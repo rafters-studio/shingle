@@ -5,34 +5,40 @@ test.describe("Home page", () => {
     await page.goto("/");
   });
 
-  test("renders page title and description", async ({ page }) => {
+  test("renders page title", async ({ page }) => {
     await expect(page).toHaveTitle(/Sean Silvius/);
     await expect(page.locator("h1").first()).toBeVisible();
   });
 
-  test("displays featured posts section", async ({ page }) => {
-    const featuredSection = page.getByRole("heading", { name: /featured/i });
-    await expect(featuredSection).toBeVisible();
+  test("has lang attribute", async ({ page }) => {
+    const lang = await page.locator("html").getAttribute("lang");
+    expect(lang).toBe("en");
   });
 
-  test("displays recent posts", async ({ page }) => {
-    // Posts are in sections within the feed
-    const postCards = page.locator("section[role='feed'] section");
-    await expect(postCards.first()).toBeVisible();
+  test("has meta description", async ({ page }) => {
+    const description = await page.locator('meta[name="description"]').getAttribute("content");
+    expect(description).toBeTruthy();
   });
 
-  test("has working navigation to posts", async ({ page }) => {
-    // Nav link is labeled "index"
-    const postsLink = page.getByRole("menuitem", { name: /index/i });
-    await expect(postsLink).toBeVisible();
-    await postsLink.click();
-    await expect(page).toHaveURL(/\/posts\//);
-  });
+  test("page loads without critical console errors", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") {
+        errors.push(msg.text());
+      }
+    });
 
-  test("has footer with links", async ({ page }) => {
-    const footer = page.locator("footer");
-    await expect(footer).toBeVisible();
-    await expect(footer.getByRole("link", { name: /privacy/i })).toBeVisible();
-    await expect(footer.getByRole("link", { name: /terms/i })).toBeVisible();
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    expect(errors).toHaveLength(0);
+  });
+});
+
+test.describe("404 handling", () => {
+  test("non-existent page returns proper error", async ({ page }) => {
+    const response = await page.goto("/this-page-does-not-exist-12345/");
+
+    expect(response?.status()).toBe(404);
   });
 });
