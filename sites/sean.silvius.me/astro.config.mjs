@@ -21,7 +21,9 @@ export default defineConfig({
     mdx({
       rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
     }),
-    sitemap(),
+    sitemap({
+      lastmod: new Date(),
+    }),
   ],
 
   adapter: cloudflare({
