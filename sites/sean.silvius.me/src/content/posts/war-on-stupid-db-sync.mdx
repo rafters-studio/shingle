@@ -1,0 +1,100 @@
+---
+id: WoS002
+featured: true
+slug: war-on-stupid-db-sync
+title: "War on Stupid: Database Sync Scripts"
+date: 2026-02-04T12:00:00.000Z
+excerpt: >-
+  Every project has that one Python script nobody wants to touch. The one that syncs your local SQLite to production. The one that makes a Wookiee itch.
+tags:
+  - war-on-stupid
+  - rust
+  - sqlite
+  - cloudflare
+  - d1
+author:
+  name: Sean Silvius
+  picture: /images/profile.jpg
+draft: false
+---
+
+_Welcome to "War on Stupid": a series where we tackle obviously better solutions that somehow face inexplicable resistance._
+
+I spent two weeks looking for a tool that doesn't exist.
+
+I run a video games guide site. The data lives in SQLite during development, content creation and Cloudflare D1 in production. Simple enough. Tens of thousands of rows across abilities, disciplines, talents, gear sets. Content comes from multiple sources; some I author manually, some gets pulled from game data files through ETL pipelines I've built over the years. The first thing I built in rust last year was this pipeline and what used to take 40 or so minutes now takes less than two. I did not write the tools I was using before, they had been around for a while and a recent patch to a game rendered them useless. Two-fold problem. I now had the best and most complete data I've ever had, I put it to good use right away over christmas. Then my little toy became something real and I was missing something...
+
+##### All I wanted was bi-directional sync. Push local changes to D1. Pull production data back when I need to debug something. The kind of thing that should be solved by now.
+
+It isn't.
+
+## The Search
+
+I looked everywhere. npm, crates.io, GitHub, random blog posts from 2024. Every "solution" I found was the same thing wearing different clothes: a script that iterates through tables, compares timestamps, and shoves rows around one at a time.
+
+Some had nice CLIs. Some had progress bars. One had a logo. None of them actually solved the problem.
+
+Here's what every single one of these tools does under the hood:
+
+```typescript
+for (const table of tables) {
+  const rows = localDb.prepare(`SELECT * FROM ${table}`).all();
+  for (const row of rows) {
+    await d1.prepare(`INSERT OR REPLACE INTO ${table} ...`).run();
+  }
+}
+```
+
+That's it. That's the "tool." A loop with extra steps.
+
+This works fine when you have 50 rows. I have 50,000. The script times out. So you add retry logic. The retry logic has bugs. So you add logging. The logs get so verbose you can't find actual errors. So you add log levels. Now you have 400 lines of code that started as 40, a comment that says `# TODO: batch this` from six months ago, and a Wookiee that won't stop itching.
+
+## What Nobody Built
+
+The tools I found didn't handle any of the hard problems:
+
+**Change detection that actually works.** Timestamps drift. Clocks lie. I have content coming from three different sources with three different ideas of what "now" means. Content hashing is the only reliable approach, but none of these scripts do it.
+
+**Conflicts.** I edit a talent description locally. The ETL pipeline updates the same talent's damage values from game data. Which one wins? "Last write wins" is the answer every script gives, which means "whoever ran the script last wins," which means "you lose data and don't know it."
+
+**D1's limits.** Cloudflare D1 has row limits, query limits, size limits. Real sync tools need to batch intelligently, respect rate limits, and recover gracefully when a batch fails. The scripts just... don't.
+
+**Schema changes.** Added a column? Hope you remembered to add it everywhere first. Hope you ran the scripts in the right order. Hope.
+
+## The Investment
+
+So I built [Smuggler](https://github.com/ezmode-games/smuggler).
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ezmode-games/smuggler/main/install.sh | bash
+```
+
+That gets you a binary. The installer figures out your platform, grabs the right build, checks the SHA256 checksum against what GitHub published, and drops it in `~/.local/bin/`. If you're on an old-ass mac, it will install for your intel chip or native apple silicon, great linux build. Windows? Umm. I built it but you need to install it yourself; however the fuck you do that.
+
+The first thing you do is look before you leap:
+
+```bash
+smuggler diff
+```
+
+Nothing changes. It reads both databases, hashes every row, and tells you exactly what's different. Local-only rows, remote-only rows, rows where the content diverged. You stare at that output and decide if you trust it. Then:
+
+```bash
+smuggler push --table abilities
+```
+
+Content hashing handles the change detection because timestamps are liars. Batching handles D1's limits because Cloudflare won't let you shove 50,000 rows through one query. Conflict resolution is configurable because sometimes local wins and sometimes production wins and the tool shouldn't decide that for me. Table names get validated against the actual database schema before they go anywhere near SQL, so if you fat-finger `--table abilitees` you get a helpful error instead of a silent no-op.
+
+It's 3,400 lines of Rust. Every hard problem from the previous section has a closed GitHub issue now. Which is more than I can say for the Python script it replaced.
+
+## The Point
+
+I'm not telling you to use Smuggler. Use whatever. I'm just shocked, but at the same time, not that had to take a few days and sit down and write this. You'd think wrangler would have sync in it by now. Or some Cloudflare supported workflow to handle this. Then I really thought about it and my size data, < 100,000 rows really does not matter to anyone and this tool will more than likely earn me maybe two stars on github. If you have more than a few hundred rows, if your data comes from multiple sources, if you ever need to pull production data back to local, if you've ever lost data to a "quick sync script", this should help.
+
+I hope someone finds this useful.
+
+---
+
+_Smuggler is open source under MIT. It syncs SQLite to Cloudflare D1. It's named after the profession, not the crime._
+
+_[GitHub](https://github.com/ezmode-games/smuggler)_

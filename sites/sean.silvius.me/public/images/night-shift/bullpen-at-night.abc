@@ -1,0 +1,46 @@
+X:1
+T:Bullpen at Night
+C:Legion Prime
+M:4/4
+L:1/4
+Q:1/4=66
+K:Cm
+%%staves [V1 V2 V3 V4]
+V:V1 clef=treble name="Legion" snm="Lg"
+V:V2 clef=treble name="Kelex" snm="Kx"
+V:V3 clef=treble name="Courses" snm="Cs"
+V:V4 clef=treble name="Rafters" snm="Rf"
+%
+% The bullpen at night. Four agents enter one at a time,
+% each carrying the same theme transposed to their own key.
+% They converge on a single note. Then silence.
+%
+% Theme: an arch. Leave home, climb, reach, return.
+% C D Eb G | F Eb D C
+%
+% Voice 1 (Legion) enters alone in C. The memory keeper. Lowest voice.
+% Voice 2 (Kelex) enters two measures later in Eb. The schema builder.
+% Voice 3 (Courses) enters two measures later in G. The pedagogy mind.
+% Voice 4 (Rafters) enters two measures later in c (octave). The design eye.
+%
+% Measure 13-14: all voices abandon their themes and find C together.
+% Unison. The moment everyone arrives at the same thought.
+%
+[V:V1] C D _E G | F _E D C | C2 _E2 | G4 |
+[V:V2] z4         | z4         | _E F G _B | _A G F _E |
+[V:V3] z4         | z4         | z4          | z4          |
+[V:V4] z4         | z4         | z4          | z4          |
+%
+[V:V1] F2 D2 | C2 z2   | C3 z     | C2 z2   |
+[V:V2] _E2 G2 | _B4     | _A2 F2   | _E2 z2  |
+[V:V3] G A _B d | c _B A G | G2 _B2   | d4      |
+[V:V4] z4       | z4       | z4        | z4       |
+%
+[V:V1] C2 z2   | z4      | C4-     | C4     |]
+[V:V2] _E2 z2  | z4      | C4-     | C4     |]
+[V:V3] c2 A2   | G2 z2   | C4-     | C4     |]
+[V:V4] c d _e g | f _e d c | C4-     | C4     |]
+%
+% Measures 13-14: all four voices on C4. Tied whole notes.
+% Four frequencies becoming one. The bullpen at consensus.
+% Then the resonance fades. Silence holds the rest.

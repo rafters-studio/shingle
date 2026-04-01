@@ -1,0 +1,223 @@
+---
+id: WoS001
+featured: true
+slug: war-on-stupid-passkeys
+title: "War on Stupid: Passkeys"
+date: 2025-08-19T12:00:00.000Z
+excerpt: >-
+  Password breaches can cost startups an average of $4.88 million. Passkeys eliminate this risk entirely. So why are you still building auth systems around SHA256 hashes and hoping users don't reuse "password123"?
+tags:
+  - security
+  - authentication
+  - passkeys
+  - passwords
+  - startups
+  - web-development
+author:
+  name: Sean Silvius
+  picture: /images/profile.jpg
+draft: false
+---
+
+_Welcome to "War on Stupid": a series where we tackle obviously better solutions that somehow face inexplicable resistance._
+
+This summer, Allianz Life disclosed that hackers stole personal information from 1.1 million individuals in a Salesforce data theft attack that occurred in July 2025[^1]. The breach affected one of America's largest insurance companies and exposed customer data including names, addresses, and policy information. While the company hasn't disclosed the full financial impact, similar breaches typically cost organizations millions in remediation, regulatory fines, and customer notification expenses.
+
+The attack vector? Social engineering against employees with access to customer data systems.
+
+I've been using passkeys since 1Password first supported them in 2022. Today, they're my primary authentication method for everything that supports them. The experience is so much better that I actively avoid services that force me back to password hell.
+
+But this isn't about user convenience. This is about startup builders who are still implementing password-based authentication in 2025, subsidizing user stupidity instead of eliminating it.
+
+## The Real Cost of Password Stupidity
+
+When IBM released their 2024 Cost of Data Breach Report, the numbers were staggering. The average breach now costs companies $4.88 million, with 81% involving stolen or weak passwords. For startups with fewer than 500 employees, the average drops to $3.31 million, still enough to kill most early-stage companies.
+
+The timeline is equally brutal. Companies take an average of 287 days to identify and contain a breach, during which hackers have free rein over customer data. Each stolen record costs an average of $165 to remediate, covering everything from regulatory fines to customer notification.
+
+What makes these numbers particularly infuriating is that Verizon's latest Data Breach Investigations Report shows 68% of these breaches are completely preventable with proper authentication. We're watching companies burn millions of dollars because users choose "password123" and we enable them.
+
+Meanwhile, the Have I Been Pwned database has catalogued over 12.3 billion compromised credentials. That's not 12.3 billion accounts; that's 12.3 billion username/password combinations that bad actors can stuff into your login form right now.
+
+## The Cryptographic Reality Check
+
+Every startup still using passwords is making the same fundamental mistake: storing shared secrets and hoping users don't screw up.
+
+Here's what happens when you store a password. User creates "MyDog123!" and your system generates a random 32-byte salt, combines it with the password, runs it through SHA256, and stores both the salt and hash. This protects against rainbow table attacks and prevents immediate plaintext exposure if your database gets breached. But it doesn't protect against the real threats.
+
+Password reuse means that when LinkedIn gets hacked, your users' credentials are compromised too. Phishing attacks work because users willingly enter their passwords on fake sites. Credential stuffing succeeds because attackers can try those known password/email combinations against your login form. Social engineering works because there's always a secret for users to give up.
+
+Passkeys eliminate all of this by never creating a shared secret in the first place. When a user registers, their device generates an ECDSA P-256 key pair locally. The private key never leaves their device; it's stored in the Secure Enclave on iOS or the Trusted Platform Module on Windows. Your server only gets the public key and a credential ID.
+
+The mathematics are decisive. ECDSA P-256 provides a 2^128 security level, equivalent to 3072-bit RSA. Brute force attacks would require more computational power than exists on Earth, for longer than the universe has existed. Ed25519, the alternative algorithm, offers the same security level with quantum-resistant design principles.
+
+## Why Startups Keep Building Password Systems
+
+I've talked to dozens of startup CTOs over the past year, and the excuses are remarkably consistent. "Users expect passwords," they tell me, as if user expectations have ever been a reliable guide to good technology decisions. Users also expected CD players, floppy disks, and dial-up internet. They adapted. The same users who figured out TikTok, learned contactless payments, and mastered AirPods pairing can handle Face ID authentication.
+
+"Passkeys are too new," is another favorite. The WebAuthn standard was finalized in 2019, six years ago. Apple, Google, and Microsoft have been pushing passkeys since 2022. Browser support is now at 96%. If you're building a startup in 2025, your users are using devices that support passkeys. If they are not, they are not valuable customers and you should not concern yourself with their outlier status, as awesome as they think it is.
+
+The most honest objection is complexity, and this one was true in 2022. Implementing WebAuthn properly required understanding elliptic curve cryptography, managing challenge-response flows, and handling attestation statements. It's not true anymore.
+
+Here's the entire passkey implementation with better-auth:
+
+```typescript
+import { betterAuth } from "better-auth";
+
+export const auth = betterAuth({
+  database: {
+    provider: "postgresql", // or whatever you're using
+    url: process.env.DATABASE_URL,
+  },
+  emailAndPassword: {
+    enabled: false, // Don't enable password stupidity
+  },
+  passkey: {
+    enabled: true,
+  },
+});
+```
+
+That's it. better-auth handles the WebAuthn complexity, stores the credentials properly, and gives you a production-ready passkey system.
+
+## The Startup Strategy: Passkeys First
+
+The smartest startups I've seen aren't gradually migrating to passkeys; they're building passkey-first authentication from day one. This means no password option during signup, no "forgot password" flows to maintain, and no legacy authentication code to support.
+
+The strategy is simple but requires conviction. Build your auth system around passkeys, use better-auth to handle the complexity, and fallback to email magic links for the edge cases where passkeys won't work. Measure authentication success rates, monitor user feedback, and track support ticket volume. Then expand with social auth if your metrics show demand, but never add passwords.
+
+The ROI is immediate. Every password reset costs money. Every frustrated user who can't log in is lost revenue. Every security incident can kill your company. Passkeys eliminate entire categories of vulnerabilities while improving user experience.
+
+## The Implementation That Actually Works
+
+Stop overthinking this. Use better-auth:
+
+```typescript
+// Client-side (React/Next.js)
+import { authClient } from "better-auth/client";
+
+const client = authClient({
+  baseURL: "http://localhost:3000",
+});
+
+// Registration
+await client.signUp.passkey({
+  email: "user@example.com",
+  name: "User Name",
+});
+
+// Authentication
+await client.signIn.passkey();
+```
+
+```typescript
+// Server-side
+import { betterAuth } from "better-auth";
+
+export const auth = betterAuth({
+  database: {
+    provider: "postgresql",
+    url: process.env.DATABASE_URL,
+  },
+  passkey: {
+    enabled: true,
+  },
+  // That's literally it
+});
+```
+
+better-auth handles:
+
+- WebAuthn credential creation and verification
+- Database schema and migrations
+- Session management
+- CSRF protection
+- Rate limiting
+- All the crypto you don't want to implement yourself
+
+## Why This Matters for Startups
+
+Every startup has limited resources, and every security incident can kill your company. The math is brutally simple; password resets cost money, frustrated users cost revenue, and data breaches cost everything.
+
+Passkeys eliminate password reset support tickets, account lockout support, breach response costs, and regulatory compliance overhead while adding faster user onboarding, higher login success rates, and reduced support burden. The competitive advantage is real. Users notice when authentication just works.
+
+I've been implementing authentication systems for 15 years, and this is the first time we've had a solution that's better for everyone involved. Users get faster, more secure authentication. Developers get simpler implementation. Businesses get reduced liability and support costs.
+
+The only thing stopping you is the assumption that users won't adapt to something that's objectively better. Stop subsidizing user stupidity. Build passkey-first authentication. Use better-auth to make it trivial.
+
+Your future self and your security budget will thank you.
+
+## When Users Lose Access
+
+The most common pushback I hear is about account recovery: "What happens when users lose their devices?" This reveals a fundamental misunderstanding of how modern passkey systems work.
+
+First, passkeys sync across devices through your platform's keychain; iCloud Keychain, Google Password Manager, or password managers like 1Password and Bitwarden. Lose your phone? Your passkeys are still available on your laptop, tablet, or any other device signed into the same account.
+
+Second, better-auth makes the backup strategy trivial. Enable email-based one-time passwords as your recovery method:
+
+```typescript
+export const auth = betterAuth({
+  database: {
+    provider: "postgresql",
+    url: process.env.DATABASE_URL,
+  },
+  passkey: {
+    enabled: true,
+  },
+  emailOtp: {
+    enabled: true,
+    // Verfiy the email is real
+    sendOnSignUp: true,
+  },
+});
+```
+
+This gives users a secure recovery path without the ongoing security liability of passwords. When someone genuinely loses access to all their devices, they can use email verification to regain access and register new passkeys. It's the 1% edge case that doesn't justify making the 99% of normal authentication less secure.
+
+## Better-auth salesman?
+
+I love a good open source solution to complex problems and better-auth has filled my auth needs for pretty much everything, yes even HIPAA. You can setup a quick hono-based auth server on cloudflare or aws and provide for whatever else you're using in a day or two. A week with audits and docs for the auditors.
+
+## If Not better-auth, Then What?
+
+If you're not ready to use better-auth (though you should be), here are the alternatives ranked by how much I recommend them:
+
+**Tier 1: Actually Good**
+
+- [FusionAuth](https://fusionauth.io/) - Self-hosted or cloud, excellent passkey support, no vendor lock-in. Actually understands authentication.
+- [Clerk](https://clerk.com/) - Developer-first, beautiful UX, solid passkey implementation. Great for modern web apps.
+
+**Tier 2: Acceptable if You Must**
+
+- [Auth0](https://auth0.com/) - Comprehensive but expensive. Good passkey support buried under enterprise complexity.
+- [AWS Cognito](https://aws.amazon.com/cognito/) - Works if you're already deep in AWS, but the UX is Amazon-level terrible.
+- [Azure AD B2C](https://azure.microsoft.com/en-us/products/active-directory/external-identities/b2c/) - Microsoft's consumer identity solution. Complex but functional.
+
+**Tier 3: Please Reconsider**
+
+- [Okta Customer Identity](https://www.okta.com/customer-identity/) - Expensive, complex, designed for enterprise not startups.
+- **Rolling your own WebAuthn - Don't. Just don't. The crypto is hard and you will get it wrong.**
+
+**Tier 4: No, Just No**
+
+- Any solution that makes passwords the primary method
+- Any "secure" solution built on top of passwords
+- NextAuth.js (sorry, but the architecture is fundamentally flawed for modern auth)
+
+The reality is that better-auth gives you everything the Tier 1 solutions provide without vendor lock-in, at a fraction of the cost, with better developer experience. But if you absolutely must use something else, stick to Tier 1.
+
+---
+
+_Resources:_
+
+- [better-auth](https://better-auth.com/) - The only library you need
+- [WebAuthn.guide](https://webauthn.guide/) - If you want to understand the details
+- [Passkeys.dev](https://passkeys.dev/) - Cross-platform implementation guide
+
+_Building something interesting with passkeys? [I'd love to talk about it](/connect)._
+
+---
+
+## References
+
+[^1]: Allianz Life. "Allianz Life Data Security Incident Notification." August 2025. [Allianz Life Security Notice](https://www.allianzlife.com/about/newsroom/data-security-incident-notification)

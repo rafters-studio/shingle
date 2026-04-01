@@ -1,0 +1,175 @@
+---
+id: WoS003
+featured: false
+slug: breaking-down-impossible-problems-for-ai-agents
+title: "Breaking Down Impossible Problems for AI Agents"
+date: 2025-09-13T12:00:00.000Z
+excerpt: >-
+  Most teams treat AI agents like junior developers who need to understand everything. That's backwards. The best human teams have specialists. Here's how we decomposed an impossible problem into agent-sized tasks and built something that actually works.
+tags:
+  - ai
+  - agents
+  - architecture
+  - development
+draft: false
+author:
+  name: Sean Silvius
+  picture: /images/profile.jpg
+---
+
+_Welcome to "War on Stupid"; a series where we tackle obviously better solutions that somehow face inexplicable resistance._
+
+Here's where most teams get AI collaboration wrong: they treat AI agents like junior developers who need to understand everything about everything.
+
+That's backwards.
+
+The best human teams have specialists. The backend engineer doesn't need to be an expert in CSS animations. The UX designer doesn't need to understand database optimization. Everyone has a domain where they're the expert, and they collaborate at the boundaries.
+
+AI agents should work the same way.
+
+## The Impossible Problem
+
+We set out to eliminate documentation maintenance entirely while making components more intelligent and AI-readable. On paper, this seemed impossible. Documentation always drifts from reality. Maintaining sync requires constant engineering overhead. AI agents can't understand design intent from hardcoded examples. Build-time compilation of real components is complex and fragile. Style isolation between components and documentation sites is unsolved.
+
+Any one of these would be a significant challenge. All five together? Impossible.
+
+But impossible problems become manageable when you break them down into focused goals that specialized AI agents can handle independently. That realization changed everything about how we approached AI-assisted development.
+
+## The Moment It Clicked
+
+We'd been struggling with a TypeScript compilation pipeline for weeks. Every time we asked Claude to help, we got reasonable-looking code that fell apart at edge cases. The agent understood TypeScript. It understood compilation. But it didn't understand the specific constraints of running compiled code in Cloudflare Workers, or the performance implications of different caching strategies, or how our error handling needed to integrate with the broader system.
+
+We were asking one agent to be an expert in everything. No human works that way. Why would AI?
+
+So we stopped. Instead of one general-purpose assistant, we created specialists. Each lives as a markdown file with shared rules and deep domain knowledge:
+
+```markdown
+# Back-End Specialist
+
+You are a back-end specialist building edge-first APIs with
+Cloudflare Workers, Hono, D1, and the broader Cloudflare platform.
+
+## Rules
+
+- **pnpm only**. Never npm or yarn.
+- **No `any`**. Ever. Use `unknown` and narrow.
+- **Biome** for linting and formatting.
+
+## First Step: Check CLAUDE.md
+
+Before writing code, check for `CLAUDE.md` in the project root.
+It contains project-specific context.
+
+## Hono
+
+Web framework. TypeScript-first, zero dependencies...
+[300+ lines of patterns, code examples, gotchas]
+
+## D1
+
+SQLite at the edge. Read replicas globally...
+[Prepared statements, batch operations, Drizzle ORM patterns]
+
+Build for the edge. Validate everything. No bullshit.
+```
+
+The specialists share common rules but diverge on domain expertise. The testing specialist has 700 lines on Zocker, MSW, and Playwright patterns. The frontend specialist knows React Router v7 loaders and Astro islands. Each became a reference manual the agent draws from when working in that domain.
+
+The pipeline that had stalled for weeks came together in days.
+
+## What Specialization Actually Looks Like
+
+We ended up with seven specialists: backend, frontend, testing, deep-research, marketing, service-design, and Rust. The number isn't the point. What matters is focused domains where agents develop genuine expertise.
+
+Our service-design specialist understands journey mapping and service blueprints. When designing error states, it thinks about user psychology; how people respond to failure, what information they need to recover. A general-purpose AI gives generic error messages. This specialist designs recovery flows that actually help users.
+
+The difference is advice from someone who read a book versus advice from someone who's lived it.
+
+## The Collaboration Problem
+
+Specialization creates its own challenges. Seven experts who can't talk to each other aren't a team; they're solo practitioners who happen to share an office.
+
+We learned this when our backend and testing specialists gave conflicting recommendations. The backend agent wanted complex generic constraints for type safety. The testing agent wanted simpler structures for testability. Both were right within their domains. Neither understood why the other's constraints mattered.
+
+The solution wasn't to make each agent understand everything. Instead, we designed explicit handoffs through the orchestrator:
+
+```markdown
+Use the testing subagent to create tests for the auth module.
+
+Context:
+
+- Backend agent generated /src/services/auth.ts
+- Uses complex generics for type inference (preserve these)
+- Optimized for tree-shaking (export patterns are intentional)
+
+Requirements:
+
+- Test the public API, not internal helpers
+- Mock external dependencies with MSW
+- If generic patterns are untestable, report back with specifics
+```
+
+The backend specialist produces code. The orchestrator captures what was optimized for, what can be modified, and what should trigger escalation. The testing specialist receives that context and works within it; they don't second-guess the type system decisions, they design tests that validate those decisions work correctly.
+
+With AI agents, you design collaboration explicitly. Humans do this intuitively.
+
+## When Specialization Fails
+
+Sometimes a problem doesn't fit neatly into one domain. Our documentation system needed deep knowledge in frontend, backend, testing, and service-design simultaneously. No single specialist could own it. The handoffs were creating so much overhead that we weren't making progress.
+
+The answer was a dedicated orchestration layer. We defined it in a global configuration file that governs all agent interactions:
+
+```markdown
+## Core Principle: Delegate to Specialists
+
+You are the orchestrator. Your job is to orchestrate and delegate,
+not do everything yourself. You are a manager with a team of experts.
+
+Your role:
+
+- Break down user requests into specialist tasks
+- Launch appropriate agents with clear, specific prompts
+- Synthesize agent outputs into coherent user responses
+- Coordinate dependencies between sequential agents
+
+For independent tasks, invoke multiple agents in parallel.
+For dependent tasks, wait for each result before the next.
+```
+
+The orchestrator doesn't try to be smart about domain specifics. It's smart about decomposition and integration. It knows which specialist to ask and how to structure the handoff; not how to do their job.
+
+This is where most "AI agent" frameworks get it wrong. They build orchestration into a general-purpose agent, which means the orchestrator is mediocre at everything. Keep the orchestrator dumb about domains and smart about coordination.
+
+## The Compound Effect
+
+Specialists get better over time. Each backend challenge teaches our backend specialist patterns that transfer to future problems. Each service-design review deepens understanding of user behavior. Knowledge compounds within domains in ways that generalist knowledge doesn't.
+
+More importantly, specialists learn their boundaries. They develop intuition for when a problem is within their expertise and when they need to defer. Early on, our backend specialist would try to solve frontend problems that happened to call the API. Now it recognizes the distinction and routes appropriately.
+
+I expected specialization to improve individual task quality. I didn't expect it to improve system-level collaboration. But agents that know their limits coordinate better than agents that think they can do everything.
+
+## What This Means for You
+
+If you're using AI as a generalist assistant, you're leaving capability on the table. Expertise requires focus, and focus requires boundaries.
+
+Start with one domain where you have clear expertise requirements: testing, documentation, code review, API design. Create a specialist. Give it context about your specific patterns and constraints. Let it develop depth instead of breadth.
+
+Then add a second specialist. Pay attention to where they conflict and where they complement each other. Design the handoffs explicitly.
+
+This isn't fast. But the payoff is AI collaboration that produces expert-level output instead of plausible-sounding mediocrity.
+
+## The Future We're Building
+
+In five years, the idea of using general-purpose AI for complex technical problems will seem as antiquated as using a Swiss Army knife for surgery. Yes, it has a blade. No, you shouldn't use it for this.
+
+Development teams will work with specialized AI agents the way they currently work with specialized human experts. Problem decomposition will become a core architecture skill. Agent orchestration will matter as much as service orchestration.
+
+The teams building these systems now will have significant advantages. Not because the technology is secret, but because effective specialization requires experimentation, iteration, and institutional learning that can't be shortcut.
+
+The tools exist. The patterns work. The question is whether you'll build the future of AI-human collaboration or get disrupted by teams that are.
+
+---
+
+_Growth happens at the edges of your comfort zone. Not beside it. Not near it. In it._
+
+_The edge is where we stopped treating AI as a generalist and started building specialists. That's where the future gets built._
