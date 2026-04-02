@@ -1,6 +1,8 @@
 ---
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Separator from '@/src/components/ui/separator.astro';
 
 interface Props {
   title: string;
@@ -30,39 +32,41 @@ const navLinks = [
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
   </head>
-  <body class="bg-background text-foreground min-h-screen">
+  <body class="bg-background text-foreground">
     {heroSlot ? (
       <div class="bg-primary text-primary-foreground">
         <header>
           <nav aria-label="Main navigation">
-            <Container size="5xl" padding="6" class="py-4">
-              <div class="flex items-center justify-between">
-                <a href="/" class="text-xs font-semibold tracking-widest uppercase text-primary-foreground no-underline">
-                  sean.silvius.me
+            <Container size="5xl" padding="6">
+              <Grid preset="linear" columns={2}>
+                <a href="/" class="no-underline">
+                  <Typography as="span" variant="small" class="tracking-widest uppercase text-primary-foreground">
+                    sean.silvius.me
+                  </Typography>
                 </a>
-                <div class="flex items-center gap-6">
+                <Grid preset="linear" columns={4} gap="6" class="text-end">
                   {navLinks.map((link) => (
                     <a
                       href={link.href}
                       class:list={[
-                        'text-xs uppercase tracking-wider no-underline transition-colors',
+                        'no-underline uppercase tracking-wider',
                         currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
-                          ? 'text-primary-foreground font-semibold'
+                          ? 'text-primary-foreground'
                           : 'text-primary-foreground/70 hover:text-primary-foreground',
                       ]}
                       aria-current={currentPath === link.href ? 'page' : undefined}
                     >
-                      {link.label}
+                      <Typography as="span" variant="small">{link.label}</Typography>
                     </a>
                   ))}
                   <a
                     href="/connect/"
-                    class="text-xs uppercase tracking-wider no-underline border border-primary-foreground/50 rounded px-3 py-1.5 text-primary-foreground/90 hover:bg-primary-foreground/10 transition-colors"
+                    class="no-underline uppercase tracking-wider text-primary-foreground/90 border border-primary-foreground/50 rounded"
                   >
-                    Connect
+                    <Typography as="span" variant="small">Connect</Typography>
                   </a>
-                </div>
-              </div>
+                </Grid>
+              </Grid>
             </Container>
           </nav>
         </header>
@@ -71,34 +75,36 @@ const navLinks = [
     ) : (
       <header class="bg-primary text-primary-foreground">
         <nav aria-label="Main navigation">
-          <Container size="5xl" padding="6" class="py-4">
-            <div class="flex items-center justify-between">
-              <a href="/" class="text-xs font-semibold tracking-widest uppercase text-primary-foreground no-underline">
-                sean.silvius.me
+          <Container size="5xl" padding="6">
+            <Grid preset="linear" columns={2}>
+              <a href="/" class="no-underline">
+                <Typography as="span" variant="small" class="tracking-widest uppercase text-primary-foreground">
+                  sean.silvius.me
+                </Typography>
               </a>
-              <div class="flex items-center gap-6">
+              <Grid preset="linear" columns={4} gap="6" class="text-end">
                 {navLinks.map((link) => (
                   <a
                     href={link.href}
                     class:list={[
-                      'text-xs uppercase tracking-wider no-underline transition-colors',
+                      'no-underline uppercase tracking-wider',
                       currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
-                        ? 'text-primary-foreground font-semibold'
+                        ? 'text-primary-foreground'
                         : 'text-primary-foreground/70 hover:text-primary-foreground',
                     ]}
                     aria-current={currentPath === link.href ? 'page' : undefined}
                   >
-                    {link.label}
+                    <Typography as="span" variant="small">{link.label}</Typography>
                   </a>
                 ))}
                 <a
                   href="/connect/"
-                  class="text-xs uppercase tracking-wider no-underline border border-primary-foreground/50 rounded px-3 py-1.5 text-primary-foreground/90 hover:bg-primary-foreground/10 transition-colors"
+                  class="no-underline uppercase tracking-wider text-primary-foreground/90 border border-primary-foreground/50 rounded"
                 >
-                  Connect
+                  <Typography as="span" variant="small">Connect</Typography>
                 </a>
-              </div>
-            </div>
+              </Grid>
+            </Grid>
           </Container>
         </nav>
       </header>
@@ -106,47 +112,48 @@ const navLinks = [
 
     <slot />
 
-    <footer class="bg-primary text-primary-foreground mt-20">
-      <Container size="5xl" padding="6" class="py-12">
+    <footer class="bg-primary text-primary-foreground">
+      <Container size="5xl" padding="6">
         <Grid preset="linear" columns={4} gap="8">
           <div>
-            <p class="text-sm font-semibold mb-3">Bio</p>
-            <p class="text-sm text-primary-foreground/70 leading-relaxed">
+            <Typography as="p" variant="small" class="text-primary-foreground">Bio</Typography>
+            <Typography as="p" variant="muted" class="text-primary-foreground/70">
               UI designer and software architect since 1993. I build design systems, write about service design, and make mistakes worth learning from.
-            </p>
+            </Typography>
+          </div>
+          <nav aria-label="Site navigation">
+            <Container gap="2">
+              <a href="/" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">Home</Typography></a>
+              <a href="/posts/" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">Articles</Typography></a>
+              <a href="/posts/" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">Software</Typography></a>
+              <a href="/night-shift/" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">Night Shift</Typography></a>
+              <a href="/connect/" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">Connect</Typography></a>
+            </Container>
+          </nav>
+          <div>
+            <Typography as="p" variant="small" class="text-primary-foreground">Connect</Typography>
+            <Container gap="2">
+              <a href="https://github.com/ssilvius" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">GitHub</Typography></a>
+              <a href="https://linkedin.com/in/seansilvius" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">LinkedIn</Typography></a>
+            </Container>
           </div>
           <div>
-            <nav class="flex flex-col gap-2" aria-label="Site navigation">
-              <a href="/" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">Home</a>
-              <a href="/posts/" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">Articles</a>
-              <a href="/posts/" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">Software</a>
-              <a href="/night-shift/" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">Night Shift</a>
-              <a href="/connect/" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">Connect</a>
-            </nav>
-          </div>
-          <div>
-            <p class="text-sm font-semibold mb-3">Connect</p>
-            <nav class="flex flex-col gap-2" aria-label="Social links">
-              <a href="https://github.com/ssilvius" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">GitHub</a>
-              <a href="https://linkedin.com/in/seansilvius" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">LinkedIn</a>
-            </nav>
-          </div>
-          <div>
-            <p class="text-sm font-semibold mb-3">Legal</p>
-            <nav class="flex flex-col gap-2" aria-label="Legal links">
-              <a href="/privacy/" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">Privacy Policy</a>
-              <a href="/terms/" class="text-sm text-primary-foreground/70 hover:text-primary-foreground no-underline transition-colors">Terms of Service</a>
-            </nav>
+            <Typography as="p" variant="small" class="text-primary-foreground">Legal</Typography>
+            <Container gap="2">
+              <a href="/privacy/" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">Privacy Policy</Typography></a>
+              <a href="/terms/" class="no-underline text-primary-foreground/70 hover:text-primary-foreground"><Typography as="span" variant="muted">Terms of Service</Typography></a>
+            </Container>
           </div>
         </Grid>
-        <div class="border-t border-primary-foreground/20 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
-          <p class="text-xs text-primary-foreground/50">
+        <Separator class="bg-primary-foreground/20" />
+        <Grid preset="linear" columns={2}>
+          <Typography as="p" variant="small" class="text-primary-foreground/50">
             &copy; {new Date().getFullYear()} Sean Silvius. All rights reserved.
-          </p>
-          <p class="text-xs text-primary-foreground/50">
+          </Typography>
+          <Typography as="p" variant="small" class="text-primary-foreground/50 text-end">
             Built with love in the PNW.
-          </p>
-        </div>
+          </Typography>
+        </Grid>
       </Container>
     </footer>
   </body>

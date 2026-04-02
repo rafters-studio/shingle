@@ -5,6 +5,7 @@ import Container from '@/src/components/ui/container.astro';
 import Typography from '@/src/components/ui/typography.astro';
 import Grid from '@/src/components/ui/grid.astro';
 import Card from '@/src/components/ui/card.astro';
+import Button from '@/src/components/ui/button.astro';
 
 const allPosts = (await getCollection('posts'))
   .filter((post) => !post.data.draft && !post.data.archived)
@@ -15,20 +16,20 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
 ---
 
 <Base title="Sean Silvius" heroSlot>
-  <Container slot="hero" as="section" size="5xl" padding="6" class="pt-16 pb-20">
-    <Typography as="h1" variant="h1" class="leading-tight max-w-4xl">
+  <Container slot="hero" as="section" size="5xl" padding="6" gap="6">
+    <Typography as="h1" variant="h1" class="text-primary-foreground">
       Hi. I build complex things in a simple manner. With bits and bytes, with wood.
     </Typography>
-    <Typography as="p" variant="lead" class="mt-6 text-primary-foreground/80 max-w-2xl leading-relaxed">
+    <Typography as="p" variant="lead" class="text-primary-foreground/80">
       I log the things that have interested me, hopefully someone will find some of what
       I've learned useful in their own endeavors. I tend to make mistakes and adjust just
       as any student of life does. Those mistakes are really the important things.
     </Typography>
   </Container>
 
-  <Container as="main" size="5xl" padding="6">
-    <Container as="section" class="py-16">
-      <Typography as="h2" variant="muted" class="text-center text-xs font-semibold tracking-widest uppercase mb-10">
+  <Container as="main" size="5xl" padding="6" gap="10">
+    <Container as="section" gap="8">
+      <Typography as="h2" variant="muted" class="text-center uppercase tracking-widest">
         Featured Articles
       </Typography>
 
@@ -42,34 +43,32 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
                 <img
                   src={imagePath}
                   alt=""
-                  class="w-full h-48 object-cover rounded-t-lg"
                   loading="lazy"
                 />
-                <div class="p-5">
-                  <Typography as="h3" variant="p" class="font-bold tracking-tight text-card-foreground group-hover:text-primary transition-colors leading-snug">
+                <Container padding="5" gap="2">
+                  <Typography as="h3" variant="p" class="text-card-foreground group-hover:text-primary transition-colors">
                     {post.data.title}
                   </Typography>
-                  <Typography as="p" variant="muted" class="mt-2 text-sm line-clamp-3 leading-relaxed">
+                  <Typography as="p" variant="muted" class="line-clamp-3">
                     {post.data.excerpt}
                   </Typography>
-                  <Typography as="p" variant="small" class="mt-4 font-semibold uppercase tracking-wider text-primary">
+                  <Typography as="p" variant="small" class="uppercase tracking-wider text-primary">
                     Read More
                   </Typography>
-                </div>
+                </Container>
               </Card>
             </a>
           );
         })}
       </Grid>
 
-      <div class="mt-12 text-center">
-        <a
-          href="/posts/"
-          class="inline-block border-2 border-foreground rounded px-8 py-3 text-xs font-semibold uppercase tracking-wider text-foreground no-underline hover:bg-foreground hover:text-background transition-colors"
-        >
-          More Articles &rsaquo;
+      <Container class="text-center">
+        <a href="/posts/" class="no-underline">
+          <Button variant="outline" size="lg">
+            More Articles &rsaquo;
+          </Button>
         </a>
-      </div>
+      </Container>
     </Container>
   </Container>
 </Base>
