@@ -1,0 +1,84 @@
+---
+import Container from '@/src/components/ui/container.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Button from '@/src/components/ui/button.astro';
+
+const currentPath = Astro.url.pathname;
+
+const navLinks = [
+  { href: '/posts/', label: 'Index' },
+  { href: '/software/', label: 'Software' },
+  { href: '/night-shift/', label: 'Night Shift' },
+];
+---
+
+<header id="topbar" class="topbar" transition:persist>
+  <Container size="7xl">
+    <Grid preset="linear" columns={3}>
+      <a href="/" class="no-underline">
+        <Typography as="span" variant="large" class="uppercase tracking-tight text-foreground">sean.silvius.me</Typography>
+      </a>
+      <Grid preset="linear" columns={3} gap="6">
+        {navLinks.map((link) => {
+          const isActive = currentPath.startsWith(link.href);
+          return (
+            <a
+              href={link.href}
+              class:list={[
+                'no-underline uppercase font-bold tracking-tight text-lg',
+                isActive ? 'text-foreground underline decoration-4 underline-offset-4' : 'text-foreground hover:underline decoration-4 underline-offset-4',
+              ]}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          );
+        })}
+      </Grid>
+      <div class="text-end">
+        <a href="/connect/" class="no-underline">
+          <Button>Connect</Button>
+        </a>
+      </div>
+    </Grid>
+  </Container>
+</header>
+<div id="scroll-sentinel" aria-hidden="true"></div>
+
+<style is:global>
+  .topbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 30;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+
+  #scroll-sentinel {
+    height: 4rem;
+  }
+</style>
+
+<script>
+  function initScrollEffect() {
+    const topbar = document.getElementById('topbar');
+    const sentinel = document.getElementById('scroll-sentinel');
+    if (!topbar || !sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const scrolled = !entry.isIntersecting;
+        topbar.style.backgroundColor = scrolled ? 'var(--card)' : 'transparent';
+        topbar.style.borderBottom = scrolled ? '1px solid var(--border)' : 'none';
+        topbar.style.boxShadow = scrolled ? 'var(--shadow-sm)' : 'none';
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+  }
+
+  initScrollEffect();
+  document.addEventListener('astro:after-swap', initScrollEffect);
+</script>

@@ -4,7 +4,7 @@ import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
 import Typography from '@/src/components/ui/typography.astro';
 import Separator from '@/src/components/ui/separator.astro';
-import Button from '@/src/components/ui/button.astro';
+import Topbar from '@/src/components/Topbar.astro';
 
 interface Props {
   title?: string;
@@ -16,14 +16,34 @@ const {
   description = 'Articles on software engineering, product design, startups, and gaming from Sean Silvius.',
 } = Astro.props;
 
-const siteUrl = 'https://sean.silvius.me';
+const siteUrl = Astro.site?.href.replace(/\/$/, '') ?? 'https://sean.silvius.me';
 const fullTitle = title === 'Sean Silvius' ? title : `${title} | Sean Silvius`;
-const currentPath = Astro.url.pathname;
 
-const navLinks = [
-  { href: '/posts/', label: 'Index' },
-  { href: '/software/', label: 'Software' },
-  { href: '/night-shift/', label: 'Night Shift' },
+const footerColumns = [
+  {
+    heading: 'Site',
+    links: [
+      { href: '/', label: 'Home' },
+      { href: '/posts/', label: 'Articles' },
+      { href: '/software/', label: 'Software' },
+      { href: '/night-shift/', label: 'Night Shift' },
+      { href: '/connect/', label: 'Connect' },
+    ],
+  },
+  {
+    heading: 'Connect',
+    links: [
+      { href: 'https://github.com/ssilvius', label: 'GitHub', external: true },
+      { href: 'https://www.linkedin.com/in/seansilvius/', label: 'LinkedIn', external: true },
+    ],
+  },
+  {
+    heading: 'Legal',
+    links: [
+      { href: '/privacy/', label: 'Privacy Policy' },
+      { href: '/terms/', label: 'Terms of Service' },
+    ],
+  },
 ];
 ---
 
@@ -49,73 +69,31 @@ const navLinks = [
   </head>
   <body class="bg-background text-foreground">
 
-    <!-- Nav -->
-    <header id="topbar" class="topbar" transition:persist>
-      <Container size="7xl">
-        <Grid preset="linear" columns={3}>
-          <a href="/" class="no-underline">
-            <Typography as="span" variant="large" class="uppercase tracking-tight text-foreground">sean.silvius.me</Typography>
-          </a>
-          <Grid preset="linear" columns={3} gap="6">
-            {navLinks.map((link) => {
-              const isActive = currentPath.startsWith(link.href);
-              return (
-                <a
-                  href={link.href}
-                  class:list={[
-                    'no-underline uppercase font-bold tracking-tight text-lg',
-                    isActive ? 'text-foreground underline decoration-4 underline-offset-4' : 'text-foreground hover:underline decoration-4 underline-offset-4',
-                  ]}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
-          </Grid>
-          <div class="text-end">
-            <a href="/connect/" class="no-underline">
-              <Button>Connect</Button>
-            </a>
-          </div>
-        </Grid>
-      </Container>
-    </header>
-
-    <!-- Spacer for fixed nav -->
-    <div class="topbar-spacer"></div>
+    <Topbar />
 
     <main transition:animate={fade({ duration: '0.15s' })}>
       <slot />
     </main>
 
-    <!-- Footer -->
     <footer class="bg-primary text-primary-foreground">
       <Container size="7xl">
         <Grid preset="linear" columns={3} gap="8">
-          <Container gap="3">
-            <Typography as="h3" variant="h4" class="text-secondary">Site</Typography>
-            <Container gap="2">
-              <a href="/" class="no-underline text-primary-foreground hover:text-secondary">Home</a>
-              <a href="/posts/" class="no-underline text-primary-foreground hover:text-secondary">Articles</a>
-              <a href="/software/" class="no-underline text-primary-foreground hover:text-secondary">Software</a>
-              <a href="/night-shift/" class="no-underline text-primary-foreground hover:text-secondary">Night Shift</a>
-              <a href="/connect/" class="no-underline text-primary-foreground hover:text-secondary">Connect</a>
+          {footerColumns.map((col) => (
+            <Container gap="3">
+              <Typography as="h3" variant="h4" class="text-secondary">{col.heading}</Typography>
+              <Container gap="2">
+                {col.links.map((link) => (
+                  <a
+                    href={link.href}
+                    class="no-underline text-primary-foreground hover:text-secondary"
+                    {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </Container>
             </Container>
-          </Container>
-          <Container gap="3">
-            <Typography as="h3" variant="h4" class="text-secondary">Connect</Typography>
-            <Container gap="2">
-              <a href="https://github.com/ssilvius" target="_blank" rel="noopener noreferrer" class="no-underline text-primary-foreground hover:text-secondary">GitHub</a>
-              <a href="https://www.linkedin.com/in/seansilvius/" target="_blank" rel="noopener noreferrer" class="no-underline text-primary-foreground hover:text-secondary">LinkedIn</a>
-            </Container>
-          </Container>
-          <Container gap="3">
-            <Typography as="h3" variant="h4" class="text-secondary">Legal</Typography>
-            <Container gap="2">
-              <a href="/privacy/" class="no-underline text-primary-foreground hover:text-secondary">Privacy Policy</a>
-              <a href="/terms/" class="no-underline text-primary-foreground hover:text-secondary">Terms of Service</a>
-            </Container>
-          </Container>
+          ))}
         </Grid>
         <Separator class="bg-primary-foreground/20" />
         <Grid preset="linear" columns={2}>
@@ -130,38 +108,4 @@ const navLinks = [
 
 <style>
   @import '../styles/global.css';
-
-  .topbar {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 30;
-    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .topbar-spacer {
-    height: 4rem;
-  }
 </style>
-
-<script>
-  function initScrollEffect() {
-    const topbar = document.getElementById('topbar');
-    if (!topbar) return;
-    function onScroll() {
-      if (window.scrollY > 64) {
-        topbar.style.backgroundColor = 'var(--card)';
-        topbar.style.borderBottom = '1px solid var(--border)';
-        topbar.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
-      } else {
-        topbar.style.backgroundColor = 'transparent';
-        topbar.style.borderBottom = 'none';
-        topbar.style.boxShadow = 'none';
-      }
-    }
-    window.addEventListener('scroll', onScroll);
-    onScroll();
-  }
-  initScrollEffect();
-  document.addEventListener('astro:after-swap', initScrollEffect);
-</script>
