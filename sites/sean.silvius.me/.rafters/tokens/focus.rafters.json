@@ -2,7 +2,7 @@
   "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "focus",
   "version": "1.0.0",
-  "generatedAt": "2026-03-29T04:05:15.705Z",
+  "generatedAt": "2026-04-05T22:08:38.505Z",
   "tokens": [
     {
       "name": "focus-ring-width",
@@ -15,10 +15,6 @@
         "keyboard-navigation"
       ],
       "accessibilityLevel": "AA",
-      "focusRingWidth": "0.125rem",
-      "description": "Focus ring width 0.125rem. WCAG 2.2 requires minimum 2px for visibility.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for all focus-visible states",
@@ -28,7 +24,11 @@
           "Reduce below 2px",
           "Remove focus rings without alternative indicator"
         ]
-      }
+      },
+      "containerQueryAware": false,
+      "focusRingWidth": "0.125rem",
+      "description": "Focus ring width 0.125rem. WCAG 2.2 requires minimum 2px for visibility.",
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-ring-color",
@@ -42,11 +42,11 @@
       "dependsOn": [
         "ring"
       ],
+      "containerQueryAware": false,
+      "highContrastMode": "Highlight",
       "focusRingColor": "var(--ring)",
       "description": "Focus ring color. Uses semantic ring token for theme consistency.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false,
-      "highContrastMode": "Highlight"
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-ring",
@@ -60,19 +60,7 @@
         "inputs",
         "selects"
       ],
-      "focusRingWidth": "0.125rem",
-      "focusRingColor": "var(--ring)",
-      "focusRingOffset": "0.125rem",
-      "focusRingStyle": "solid",
-      "dependsOn": [
-        "ring",
-        "focus-ring-width"
-      ],
       "accessibilityLevel": "AA",
-      "description": "Default focus ring - suitable for most interactive elements. Width: 0.125rem, Offset: 0.125rem.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false,
-      "highContrastMode": "Highlight",
       "usagePatterns": {
         "do": [
           "Use as the default focus indicator",
@@ -82,7 +70,19 @@
           "Remove without providing alternative focus indicator",
           "Use colors with insufficient contrast"
         ]
-      }
+      },
+      "dependsOn": [
+        "ring",
+        "focus-ring-width"
+      ],
+      "containerQueryAware": false,
+      "highContrastMode": "Highlight",
+      "focusRingWidth": "0.125rem",
+      "focusRingColor": "var(--ring)",
+      "focusRingOffset": "0.125rem",
+      "focusRingStyle": "solid",
+      "description": "Default focus ring - suitable for most interactive elements. Width: 0.125rem, Offset: 0.125rem.",
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-outline",
@@ -96,9 +96,9 @@
       "dependsOn": [
         "ring"
       ],
+      "containerQueryAware": false,
       "description": "CSS outline value: 0.125rem solid var(--ring). Use with outline-offset: 0.125rem.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-offset",
@@ -106,10 +106,10 @@
       "category": "focus",
       "namespace": "focus",
       "semanticMeaning": "Focus ring offset for default style",
+      "containerQueryAware": false,
       "focusRingOffset": "0.125rem",
       "description": "Focus offset 0.125rem for default focus style.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-ring-inset",
@@ -122,19 +122,7 @@
         "containers",
         "overflow-hidden"
       ],
-      "focusRingWidth": "0.125rem",
-      "focusRingColor": "var(--ring)",
-      "focusRingOffset": "-0.125rem",
-      "focusRingStyle": "solid",
-      "dependsOn": [
-        "ring",
-        "focus-ring-width"
-      ],
       "accessibilityLevel": "AA",
-      "description": "Inset focus ring - for elements where external ring would be cut off. Width: 0.125rem, Offset: -0.125rem.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false,
-      "highContrastMode": "Highlight",
       "usagePatterns": {
         "do": [
           "Use when external ring would be clipped",
@@ -144,7 +132,19 @@
           "Remove without providing alternative focus indicator",
           "Use colors with insufficient contrast"
         ]
-      }
+      },
+      "dependsOn": [
+        "ring",
+        "focus-ring-width"
+      ],
+      "containerQueryAware": false,
+      "highContrastMode": "Highlight",
+      "focusRingWidth": "0.125rem",
+      "focusRingColor": "var(--ring)",
+      "focusRingOffset": "-0.125rem",
+      "focusRingStyle": "solid",
+      "description": "Inset focus ring - for elements where external ring would be cut off. Width: 0.125rem, Offset: -0.125rem.",
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-outline-inset",
@@ -158,9 +158,9 @@
       "dependsOn": [
         "ring"
       ],
+      "containerQueryAware": false,
       "description": "CSS outline value: 0.125rem solid var(--ring). Use with outline-offset: -0.125rem.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-offset-inset",
@@ -168,10 +168,10 @@
       "category": "focus",
       "namespace": "focus",
       "semanticMeaning": "Focus ring offset for inset style",
+      "containerQueryAware": false,
       "focusRingOffset": "-0.125rem",
       "description": "Focus offset -0.125rem for inset focus style.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-ring-thick",
@@ -184,19 +184,7 @@
         "primary-cta",
         "accessibility-mode"
       ],
-      "focusRingWidth": "0.188rem",
-      "focusRingColor": "var(--ring)",
-      "focusRingOffset": "0.125rem",
-      "focusRingStyle": "solid",
-      "dependsOn": [
-        "ring",
-        "focus-ring-width"
-      ],
       "accessibilityLevel": "AA",
-      "description": "Thick focus ring - for high-visibility needs. Width: 0.188rem, Offset: 0.125rem.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false,
-      "highContrastMode": "Highlight",
       "usagePatterns": {
         "do": [
           "Use for critical actions",
@@ -206,7 +194,19 @@
           "Remove without providing alternative focus indicator",
           "Use colors with insufficient contrast"
         ]
-      }
+      },
+      "dependsOn": [
+        "ring",
+        "focus-ring-width"
+      ],
+      "containerQueryAware": false,
+      "highContrastMode": "Highlight",
+      "focusRingWidth": "0.188rem",
+      "focusRingColor": "var(--ring)",
+      "focusRingOffset": "0.125rem",
+      "focusRingStyle": "solid",
+      "description": "Thick focus ring - for high-visibility needs. Width: 0.188rem, Offset: 0.125rem.",
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-outline-thick",
@@ -220,9 +220,9 @@
       "dependsOn": [
         "ring"
       ],
+      "containerQueryAware": false,
       "description": "CSS outline value: 0.188rem solid var(--ring). Use with outline-offset: 0.125rem.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-offset-thick",
@@ -230,10 +230,10 @@
       "category": "focus",
       "namespace": "focus",
       "semanticMeaning": "Focus ring offset for thick style",
+      "containerQueryAware": false,
       "focusRingOffset": "0.125rem",
       "description": "Focus offset 0.125rem for thick focus style.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-ring-subtle",
@@ -246,18 +246,6 @@
         "list-items",
         "dense-ui"
       ],
-      "focusRingWidth": "0.063rem",
-      "focusRingColor": "var(--ring)",
-      "focusRingOffset": "0.125rem",
-      "focusRingStyle": "solid",
-      "dependsOn": [
-        "ring",
-        "focus-ring-width"
-      ],
-      "description": "Subtle focus ring - for dense UIs with many focusable elements. Width: 0.063rem, Offset: 0.125rem.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false,
-      "highContrastMode": "Highlight",
       "usagePatterns": {
         "do": [
           "Use in dense UIs",
@@ -267,7 +255,19 @@
           "Remove without providing alternative focus indicator",
           "Use colors with insufficient contrast"
         ]
-      }
+      },
+      "dependsOn": [
+        "ring",
+        "focus-ring-width"
+      ],
+      "containerQueryAware": false,
+      "highContrastMode": "Highlight",
+      "focusRingWidth": "0.063rem",
+      "focusRingColor": "var(--ring)",
+      "focusRingOffset": "0.125rem",
+      "focusRingStyle": "solid",
+      "description": "Subtle focus ring - for dense UIs with many focusable elements. Width: 0.063rem, Offset: 0.125rem.",
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-outline-subtle",
@@ -281,9 +281,9 @@
       "dependsOn": [
         "ring"
       ],
+      "containerQueryAware": false,
       "description": "CSS outline value: 0.063rem solid var(--ring). Use with outline-offset: 0.125rem.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-offset-subtle",
@@ -291,10 +291,10 @@
       "category": "focus",
       "namespace": "focus",
       "semanticMeaning": "Focus ring offset for subtle style",
+      "containerQueryAware": false,
       "focusRingOffset": "0.125rem",
       "description": "Focus offset 0.125rem for subtle focus style.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-within-ring",
@@ -307,16 +307,6 @@
         "card-actions",
         "list-containers"
       ],
-      "focusRingWidth": "0.125rem",
-      "focusRingColor": "var(--ring)",
-      "focusRingOffset": "0",
-      "focusRingStyle": "solid",
-      "dependsOn": [
-        "ring"
-      ],
-      "description": "Focus indicator for containers using :focus-within pseudo-class.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use on containers with focusable children",
@@ -326,7 +316,17 @@
           "Use as replacement for child focus indicators",
           "Apply to non-container elements"
         ]
-      }
+      },
+      "dependsOn": [
+        "ring"
+      ],
+      "containerQueryAware": false,
+      "focusRingWidth": "0.125rem",
+      "focusRingColor": "var(--ring)",
+      "focusRingOffset": "0",
+      "focusRingStyle": "solid",
+      "description": "Focus indicator for containers using :focus-within pseudo-class.",
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     },
     {
       "name": "focus-high-contrast",
@@ -338,13 +338,6 @@
         "high-contrast-mode",
         "forced-colors"
       ],
-      "focusRingWidth": "0.188rem",
-      "focusRingOffset": "0.125rem",
-      "focusRingStyle": "solid",
-      "highContrastMode": "Highlight",
-      "description": "High contrast focus ring using system Highlight color.",
-      "generatedAt": "2026-03-29T04:05:15.696Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Apply in @media (forced-colors: active)",
@@ -354,7 +347,14 @@
           "Override in forced-colors mode",
           "Use custom colors in high contrast"
         ]
-      }
+      },
+      "containerQueryAware": false,
+      "highContrastMode": "Highlight",
+      "focusRingWidth": "0.188rem",
+      "focusRingOffset": "0.125rem",
+      "focusRingStyle": "solid",
+      "description": "High contrast focus ring using system Highlight color.",
+      "generatedAt": "2026-03-29T04:05:15.696Z"
     }
   ]
 }

@@ -1,10 +1,30 @@
 ---
+import { ClientRouter, fade } from 'astro:transitions';
+import Container from '@/src/components/ui/container.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Separator from '@/src/components/ui/separator.astro';
+import Button from '@/src/components/ui/button.astro';
+
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
 }
 
-const { title, description = 'Sean Silvius - UI designer and software architect. Writing about design systems, service design, and building software.' } = Astro.props;
+const {
+  title = 'Sean Silvius',
+  description = 'Articles on software engineering, product design, startups, and gaming from Sean Silvius.',
+} = Astro.props;
+
+const siteUrl = 'https://sean.silvius.me';
+const fullTitle = title === 'Sean Silvius' ? title : `${title} | Sean Silvius`;
+const currentPath = Astro.url.pathname;
+
+const navLinks = [
+  { href: '/posts/', label: 'Index' },
+  { href: '/software/', label: 'Software' },
+  { href: '/night-shift/', label: 'Night Shift' },
+];
 ---
 
 <!doctype html>
@@ -12,14 +32,136 @@ const { title, description = 'Sean Silvius - UI designer and software architect.
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <title>{title}</title>
+    <meta name="author" content="Sean Silvius" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={`${siteUrl}${Astro.url.pathname}`} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`${siteUrl}/images/profile.jpg`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@ssilvius" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={`${siteUrl}${Astro.url.pathname}`} />
+    <ClientRouter />
   </head>
   <body class="bg-background text-foreground">
-    <slot />
+
+    <!-- Nav -->
+    <header id="topbar" class="topbar" transition:persist>
+      <Container size="7xl">
+        <Grid preset="linear" columns={3}>
+          <a href="/" class="no-underline">
+            <Typography as="span" variant="large" class="uppercase tracking-tight text-foreground">sean.silvius.me</Typography>
+          </a>
+          <Grid preset="linear" columns={3} gap="6">
+            {navLinks.map((link) => {
+              const isActive = currentPath.startsWith(link.href);
+              return (
+                <a
+                  href={link.href}
+                  class:list={[
+                    'no-underline uppercase font-bold tracking-tight text-lg',
+                    isActive ? 'text-foreground underline decoration-4 underline-offset-4' : 'text-foreground hover:underline decoration-4 underline-offset-4',
+                  ]}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
+          </Grid>
+          <div class="text-end">
+            <a href="/connect/" class="no-underline">
+              <Button>Connect</Button>
+            </a>
+          </div>
+        </Grid>
+      </Container>
+    </header>
+
+    <!-- Spacer for fixed nav -->
+    <div class="topbar-spacer"></div>
+
+    <main transition:animate={fade({ duration: '0.15s' })}>
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-primary-foreground">
+      <Container size="7xl">
+        <Grid preset="linear" columns={3} gap="8">
+          <Container gap="3">
+            <Typography as="h3" variant="h4" class="text-secondary">Site</Typography>
+            <Container gap="2">
+              <a href="/" class="no-underline text-primary-foreground hover:text-secondary">Home</a>
+              <a href="/posts/" class="no-underline text-primary-foreground hover:text-secondary">Articles</a>
+              <a href="/software/" class="no-underline text-primary-foreground hover:text-secondary">Software</a>
+              <a href="/night-shift/" class="no-underline text-primary-foreground hover:text-secondary">Night Shift</a>
+              <a href="/connect/" class="no-underline text-primary-foreground hover:text-secondary">Connect</a>
+            </Container>
+          </Container>
+          <Container gap="3">
+            <Typography as="h3" variant="h4" class="text-secondary">Connect</Typography>
+            <Container gap="2">
+              <a href="https://github.com/ssilvius" target="_blank" rel="noopener noreferrer" class="no-underline text-primary-foreground hover:text-secondary">GitHub</a>
+              <a href="https://www.linkedin.com/in/seansilvius/" target="_blank" rel="noopener noreferrer" class="no-underline text-primary-foreground hover:text-secondary">LinkedIn</a>
+            </Container>
+          </Container>
+          <Container gap="3">
+            <Typography as="h3" variant="h4" class="text-secondary">Legal</Typography>
+            <Container gap="2">
+              <a href="/privacy/" class="no-underline text-primary-foreground hover:text-secondary">Privacy Policy</a>
+              <a href="/terms/" class="no-underline text-primary-foreground hover:text-secondary">Terms of Service</a>
+            </Container>
+          </Container>
+        </Grid>
+        <Separator class="bg-primary-foreground/20" />
+        <Grid preset="linear" columns={2}>
+          <Typography as="p" variant="muted" class="text-primary-foreground/60">&copy; 2026 Sean Silvius. All rights reserved.</Typography>
+          <Typography as="p" variant="muted" class="text-primary-foreground/60 text-end">Built with love in the PNW</Typography>
+        </Grid>
+      </Container>
+    </footer>
+
   </body>
 </html>
 
 <style>
   @import '../styles/global.css';
+
+  .topbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 30;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .topbar-spacer {
+    height: 4rem;
+  }
 </style>
+
+<script>
+  function initScrollEffect() {
+    const topbar = document.getElementById('topbar');
+    if (!topbar) return;
+    function onScroll() {
+      if (window.scrollY > 64) {
+        topbar.style.backgroundColor = 'var(--card)';
+        topbar.style.borderBottom = '1px solid var(--border)';
+        topbar.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
+      } else {
+        topbar.style.backgroundColor = 'transparent';
+        topbar.style.borderBottom = 'none';
+        topbar.style.boxShadow = 'none';
+      }
+    }
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+  }
+  initScrollEffect();
+  document.addEventListener('astro:after-swap', initScrollEffect);
+</script>
