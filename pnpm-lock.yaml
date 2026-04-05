@@ -150,9 +150,6 @@ importers:
       dayjs:
         specifier: ^1.11.19
         version: 1.11.20
-      h1.astro:
-        specifier: link:@/components/ui/typography/h1.astro
-        version: link:@/components/ui/typography/h1.astro
       lucide-react:
         specifier: ^0.577.0
         version: 0.577.0(react@19.2.4)
@@ -171,9 +168,6 @@ importers:
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
-      typography.astro:
-        specifier: link:@/components/ui/typography.astro
-        version: link:@/components/ui/typography.astro
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.7
