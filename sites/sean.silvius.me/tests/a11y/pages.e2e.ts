@@ -4,10 +4,8 @@ import { test, expect } from "@playwright/test";
 const pages = [
   { name: "Home", path: "/" },
   { name: "Posts", path: "/posts/" },
-  { name: "Post", path: "/posts/active-listening/" },
-  { name: "Privacy", path: "/privacy/" },
-  { name: "Terms", path: "/terms/" },
-  { name: "Connect", path: "/connect/" },
+  { name: "Night Shift", path: "/night-shift/" },
+  { name: "Stories", path: "/stories/" },
 ];
 
 test.describe("Accessibility", () => {
@@ -21,7 +19,6 @@ test.describe("Accessibility", () => {
         .exclude("iframe")
         .disableRules([
           "color-contrast", // Design decision - can be addressed later
-          "aria-required-children", // Home page uses role=feed/grid incorrectly
         ])
         .analyze();
 
@@ -35,6 +32,9 @@ test.describe("Accessibility", () => {
     await page.goto("/");
 
     const images = page.locator("img");
+    const count = await images.count();
+    if (count === 0) return;
+
     const imageData = await images.evaluateAll((imgs) =>
       imgs.map((img) => ({
         alt: img.getAttribute("alt"),

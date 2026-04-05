@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '@/src/layouts/Base.astro';
+import Container from '@/src/components/ui/container.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Card from '@/src/components/ui/card.astro';
+
+const posts = (await getCollection('posts'))
+  .filter((post) => !post.data.draft && !post.data.archived)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Base title="Posts - Sean Silvius" description="Writing about design systems, service design, leadership, and building software.">
+  <Container as="main" size="3xl" padding="6">
+    <Typography as="h1" variant="h1">Posts</Typography>
+    <Typography as="p" variant="lead" class="mt-2">
+      Writing about design, engineering, leadership, and the things between.
+    </Typography>
+
+    <div class="mt-12 flex flex-col gap-6">
+      {posts.map((post) => {
+        const slug = post.data.slug || post.id;
+        return (
+          <a href={`/posts/${slug}/`} class="no-underline">
+            <Card as="article" interactive>
+              <div class="p-6">
+                <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                  <time datetime={post.data.date.toISOString()}>
+                    {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </time>
+                  {post.data.tags.length > 0 && (
+                    <>
+                      <span aria-hidden="true">|</span>
+                      {post.data.tags.slice(0, 3).map((tag) => (
+                        <span class="text-muted-foreground">{tag}</span>
+                      ))}
+                    </>
+                  )}
+                </div>
+                <Typography as="h2" variant="h3" class="mt-2">{post.data.title}</Typography>
+                <Typography as="p" variant="muted" class="mt-2">{post.data.excerpt}</Typography>
+              </div>
+            </Card>
+          </a>
+        );
+      })}
+    </div>
+  </Container>
+</Base>

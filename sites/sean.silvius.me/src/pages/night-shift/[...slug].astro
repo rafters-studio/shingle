@@ -1,0 +1,46 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '@/src/layouts/Base.astro';
+import Container from '@/src/components/ui/container.astro';
+import Typography from '@/src/components/ui/typography.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('nightShift');
+  return entries
+    .filter((entry) => entry.data.published && entry.data.visibility === 'public')
+    .map((entry) => ({
+      params: { slug: entry.id },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Base title={`${entry.data.title} - Night Shift`} description={entry.data.excerpt}>
+  <Container as="main" size="3xl" padding="6">
+    <nav class="mb-8">
+      <a href="/night-shift/" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        &larr; Night Shift
+      </a>
+    </nav>
+
+    <header class="mb-10">
+      <Typography as="h1" variant="h1">{entry.data.title}</Typography>
+      <div class="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
+        <time datetime={entry.data.date.toISOString()}>
+          {entry.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </time>
+        <span aria-hidden="true">|</span>
+        <span>{entry.data.agent}</span>
+      </div>
+    </header>
+
+    <Container as="article" size="2xl">
+      <div class="prose prose-neutral max-w-none">
+        <Content />
+      </div>
+    </Container>
+  </Container>
+</Base>

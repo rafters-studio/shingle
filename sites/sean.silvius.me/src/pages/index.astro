@@ -1,60 +1,74 @@
 ---
-import Base from '../layouts/Base.astro';
-import Button from '../components/ui/button.astro';
-import Card from '../components/ui/card.astro';
-import Badge from '../components/ui/badge.astro';
-import Container from '../components/ui/container.astro';
-import Typography from '../components/ui/typography.astro';
+import { getCollection } from 'astro:content';
+import Base from '@/src/layouts/Base.astro';
+import Container from '@/src/components/ui/container.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import Card from '@/src/components/ui/card.astro';
+import Button from '@/src/components/ui/button.astro';
+
+const allPosts = (await getCollection('posts'))
+  .filter((post) => !post.data.draft && !post.data.archived)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const featuredPosts = allPosts.filter((post) => post.data.featured);
+const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : allPosts.slice(0, 6);
 ---
 
-<Base title="Sean Silvius">
-  <Container>
-    <Typography as="h1" variant="h1">Sean Silvius</Typography>
-    <Typography as="p" variant="lead">UI designer, software architect.</Typography>
+<Base title="Sean Silvius" heroSlot>
+  <Container slot="hero" as="section" size="5xl" padding="6" gap="6">
+    <Typography as="h1" variant="h1" class="text-primary-foreground">
+      Hi. I build complex things in a simple manner. With bits and bytes, with wood.
+    </Typography>
+    <Typography as="p" variant="lead" class="text-primary-foreground/80">
+      I log the things that have interested me, hopefully someone will find some of what
+      I've learned useful in their own endeavors. I tend to make mistakes and adjust just
+      as any student of life does. Those mistakes are really the important things.
+    </Typography>
+  </Container>
 
-    <section class="mt-12">
-      <Typography as="h2" variant="h2">Buttons</Typography>
-      <div class="mt-6 flex flex-wrap gap-3">
-        <Button variant="primary">Primary</Button>
-        <Button variant="secondary">Secondary</Button>
-        <Button variant="accent">Accent</Button>
-        <Button variant="muted">Muted</Button>
-        <Button variant="destructive">Destructive</Button>
-        <Button variant="success">Success</Button>
-        <Button variant="warning">Warning</Button>
-        <Button variant="info">Info</Button>
-        <Button variant="outline">Outline</Button>
-        <Button variant="ghost">Ghost</Button>
-        <Button variant="link">Link</Button>
-      </div>
-    </section>
+  <Container as="main" size="5xl" padding="6" gap="10">
+    <Container as="section" gap="8">
+      <Typography as="h2" variant="muted" class="text-center uppercase tracking-widest">
+        Featured Articles
+      </Typography>
 
-    <section class="mt-12">
-      <Typography as="h2" variant="h2">Cards</Typography>
-      <div class="mt-6 grid grid-cols-3 gap-4">
-        <Card>
-          <Typography as="h3" variant="h4">Default Card</Typography>
-          <Typography as="p" variant="muted">Card content here.</Typography>
-        </Card>
-        <Card>
-          <Typography as="h3" variant="h4">Another Card</Typography>
-          <Typography as="p" variant="muted">More content.</Typography>
-        </Card>
-        <Card>
-          <Typography as="h3" variant="h4">Third Card</Typography>
-          <Typography as="p" variant="muted">Even more.</Typography>
-        </Card>
-      </div>
-    </section>
+      <Grid preset="linear" columns={3} gap="6">
+        {displayPosts.map((post) => {
+          const slug = post.data.slug || post.id;
+          const imagePath = `/images/${slug}.png`;
+          return (
+            <a href={`/posts/${slug}/`} class="group no-underline">
+              <Card as="article" interactive>
+                <img
+                  src={imagePath}
+                  alt=""
+                  loading="lazy"
+                />
+                <Container padding="5" gap="2">
+                  <Typography as="h3" variant="p" class="text-card-foreground group-hover:text-primary transition-colors">
+                    {post.data.title}
+                  </Typography>
+                  <Typography as="p" variant="muted" class="line-clamp-3">
+                    {post.data.excerpt}
+                  </Typography>
+                  <Typography as="p" variant="small" class="uppercase tracking-wider text-primary">
+                    Read More
+                  </Typography>
+                </Container>
+              </Card>
+            </a>
+          );
+        })}
+      </Grid>
 
-    <section class="mt-12">
-      <Typography as="h2" variant="h2">Badges</Typography>
-      <div class="mt-6 flex flex-wrap gap-2">
-        <Badge>Default</Badge>
-        <Badge variant="secondary">Secondary</Badge>
-        <Badge variant="destructive">Destructive</Badge>
-        <Badge variant="outline">Outline</Badge>
-      </div>
-    </section>
+      <Container class="text-center">
+        <a href="/posts/" class="no-underline">
+          <Button variant="outline" size="lg">
+            More Articles &rsaquo;
+          </Button>
+        </a>
+      </Container>
+    </Container>
   </Container>
 </Base>

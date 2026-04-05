@@ -17,7 +17,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: process.env.CI ? "pnpm exec serve dist/client -l 4321" : "pnpm dev --port 4321",
+    command: process.env.CI ? "pnpm preview --port 4321" : "pnpm dev --port 4321",
     url: "http://localhost:4321",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
