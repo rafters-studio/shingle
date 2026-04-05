@@ -521,7 +521,7 @@ export const tokens = {
     /** Surface border color */
     'surface-border': 'var(--color-neutral-200)',
     /** Primary interactive elements - buttons, links, focus states */
-    'primary': 'var(--color-neutral-900)',
+    'primary': 'silver-true-sky-900',
     /** Text on primary color backgrounds */
     'primary-foreground': 'var(--color-neutral-50)',
     /** Primary hover state */

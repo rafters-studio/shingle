@@ -84,41 +84,41 @@
   --color-silver-true-violet-950: oklch(0.05 0.072 270);
   --color-silver-true-violet: oklch(0.645 0.12 270);
 
-  --spacing-spacing-base: 0.25rem;
-  --spacing-spacing-0: 0;
-  --spacing-spacing-0.5: 0.125rem;
-  --spacing-spacing-1: 0.25rem;
-  --spacing-spacing-1.5: 0.375rem;
-  --spacing-spacing-2: 0.5rem;
-  --spacing-spacing-2.5: 0.625rem;
-  --spacing-spacing-3: 0.75rem;
-  --spacing-spacing-3.5: 0.875rem;
-  --spacing-spacing-4: 1rem;
-  --spacing-spacing-5: 1.25rem;
-  --spacing-spacing-6: 1.5rem;
-  --spacing-spacing-7: 1.75rem;
-  --spacing-spacing-8: 2rem;
-  --spacing-spacing-9: 2.25rem;
-  --spacing-spacing-10: 2.5rem;
-  --spacing-spacing-11: 2.75rem;
-  --spacing-spacing-12: 3rem;
-  --spacing-spacing-14: 3.5rem;
-  --spacing-spacing-16: 4rem;
-  --spacing-spacing-20: 5rem;
-  --spacing-spacing-24: 6rem;
-  --spacing-spacing-28: 7rem;
-  --spacing-spacing-32: 8rem;
-  --spacing-spacing-36: 9rem;
-  --spacing-spacing-40: 10rem;
-  --spacing-spacing-44: 11rem;
-  --spacing-spacing-48: 12rem;
-  --spacing-spacing-52: 13rem;
-  --spacing-spacing-56: 14rem;
-  --spacing-spacing-60: 15rem;
-  --spacing-spacing-64: 16rem;
-  --spacing-spacing-72: 18rem;
-  --spacing-spacing-80: 20rem;
-  --spacing-spacing-96: 24rem;
+  --spacing-base: 0.25rem;
+  --spacing-0: 0;
+  --spacing-0.5: 0.125rem;
+  --spacing-1: 0.25rem;
+  --spacing-1.5: 0.375rem;
+  --spacing-2: 0.5rem;
+  --spacing-2.5: 0.625rem;
+  --spacing-3: 0.75rem;
+  --spacing-3.5: 0.875rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-9: 2.25rem;
+  --spacing-10: 2.5rem;
+  --spacing-11: 2.75rem;
+  --spacing-12: 3rem;
+  --spacing-14: 3.5rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-28: 7rem;
+  --spacing-32: 8rem;
+  --spacing-36: 9rem;
+  --spacing-40: 10rem;
+  --spacing-44: 11rem;
+  --spacing-48: 12rem;
+  --spacing-52: 13rem;
+  --spacing-56: 14rem;
+  --spacing-60: 15rem;
+  --spacing-64: 16rem;
+  --spacing-72: 18rem;
+  --spacing-80: 20rem;
+  --spacing-96: 24rem;
 
   --font-sans: 'Noto Sans Variable', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
@@ -184,28 +184,28 @@
   --font-weight-extrabold: 800;
   --font-weight-black: 900;
 
-  --radius-radius-base: 0.375rem;
-  --radius-radius-none: 0;
-  --radius-radius-sm: 0.31rem;
+  --radius-base: 0.375rem;
+  --radius-none: 0;
+  --radius-sm: 0.31rem;
   --radius-radius: 0.38rem;
-  --radius-radius-md: 0.45rem;
-  --radius-radius-lg: 0.54rem;
-  --radius-radius-xl: 0.65rem;
-  --radius-radius-2xl: 0.78rem;
-  --radius-radius-3xl: 0.93rem;
-  --radius-radius-full: 9999px;
+  --radius-md: 0.45rem;
+  --radius-lg: 0.54rem;
+  --radius-xl: 0.65rem;
+  --radius-2xl: 0.78rem;
+  --radius-3xl: 0.93rem;
+  --radius-full: 9999px;
 
-  --shadow-shadow-base-unit: 0.25rem;
-  --shadow-shadow-none: none;
-  --shadow-shadow-xs: 0 0.063rem 0.125rem 0rem rgb(0 0 0 / 0.05);
-  --shadow-shadow-sm: 0 0.063rem 0.25rem 0rem rgb(0 0 0 / 0.06), 0 0.063rem 0.125rem 0rem rgb(0 0 0 / 0.1);
+  --shadow-base-unit: 0.25rem;
+  --shadow-none: none;
+  --shadow-xs: 0 0.063rem 0.125rem 0rem rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 0.063rem 0.25rem 0rem rgb(0 0 0 / 0.06), 0 0.063rem 0.125rem 0rem rgb(0 0 0 / 0.1);
   --shadow-shadow: 0 0.125rem 0.375rem -0.062rem rgb(0 0 0 / 0.1), 0 0.063rem 0.125rem 0rem rgb(0 0 0 / 0.1);
-  --shadow-shadow-md: 0 0.25rem 0.5rem -0.125rem rgb(0 0 0 / 0.1), 0 0.125rem 0.25rem -0.062rem rgb(0 0 0 / 0.1);
-  --shadow-shadow-lg: 0 0.5rem 1rem -0.187rem rgb(0 0 0 / 0.1), 0 0.25rem 0.5rem -0.125rem rgb(0 0 0 / 0.1);
-  --shadow-shadow-xl: 0 1.25rem 1.5rem -0.25rem rgb(0 0 0 / 0.1), 0 0.5rem 1rem -0.187rem rgb(0 0 0 / 0.1);
-  --shadow-shadow-2xl: 0 1.5rem 3rem -0.5rem rgb(0 0 0 / 0.25);
-  --shadow-shadow-primary: 0 0.125rem 0.375rem -0.062rem color-mix(in oklch, var(--primary) 12%, transparent);
-  --shadow-shadow-destructive: 0 0.125rem 0.375rem -0.062rem color-mix(in oklch, var(--destructive) 12%, transparent);
+  --shadow-md: 0 0.25rem 0.5rem -0.125rem rgb(0 0 0 / 0.1), 0 0.125rem 0.25rem -0.062rem rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 0.5rem 1rem -0.187rem rgb(0 0 0 / 0.1), 0 0.25rem 0.5rem -0.125rem rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 1.25rem 1.5rem -0.25rem rgb(0 0 0 / 0.1), 0 0.5rem 1rem -0.187rem rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 1.5rem 3rem -0.5rem rgb(0 0 0 / 0.25);
+  --shadow-primary: 0 0.125rem 0.375rem -0.062rem color-mix(in oklch, var(--primary) 12%, transparent);
+  --shadow-destructive: 0 0.125rem 0.375rem -0.062rem color-mix(in oklch, var(--destructive) 12%, transparent);
 
   --depth-base: 0;
   --depth-dropdown: 10;
@@ -220,18 +220,6 @@
   --depth-max: 9999;
 
   --motion-duration-base: 150ms;
-  --motion-duration-instant: 0ms;
-  --motion-duration-fast: 125ms;
-  --motion-duration-normal: 150ms;
-  --motion-duration-slow: 180ms;
-  --motion-duration-slower: 216ms;
-  --motion-easing-linear: linear;
-  --motion-easing-ease-in: cubic-bezier(0.42, 0, 1, 1);
-  --motion-easing-ease-out: cubic-bezier(0, 0, 0.58, 1);
-  --motion-easing-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
-  --motion-easing-productive: cubic-bezier(0.2, 0, 0.38, 0.9);
-  --motion-easing-expressive: cubic-bezier(0.4, 0.14, 0.3, 1);
-  --motion-easing-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --motion-delay-none: 0ms;
   --motion-delay-short: 125ms;
   --motion-delay-medium: 150ms;
@@ -279,6 +267,19 @@
   --motion-slide-in: 150ms cubic-bezier(0, 0, 0.58, 1);
   --motion-slide-out: 125ms cubic-bezier(0.42, 0, 1, 1);
   --motion-scale-in: 150ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  --duration-instant: 0ms;
+  --duration-fast: 125ms;
+  --duration-normal: 150ms;
+  --duration-slow: 180ms;
+  --duration-slower: 216ms;
+  --ease-linear: linear;
+  --ease-ease-in: cubic-bezier(0.42, 0, 1, 1);
+  --ease-ease-out: cubic-bezier(0, 0, 0.58, 1);
+  --ease-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  --ease-productive: cubic-bezier(0.2, 0, 0.38, 0.9);
+  --ease-expressive: cubic-bezier(0.4, 0.14, 0.3, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   --breakpoint-sm: 640px;
   --screen-sm: (min-width: 640px);
@@ -375,7 +376,6 @@
   --color-surface-hover: var(--surface-hover);
   --color-surface-active: var(--surface-active);
   --color-surface-border: var(--surface-border);
-  --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-primary-hover-foreground: var(--primary-hover-foreground);
@@ -559,6 +559,7 @@
   --color-badge-border: var(--badge-border);
   --color-avatar: var(--avatar);
   --color-avatar-foreground: var(--avatar-foreground);
+  --color-primary: var(--primary);
 }
 
 :root {
@@ -576,7 +577,6 @@
   --rafters-surface-hover: var(--color-neutral-100);
   --rafters-surface-active: var(--color-neutral-200);
   --rafters-surface-border: var(--color-neutral-200);
-  --rafters-primary: var(--color-neutral-900);
   --rafters-primary-foreground: var(--color-neutral-50);
   --rafters-primary-hover: var(--color-neutral-800);
   --rafters-primary-hover-foreground: var(--color-neutral-50);
@@ -760,6 +760,7 @@
   --rafters-badge-border: var(--color-neutral-200);
   --rafters-avatar: var(--color-neutral-200);
   --rafters-avatar-foreground: var(--color-neutral-600);
+  --rafters-primary: var(--color-neutral-900);
 
   --rafters-dark-background: var(--color-neutral-950);
   --rafters-dark-foreground: var(--color-neutral-50);
@@ -775,7 +776,6 @@
   --rafters-dark-surface-hover: var(--color-neutral-800);
   --rafters-dark-surface-active: var(--color-neutral-700);
   --rafters-dark-surface-border: var(--color-neutral-800);
-  --rafters-dark-primary: var(--color-neutral-50);
   --rafters-dark-primary-foreground: var(--color-neutral-900);
   --rafters-dark-primary-hover: var(--color-neutral-200);
   --rafters-dark-primary-hover-foreground: var(--color-neutral-900);
@@ -959,6 +959,7 @@
   --rafters-dark-badge-border: var(--color-neutral-700);
   --rafters-dark-avatar: var(--color-neutral-800);
   --rafters-dark-avatar-foreground: var(--color-neutral-400);
+  --rafters-dark-primary: var(--color-neutral-50);
 
   --background: var(--rafters-background);
   --foreground: var(--rafters-foreground);
@@ -974,7 +975,6 @@
   --surface-hover: var(--rafters-surface-hover);
   --surface-active: var(--rafters-surface-active);
   --surface-border: var(--rafters-surface-border);
-  --primary: var(--rafters-primary);
   --primary-foreground: var(--rafters-primary-foreground);
   --primary-hover: var(--rafters-primary-hover);
   --primary-hover-foreground: var(--rafters-primary-hover-foreground);
@@ -1158,6 +1158,7 @@
   --badge-border: var(--rafters-badge-border);
   --avatar: var(--rafters-avatar);
   --avatar-foreground: var(--rafters-avatar-foreground);
+  --primary: var(--rafters-primary);
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -1177,7 +1178,6 @@
   --surface-hover: var(--rafters-dark-surface-hover);
   --surface-active: var(--rafters-dark-surface-active);
   --surface-border: var(--rafters-dark-surface-border);
-  --primary: var(--rafters-dark-primary);
   --primary-foreground: var(--rafters-dark-primary-foreground);
   --primary-hover: var(--rafters-dark-primary-hover);
   --primary-hover-foreground: var(--rafters-dark-primary-hover-foreground);
@@ -1361,6 +1361,7 @@
   --badge-border: var(--rafters-dark-badge-border);
   --avatar: var(--rafters-dark-avatar);
   --avatar-foreground: var(--rafters-dark-avatar-foreground);
+  --primary: var(--rafters-dark-primary);
 }
 
 
