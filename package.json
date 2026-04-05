@@ -6,8 +6,8 @@
   "packageManager": "pnpm@10.30.3",
   "scripts": {
     "lint": "pnpm -r --if-present lint",
-    "typecheck": "pnpm -r --if-present typecheck",
-    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present --workspace-concurrency=1 typecheck",
+    "build": "pnpm -r --if-present --workspace-concurrency=1 build",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm -r --if-present test:e2e",
     "preflight": "pnpm lint && pnpm typecheck && pnpm build && pnpm test"

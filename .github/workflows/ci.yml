@@ -64,7 +64,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - name: Build sites sequentially (Cloudflare workerd port conflict)
+        run: pnpm -r --if-present --workspace-concurrency=1 build
       - uses: actions/upload-artifact@v4
         with:
           name: build-output
@@ -84,7 +85,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Build sites for preview
-        run: pnpm build
+        run: pnpm -r --if-present --workspace-concurrency=1 build
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v4
