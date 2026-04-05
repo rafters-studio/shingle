@@ -1,60 +1,79 @@
 ---
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import Button from '../components/ui/button.astro';
-import Card from '../components/ui/card.astro';
-import Badge from '../components/ui/badge.astro';
-import Container from '../components/ui/container.astro';
-import Typography from '../components/ui/typography.astro';
+import Container from '@/src/components/ui/container.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Card from '@/src/components/ui/card.astro';
+import Button from '@/src/components/ui/button.astro';
+import readingTime from 'reading-time';
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  const isProduction = import.meta.env.PROD;
+  return isProduction ? !data.draft && !data.archived : true;
+});
+
+const featuredPosts = allPosts
+  .filter((post) => post.data.featured)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 6);
 ---
 
-<Base title="Sean Silvius">
-  <Container>
-    <Typography as="h1" variant="h1">Sean Silvius</Typography>
-    <Typography as="p" variant="lead">UI designer, software architect.</Typography>
+<Base title="Sean Silvius" description="Articles on software engineering, product design, startups, and gaming from Sean Silvius.">
 
-    <section class="mt-12">
-      <Typography as="h2" variant="h2">Buttons</Typography>
-      <div class="mt-6 flex flex-wrap gap-3">
-        <Button variant="primary">Primary</Button>
-        <Button variant="secondary">Secondary</Button>
-        <Button variant="accent">Accent</Button>
-        <Button variant="muted">Muted</Button>
-        <Button variant="destructive">Destructive</Button>
-        <Button variant="success">Success</Button>
-        <Button variant="warning">Warning</Button>
-        <Button variant="info">Info</Button>
-        <Button variant="outline">Outline</Button>
-        <Button variant="ghost">Ghost</Button>
-        <Button variant="link">Link</Button>
-      </div>
-    </section>
-
-    <section class="mt-12">
-      <Typography as="h2" variant="h2">Cards</Typography>
-      <div class="mt-6 grid grid-cols-3 gap-4">
-        <Card>
-          <Typography as="h3" variant="h4">Default Card</Typography>
-          <Typography as="p" variant="muted">Card content here.</Typography>
-        </Card>
-        <Card>
-          <Typography as="h3" variant="h4">Another Card</Typography>
-          <Typography as="p" variant="muted">More content.</Typography>
-        </Card>
-        <Card>
-          <Typography as="h3" variant="h4">Third Card</Typography>
-          <Typography as="p" variant="muted">Even more.</Typography>
-        </Card>
-      </div>
-    </section>
-
-    <section class="mt-12">
-      <Typography as="h2" variant="h2">Badges</Typography>
-      <div class="mt-6 flex flex-wrap gap-2">
-        <Badge>Default</Badge>
-        <Badge variant="secondary">Secondary</Badge>
-        <Badge variant="destructive">Destructive</Badge>
-        <Badge variant="outline">Outline</Badge>
-      </div>
-    </section>
+  <Container size="5xl">
+    <Grid preset="linear" columns={1}>
+      <Typography as="h1" variant="h1">Hi. I build complex things in a simple manner. With bits and bytes, with wood.</Typography>
+      <Typography as="p" variant="lead">
+        I log the things that have interested me, hopefully someone will find some of what I've
+        learned useful in their own endeavors. I tend to make mistakes and adjust just as any
+        student of life does. Those mistakes are really the important things.
+      </Typography>
+    </Grid>
   </Container>
+
+  <section class="bg-muted">
+    <Container size="5xl">
+      <Grid preset="linear" columns={1}>
+        <Typography as="h2" variant="h2" class="uppercase">Featured Articles</Typography>
+      </Grid>
+      <Grid preset="cards">
+        {featuredPosts.map((post) => {
+          const rt = readingTime(post.body || '');
+          return (
+            <a href={`/posts/${post.id}/`} class="no-underline">
+              <Card interactive>
+                <img
+                  src={`/images/${post.id}.png`}
+                  alt={`Image for ${post.data.title}`}
+                  class="w-full object-cover"
+                  loading="lazy"
+                />
+                <Container gap="2">
+                  <Typography as="h3" variant="h4" class="text-secondary">{post.data.title}</Typography>
+                  <Typography as="p" variant="muted">
+                    {post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}
+                  </Typography>
+                  <Typography as="p" variant="p">{post.data.excerpt}</Typography>
+                </Container>
+                <Container>
+                  <Button>Read More</Button>
+                </Container>
+              </Card>
+            </a>
+          );
+        })}
+      </Grid>
+      <Container>
+        <div class="text-end">
+          <a href="/posts/" class="no-underline">
+            <Button variant="outline">More Articles</Button>
+          </a>
+        </div>
+      </Container>
+    </Container>
+  </section>
+
 </Base>
