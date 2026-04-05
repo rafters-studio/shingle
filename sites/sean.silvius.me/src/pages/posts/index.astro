@@ -1,0 +1,56 @@
+---
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import Base from '@/src/layouts/Base.astro';
+import Container from '@/src/components/ui/container.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Card from '@/src/components/ui/card.astro';
+import readingTime from 'reading-time';
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  const isProduction = import.meta.env.PROD;
+  return isProduction ? !data.draft && !data.archived : true;
+});
+
+const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Base title="Articles" description="All articles from Sean Silvius.">
+
+  <Container size="5xl">
+    <Grid preset="linear" columns={1}>
+      <Typography as="h1" variant="h1">Articles</Typography>
+      <Typography as="p" variant="lead">Everything I've written, newest first.</Typography>
+    </Grid>
+  </Container>
+
+  <Container size="5xl">
+    <Grid preset="cards">
+      {sortedPosts.map((post) => {
+        const rt = readingTime(post.body || '');
+        return (
+          <a href={`/posts/${post.id}/`} class="no-underline">
+            <Card interactive>
+              <img
+                src={`/images/${post.id}.png`}
+                alt={`Image for ${post.data.title}`}
+                class="w-full object-cover"
+                loading="lazy"
+              />
+              <Container gap="2">
+                <Typography as="h2" variant="h4" class="text-secondary">{post.data.title}</Typography>
+                <Typography as="p" variant="muted">
+                  {post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}
+                </Typography>
+                <Typography as="p" variant="p">{post.data.excerpt}</Typography>
+              </Container>
+            </Card>
+          </a>
+        );
+      })}
+    </Grid>
+  </Container>
+
+</Base>
