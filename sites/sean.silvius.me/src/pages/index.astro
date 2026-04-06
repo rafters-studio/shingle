@@ -8,6 +8,7 @@ import Grid from '@/src/components/ui/grid.astro';
 import Typography from '@/src/components/ui/typography.astro';
 import Card from '@/src/components/ui/card.astro';
 import Button from '@/src/components/ui/button.astro';
+import readingTime from 'reading-time';
 
 const allPosts = (await getCollection('posts'))
   .filter((post) => !post.data.draft && !post.data.archived)
@@ -33,32 +34,45 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
   <section class="bg-muted">
     <Container size="5xl">
       <Grid preset="linear" columns={1}>
-        <Typography as="h2" variant="muted" class="text-center uppercase tracking-widest">Featured Articles</Typography>
+        <Typography as="h2" variant="h2" class="uppercase">Featured Articles</Typography>
       </Grid>
-      <Grid preset="linear" columns={3}>
+      <Grid preset="linear" columns={3} gap="6">
         {displayPosts.map((post) => {
           const slug = post.data.slug || post.id;
+          const rt = readingTime(post.body || '');
           return (
             <a href={`/posts/${slug}/`} class="group no-underline">
-              <Card as="article" interactive>
-                <img
-                  src={`/images/${slug}.png`}
-                  alt=""
-                  loading="lazy"
-                />
+              <Card as="article" interactive class="overflow-hidden h-full">
+                <div class="aspect-video overflow-hidden">
+                  <img
+                    src={`/images/${slug}.png`}
+                    alt={`Image for ${post.data.title}`}
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="bg-primary text-primary-foreground">
+                  <Container gap="1">
+                    <Typography as="h3" variant="h4" class="text-secondary">{post.data.title}</Typography>
+                    <Typography as="span" variant="muted" class="text-primary-foreground/60">
+                      {post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}
+                    </Typography>
+                  </Container>
+                </div>
                 <Container gap="2">
-                  <Typography as="h3" variant="h4" class="text-secondary">{post.data.title}</Typography>
-                  <Typography as="p" variant="muted">{post.data.excerpt}</Typography>
-                  <Typography as="p" variant="small" class="uppercase tracking-wider text-primary">Read More</Typography>
+                  <Typography as="p" variant="p">{post.data.excerpt}</Typography>
+                </Container>
+                <Container class="mt-auto">
+                  <Button>Read More</Button>
                 </Container>
               </Card>
             </a>
           );
         })}
       </Grid>
-      <Container class="text-center">
+      <Container class="text-end">
         <a href="/posts/" class="no-underline">
-          <Button variant="outline">More Articles</Button>
+          <Button variant="outline">More Articles &rsaquo;</Button>
         </a>
       </Container>
     </Container>
