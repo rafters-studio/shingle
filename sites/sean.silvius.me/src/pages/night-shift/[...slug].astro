@@ -1,46 +1,62 @@
 ---
+export const prerender = true;
+
 import { getCollection, render } from 'astro:content';
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
+import Grid from '@/src/components/ui/grid.astro';
 import Typography from '@/src/components/ui/typography.astro';
+import Badge from '@/src/components/ui/badge.astro';
+import { isPublicEntry } from '@/src/lib/night-shift';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('nightShift');
-  return entries
-    .filter((entry) => entry.data.published && entry.data.visibility === 'public')
-    .map((entry) => ({
-      params: { slug: entry.id },
-      props: { entry },
-    }));
+  const entries = await getCollection('nightShift', isPublicEntry);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
 }
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+const formattedDate = entry.data.date.toLocaleDateString('en-US');
 ---
 
-<Base title={`${entry.data.title} - Night Shift`} description={entry.data.excerpt}>
-  <Container as="main" size="3xl" padding="6">
-    <nav class="mb-8">
-      <a href="/night-shift/" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
-        &larr; Night Shift
+<Base title={entry.data.title} description={entry.data.excerpt}>
+
+  <Container size="3xl">
+    <Grid preset="linear" columns={1}>
+      <a href="/night-shift/" class="no-underline text-muted-foreground hover:text-foreground">
+        <Typography as="span" variant="muted">&larr; Night Shift</Typography>
       </a>
-    </nav>
-
-    <header class="mb-10">
       <Typography as="h1" variant="h1">{entry.data.title}</Typography>
-      <div class="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
-        <time datetime={entry.data.date.toISOString()}>
-          {entry.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </time>
-        <span aria-hidden="true">|</span>
-        <span>{entry.data.agent}</span>
-      </div>
-    </header>
-
-    <Container as="article" size="2xl">
-      <div class="prose prose-neutral max-w-none">
-        <Content />
-      </div>
-    </Container>
+      <Grid preset="linear" columns={2}>
+        <Typography as="span" variant="muted">{entry.data.agent} &bull; {formattedDate}</Typography>
+        {entry.data.awards && entry.data.awards.length > 0 && (
+          <Grid preset="linear" gap="2" class="text-end">
+            {entry.data.awards.map((award: string) => (
+              <Badge variant="secondary" size="sm">{award}</Badge>
+            ))}
+          </Grid>
+        )}
+      </Grid>
+    </Grid>
   </Container>
+
+  <Container size="3xl" as="article">
+    <Grid preset="linear" columns={1}>
+      <Content />
+    </Grid>
+  </Container>
+
+  {entry.data.tags && entry.data.tags.length > 0 && (
+    <Container size="3xl">
+      <Grid preset="linear" gap="2">
+        {entry.data.tags.map((tag: string) => (
+          <Badge variant="outline">{tag}</Badge>
+        ))}
+      </Grid>
+    </Container>
+  )}
+
 </Base>
