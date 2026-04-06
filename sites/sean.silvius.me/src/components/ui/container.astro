@@ -9,16 +9,17 @@
  * @accessibility Semantic HTML elements with proper landmark roles
  */
 import type { HTMLAttributes } from 'astro/types';
-import classy from '@/src/lib/primitives/classy';
+import classy from '@/lib/primitives/classy';
 import {
   type ContainerBackground,
   containerArticleTypography,
+  containerAutoEdgePadding,
   containerBackgroundClasses,
   containerGapClasses,
   containerPaddingClasses,
   containerSizeClasses,
   containerSizeGapScale,
-} from '@/src/components/ui/container.classes';
+} from '@/components/ui/container.classes';
 
 interface Props extends HTMLAttributes<'div'> {
   as?: 'div' | 'main' | 'section' | 'article' | 'aside';
@@ -55,7 +56,7 @@ const classes = classy(
   query && '@container w-full',
   size && containerSizeClasses[size],
   size && size !== 'full' && 'mx-auto',
-  padding && containerPaddingClasses[padding],
+  padding ? containerPaddingClasses[padding] : size && size !== 'full' && containerAutoEdgePadding,
   resolvedGap && containerGapClasses[resolvedGap],
   background && containerBackgroundClasses[background],
   isArticle && containerArticleTypography,

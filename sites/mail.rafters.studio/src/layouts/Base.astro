@@ -1,0 +1,45 @@
+---
+import { ClientRouter, fade } from 'astro:transitions';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Mail',
+  description = 'Rafters Studio Mail',
+} = Astro.props;
+
+const siteUrl = Astro.site?.href.replace(/\/$/, '') ?? 'https://rafters.studio';
+const fullTitle = title === 'Mail' ? 'Mail | Rafters Studio' : `${title} | Mail | Rafters Studio`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={`${siteUrl}${Astro.url.pathname}`} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={`${siteUrl}${Astro.url.pathname}`} />
+    <ClientRouter />
+  </head>
+  <body class="bg-background text-foreground">
+
+    <main transition:animate={fade({ duration: '0.15s' })}>
+      <slot />
+    </main>
+
+  </body>
+</html>
+
+<style>
+  @import '../styles/global.css';
+</style>

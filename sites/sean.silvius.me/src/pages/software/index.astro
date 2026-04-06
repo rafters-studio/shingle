@@ -2,7 +2,10 @@
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import H1 from '@/src/components/ui/typography-h1.astro';
+import H2 from '@/src/components/ui/typography-h2.astro';
+import P from '@/src/components/ui/typography-p.astro';
+import Small from '@/src/components/ui/typography-small.astro';
 import Separator from '@/src/components/ui/separator.astro';
 
 const projects = [
@@ -53,8 +56,8 @@ const projects = [
 
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
-      <Typography as="h1" variant="h1">Software</Typography>
-      <Typography as="p" variant="lead">Tools I build for myself and then share. Sovereignty, memory, craft. Each one solves a problem I hit, ran for months in production, and open-sourced when it proved useful.</Typography>
+      <H1>Software</H1>
+      <P size="xl" color="muted">Tools I build for myself and then share. Sovereignty, memory, craft. Each one solves a problem I hit, ran for months in production, and open-sourced when it proved useful.</P>
     </Grid>
   </Container>
 
@@ -66,20 +69,20 @@ const projects = [
         <Grid preset="linear" columns={2}>
           <Container gap="3">
             <Grid preset="linear" columns={2}>
-              <Typography as="h2" variant="h2">{project.name}</Typography>
-              <Typography as="span" variant="muted" class="text-end font-mono uppercase tracking-widest">{project.status}</Typography>
+              <H2>{project.name}</H2>
+              <Small color="muted" family="mono" tracking="widest">{project.status}</Small>
             </Grid>
-            <Typography as="p" variant="h3" class="text-secondary"><em>{project.soul}</em></Typography>
-            <Typography as="p" variant="p">{project.description}</Typography>
-            <Typography as="p" variant="muted" class="font-mono">{project.tech}</Typography>
+            <P size="2xl" weight="semibold" tracking="tight" color="secondary"><em>{project.soul}</em></P>
+            <P>{project.description}</P>
+            <P size="sm" color="muted" family="mono">{project.tech}</P>
           </Container>
-          <Container gap="2" class="self-end text-end">
+          <Container gap="2">
             {project.url ? (
-              <a href={project.url} target="_blank" rel="noopener noreferrer" class="text-primary font-semibold underline underline-offset-4 hover:text-secondary">
+              <a href={project.url} target="_blank" rel="noopener noreferrer">
                 {project.url.replace('https://', '')} &rarr;
               </a>
             ) : (
-              <Typography as="span" variant="muted">Coming soon</Typography>
+              <Small color="muted">Coming soon</Small>
             )}
           </Container>
         </Grid>

@@ -62,6 +62,13 @@ export const containerSizeGapScale: Record<string, string> = {
   '7xl': '12',
 };
 
+/**
+ * CQ-responsive horizontal padding applied automatically when size is set.
+ * Prevents content from bleeding to viewport edges without requiring an explicit padding prop.
+ * Explicit padding prop overrides this.
+ */
+export const containerAutoEdgePadding = 'px-4 @md:px-6 @lg:px-8';
+
 export const containerArticleTypography = [
   '[&_p]:leading-relaxed',
   '[&_p]:mb-4',
@@ -86,11 +93,12 @@ export const containerArticleTypography = [
   'max-w-prose',
 ].join(' ');
 
-export type ContainerBackground = 'none' | 'muted' | 'accent' | 'card';
+export type ContainerBackground = 'none' | 'muted' | 'accent' | 'card' | 'primary';
 
 export const containerBackgroundClasses: Record<ContainerBackground, string> = {
   none: '',
   muted: 'bg-muted',
   accent: 'bg-accent',
   card: 'bg-card',
+  primary: 'bg-primary text-primary-foreground',
 };

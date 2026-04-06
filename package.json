@@ -11,5 +11,8 @@
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm -r --if-present test:e2e",
     "preflight": "pnpm lint && pnpm typecheck && pnpm build && pnpm test"
+  },
+  "dependencies": {
+    "react": "19.2.0"
   }
 }

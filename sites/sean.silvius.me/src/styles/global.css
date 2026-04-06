@@ -2,6 +2,7 @@
 @import "../../.rafters/output/rafters.css";
 
 @source "../components/ui/*.classes.ts";
+@source inline("font-serif font-heading font-mono");
 
 @font-face {
   font-family: 'Arvo';

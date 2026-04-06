@@ -1,7 +1,4 @@
 ---
-import Container from '@/src/components/ui/container.astro';
-import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
 import Button from '@/src/components/ui/button.astro';
 
 const currentPath = Astro.url.pathname;
@@ -16,7 +13,7 @@ const navLinks = [
 <header id="topbar" class="topbar" transition:persist>
   <nav class="topbar-nav">
     <a href="/" class="no-underline topbar-name">
-      <Typography as="span" variant="large" class="uppercase tracking-tight font-bold text-foreground">sean.silvius.me</Typography>
+      <span class="text-lg font-semibold uppercase tracking-tight text-foreground">sean.silvius.me</span>
     </a>
     <div class="topbar-links">
       {navLinks.map((link) => {

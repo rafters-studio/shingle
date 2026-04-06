@@ -2,7 +2,11 @@
 import { getCollection } from 'astro:content';
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import H1 from '@/src/components/ui/typography-h1.astro';
+import H2 from '@/src/components/ui/typography-h2.astro';
+import P from '@/src/components/ui/typography-p.astro';
+import Small from '@/src/components/ui/typography-small.astro';
 import Card from '@/src/components/ui/card.astro';
 
 const stories = (await getCollection('stories'))
@@ -11,37 +15,34 @@ const stories = (await getCollection('stories'))
 ---
 
 <Base title="Stories - Sean Silvius" description="Fiction, campaigns, and narrative experiments.">
-  <Container as="main" size="3xl" padding="6">
-    <Typography as="h1" variant="h1">Stories</Typography>
-    <Typography as="p" variant="lead" class="mt-2">
-      Fiction, campaigns, and narrative experiments.
-    </Typography>
+  <Container as="main" size="3xl">
+    <Grid preset="linear" columns={1}>
+      <H1>Stories</H1>
+      <P size="xl" color="muted">Fiction, campaigns, and narrative experiments.</P>
+    </Grid>
 
-    <div class="mt-12 flex flex-col gap-6">
+    <Grid preset="linear" columns={1} gap="6">
       {stories.map((story) => (
-        <a href={`/stories/${story.id}/`} class="no-underline">
+        <a href={`/stories/${story.id}/`}>
           <Card as="article" interactive>
-            <div class="p-6">
-              <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <Container padding="6" gap="2">
+              <Small color="muted">
                 <time datetime={story.data.date.toISOString()}>
                   {story.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </time>
                 {story.data.campaign && (
-                  <>
-                    <span aria-hidden="true">|</span>
-                    <span>{story.data.campaign}</span>
-                  </>
+                  <> | {story.data.campaign}</>
                 )}
                 {story.data.session && (
-                  <span class="text-muted-foreground">Session {story.data.session}</span>
+                  <> Session {story.data.session}</>
                 )}
-              </div>
-              <Typography as="h2" variant="h3" class="mt-2">{story.data.title}</Typography>
-              <Typography as="p" variant="muted" class="mt-2">{story.data.excerpt}</Typography>
-            </div>
+              </Small>
+              <H2 size="2xl">{story.data.title}</H2>
+              <P size="sm" color="muted">{story.data.excerpt}</P>
+            </Container>
           </Card>
         </a>
       ))}
-    </div>
+    </Grid>
   </Container>
 </Base>

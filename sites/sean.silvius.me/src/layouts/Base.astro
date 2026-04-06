@@ -2,7 +2,8 @@
 import { ClientRouter, fade } from 'astro:transitions';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import H3 from '@/src/components/ui/typography-h3.astro';
+import P from '@/src/components/ui/typography-p.astro';
 import Separator from '@/src/components/ui/separator.astro';
 import Topbar from '@/src/components/Topbar.astro';
 
@@ -80,7 +81,7 @@ const footerColumns = [
         <Grid preset="linear" columns={3} gap="8">
           {footerColumns.map((col) => (
             <Container gap="3">
-              <Typography as="h3" variant="h4" class="text-secondary">{col.heading}</Typography>
+              <H3 size="xl" color="secondary">{col.heading}</H3>
               <Container gap="2">
                 {col.links.map((link) => (
                   <a
@@ -97,8 +98,8 @@ const footerColumns = [
         </Grid>
         <Separator class="bg-primary-foreground/20" />
         <Grid preset="linear" columns={2}>
-          <Typography as="p" variant="muted" class="text-primary-foreground/60">&copy; 2026 Sean Silvius. All rights reserved.</Typography>
-          <Typography as="p" variant="muted" class="text-primary-foreground/60 text-end">Built with love in the PNW <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline text-success"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M16 14v.2A3 3 0 0 1 14.9 20H11a3 3 0 0 1-1-5.8V14a3 3 0 0 1 6 0"/></svg></Typography>
+          <P size="sm" color="primary-foreground">&copy; 2026 Sean Silvius. All rights reserved.</P>
+          <P size="sm" color="primary-foreground">Built with love in the PNW <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline text-success"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M16 14v.2A3 3 0 0 1 14.9 20H11a3 3 0 0 1-1-5.8V14a3 3 0 0 1 6 0"/></svg></P>
         </Grid>
       </Container>
     </footer>

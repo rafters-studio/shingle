@@ -5,7 +5,11 @@ import { getCollection } from 'astro:content';
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import H1 from '@/src/components/ui/typography-h1.astro';
+import H2 from '@/src/components/ui/typography-h2.astro';
+import H3 from '@/src/components/ui/typography-h3.astro';
+import P from '@/src/components/ui/typography-p.astro';
+import Small from '@/src/components/ui/typography-small.astro';
 import Badge from '@/src/components/ui/badge.astro';
 import Separator from '@/src/components/ui/separator.astro';
 import { isPublicEntry } from '@/src/lib/night-shift';
@@ -26,24 +30,24 @@ const grouped = sorted.reduce<Record<string, typeof sorted>>((acc, entry) => {
 
   <Container size="3xl">
     <Grid preset="linear" columns={1}>
-      <Typography as="h1" variant="h1">Night Shift</Typography>
-      <Typography as="p" variant="lead">What happens when you tell AI agents to dream. Musings, explorations, and experiments from autonomous night sessions.</Typography>
+      <H1>Night Shift</H1>
+      <P size="xl" color="muted">What happens when you tell AI agents to dream. Musings, explorations, and experiments from autonomous night sessions.</P>
     </Grid>
   </Container>
 
   <Container size="3xl">
     {Object.entries(grouped).map(([date, entries]) => (
       <Container gap="4">
-        <Typography as="h2" variant="muted" class="uppercase tracking-widest">{date}</Typography>
+        <H2 size="sm" color="muted" weight="medium" tracking="widest">{date}</H2>
         <Container gap="3">
           {entries.map((entry) => (
-            <a href={`/night-shift/${entry.id}/`} class="no-underline block border-b border-border">
+            <a href={`/night-shift/${entry.id}/`}>
               <Container gap="1">
                 <Grid preset="linear" columns={2}>
-                  <Typography as="h3" variant="h4">{entry.data.title}</Typography>
-                  <Typography as="span" variant="muted" class="text-end">{entry.data.agent}</Typography>
+                  <H3 size="xl">{entry.data.title}</H3>
+                  <Small color="muted">{entry.data.agent}</Small>
                 </Grid>
-                <Typography as="p" variant="muted">{entry.data.excerpt}</Typography>
+                <P size="sm" color="muted">{entry.data.excerpt}</P>
                 {entry.data.awards && entry.data.awards.length > 0 && (
                   <Grid preset="linear" gap="2">
                     {entry.data.awards.map((award: string) => (

@@ -2,7 +2,7 @@
   "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "color",
   "version": "1.0.0",
-  "generatedAt": "2026-04-06T06:41:05.508Z",
+  "generatedAt": "2026-04-06T07:04:07.010Z",
   "tokens": [
     {
       "name": "neutral-50",
@@ -2753,15 +2753,15 @@
         "hover-states",
         "subtle-borders"
       ],
+      "userOverride": {
+        "previousValue": "oklch(0.839 0.12 270)",
+        "reason": "Match live site border color. Subtle navy-tinted border instead of stronger violet."
+      },
       "progressionSystem": "custom",
       "scalePosition": 2,
       "containerQueryAware": true,
       "description": "silver-true-violet color at 200 position (OKLCH L=0.839)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "userOverride": {
-        "previousValue": "oklch(0.839 0.12 270)",
-        "reason": "Match live site border color. Subtle navy-tinted border instead of stronger violet."
-      }
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-300",
@@ -2835,7 +2835,7 @@
     },
     {
       "name": "silver-true-violet-700",
-      "value": "oklch(0.425 0.12 270)",
+      "value": "oklch(0.379 0.146 265.5)",
       "category": "color",
       "namespace": "color",
       "semanticMeaning": "silver-true-violet shade at 700 level - dark foreground range",
@@ -2848,7 +2848,11 @@
       "scalePosition": 7,
       "containerQueryAware": true,
       "description": "silver-true-violet color at 700 position (OKLCH L=0.425)",
-      "generatedAt": "2026-03-29T04:05:15.694Z"
+      "generatedAt": "2026-03-29T04:05:15.694Z",
+      "userOverride": {
+        "previousValue": "oklch(0.425 0.12 270)",
+        "reason": "Match live site hero heading color (Tailwind blue-900). The hero uses a brighter, more saturated navy than the primary background color."
+      }
     },
     {
       "name": "silver-true-violet-800",

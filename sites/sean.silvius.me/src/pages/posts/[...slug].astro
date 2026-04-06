@@ -5,7 +5,9 @@ import { getCollection, render } from 'astro:content';
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import H1 from '@/src/components/ui/typography-h1.astro';
+import P from '@/src/components/ui/typography-p.astro';
+import Small from '@/src/components/ui/typography-small.astro';
 import Badge from '@/src/components/ui/badge.astro';
 import readingTime from 'reading-time';
 
@@ -32,17 +34,17 @@ const dateIso = post.data.date.toISOString();
 <Base title={post.data.title} description={post.data.excerpt}>
 
   <Container size="5xl">
-    <a href="/posts/" class="no-underline text-muted-foreground hover:text-foreground transition-colors duration-fast">
-      <Typography as="span" variant="muted">&larr; All posts</Typography>
+    <a href="/posts/">
+      <Small color="muted">&larr; All posts</Small>
     </a>
   </Container>
 
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
-      <Typography as="span" variant="small" class="uppercase tracking-widest text-muted-foreground">{post.data.title}</Typography>
-      <Typography as="span" variant="muted">
+      <Small tracking="widest" color="muted">{post.data.title}</Small>
+      <Small color="muted">
         <time datetime={dateIso}>{formattedDate}</time> &bull; {rt.text}
-      </Typography>
+      </Small>
       {post.data.tags && post.data.tags.length > 0 && (
         <Grid preset="linear" columns={6} gap="2">
           {post.data.tags.map((tag: string) => (
@@ -54,14 +56,13 @@ const dateIso = post.data.date.toISOString();
   </Container>
 
   <Container size="5xl">
-    <Typography as="h1" variant="h1" class="animate-fade-in duration-normal">{post.data.excerpt}</Typography>
+    <H1>{post.data.excerpt}</H1>
   </Container>
 
   <Container size="5xl">
     <img
       src={`/images/${post.id}.png`}
       alt={`Image for ${post.data.title}`}
-      class="w-full object-cover shadow-md"
       loading="eager"
     />
   </Container>

@@ -229,7 +229,7 @@ export const tokens = {
     /** silver-true-violet shade at 600 level - mid-tone for borders and secondary text */
     'silver-true-violet-600': 'oklch(0.55 0.12 270)',
     /** silver-true-violet shade at 700 level - dark foreground range */
-    'silver-true-violet-700': 'oklch(0.425 0.12 270)',
+    'silver-true-violet-700': 'oklch(0.379 0.146 265.5)',
     /** silver-true-violet shade at 800 level - dark foreground range */
     'silver-true-violet-800': 'oklch(0.3 0.12 270)',
     /** silver-true-violet shade at 900 level - dark foreground range */
@@ -487,19 +487,19 @@ export const tokens = {
     /** No border radius - sharp corners */
     'radius-none': '0',
     /** Small radius for subtle rounding */
-    'radius-sm': '0.31rem',
+    'radius-sm': '0',
     /** Default radius - primary UI elements */
-    'radius': '0.38rem',
+    'radius': '0',
     /** Medium radius for containers */
-    'radius-md': '0.45rem',
+    'radius-md': '0',
     /** Large radius for prominent containers */
-    'radius-lg': '0.54rem',
+    'radius-lg': '0',
     /** Extra large radius for emphasized elements */
-    'radius-xl': '0.65rem',
+    'radius-xl': '0',
     /** Maximum meaningful radius */
-    'radius-2xl': '0.78rem',
+    'radius-2xl': '0',
     /** Very large radius for special cases */
-    'radius-3xl': '0.93rem',
+    'radius-3xl': '0',
     /** Fully rounded - circles and pills */
     'radius-full': '9999px',
   },

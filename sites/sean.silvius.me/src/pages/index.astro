@@ -5,7 +5,11 @@ import { getCollection } from 'astro:content';
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import H1 from '@/src/components/ui/typography-h1.astro';
+import H2 from '@/src/components/ui/typography-h2.astro';
+import H3 from '@/src/components/ui/typography-h3.astro';
+import P from '@/src/components/ui/typography-p.astro';
+import Small from '@/src/components/ui/typography-small.astro';
 import Card from '@/src/components/ui/card.astro';
 import Button from '@/src/components/ui/button.astro';
 import readingTime from 'reading-time';
@@ -22,58 +26,51 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
 
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
-      <Typography as="h1" size="6xl" weight="semibold" family="serif" line="none" class="text-center text-primary @lg:text-7xl animate-fade-in duration-normal"
-        >Hi. I build complex things in a simple manner. With bits and bytes, with wood.</Typography>
-      <Typography as="p" variant="lead" weight="medium" class="animate-fade-in duration-slow delay-short"
-        >I log the things that have interested me, hopefully someone will find some of what I've
+      <H1 size="6xl" family="serif" weight="semibold" line="none">Hi. I build complex things in a simple manner. With bits and bytes, with wood.</H1>
+      <P size="xl" color="muted" weight="medium">I log the things that have interested me, hopefully someone will find some of what I've
         learned useful in their own endeavors. I tend to make mistakes and adjust just as any
-        student of life does. Those mistakes are really the important things.</Typography>
+        student of life does. Those mistakes are really the important things.</P>
     </Grid>
   </Container>
 
-  <section class="bg-muted">
-    <Container size="5xl">
-      <Grid preset="linear" columns={1}>
-        <Typography as="h2" variant="h2" class="uppercase">Featured Articles</Typography>
-      </Grid>
-      <Grid preset="linear" columns={3} gap="6">
-        {displayPosts.map((post) => {
-          const slug = post.data.slug || post.id;
-          const rt = readingTime(post.body || '');
-          return (
-            <Card as="article" interactive class="overflow-hidden h-full transition-all duration-normal hover:shadow-2xl hover:-translate-y-1 hover:-translate-x-1">
-              <a href={`/posts/${slug}/`} class="no-underline group">
-                <div class="aspect-video overflow-hidden">
-                  <img
-                    src={`/images/${slug}.png`}
-                    alt={`Image for ${post.data.title}`}
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-                <Container gap="1" class="bg-primary @sm:p-2 @lg:p-4">
-                  <Typography as="h3" size="xl" weight="bold" class="!text-accent">{post.data.title}</Typography>
-                  <Typography as="span" size="sm" class="!text-primary-foreground/60">{post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}</Typography>
-                </Container>
-                <Container gap="2" class="@sm:p-2 @lg:p-4">
-                  <Typography as="p">{post.data.excerpt}</Typography>
-                </Container>
-              </a>
-              <Container class="mt-auto @sm:p-2 @lg:p-4">
-                <a href={`/posts/${slug}/`} class="no-underline">
-                  <Button class="uppercase font-bold tracking-tight">Read More</Button>
-                </a>
+  <Container size="5xl" background="muted">
+    <Grid preset="linear" columns={1}>
+      <H2>Featured Articles</H2>
+    </Grid>
+    <Grid preset="linear" columns={3} gap="6">
+      {displayPosts.map((post) => {
+        const slug = post.data.slug || post.id;
+        const rt = readingTime(post.body || '');
+        return (
+          <Card as="article" interactive>
+            <a href={`/posts/${slug}/`}>
+              <img
+                src={`/images/${slug}.png`}
+                alt={`Image for ${post.data.title}`}
+                loading="lazy"
+              />
+              <Container gap="1" background="primary">
+                <H3 size="xl" weight="bold">{post.data.title}</H3>
+                <Small color="muted">{post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}</Small>
               </Container>
-            </Card>
-          );
-        })}
-      </Grid>
-      <Container class="text-end">
-        <a href="/posts/" class="no-underline">
-          <Button variant="outline" class="uppercase font-bold tracking-tight transition-all duration-normal hover:bg-secondary hover:text-secondary-foreground">More Articles &rsaquo;</Button>
-        </a>
-      </Container>
+              <Container gap="2">
+                <P>{post.data.excerpt}</P>
+              </Container>
+            </a>
+            <Container>
+              <a href={`/posts/${slug}/`}>
+                <Button>Read More</Button>
+              </a>
+            </Container>
+          </Card>
+        );
+      })}
+    </Grid>
+    <Container>
+      <a href="/posts/">
+        <Button variant="outline">More Articles &rsaquo;</Button>
+      </a>
     </Container>
-  </section>
+  </Container>
 
 </Base>

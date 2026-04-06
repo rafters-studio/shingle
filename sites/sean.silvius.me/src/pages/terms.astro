@@ -3,43 +3,46 @@ export const prerender = true;
 
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import H1 from '@/src/components/ui/typography-h1.astro';
+import H2 from '@/src/components/ui/typography-h2.astro';
+import H3 from '@/src/components/ui/typography-h3.astro';
+import P from '@/src/components/ui/typography-p.astro';
 ---
 
 <Base title="Terms of Service" description="Terms of service for sean.silvius.me">
   <Container size="3xl" as="article">
-    <Typography as="h1" variant="h1">Terms of Service</Typography>
-    <Typography as="p" variant="muted">Last updated: May 10, 2025</Typography>
+    <H1>Terms of Service</H1>
+    <P size="sm" color="muted">Last updated: May 10, 2025</P>
 
-    <Typography as="h2" variant="h2">Introduction</Typography>
-    <Typography as="p" variant="p">Welcome to sean.silvius.me. By accessing this website, you agree to comply with and be bound by these Terms of Service. If you do not agree with any part of these terms, you may not access the website.</Typography>
+    <H2>Introduction</H2>
+    <P>Welcome to sean.silvius.me. By accessing this website, you agree to comply with and be bound by these Terms of Service. If you do not agree with any part of these terms, you may not access the website.</P>
 
-    <Typography as="h2" variant="h2">Intellectual Property</Typography>
-    <Typography as="p" variant="p">All content on this website, including but not limited to text, articles, graphics, logos, images, and code, is the property of Sean Silvius and is protected by copyright and other intellectual property laws.</Typography>
+    <H2>Intellectual Property</H2>
+    <P>All content on this website, including but not limited to text, articles, graphics, logos, images, and code, is the property of Sean Silvius and is protected by copyright and other intellectual property laws.</P>
 
-    <Typography as="h3" variant="h3">Content Usage</Typography>
-    <Typography as="p" variant="p">You may not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, store, or transmit any of the material on this website without express written permission.</Typography>
+    <H3>Content Usage</H3>
+    <P>You may not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, store, or transmit any of the material on this website without express written permission.</P>
 
-    <Typography as="h3" variant="h3">About The Images</Typography>
-    <Typography as="p" variant="p">The images on this website are a mix of AI-generated content and hand-drawn illustrations. The hand-drawn illustrations represent personal creative work and practice of craft. Drawing, like many skills, requires consistent practice to maintain proficiency.</Typography>
-    <Typography as="p" variant="p">All images, regardless of their creation method, may not be used without permission. Unauthorized use constitutes copyright infringement and may result in legal action.</Typography>
+    <H3>About The Images</H3>
+    <P>The images on this website are a mix of AI-generated content and hand-drawn illustrations. The hand-drawn illustrations represent personal creative work and practice of craft. Drawing, like many skills, requires consistent practice to maintain proficiency.</P>
+    <P>All images, regardless of their creation method, may not be used without permission. Unauthorized use constitutes copyright infringement and may result in legal action.</P>
 
-    <Typography as="h2" variant="h2">User Contributions</Typography>
-    <Typography as="p" variant="p">This website does not currently allow user-contributed content. If this changes in the future, additional terms will be added to cover such contributions.</Typography>
+    <H2>User Contributions</H2>
+    <P>This website does not currently allow user-contributed content. If this changes in the future, additional terms will be added to cover such contributions.</P>
 
-    <Typography as="h2" variant="h2">Links to Other Websites</Typography>
-    <Typography as="p" variant="p">This website may contain links to third-party websites that are not owned or controlled by Sean Silvius. I have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party websites or services.</Typography>
+    <H2>Links to Other Websites</H2>
+    <P>This website may contain links to third-party websites that are not owned or controlled by Sean Silvius. I have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party websites or services.</P>
 
-    <Typography as="h2" variant="h2">Disclaimer</Typography>
-    <Typography as="p" variant="p">The information provided on this website is for general informational purposes only. I make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the website.</Typography>
+    <H2>Disclaimer</H2>
+    <P>The information provided on this website is for general informational purposes only. I make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the website.</P>
 
-    <Typography as="h2" variant="h2">Limitation of Liability</Typography>
-    <Typography as="p" variant="p">In no event shall Sean Silvius be liable for any indirect, punitive, incidental, special, consequential damages, or any damages whatsoever arising out of or connected with the use or misuse of this website or its content.</Typography>
+    <H2>Limitation of Liability</H2>
+    <P>In no event shall Sean Silvius be liable for any indirect, punitive, incidental, special, consequential damages, or any damages whatsoever arising out of or connected with the use or misuse of this website or its content.</P>
 
-    <Typography as="h2" variant="h2">Changes to These Terms</Typography>
-    <Typography as="p" variant="p">I reserve the right to modify these terms of service at any time. Changes will be effective immediately upon posting to the website. Your continued use of the website after any modifications constitutes your acceptance of the revised terms.</Typography>
+    <H2>Changes to These Terms</H2>
+    <P>I reserve the right to modify these terms of service at any time. Changes will be effective immediately upon posting to the website. Your continued use of the website after any modifications constitutes your acceptance of the revised terms.</P>
 
-    <Typography as="h2" variant="h2">Contact Information</Typography>
-    <Typography as="p" variant="p">If you have any questions about these Terms of Service, please contact me through the <a href="/connect/" class="text-primary underline underline-offset-4">Connect page</a> on this website.</Typography>
+    <H2>Contact Information</H2>
+    <P>If you have any questions about these Terms of Service, please contact me through the <a href="/connect/" >Connect page</a> on this website.</P>
   </Container>
 </Base>

@@ -4,26 +4,28 @@ export const prerender = true;
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import H1 from '@/src/components/ui/typography-h1.astro';
+import H2 from '@/src/components/ui/typography-h2.astro';
+import P from '@/src/components/ui/typography-p.astro';
 ---
 
 <Base title="Connect" description="Get in touch with Sean Silvius.">
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
-      <Typography as="h1" variant="h1">Connect</Typography>
-      <Typography as="p" variant="lead">Want to chat? Reach out on any of these platforms.</Typography>
+      <H1>Connect</H1>
+      <P size="xl" color="muted">Want to chat? Reach out on any of these platforms.</P>
     </Grid>
   </Container>
 
   <Container size="5xl">
     <Grid preset="linear" columns={2} gap="6">
       <Container gap="2">
-        <Typography as="h2" variant="h3">GitHub</Typography>
-        <Typography as="p" variant="p"><a href="https://github.com/ssilvius" target="_blank" rel="noopener noreferrer" class="text-primary underline underline-offset-4">github.com/ssilvius</a></Typography>
+        <H2 size="2xl">GitHub</H2>
+        <P><a href="https://github.com/ssilvius" target="_blank" rel="noopener noreferrer">github.com/ssilvius</a></P>
       </Container>
       <Container gap="2">
-        <Typography as="h2" variant="h3">LinkedIn</Typography>
-        <Typography as="p" variant="p"><a href="https://www.linkedin.com/in/seansilvius/" target="_blank" rel="noopener noreferrer" class="text-primary underline underline-offset-4">linkedin.com/in/seansilvius</a></Typography>
+        <H2 size="2xl">LinkedIn</H2>
+        <P><a href="https://www.linkedin.com/in/seansilvius/" target="_blank" rel="noopener noreferrer">linkedin.com/in/seansilvius</a></P>
       </Container>
     </Grid>
   </Container>
