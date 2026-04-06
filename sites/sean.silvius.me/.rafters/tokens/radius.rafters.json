@@ -2,11 +2,11 @@
   "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "radius",
   "version": "1.0.0",
-  "generatedAt": "2026-04-05T22:08:38.505Z",
+  "generatedAt": "2026-04-06T06:39:10.732Z",
   "tokens": [
     {
       "name": "radius-base",
-      "value": "0.375rem",
+      "value": "0",
       "category": "radius",
       "namespace": "radius",
       "semanticMeaning": "Base border radius - all other radii derive from this value",
@@ -20,6 +20,10 @@
         "never": [
           "Change without understanding scale impact"
         ]
+      },
+      "userOverride": {
+        "previousValue": "0.375rem",
+        "reason": "sean.silvius.me uses square corners on all interactive elements. No border radius on buttons, cards, or inputs. This matches the editorial brutalist aesthetic of the live site."
       },
       "progressionSystem": "minor-third",
       "containerQueryAware": false,

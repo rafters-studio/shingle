@@ -4,10 +4,10 @@
  */
 
 export const typographyClasses = {
-  h1: 'scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl text-foreground font-serif',
-  h2: 'scroll-m-20 text-3xl font-semibold tracking-tight text-foreground font-serif',
-  h3: 'scroll-m-20 text-2xl font-semibold tracking-tight text-foreground font-serif',
-  h4: 'scroll-m-20 text-xl font-semibold tracking-tight text-foreground font-serif',
+  h1: 'scroll-m-20 text-4xl font-bold tracking-tight @lg:text-5xl text-foreground',
+  h2: 'scroll-m-20 text-3xl font-semibold tracking-tight text-foreground',
+  h3: 'scroll-m-20 text-2xl font-semibold tracking-tight text-foreground',
+  h4: 'scroll-m-20 text-xl font-semibold tracking-tight text-foreground',
   p: 'leading-7 text-foreground',
   lead: 'text-xl text-muted-foreground',
   large: 'text-lg font-semibold text-foreground',

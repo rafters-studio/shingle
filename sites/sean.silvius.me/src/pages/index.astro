@@ -22,9 +22,9 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
 
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
-      <Typography as="h1" variant="h1" class="animate-fade-in duration-normal"
+      <Typography as="h1" variant="h1" class="text-center text-primary font-semibold font-serif text-6xl @lg:text-7xl leading-none animate-fade-in duration-normal"
         >Hi. I build complex things in a simple manner. With bits and bytes, with wood.</Typography>
-      <Typography as="p" variant="lead" class="animate-fade-in duration-slow delay-short"
+      <Typography as="p" variant="lead" class="text-muted-foreground font-medium animate-fade-in duration-slow delay-short"
         >I log the things that have interested me, hopefully someone will find some of what I've
         learned useful in their own endeavors. I tend to make mistakes and adjust just as any
         student of life does. Those mistakes are really the important things.</Typography>
@@ -53,7 +53,7 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
                 </div>
                 <div class="bg-primary text-primary-foreground">
                   <Container gap="1">
-                    <Typography as="h3" variant="h4" class="text-accent">{post.data.title}</Typography>
+                    <Typography as="h3" variant="h4" class="!text-accent">{post.data.title}</Typography>
                     <Typography as="span" variant="muted" class="text-primary-foreground/60">
                       {post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}
                     </Typography>
