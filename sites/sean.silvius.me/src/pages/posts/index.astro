@@ -11,6 +11,7 @@ import H3 from '@/src/components/ui/typography-h3.astro';
 import P from '@/src/components/ui/typography-p.astro';
 import Small from '@/src/components/ui/typography-small.astro';
 import Card from '@/src/components/ui/card.astro';
+import Image from '@/src/components/ui/image.astro';
 import Button from '@/src/components/ui/button.astro';
 import readingTime from 'reading-time';
 
@@ -50,10 +51,10 @@ const grouped = sortedPosts.reduce<Record<string, typeof sortedPosts>>((acc, pos
           return (
             <Card as="article" interactive>
               <a href={`/posts/${slug}/`}>
-                <img
+                <Image
                   src={`/images/${slug}.png`}
                   alt={`Image for ${post.data.title}`}
-                  loading="lazy"
+                  size="full"
                 />
                 <Container gap="1" background="primary">
                   <H3 size="xl" weight="bold" color="accent">{post.data.title}</H3>

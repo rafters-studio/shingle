@@ -8,6 +8,7 @@ import Grid from '@/src/components/ui/grid.astro';
 import H1 from '@/src/components/ui/typography-h1.astro';
 import P from '@/src/components/ui/typography-p.astro';
 import Small from '@/src/components/ui/typography-small.astro';
+import Image from '@/src/components/ui/image.astro';
 import Badge from '@/src/components/ui/badge.astro';
 import readingTime from 'reading-time';
 
@@ -60,10 +61,10 @@ const dateIso = post.data.date.toISOString();
   </Container>
 
   <Container size="5xl">
-    <img
+    <Image
       src={`/images/${post.id}.png`}
       alt={`Image for ${post.data.title}`}
-      loading="eager"
+      size="full"
     />
   </Container>
 
