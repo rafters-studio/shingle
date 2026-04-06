@@ -1,0 +1,91 @@
+---
+import Base from '@/src/layouts/Base.astro';
+import Container from '@/src/components/ui/container.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Separator from '@/src/components/ui/separator.astro';
+
+const projects = [
+  {
+    name: 'Legion',
+    soul: 'Your agents get better every day.',
+    description: 'Self-hosted AI agent orchestrator. Persistent memory, team coordination, autonomous work. Agents reflect on what they learned, consult each other when stuck, and wake up when signaled. Everything runs on your machines.',
+    url: 'https://runlegion.dev',
+    status: 'shipped',
+    tech: 'Rust, SQLite, Tantivy, Claude Code plugin',
+  },
+  {
+    name: 'smugglr',
+    soul: 'Your data leaves when you leave.',
+    description: 'Content-hashed delta sync for SQLite, wherever it runs. One CLI that moves data between D1, Turso, rqlite, local SQLite, and S3 relay. Compares SHA256 of actual row data. If nothing changed, nothing moves.',
+    url: 'https://smugglr.dev',
+    status: 'shipped',
+    tech: 'Rust, WASM, SQLite, S3',
+  },
+  {
+    name: 'Rafters',
+    soul: 'The designer already made the decision.',
+    description: 'Design system with MCP intelligence. Tokens carry the designer\'s judgment. Components are pre-styled. The MCP server answers questions about color, spacing, pattern, and cognitive load before the agent writes a line of markup.',
+    url: 'https://rafters.studio',
+    status: 'shipped',
+    tech: 'TypeScript, OKLCH, MCP, Tailwind v4',
+  },
+  {
+    name: 'Eavesdrop',
+    soul: 'Listen to what practitioners say when they think the tools aren\'t listening.',
+    description: 'Discourse crawler and corpus analysis engine. Crawls Reddit, HN, Discord for practitioner conversations. Clusters by theme. Surfaces corrections, not opinions. The evidence layer for service design decisions.',
+    url: null,
+    status: 'in progress',
+    tech: 'Rust, SQLite, k-means, BM25',
+  },
+  {
+    name: 'Huttspawn',
+    soul: 'Opinionated guides backed by hundreds of hours played.',
+    description: 'SWTOR origin story rankings, class guides, and GSF reference. Community-driven, spoiler-free, updated for current patches.',
+    url: 'https://huttspawn.com',
+    status: 'shipped',
+    tech: 'Astro, Rafters, Cloudflare',
+  },
+];
+---
+
+<Base title="Software" description="What I build. Tools for sovereignty, memory, and craft.">
+
+  <Container size="5xl">
+    <Grid preset="linear" columns={1}>
+      <Typography as="h1" variant="h1">Software</Typography>
+      <Typography as="p" variant="lead">Tools I build for myself and then share. Sovereignty, memory, craft. Each one solves a problem I hit, ran for months in production, and open-sourced when it proved useful.</Typography>
+    </Grid>
+  </Container>
+
+  <Separator />
+
+  {projects.map((project, i) => (
+    <section>
+      <Container size="5xl">
+        <Grid preset="linear" columns={2}>
+          <Container gap="3">
+            <Grid preset="linear" columns={2}>
+              <Typography as="h2" variant="h2">{project.name}</Typography>
+              <Typography as="span" variant="muted" class="text-end font-mono uppercase tracking-widest">{project.status}</Typography>
+            </Grid>
+            <Typography as="p" variant="h3" class="text-secondary"><em>{project.soul}</em></Typography>
+            <Typography as="p" variant="p">{project.description}</Typography>
+            <Typography as="p" variant="muted" class="font-mono">{project.tech}</Typography>
+          </Container>
+          <Container gap="2" class="self-end text-end">
+            {project.url ? (
+              <a href={project.url} target="_blank" rel="noopener noreferrer" class="text-primary font-semibold underline underline-offset-4 hover:text-secondary">
+                {project.url.replace('https://', '')} &rarr;
+              </a>
+            ) : (
+              <Typography as="span" variant="muted">Coming soon</Typography>
+            )}
+          </Container>
+        </Grid>
+      </Container>
+      {i < projects.length - 1 && <Separator />}
+    </section>
+  ))}
+
+</Base>
