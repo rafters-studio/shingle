@@ -93,7 +93,7 @@ export const tokens = {
     /** neutral shade at 950 level - dark foreground range */
     'neutral-950': 'oklch(0.141 0 0)',
     /** Complete neutral color family with 11-position scale */
-    'neutral': 'oklch(0.552 0.000 0.0)',
+    'neutral': 'oklch(0.645 0.010 255.0)',
     /** silver-true-glacier shade at 50 level - light background range */
     'silver-true-glacier-50': 'oklch(0.95 0.036 180)',
     /** silver-true-glacier shade at 100 level - light background range */
@@ -238,6 +238,18 @@ export const tokens = {
     'silver-true-violet-950': 'oklch(0.05 0.072 270)',
     /** Complete silver-true-violet color family with 11-position scale */
     'silver-true-violet': 'oklch(0.645 0.120 270.0)',
+    'legion-deep': '#020810',
+    'legion-ice': '#cce8f4',
+    'legion-cyan': '#00e5ff',
+    'legion-cyan-dim': '#005f6b',
+    'legion-green': '#00ff9d',
+    'legion-amber': '#ffb300',
+    'legion-muted': '#8ab4c8',
+    'legion-panel': '#04111f',
+    'legion-panel-active': '#061a2e',
+    'legion-trace': '#030d18',
+    'legion-slate': '#0a1e35',
+    'tertiary': 'oklch(0.760 0.010 255.0)',
   },
   depth: {
     /** Base layer - document flow elements */
@@ -495,35 +507,35 @@ export const tokens = {
     /** Primary page background color */
     'background': 'var(--color-neutral-50)',
     /** Primary text color */
-    'foreground': 'var(--color-neutral-950)',
+    'foreground': 'var(--color-neutral-900)',
     /** Card and contained surface background */
     'card': 'var(--color-neutral-50)',
     /** Text on card surfaces */
-    'card-foreground': 'var(--color-neutral-950)',
+    'card-foreground': 'var(--color-neutral-900)',
     /** Card hover state background */
-    'card-hover': 'var(--color-neutral-100)',
+    'card-hover': '#061a2e',
     /** Card border color */
-    'card-border': 'var(--color-neutral-200)',
+    'card-border': '#005f6b',
     /** Popover and dropdown background */
     'popover': 'var(--color-neutral-50)',
     /** Text in popovers */
-    'popover-foreground': 'var(--color-neutral-950)',
+    'popover-foreground': 'var(--color-neutral-900)',
     /** Popover border color */
-    'popover-border': 'var(--color-neutral-200)',
+    'popover-border': '#005f6b',
     /** Elevated surface background */
     'surface': 'var(--color-neutral-50)',
     /** Text on surface backgrounds */
-    'surface-foreground': 'var(--color-neutral-950)',
+    'surface-foreground': 'var(--color-neutral-900)',
     /** Surface hover state */
     'surface-hover': 'var(--color-neutral-100)',
     /** Surface active/pressed state */
     'surface-active': 'var(--color-neutral-200)',
     /** Surface border color */
-    'surface-border': 'var(--color-neutral-200)',
+    'surface-border': '#005f6b',
     /** Primary interactive elements - buttons, links, focus states */
-    'primary': 'silver-true-sky-900',
+    'primary': 'oklch(0.341 0.015 255.0)',
     /** Text on primary color backgrounds */
-    'primary-foreground': 'var(--color-neutral-50)',
+    'primary-foreground': 'oklch(0.531 0.023 246.0)',
     /** Primary hover state */
     'primary-hover': 'var(--color-neutral-800)',
     /** Text on primary hover */
@@ -543,9 +555,9 @@ export const tokens = {
     /** Text on subtle primary backgrounds */
     'primary-subtle-foreground': 'var(--color-neutral-900)',
     /** Secondary interactive elements - less prominent actions */
-    'secondary': 'var(--color-neutral-100)',
+    'secondary': 'oklch(0.798 0.080 60.0)',
     /** Text on secondary color backgrounds */
-    'secondary-foreground': 'var(--color-neutral-900)',
+    'secondary-foreground': 'oklch(0.760 0.034 225.0)',
     /** Secondary hover state */
     'secondary-hover': 'var(--color-neutral-200)',
     /** Text on secondary hover */
@@ -573,9 +585,9 @@ export const tokens = {
     /** Muted border color */
     'muted-border': 'var(--color-neutral-200)',
     /** Accent for hover states and highlights */
-    'accent': 'var(--color-neutral-100)',
+    'accent': 'oklch(0.722 0.080 60.0)',
     /** Text on accent backgrounds */
-    'accent-foreground': 'var(--color-neutral-900)',
+    'accent-foreground': 'oklch(0.531 0.023 246.0)',
     /** Accent hover state */
     'accent-hover': 'var(--color-neutral-200)',
     /** Text on accent hover */
@@ -589,9 +601,9 @@ export const tokens = {
     /** Accent focus ring color */
     'accent-ring': 'var(--color-neutral-400)',
     /** Destructive actions - delete, remove, critical warnings */
-    'destructive': 'var(--color-silver-bold-fire-truck-600)',
+    'destructive': 'oklch(0.645 0.220 15.0)',
     /** Text on destructive backgrounds */
-    'destructive-foreground': 'var(--color-neutral-50)',
+    'destructive-foreground': 'oklch(0.531 0.023 246.0)',
     /** Destructive hover state */
     'destructive-hover': 'var(--color-silver-bold-fire-truck-700)',
     /** Text on destructive hover */
@@ -611,9 +623,9 @@ export const tokens = {
     /** Text on subtle destructive backgrounds */
     'destructive-subtle-foreground': 'var(--color-silver-bold-fire-truck-700)',
     /** Success states - confirmations, completions, positive feedback */
-    'success': 'var(--color-silver-true-citrine-600)',
+    'success': 'oklch(0.645 0.180 145.0)',
     /** Text on success backgrounds */
-    'success-foreground': 'var(--color-neutral-50)',
+    'success-foreground': 'oklch(0.531 0.023 246.0)',
     /** Success hover state */
     'success-hover': 'var(--color-silver-true-citrine-700)',
     /** Text on success hover */
@@ -633,9 +645,9 @@ export const tokens = {
     /** Text on subtle success backgrounds */
     'success-subtle-foreground': 'var(--color-silver-true-citrine-700)',
     /** Warning states - caution, potential issues, important notices */
-    'warning': 'var(--color-silver-true-honey-500)',
+    'warning': 'oklch(0.760 0.150 60.0)',
     /** Text on warning backgrounds */
-    'warning-foreground': 'var(--color-neutral-950)',
+    'warning-foreground': 'oklch(0.531 0.023 246.0)',
     /** Warning hover state */
     'warning-hover': 'var(--color-silver-true-honey-600)',
     /** Text on warning hover */
@@ -655,9 +667,9 @@ export const tokens = {
     /** Text on subtle warning backgrounds */
     'warning-subtle-foreground': 'var(--color-silver-true-honey-800)',
     /** Informational states - tips, help, neutral information */
-    'info': 'var(--color-silver-true-sky-600)',
+    'info': 'oklch(0.645 0.150 250.0)',
     /** Text on info backgrounds */
-    'info-foreground': 'var(--color-neutral-50)',
+    'info-foreground': 'oklch(0.531 0.023 246.0)',
     /** Info hover state */
     'info-hover': 'var(--color-silver-true-sky-700)',
     /** Text on info hover */
@@ -697,9 +709,9 @@ export const tokens = {
     /** Text on subtle alert backgrounds */
     'alert-subtle-foreground': 'var(--color-silver-bold-fire-truck-700)',
     /** Highlight for search results, selected text, emphasis */
-    'highlight': 'var(--color-silver-true-violet-200)',
+    'highlight': 'oklch(0.836 0.150 85.0)',
     /** Text on highlight backgrounds */
-    'highlight-foreground': 'var(--color-silver-true-violet-900)',
+    'highlight-foreground': 'oklch(0.531 0.023 246.0)',
     /** Highlight hover state */
     'highlight-hover': 'var(--color-silver-true-violet-300)',
     /** Text on highlight hover */
@@ -719,7 +731,7 @@ export const tokens = {
     /** Input field border color */
     'input': 'var(--color-neutral-200)',
     /** Input text color */
-    'input-foreground': 'var(--color-neutral-950)',
+    'input-foreground': '#cce8f4',
     /** Input hover state */
     'input-hover': 'var(--color-neutral-300)',
     /** Input focus state */
@@ -739,7 +751,7 @@ export const tokens = {
     /** Valid input success text */
     'input-valid-foreground': 'var(--color-silver-true-citrine-700)',
     /** Focus ring color */
-    'ring': 'var(--color-neutral-950)',
+    'ring': 'var(--color-neutral-400)',
     /** Focus ring offset color */
     'ring-offset': 'var(--color-neutral-50)',
     /** Primary focus ring */
@@ -753,7 +765,7 @@ export const tokens = {
     /** Info focus ring */
     'ring-info': 'var(--color-silver-true-sky-600)',
     /** Link color */
-    'link': 'var(--color-silver-true-sky-700)',
+    'link': '#00e5ff',
     /** Link hover color */
     'link-hover': 'var(--color-silver-true-sky-800)',
     /** Link active/pressed color */
@@ -873,11 +885,11 @@ export const tokens = {
     /** Scrollbar track background */
     'scrollbar-track': 'var(--color-neutral-100)',
     /** Code block background */
-    'code': 'var(--color-neutral-100)',
+    'code': '#030d18',
     /** Code text color */
-    'code-foreground': 'var(--color-neutral-900)',
+    'code-foreground': '#00ff9d',
     /** Code block border */
-    'code-border': 'var(--color-neutral-200)',
+    'code-border': '#005f6b',
     /** Badge background */
     'badge': 'var(--color-neutral-100)',
     /** Badge text color */

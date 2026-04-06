@@ -2,7 +2,7 @@
   "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "color",
   "version": "1.0.0",
-  "generatedAt": "2026-03-29T04:05:15.700Z",
+  "generatedAt": "2026-04-05T22:08:38.504Z",
   "tokens": [
     {
       "name": "neutral-50",
@@ -16,11 +16,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 0,
       "progressionSystem": "custom",
+      "scalePosition": 0,
+      "containerQueryAware": true,
       "description": "neutral color at 50 position (OKLCH L=0.985)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-100",
@@ -34,11 +34,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 1,
       "progressionSystem": "custom",
+      "scalePosition": 1,
+      "containerQueryAware": true,
       "description": "neutral color at 100 position (OKLCH L=0.967)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-200",
@@ -51,11 +51,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 2,
       "progressionSystem": "custom",
+      "scalePosition": 2,
+      "containerQueryAware": true,
       "description": "neutral color at 200 position (OKLCH L=0.92)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-300",
@@ -68,11 +68,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 3,
       "progressionSystem": "custom",
+      "scalePosition": 3,
+      "containerQueryAware": true,
       "description": "neutral color at 300 position (OKLCH L=0.869)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-400",
@@ -86,11 +86,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 4,
       "progressionSystem": "custom",
+      "scalePosition": 4,
+      "containerQueryAware": true,
       "description": "neutral color at 400 position (OKLCH L=0.707)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-500",
@@ -104,11 +104,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 5,
       "progressionSystem": "custom",
+      "scalePosition": 5,
+      "containerQueryAware": true,
       "description": "neutral color at 500 position (OKLCH L=0.552)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-600",
@@ -121,11 +121,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 6,
       "progressionSystem": "custom",
+      "scalePosition": 6,
+      "containerQueryAware": true,
       "description": "neutral color at 600 position (OKLCH L=0.442)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-700",
@@ -138,11 +138,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 7,
       "progressionSystem": "custom",
+      "scalePosition": 7,
+      "containerQueryAware": true,
       "description": "neutral color at 700 position (OKLCH L=0.37)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-800",
@@ -156,11 +156,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 8,
       "progressionSystem": "custom",
+      "scalePosition": 8,
+      "containerQueryAware": true,
       "description": "neutral color at 800 position (OKLCH L=0.269)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-900",
@@ -174,11 +174,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 9,
       "progressionSystem": "custom",
+      "scalePosition": 9,
+      "containerQueryAware": true,
       "description": "neutral color at 900 position (OKLCH L=0.2)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral-950",
@@ -192,86 +192,994 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 10,
       "progressionSystem": "custom",
+      "scalePosition": 10,
+      "containerQueryAware": true,
       "description": "neutral color at 950 position (OKLCH L=0.141)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "neutral",
       "value": {
-        "name": "neutral",
+        "name": "balanced-whisper",
         "scale": [
           {
-            "l": 0.985,
-            "c": 0,
-            "h": 0,
+            "l": 0.95,
+            "c": 0.003,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.967,
-            "c": 0,
-            "h": 0,
+            "l": 0.896,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.92,
-            "c": 0,
-            "h": 0,
+            "l": 0.839,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.869,
-            "c": 0,
-            "h": 0,
+            "l": 0.78,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.707,
-            "c": 0,
-            "h": 0,
+            "l": 0.716,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.552,
-            "c": 0,
-            "h": 0,
+            "l": 0.645,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.442,
-            "c": 0,
-            "h": 0,
+            "l": 0.55,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.37,
-            "c": 0,
-            "h": 0,
+            "l": 0.425,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.269,
-            "c": 0,
-            "h": 0,
+            "l": 0.3,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.2,
-            "c": 0,
-            "h": 0,
+            "l": 0.175,
+            "c": 0.01,
+            "h": 255,
             "alpha": 1
           },
           {
-            "l": 0.141,
-            "c": 0,
-            "h": 0,
+            "l": 0.05,
+            "c": 0.006,
+            "h": 255,
             "alpha": 1
           }
         ],
         "token": "neutral",
-        "use": "Foundation neutral palette for backgrounds, borders, text, and UI chrome."
+        "intelligence": {
+          "reasoning": "The OKLCH combination of L=0.5, C=0, H=225 works well due to its balanced and neutral nature. With a lightness of 0.5, this color is mid-toned, neither too bright nor too dark. The chroma of 0 means it has no saturation, making it a shade of gray. The hue of 225 degrees, which falls in the blue range, is effectively neutralized by the zero chroma, resulting in a gray color that doesn't lean too blue or any other color. This balance makes it versatile for various design applications.",
+          "emotionalImpact": "This color, being a neutral gray with a hint of blue undertone (though not strongly influential due to zero chroma), tends to evoke feelings of stability, balance, and impartiality. The lack of saturation makes it non-distracting and easy on the eyes, which can contribute to a sense of calmness. It's a dependable color that doesn't strongly provoke emotions but rather provides a steady background for other design elements.",
+          "culturalContext": "Gray colors, especially those with a mid-tone lightness like L=0.5, are often associated with balance, neutrality, and sophistication across many cultures. The specific hue of 225 degrees, while not strongly influential in this case due to zero chroma, might subtly lean towards cooler, technology-related or professional contexts in Western cultures. However, its neutrality means it is unlikely to carry strong cultural biases or associations, making it suitable for global audiences.",
+          "accessibilityNotes": "With a lightness of 0.5, this color has moderate brightness. According to WCAG 2.1 guidelines for contrast, this color can serve as a background or secondary element. For text or important UI elements, ensure they have sufficient contrast. For normal text, aim for a contrast ratio of at least 4.5:1 with this background. For larger text (18pt or 14pt bold), a contrast ratio of at least 3:1 is recommended. Pairing with black or very dark colors (e.g., OKLCH(0.1, 0, 0)) would meet these standards.",
+          "usageGuidance": "Given its neutral and balanced nature (chroma 0 and lightness 0.5), this color is ideal for use as a background, divider, or secondary element in UI design. It's particularly useful for providing space for content without overpowering it. For interactive elements like buttons, consider adding a hover effect or using a variant with higher chroma to indicate interactivity. This color can also serve as a base for creating a color palette by adding chroma to create more vibrant, engaging colors for highlights or calls to action.",
+          "metadata": {
+            "predictionId": "019b3ed5-a882-782a-90bb-9d7f7fa8eba9",
+            "confidence": 0.95,
+            "uncertaintyBounds": {
+              "lower": 0.85,
+              "upper": 1,
+              "confidenceInterval": 0.95
+            },
+            "qualityScore": 0.8300000000000001,
+            "method": "bootstrap"
+          }
+        },
+        "harmonies": {
+          "complementary": {
+            "l": 0.3,
+            "c": 0.012,
+            "h": 75,
+            "alpha": 1
+          },
+          "triadic": [
+            {
+              "l": 0.45,
+              "c": 0.009,
+              "h": 15,
+              "alpha": 1
+            },
+            {
+              "l": 0.65,
+              "c": 0.009,
+              "h": 135,
+              "alpha": 1
+            }
+          ],
+          "analogous": [
+            {
+              "l": 0.6,
+              "c": 0.009,
+              "h": 285,
+              "alpha": 1
+            },
+            {
+              "l": 0.5,
+              "c": 0.009,
+              "h": 225,
+              "alpha": 1
+            }
+          ],
+          "tetradic": [
+            {
+              "l": 0.55,
+              "c": 0.008,
+              "h": 345,
+              "alpha": 1
+            },
+            {
+              "l": 0.3,
+              "c": 0.012,
+              "h": 75,
+              "alpha": 1
+            },
+            {
+              "l": 0.55,
+              "c": 0.008,
+              "h": 165,
+              "alpha": 1
+            }
+          ],
+          "monochromatic": [
+            {
+              "l": 0.95,
+              "c": 0.003,
+              "h": 255,
+              "alpha": 1
+            },
+            {
+              "l": 0.896,
+              "c": 0.01,
+              "h": 255,
+              "alpha": 1
+            },
+            {
+              "l": 0.839,
+              "c": 0.01,
+              "h": 255,
+              "alpha": 1
+            },
+            {
+              "l": 0.78,
+              "c": 0.01,
+              "h": 255,
+              "alpha": 1
+            },
+            {
+              "l": 0.716,
+              "c": 0.01,
+              "h": 255,
+              "alpha": 1
+            }
+          ]
+        },
+        "accessibility": {
+          "wcagAA": {
+            "normal": [
+              [
+                0,
+                7
+              ],
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                9
+              ],
+              [
+                0,
+                10
+              ],
+              [
+                1,
+                7
+              ],
+              [
+                1,
+                8
+              ],
+              [
+                1,
+                9
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                7
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                3,
+                8
+              ],
+              [
+                3,
+                9
+              ],
+              [
+                3,
+                10
+              ],
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                9
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                5,
+                9
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                7,
+                0
+              ],
+              [
+                7,
+                1
+              ],
+              [
+                7,
+                2
+              ],
+              [
+                8,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                8,
+                2
+              ],
+              [
+                8,
+                3
+              ],
+              [
+                8,
+                4
+              ],
+              [
+                9,
+                0
+              ],
+              [
+                9,
+                1
+              ],
+              [
+                9,
+                2
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                9,
+                4
+              ],
+              [
+                9,
+                5
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                10,
+                4
+              ],
+              [
+                10,
+                5
+              ]
+            ],
+            "large": [
+              [
+                0,
+                6
+              ],
+              [
+                0,
+                7
+              ],
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                9
+              ],
+              [
+                0,
+                10
+              ],
+              [
+                1,
+                6
+              ],
+              [
+                1,
+                7
+              ],
+              [
+                1,
+                8
+              ],
+              [
+                1,
+                9
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                7
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                3,
+                7
+              ],
+              [
+                3,
+                8
+              ],
+              [
+                3,
+                9
+              ],
+              [
+                3,
+                10
+              ],
+              [
+                4,
+                7
+              ],
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                9
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                5,
+                8
+              ],
+              [
+                5,
+                9
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                1
+              ],
+              [
+                6,
+                9
+              ],
+              [
+                6,
+                10
+              ],
+              [
+                7,
+                0
+              ],
+              [
+                7,
+                1
+              ],
+              [
+                7,
+                2
+              ],
+              [
+                7,
+                3
+              ],
+              [
+                7,
+                4
+              ],
+              [
+                8,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                8,
+                2
+              ],
+              [
+                8,
+                3
+              ],
+              [
+                8,
+                4
+              ],
+              [
+                8,
+                5
+              ],
+              [
+                9,
+                0
+              ],
+              [
+                9,
+                1
+              ],
+              [
+                9,
+                2
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                9,
+                4
+              ],
+              [
+                9,
+                5
+              ],
+              [
+                9,
+                6
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                10,
+                4
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                10,
+                6
+              ]
+            ]
+          },
+          "wcagAAA": {
+            "normal": [
+              [
+                0,
+                7
+              ],
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                9
+              ],
+              [
+                0,
+                10
+              ],
+              [
+                1,
+                8
+              ],
+              [
+                1,
+                9
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                3,
+                9
+              ],
+              [
+                3,
+                10
+              ],
+              [
+                4,
+                9
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                7,
+                0
+              ],
+              [
+                8,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                8,
+                2
+              ],
+              [
+                9,
+                0
+              ],
+              [
+                9,
+                1
+              ],
+              [
+                9,
+                2
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                9,
+                4
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                10,
+                4
+              ]
+            ],
+            "large": [
+              [
+                0,
+                7
+              ],
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                9
+              ],
+              [
+                0,
+                10
+              ],
+              [
+                1,
+                7
+              ],
+              [
+                1,
+                8
+              ],
+              [
+                1,
+                9
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                7
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                3,
+                8
+              ],
+              [
+                3,
+                9
+              ],
+              [
+                3,
+                10
+              ],
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                9
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                5,
+                9
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                7,
+                0
+              ],
+              [
+                7,
+                1
+              ],
+              [
+                7,
+                2
+              ],
+              [
+                8,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                8,
+                2
+              ],
+              [
+                8,
+                3
+              ],
+              [
+                8,
+                4
+              ],
+              [
+                9,
+                0
+              ],
+              [
+                9,
+                1
+              ],
+              [
+                9,
+                2
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                9,
+                4
+              ],
+              [
+                9,
+                5
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                10,
+                4
+              ],
+              [
+                10,
+                5
+              ]
+            ]
+          },
+          "onWhite": {
+            "wcagAA": true,
+            "wcagAAA": false,
+            "contrastRatio": 4.848917165547431,
+            "aa": [
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "aaa": [
+              7,
+              8,
+              9,
+              10
+            ]
+          },
+          "onBlack": {
+            "wcagAA": false,
+            "wcagAAA": false,
+            "contrastRatio": 4.330863836818946,
+            "aa": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "aaa": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "apca": {
+            "onWhite": 73.65091212255257,
+            "onBlack": -28.04712540191352,
+            "minFontSize": 16
+          }
+        },
+        "analysis": {
+          "temperature": "neutral",
+          "isLight": true,
+          "name": "balanced-whisper"
+        },
+        "atmosphericWeight": {
+          "distanceWeight": 0,
+          "temperature": "cool",
+          "atmosphericRole": "background"
+        },
+        "perceptualWeight": {
+          "weight": 0.2791666666666667,
+          "density": "light",
+          "balancingRecommendation": "Balanced weight"
+        },
+        "semanticSuggestions": {
+          "danger": [
+            {
+              "l": 0.65,
+              "c": 0.012,
+              "h": 15,
+              "alpha": 1
+            },
+            {
+              "l": 0.7,
+              "c": 0.011,
+              "h": 25,
+              "alpha": 1
+            },
+            {
+              "l": 0.6,
+              "c": 0.012,
+              "h": 5,
+              "alpha": 1
+            }
+          ],
+          "success": [
+            {
+              "l": 0.7,
+              "c": 0.009,
+              "h": 135,
+              "alpha": 1
+            },
+            {
+              "l": 0.65,
+              "c": 0.01,
+              "h": 145,
+              "alpha": 1
+            },
+            {
+              "l": 0.75,
+              "c": 0.011,
+              "h": 125,
+              "alpha": 1
+            }
+          ],
+          "warning": [
+            {
+              "l": 0.7,
+              "c": 0.01,
+              "h": 45,
+              "alpha": 1
+            },
+            {
+              "l": 0.75,
+              "c": 0.009,
+              "h": 55,
+              "alpha": 1
+            },
+            {
+              "l": 0.72,
+              "c": 0.009,
+              "h": 35,
+              "alpha": 1
+            }
+          ],
+          "info": [
+            {
+              "l": 0.65,
+              "c": 0.009,
+              "h": 220,
+              "alpha": 1
+            },
+            {
+              "l": 0.6,
+              "c": 0.01,
+              "h": 230,
+              "alpha": 1
+            },
+            {
+              "l": 0.55,
+              "c": 0.011,
+              "h": 240,
+              "alpha": 1
+            }
+          ]
+        },
+        "tokenId": "color-0.550-0.010-255"
       },
       "category": "color",
       "namespace": "color",
@@ -284,9 +1192,6 @@
         "shadows",
         "overlays"
       ],
-      "description": "Foundation neutral palette for backgrounds, borders, text, and UI chrome.",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true,
       "usagePatterns": {
         "do": [
           "Use 50-200 for light mode backgrounds",
@@ -299,7 +1204,14 @@
           "Mix scale positions that have insufficient contrast",
           "Use without checking accessibility against background"
         ]
-      }
+      },
+      "userOverride": {
+        "previousValue": "{\"name\":\"dark-ghost-midnight\",\"scale\":[{\"l\":0.95,\"c\":0.007,\"h\":246,\"alpha\":1},{\"l\":0.875,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.798,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.716,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.628,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.531,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.4,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.313,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.225,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.138,\"c\":0.014,\"h\":246,\"alpha\":1},{\"l\":0.05,\"c\":0.014,\"h\":246,\"alpha\":1}],\"token\":\"neutral\",\"intelligence\":{\"reasoning\":\"The OKLCH combination (0.278, 0.033, 257) works well due to its balanced, muted characteristics. With a lightness (L) of 0.278, this color is dark, which provides a strong background for contrast. The low chroma (C) of 0.033 indicates a neutral or grayish tone, reducing visual noise. The hue (H) of 257 degrees positions this color in the blue-violet spectrum, often associated with depth and sophistication. The low chroma ensures that the color doesn't overwhelm, making it suitable for backgrounds or subtle accents.\",\"emotionalImpact\":\"This color elicits a sense of calmness and professionalism due to its dark, muted, and slightly cool tone. The blue-violet hue at 257 degrees can convey creativity and wisdom, while the low chroma prevents the color from feeling overly stimulating. The overall effect is one of understated elegance and reliability, making it suitable for designs that require a somber or corporate feel.\",\"culturalContext\":\"Cross-culturally, blue-violet hues are often associated with luxury, creativity, and wisdom. However, the dark lightness and low chroma of this specific color tone down these associations, making it more about stability and sophistication than vibrant creativity. In Western cultures, this color might be seen as professional and trustworthy, while in other cultures, the specific hue and lightness might carry different meanings. It's essential to consider local design preferences and color traditions when using this color in a global context.\",\"accessibilityNotes\":\"With a lightness (L) of 0.278, this color is considered dark and may pose challenges for readability, especially when used as a background for text. According to WCAG guidelines, for normal text, a contrast ratio of at least 4.5:1 is recommended, and for larger text (18pt or 14pt bold), a contrast ratio of at least 3:1 is acceptable. When using this color, ensure that any text or design elements overlaid on it meet these contrast ratios to ensure readability and accessibility. For body text, consider using a light color with high contrast, such as white or near-white.\",\"usageGuidance\":\"Given its low chroma (0.033) and dark lightness (0.278), this color is best used as a background or for subtle design elements where a neutral, non-distracting tone is desired. It's suitable for UI elements like footers, headers, or backgrounds where a deep, muted tone can add depth without overwhelming the user. For interactive elements or calls to action, consider adding higher contrast colors to ensure they stand out. This color can also work well for text or iconography when a subtle, sophisticated look is needed, but ensure that accessibility contrast ratios are maintained.\",\"metadata\":{\"predictionId\":\"019b4a37-9679-7ee7-8059-209b1504ceb2\",\"confidence\":0.95,\"uncertaintyBounds\":{\"lower\":0.85,\"upper\":1,\"confidenceInterval\":0.95},\"qualityScore\":0.8300000000000001,\"method\":\"bootstrap\"}},\"harmonies\":{\"complementary\":{\"l\":0.7,\"c\":0.028,\"h\":66,\"alpha\":1},\"triadic\":[{\"l\":0.3,\"c\":0.02,\"h\":6,\"alpha\":1},{\"l\":0.3,\"c\":0.02,\"h\":126,\"alpha\":1}],\"analogous\":[{\"l\":0.2,\"c\":0.021,\"h\":276,\"alpha\":1},{\"l\":0.2,\"c\":0.021,\"h\":216,\"alpha\":1}],\"tetradic\":[{\"l\":0.2,\"c\":0.019,\"h\":336,\"alpha\":1},{\"l\":0.7,\"c\":0.028,\"h\":66,\"alpha\":1},{\"l\":0.2,\"c\":0.019,\"h\":156,\"alpha\":1}],\"monochromatic\":[{\"l\":0.95,\"c\":0.007,\"h\":246,\"alpha\":1},{\"l\":0.875,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.798,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.716,\"c\":0.023,\"h\":246,\"alpha\":1},{\"l\":0.628,\"c\":0.023,\"h\":246,\"alpha\":1}]},\"accessibility\":{\"wcagAA\":{\"normal\":[[0,5],[0,6],[0,7],[0,8],[0,9],[0,10],[1,6],[1,7],[1,8],[1,9],[1,10],[2,6],[2,7],[2,8],[2,9],[2,10],[3,7],[3,8],[3,9],[3,10],[4,8],[4,9],[4,10],[5,0],[6,0],[6,1],[6,2],[7,0],[7,1],[7,2],[7,3],[8,0],[8,1],[8,2],[8,3],[8,4],[9,0],[9,1],[9,2],[9,3],[9,4],[10,0],[10,1],[10,2],[10,3],[10,4]],\"large\":[[0,4],[0,5],[0,6],[0,7],[0,8],[0,9],[0,10],[1,5],[1,6],[1,7],[1,8],[1,9],[1,10],[2,6],[2,7],[2,8],[2,9],[2,10],[3,6],[3,7],[3,8],[3,9],[3,10],[4,0],[4,7],[4,8],[4,9],[4,10],[5,0],[5,1],[5,8],[5,9],[5,10],[6,0],[6,1],[6,2],[6,3],[7,0],[7,1],[7,2],[7,3],[7,4],[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[9,0],[9,1],[9,2],[9,3],[9,4],[9,5],[10,0],[10,1],[10,2],[10,3],[10,4],[10,5]]},\"wcagAAA\":{\"normal\":[[0,6],[0,7],[0,8],[0,9],[0,10],[1,7],[1,8],[1,9],[1,10],[2,8],[2,9],[2,10],[3,9],[3,10],[6,0],[7,0],[7,1],[8,0],[8,1],[8,2],[9,0],[9,1],[9,2],[9,3],[10,0],[10,1],[10,2],[10,3]],\"large\":[[0,5],[0,6],[0,7],[0,8],[0,9],[0,10],[1,6],[1,7],[1,8],[1,9],[1,10],[2,6],[2,7],[2,8],[2,9],[2,10],[3,7],[3,8],[3,9],[3,10],[4,8],[4,9],[4,10],[5,0],[6,0],[6,1],[6,2],[7,0],[7,1],[7,2],[7,3],[8,0],[8,1],[8,2],[8,3],[8,4],[9,0],[9,1],[9,2],[9,3],[9,4],[10,0],[10,1],[10,2],[10,3],[10,4]]},\"onWhite\":{\"wcagAA\":true,\"wcagAAA\":true,\"contrastRatio\":20.09960784928913,\"aa\":[5,6,7,8,9,10],\"aaa\":[6,7,8,9,10]},\"onBlack\":{\"wcagAA\":false,\"wcagAAA\":false,\"contrastRatio\":1.0447965033677364,\"aa\":[0,1,2,3,4],\"aaa\":[0,1,2,3]},\"apca\":{\"onWhite\":105.91412441123072,\"onBlack\":0,\"minFontSize\":16}},\"analysis\":{\"temperature\":\"neutral\",\"isLight\":false,\"name\":\"dark-ghost-midnight\"},\"atmosphericWeight\":{\"distanceWeight\":0.1827795078851711,\"temperature\":\"cool\",\"atmosphericRole\":\"background\"},\"perceptualWeight\":{\"weight\":0.4625172829373516,\"density\":\"medium\",\"balancingRecommendation\":\"Balanced weight\"},\"semanticSuggestions\":{\"danger\":[{\"l\":0.55,\"c\":0.028,\"h\":15,\"alpha\":1},{\"l\":0.6,\"c\":0.026,\"h\":25,\"alpha\":1},{\"l\":0.5,\"c\":0.027,\"h\":5,\"alpha\":1}],\"success\":[{\"l\":0.6,\"c\":0.021,\"h\":135,\"alpha\":1},{\"l\":0.55,\"c\":0.023,\"h\":145,\"alpha\":1},{\"l\":0.65,\"c\":0.026,\"h\":125,\"alpha\":1}],\"warning\":[{\"l\":0.7,\"c\":0.022,\"h\":45,\"alpha\":1},{\"l\":0.75,\"c\":0.021,\"h\":55,\"alpha\":1},{\"l\":0.72,\"c\":0.021,\"h\":35,\"alpha\":1}],\"info\":[{\"l\":0.6,\"c\":0.021,\"h\":220,\"alpha\":1},{\"l\":0.55,\"c\":0.023,\"h\":230,\"alpha\":1},{\"l\":0.5,\"c\":0.026,\"h\":240,\"alpha\":1}]},\"tokenId\":\"color-0.130-0.023-246\"}",
+        "reason": "Onboarded from --neutral: Blue-gray neutral scale. The warm undertone that makes the site feel editorial, not clinical."
+      },
+      "containerQueryAware": true,
+      "description": "Foundation neutral palette for backgrounds, borders, text, and UI chrome.",
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-50",
@@ -313,11 +1225,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 0,
       "progressionSystem": "custom",
+      "scalePosition": 0,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 50 position (OKLCH L=0.95)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-100",
@@ -331,11 +1243,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 1,
       "progressionSystem": "custom",
+      "scalePosition": 1,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 100 position (OKLCH L=0.896)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-200",
@@ -348,11 +1260,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 2,
       "progressionSystem": "custom",
+      "scalePosition": 2,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 200 position (OKLCH L=0.839)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-300",
@@ -365,11 +1277,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 3,
       "progressionSystem": "custom",
+      "scalePosition": 3,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 300 position (OKLCH L=0.78)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-400",
@@ -383,11 +1295,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 4,
       "progressionSystem": "custom",
+      "scalePosition": 4,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 400 position (OKLCH L=0.716)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-500",
@@ -401,11 +1313,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 5,
       "progressionSystem": "custom",
+      "scalePosition": 5,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 500 position (OKLCH L=0.645)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-600",
@@ -418,11 +1330,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 6,
       "progressionSystem": "custom",
+      "scalePosition": 6,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 600 position (OKLCH L=0.55)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-700",
@@ -435,11 +1347,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 7,
       "progressionSystem": "custom",
+      "scalePosition": 7,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 700 position (OKLCH L=0.425)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-800",
@@ -453,11 +1365,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 8,
       "progressionSystem": "custom",
+      "scalePosition": 8,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 800 position (OKLCH L=0.3)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-900",
@@ -471,11 +1383,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 9,
       "progressionSystem": "custom",
+      "scalePosition": 9,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 900 position (OKLCH L=0.175)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier-950",
@@ -489,11 +1401,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 10,
       "progressionSystem": "custom",
+      "scalePosition": 10,
+      "containerQueryAware": true,
       "description": "silver-true-glacier color at 950 position (OKLCH L=0.05)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-glacier",
@@ -581,9 +1493,6 @@
         "shadows",
         "overlays"
       ],
-      "description": "Cool cyan/teal palette - serene, balanced, calming.",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true,
       "usagePatterns": {
         "do": [
           "Use 50-200 for light mode backgrounds",
@@ -596,7 +1505,10 @@
           "Mix scale positions that have insufficient contrast",
           "Use without checking accessibility against background"
         ]
-      }
+      },
+      "containerQueryAware": true,
+      "description": "Cool cyan/teal palette - serene, balanced, calming.",
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-50",
@@ -610,11 +1522,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 0,
       "progressionSystem": "custom",
+      "scalePosition": 0,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 50 position (OKLCH L=0.95)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-100",
@@ -628,11 +1540,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 1,
       "progressionSystem": "custom",
+      "scalePosition": 1,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 100 position (OKLCH L=0.896)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-200",
@@ -645,11 +1557,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 2,
       "progressionSystem": "custom",
+      "scalePosition": 2,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 200 position (OKLCH L=0.839)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-300",
@@ -662,11 +1574,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 3,
       "progressionSystem": "custom",
+      "scalePosition": 3,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 300 position (OKLCH L=0.78)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-400",
@@ -680,11 +1592,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 4,
       "progressionSystem": "custom",
+      "scalePosition": 4,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 400 position (OKLCH L=0.716)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-500",
@@ -698,11 +1610,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 5,
       "progressionSystem": "custom",
+      "scalePosition": 5,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 500 position (OKLCH L=0.645)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-600",
@@ -715,11 +1627,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 6,
       "progressionSystem": "custom",
+      "scalePosition": 6,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 600 position (OKLCH L=0.55)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-700",
@@ -732,11 +1644,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 7,
       "progressionSystem": "custom",
+      "scalePosition": 7,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 700 position (OKLCH L=0.425)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-800",
@@ -750,11 +1662,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 8,
       "progressionSystem": "custom",
+      "scalePosition": 8,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 800 position (OKLCH L=0.3)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-900",
@@ -768,11 +1680,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 9,
       "progressionSystem": "custom",
+      "scalePosition": 9,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 900 position (OKLCH L=0.175)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck-950",
@@ -786,11 +1698,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 10,
       "progressionSystem": "custom",
+      "scalePosition": 10,
+      "containerQueryAware": true,
       "description": "silver-bold-fire-truck color at 950 position (OKLCH L=0.05)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-bold-fire-truck",
@@ -878,9 +1790,6 @@
         "shadows",
         "overlays"
       ],
-      "description": "Bold fire-truck red palette - warm, energetic, attention-grabbing.",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true,
       "usagePatterns": {
         "do": [
           "Use 50-200 for light mode backgrounds",
@@ -893,7 +1802,10 @@
           "Mix scale positions that have insufficient contrast",
           "Use without checking accessibility against background"
         ]
-      }
+      },
+      "containerQueryAware": true,
+      "description": "Bold fire-truck red palette - warm, energetic, attention-grabbing.",
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-50",
@@ -907,11 +1819,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 0,
       "progressionSystem": "custom",
+      "scalePosition": 0,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 50 position (OKLCH L=0.95)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-100",
@@ -925,11 +1837,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 1,
       "progressionSystem": "custom",
+      "scalePosition": 1,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 100 position (OKLCH L=0.896)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-200",
@@ -942,11 +1854,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 2,
       "progressionSystem": "custom",
+      "scalePosition": 2,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 200 position (OKLCH L=0.839)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-300",
@@ -959,11 +1871,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 3,
       "progressionSystem": "custom",
+      "scalePosition": 3,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 300 position (OKLCH L=0.78)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-400",
@@ -977,11 +1889,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 4,
       "progressionSystem": "custom",
+      "scalePosition": 4,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 400 position (OKLCH L=0.716)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-500",
@@ -995,11 +1907,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 5,
       "progressionSystem": "custom",
+      "scalePosition": 5,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 500 position (OKLCH L=0.645)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-600",
@@ -1012,11 +1924,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 6,
       "progressionSystem": "custom",
+      "scalePosition": 6,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 600 position (OKLCH L=0.55)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-700",
@@ -1029,11 +1941,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 7,
       "progressionSystem": "custom",
+      "scalePosition": 7,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 700 position (OKLCH L=0.425)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-800",
@@ -1047,11 +1959,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 8,
       "progressionSystem": "custom",
+      "scalePosition": 8,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 800 position (OKLCH L=0.3)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-900",
@@ -1065,11 +1977,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 9,
       "progressionSystem": "custom",
+      "scalePosition": 9,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 900 position (OKLCH L=0.175)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey-950",
@@ -1083,11 +1995,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 10,
       "progressionSystem": "custom",
+      "scalePosition": 10,
+      "containerQueryAware": true,
       "description": "silver-true-honey color at 950 position (OKLCH L=0.05)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-honey",
@@ -1175,9 +2087,6 @@
         "shadows",
         "overlays"
       ],
-      "description": "Warm honey gold palette - inviting, refined, subtle warmth.",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true,
       "usagePatterns": {
         "do": [
           "Use 50-200 for light mode backgrounds",
@@ -1190,7 +2099,10 @@
           "Mix scale positions that have insufficient contrast",
           "Use without checking accessibility against background"
         ]
-      }
+      },
+      "containerQueryAware": true,
+      "description": "Warm honey gold palette - inviting, refined, subtle warmth.",
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-50",
@@ -1204,11 +2116,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 0,
       "progressionSystem": "custom",
+      "scalePosition": 0,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 50 position (OKLCH L=0.95)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-100",
@@ -1222,11 +2134,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 1,
       "progressionSystem": "custom",
+      "scalePosition": 1,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 100 position (OKLCH L=0.896)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-200",
@@ -1239,11 +2151,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 2,
       "progressionSystem": "custom",
+      "scalePosition": 2,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 200 position (OKLCH L=0.839)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-300",
@@ -1256,11 +2168,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 3,
       "progressionSystem": "custom",
+      "scalePosition": 3,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 300 position (OKLCH L=0.78)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-400",
@@ -1274,11 +2186,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 4,
       "progressionSystem": "custom",
+      "scalePosition": 4,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 400 position (OKLCH L=0.716)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-500",
@@ -1292,11 +2204,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 5,
       "progressionSystem": "custom",
+      "scalePosition": 5,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 500 position (OKLCH L=0.645)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-600",
@@ -1309,11 +2221,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 6,
       "progressionSystem": "custom",
+      "scalePosition": 6,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 600 position (OKLCH L=0.55)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-700",
@@ -1326,11 +2238,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 7,
       "progressionSystem": "custom",
+      "scalePosition": 7,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 700 position (OKLCH L=0.425)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-800",
@@ -1344,11 +2256,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 8,
       "progressionSystem": "custom",
+      "scalePosition": 8,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 800 position (OKLCH L=0.3)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-900",
@@ -1362,11 +2274,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 9,
       "progressionSystem": "custom",
+      "scalePosition": 9,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 900 position (OKLCH L=0.175)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine-950",
@@ -1380,11 +2292,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 10,
       "progressionSystem": "custom",
+      "scalePosition": 10,
+      "containerQueryAware": true,
       "description": "silver-true-citrine color at 950 position (OKLCH L=0.05)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-citrine",
@@ -1472,9 +2384,6 @@
         "shadows",
         "overlays"
       ],
-      "description": "Fresh citrine green palette - natural, growth, harmony.",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true,
       "usagePatterns": {
         "do": [
           "Use 50-200 for light mode backgrounds",
@@ -1487,7 +2396,10 @@
           "Mix scale positions that have insufficient contrast",
           "Use without checking accessibility against background"
         ]
-      }
+      },
+      "containerQueryAware": true,
+      "description": "Fresh citrine green palette - natural, growth, harmony.",
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-50",
@@ -1501,11 +2413,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 0,
       "progressionSystem": "custom",
+      "scalePosition": 0,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 50 position (OKLCH L=0.95)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-100",
@@ -1519,11 +2431,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 1,
       "progressionSystem": "custom",
+      "scalePosition": 1,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 100 position (OKLCH L=0.896)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-200",
@@ -1536,11 +2448,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 2,
       "progressionSystem": "custom",
+      "scalePosition": 2,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 200 position (OKLCH L=0.839)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-300",
@@ -1553,11 +2465,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 3,
       "progressionSystem": "custom",
+      "scalePosition": 3,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 300 position (OKLCH L=0.78)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-400",
@@ -1571,11 +2483,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 4,
       "progressionSystem": "custom",
+      "scalePosition": 4,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 400 position (OKLCH L=0.716)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-500",
@@ -1589,11 +2501,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 5,
       "progressionSystem": "custom",
+      "scalePosition": 5,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 500 position (OKLCH L=0.645)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-600",
@@ -1606,11 +2518,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 6,
       "progressionSystem": "custom",
+      "scalePosition": 6,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 600 position (OKLCH L=0.55)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-700",
@@ -1623,11 +2535,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 7,
       "progressionSystem": "custom",
+      "scalePosition": 7,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 700 position (OKLCH L=0.425)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-800",
@@ -1641,11 +2553,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 8,
       "progressionSystem": "custom",
+      "scalePosition": 8,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 800 position (OKLCH L=0.3)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-900",
@@ -1659,11 +2571,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 9,
       "progressionSystem": "custom",
+      "scalePosition": 9,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 900 position (OKLCH L=0.175)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky-950",
@@ -1677,11 +2589,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 10,
       "progressionSystem": "custom",
+      "scalePosition": 10,
+      "containerQueryAware": true,
       "description": "silver-true-sky color at 950 position (OKLCH L=0.05)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-sky",
@@ -1769,9 +2681,6 @@
         "shadows",
         "overlays"
       ],
-      "description": "Calm sky blue palette - trustworthy, serene, reliable.",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true,
       "usagePatterns": {
         "do": [
           "Use 50-200 for light mode backgrounds",
@@ -1784,7 +2693,10 @@
           "Mix scale positions that have insufficient contrast",
           "Use without checking accessibility against background"
         ]
-      }
+      },
+      "containerQueryAware": true,
+      "description": "Calm sky blue palette - trustworthy, serene, reliable.",
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-50",
@@ -1798,11 +2710,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 0,
       "progressionSystem": "custom",
+      "scalePosition": 0,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 50 position (OKLCH L=0.95)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-100",
@@ -1816,11 +2728,11 @@
         "surfaces",
         "light-mode-bg"
       ],
-      "scalePosition": 1,
       "progressionSystem": "custom",
+      "scalePosition": 1,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 100 position (OKLCH L=0.896)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-200",
@@ -1833,11 +2745,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 2,
       "progressionSystem": "custom",
+      "scalePosition": 2,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 200 position (OKLCH L=0.839)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-300",
@@ -1850,11 +2762,11 @@
         "hover-states",
         "subtle-borders"
       ],
-      "scalePosition": 3,
       "progressionSystem": "custom",
+      "scalePosition": 3,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 300 position (OKLCH L=0.78)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-400",
@@ -1868,11 +2780,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 4,
       "progressionSystem": "custom",
+      "scalePosition": 4,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 400 position (OKLCH L=0.716)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-500",
@@ -1886,11 +2798,11 @@
         "disabled-states",
         "placeholder-text"
       ],
-      "scalePosition": 5,
       "progressionSystem": "custom",
+      "scalePosition": 5,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 500 position (OKLCH L=0.645)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-600",
@@ -1903,11 +2815,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 6,
       "progressionSystem": "custom",
+      "scalePosition": 6,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 600 position (OKLCH L=0.55)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-700",
@@ -1920,11 +2832,11 @@
         "icons",
         "input-borders"
       ],
-      "scalePosition": 7,
       "progressionSystem": "custom",
+      "scalePosition": 7,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 700 position (OKLCH L=0.425)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-800",
@@ -1938,11 +2850,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 8,
       "progressionSystem": "custom",
+      "scalePosition": 8,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 800 position (OKLCH L=0.3)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-900",
@@ -1956,11 +2868,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 9,
       "progressionSystem": "custom",
+      "scalePosition": 9,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 900 position (OKLCH L=0.175)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet-950",
@@ -1974,11 +2886,11 @@
         "dark-mode-bg",
         "high-contrast-elements"
       ],
-      "scalePosition": 10,
       "progressionSystem": "custom",
+      "scalePosition": 10,
+      "containerQueryAware": true,
       "description": "silver-true-violet color at 950 position (OKLCH L=0.05)",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-03-29T04:05:15.694Z"
     },
     {
       "name": "silver-true-violet",
@@ -2066,9 +2978,6 @@
         "shadows",
         "overlays"
       ],
-      "description": "Creative violet palette - luxurious, imaginative, refined.",
-      "generatedAt": "2026-03-29T04:05:15.694Z",
-      "containerQueryAware": true,
       "usagePatterns": {
         "do": [
           "Use 50-200 for light mode backgrounds",
@@ -2081,7 +2990,1139 @@
           "Mix scale positions that have insufficient contrast",
           "Use without checking accessibility against background"
         ]
-      }
+      },
+      "containerQueryAware": true,
+      "description": "Creative violet palette - luxurious, imaginative, refined.",
+      "generatedAt": "2026-03-29T04:05:15.694Z"
+    },
+    {
+      "name": "legion-deep",
+      "value": "#020810",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion terminal background from LegionHero.astro canvas."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-ice",
+      "value": "#cce8f4",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion ice-blue foreground text from LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-cyan",
+      "value": "#00e5ff",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion signature cyan -- primary identity color from LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-cyan-dim",
+      "value": "#005f6b",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion dimmed cyan for borders and inactive elements from LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-green",
+      "value": "#00ff9d",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion terminal green -- command output and repo nodes from LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-amber",
+      "value": "#ffb300",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion amber -- BM25 scores and storage nodes from LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-muted",
+      "value": "#8ab4c8",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion muted blue-gray subtitle text from LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-panel",
+      "value": "#04111f",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion card/panel bg from LegionHero.astro phase panels."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-panel-active",
+      "value": "#061a2e",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion active phase panel bg from LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-trace",
+      "value": "#030d18",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion trace/code container bg from LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "legion-slate",
+      "value": "#0a1e35",
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Legion dark slate from hexagonal grid pattern in LegionHero.astro."
+      },
+      "containerQueryAware": true
+    },
+    {
+      "name": "tertiary",
+      "value": {
+        "name": "pale-whisper",
+        "scale": [
+          {
+            "l": 0.95,
+            "c": 0.003,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.916,
+            "c": 0.003,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.881,
+            "c": 0.01,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.844,
+            "c": 0.01,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.804,
+            "c": 0.01,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.76,
+            "c": 0.01,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.7,
+            "c": 0.01,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.538,
+            "c": 0.01,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.375,
+            "c": 0.01,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.213,
+            "c": 0.01,
+            "h": 255,
+            "alpha": 1
+          },
+          {
+            "l": 0.05,
+            "c": 0.006,
+            "h": 255,
+            "alpha": 1
+          }
+        ],
+        "token": "tertiary",
+        "intelligence": {
+          "reasoning": "The OKLCH combination works well due to its extremely light and neutral nature. With L=0.95, this color is almost white, and its chroma C=0.004 is nearly achromatic, making it very subtle. The hue H=236deg, which falls in the blue range, is muted by the low chroma, resulting in a pale, serene blue-gray color. This combination creates a calming effect, ideal for backgrounds or non-critical UI elements.",
+          "emotionalImpact": "This color elicits a sense of tranquility and peacefulness due to its pale, washed-out quality. The low chroma reduces emotional intensity, making it suitable for designs that require a subtle, non-distracting background. The blue hue at 236deg adds a hint of trustworthiness and stability, but its muted nature prevents it from being overly dominant.",
+          "culturalContext": "The pale blue-gray hue has cross-cultural associations with clarity, purity, and serenity. In Western cultures, blue is often linked to trust and reliability, while in Asian cultures, pale blue can symbolize good fortune and prosperity. The lightness and neutrality of this color make it accessible and innocuous across various cultural contexts.",
+          "accessibilityNotes": "With a lightness of L=0.95, this color has very low contrast against a white background (WCAG contrast ratio < 1.2). For text or critical UI elements, it's recommended to use a darker, higher-contrast color. For non-critical elements or backgrounds, this color can be used, but ensure that interactive elements have sufficient contrast (WCAG 2.1 guidelines: at least 4.5:1 for normal text or 3:1 for large text).",
+          "usageGuidance": "Use this color as a background or subtle accent for non-critical UI elements, such as:\n    - Backgrounds for dialogs, tooltips, or notifications\n    - Borders or dividers to create visual separation\n    - Fills for non-interactive graphics or icons\n    Avoid using this color for:\n    - Primary buttons or interactive elements\n    - Critical text or information that requires high visibility",
+          "metadata": {
+            "predictionId": "019b4d94-c074-74f8-bc26-f43d0b0fc540",
+            "confidence": 0.85,
+            "uncertaintyBounds": {
+              "lower": 0.75,
+              "upper": 0.9,
+              "confidenceInterval": 0.95
+            },
+            "qualityScore": 0.8300000000000001,
+            "method": "bootstrap"
+          }
+        },
+        "harmonies": {
+          "complementary": {
+            "l": 0.3,
+            "c": 0.012,
+            "h": 75,
+            "alpha": 1
+          },
+          "triadic": [
+            {
+              "l": 0.6,
+              "c": 0.009,
+              "h": 15,
+              "alpha": 1
+            },
+            {
+              "l": 0.7,
+              "c": 0.009,
+              "h": 135,
+              "alpha": 1
+            }
+          ],
+          "analogous": [
+            {
+              "l": 0.75,
+              "c": 0.009,
+              "h": 285,
+              "alpha": 1
+            },
+            {
+              "l": 0.65,
+              "c": 0.009,
+              "h": 225,
+              "alpha": 1
+            }
+          ],
+          "tetradic": [
+            {
+              "l": 0.7,
+              "c": 0.008,
+              "h": 345,
+              "alpha": 1
+            },
+            {
+              "l": 0.3,
+              "c": 0.012,
+              "h": 75,
+              "alpha": 1
+            },
+            {
+              "l": 0.7,
+              "c": 0.008,
+              "h": 165,
+              "alpha": 1
+            }
+          ],
+          "monochromatic": [
+            {
+              "l": 0.95,
+              "c": 0.003,
+              "h": 255,
+              "alpha": 1
+            },
+            {
+              "l": 0.916,
+              "c": 0.003,
+              "h": 255,
+              "alpha": 1
+            },
+            {
+              "l": 0.881,
+              "c": 0.01,
+              "h": 255,
+              "alpha": 1
+            },
+            {
+              "l": 0.844,
+              "c": 0.01,
+              "h": 255,
+              "alpha": 1
+            },
+            {
+              "l": 0.804,
+              "c": 0.01,
+              "h": 255,
+              "alpha": 1
+            }
+          ]
+        },
+        "accessibility": {
+          "wcagAA": {
+            "normal": [
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                9
+              ],
+              [
+                0,
+                10
+              ],
+              [
+                1,
+                8
+              ],
+              [
+                1,
+                9
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                3,
+                8
+              ],
+              [
+                3,
+                9
+              ],
+              [
+                3,
+                10
+              ],
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                9
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                5,
+                8
+              ],
+              [
+                5,
+                9
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                6,
+                9
+              ],
+              [
+                6,
+                10
+              ],
+              [
+                8,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                8,
+                2
+              ],
+              [
+                8,
+                3
+              ],
+              [
+                8,
+                4
+              ],
+              [
+                8,
+                5
+              ],
+              [
+                9,
+                0
+              ],
+              [
+                9,
+                1
+              ],
+              [
+                9,
+                2
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                9,
+                4
+              ],
+              [
+                9,
+                5
+              ],
+              [
+                9,
+                6
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                10,
+                4
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                10,
+                6
+              ]
+            ],
+            "large": [
+              [
+                0,
+                7
+              ],
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                9
+              ],
+              [
+                0,
+                10
+              ],
+              [
+                1,
+                7
+              ],
+              [
+                1,
+                8
+              ],
+              [
+                1,
+                9
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                7
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                3,
+                7
+              ],
+              [
+                3,
+                8
+              ],
+              [
+                3,
+                9
+              ],
+              [
+                3,
+                10
+              ],
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                9
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                5,
+                8
+              ],
+              [
+                5,
+                9
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                6,
+                8
+              ],
+              [
+                6,
+                9
+              ],
+              [
+                6,
+                10
+              ],
+              [
+                7,
+                0
+              ],
+              [
+                7,
+                1
+              ],
+              [
+                7,
+                2
+              ],
+              [
+                7,
+                3
+              ],
+              [
+                7,
+                9
+              ],
+              [
+                7,
+                10
+              ],
+              [
+                8,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                8,
+                2
+              ],
+              [
+                8,
+                3
+              ],
+              [
+                8,
+                4
+              ],
+              [
+                8,
+                5
+              ],
+              [
+                8,
+                6
+              ],
+              [
+                9,
+                0
+              ],
+              [
+                9,
+                1
+              ],
+              [
+                9,
+                2
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                9,
+                4
+              ],
+              [
+                9,
+                5
+              ],
+              [
+                9,
+                6
+              ],
+              [
+                9,
+                7
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                10,
+                4
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                10,
+                6
+              ],
+              [
+                10,
+                7
+              ]
+            ]
+          },
+          "wcagAAA": {
+            "normal": [
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                9
+              ],
+              [
+                0,
+                10
+              ],
+              [
+                1,
+                8
+              ],
+              [
+                1,
+                9
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                3,
+                9
+              ],
+              [
+                3,
+                10
+              ],
+              [
+                4,
+                9
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                5,
+                9
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                6,
+                10
+              ],
+              [
+                8,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                8,
+                2
+              ],
+              [
+                9,
+                0
+              ],
+              [
+                9,
+                1
+              ],
+              [
+                9,
+                2
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                9,
+                4
+              ],
+              [
+                9,
+                5
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                10,
+                4
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                10,
+                6
+              ]
+            ],
+            "large": [
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                9
+              ],
+              [
+                0,
+                10
+              ],
+              [
+                1,
+                8
+              ],
+              [
+                1,
+                9
+              ],
+              [
+                1,
+                10
+              ],
+              [
+                2,
+                8
+              ],
+              [
+                2,
+                9
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                3,
+                8
+              ],
+              [
+                3,
+                9
+              ],
+              [
+                3,
+                10
+              ],
+              [
+                4,
+                8
+              ],
+              [
+                4,
+                9
+              ],
+              [
+                4,
+                10
+              ],
+              [
+                5,
+                8
+              ],
+              [
+                5,
+                9
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                6,
+                9
+              ],
+              [
+                6,
+                10
+              ],
+              [
+                8,
+                0
+              ],
+              [
+                8,
+                1
+              ],
+              [
+                8,
+                2
+              ],
+              [
+                8,
+                3
+              ],
+              [
+                8,
+                4
+              ],
+              [
+                8,
+                5
+              ],
+              [
+                9,
+                0
+              ],
+              [
+                9,
+                1
+              ],
+              [
+                9,
+                2
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                9,
+                4
+              ],
+              [
+                9,
+                5
+              ],
+              [
+                9,
+                6
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                10,
+                4
+              ],
+              [
+                10,
+                5
+              ],
+              [
+                10,
+                6
+              ]
+            ]
+          },
+          "onWhite": {
+            "wcagAA": false,
+            "wcagAAA": false,
+            "contrastRatio": 2.669861103710923,
+            "aa": [
+              7,
+              8,
+              9,
+              10
+            ],
+            "aaa": [
+              8,
+              9,
+              10
+            ]
+          },
+          "onBlack": {
+            "wcagAA": true,
+            "wcagAAA": true,
+            "contrastRatio": 7.865577715189542,
+            "aa": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "aaa": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "apca": {
+            "onWhite": 51.92534089335932,
+            "onBlack": -49.95723343182353,
+            "minFontSize": 24
+          }
+        },
+        "analysis": {
+          "temperature": "neutral",
+          "isLight": true,
+          "name": "pale-whisper"
+        },
+        "atmosphericWeight": {
+          "distanceWeight": 0,
+          "temperature": "cool",
+          "atmosphericRole": "background"
+        },
+        "perceptualWeight": {
+          "weight": 0.21916666666666668,
+          "density": "light",
+          "balancingRecommendation": "Balanced weight"
+        },
+        "semanticSuggestions": {
+          "danger": [
+            {
+              "l": 0.7,
+              "c": 0.012,
+              "h": 15,
+              "alpha": 1
+            },
+            {
+              "l": 0.75,
+              "c": 0.011,
+              "h": 25,
+              "alpha": 1
+            },
+            {
+              "l": 0.65,
+              "c": 0.012,
+              "h": 5,
+              "alpha": 1
+            }
+          ],
+          "success": [
+            {
+              "l": 0.75,
+              "c": 0.009,
+              "h": 135,
+              "alpha": 1
+            },
+            {
+              "l": 0.7,
+              "c": 0.01,
+              "h": 145,
+              "alpha": 1
+            },
+            {
+              "l": 0.8,
+              "c": 0.011,
+              "h": 125,
+              "alpha": 1
+            }
+          ],
+          "warning": [
+            {
+              "l": 0.8,
+              "c": 0.01,
+              "h": 45,
+              "alpha": 1
+            },
+            {
+              "l": 0.85,
+              "c": 0.009,
+              "h": 55,
+              "alpha": 1
+            },
+            {
+              "l": 0.82,
+              "c": 0.009,
+              "h": 35,
+              "alpha": 1
+            }
+          ],
+          "info": [
+            {
+              "l": 0.75,
+              "c": 0.009,
+              "h": 220,
+              "alpha": 1
+            },
+            {
+              "l": 0.7,
+              "c": 0.01,
+              "h": 230,
+              "alpha": 1
+            },
+            {
+              "l": 0.65,
+              "c": 0.011,
+              "h": 240,
+              "alpha": 1
+            }
+          ]
+        },
+        "tokenId": "color-0.700-0.010-255"
+      },
+      "category": "color",
+      "namespace": "color",
+      "userOverride": {
+        "previousValue": "",
+        "reason": "Onboarded from --tertiary: Light steel gray for breadcrumbs, timestamps, tertiary UI."
+      },
+      "containerQueryAware": true
     }
   ]
 }

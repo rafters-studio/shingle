@@ -2,7 +2,7 @@
   "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "shadow",
   "version": "1.0.0",
-  "generatedAt": "2026-03-29T04:05:15.704Z",
+  "generatedAt": "2026-04-05T22:08:38.508Z",
   "tokens": [
     {
       "name": "shadow-base-unit",
@@ -13,13 +13,13 @@
       "usageContext": [
         "calculation-reference"
       ],
-      "progressionSystem": "minor-third",
       "dependsOn": [
         "spacing-base"
       ],
+      "progressionSystem": "minor-third",
+      "containerQueryAware": false,
       "description": "Shadows derive from spacing base (0.25rem) for visual consistency.",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-none",
@@ -32,12 +32,6 @@
         "inline",
         "disabled"
       ],
-      "scalePosition": 0,
-      "progressionSystem": "minor-third",
-      "dependsOn": [],
-      "description": "Shadow none: No shadow - flat appearance. Y: 0×base, Blur: 0×base",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for flat elements",
@@ -46,7 +40,13 @@
         "never": [
           "Use on interactive elements that need depth feedback"
         ]
-      }
+      },
+      "dependsOn": [],
+      "progressionSystem": "minor-third",
+      "scalePosition": 0,
+      "containerQueryAware": false,
+      "description": "Shadow none: No shadow - flat appearance. Y: 0×base, Blur: 0×base",
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-xs",
@@ -59,14 +59,6 @@
         "list-items",
         "hover-states"
       ],
-      "scalePosition": 1,
-      "progressionSystem": "minor-third",
-      "dependsOn": [
-        "shadow-base-unit"
-      ],
-      "description": "Shadow xs: Extra small shadow - subtle depth hint. Y: 0.25×base, Blur: 0.5×base",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for subtle depth",
@@ -75,7 +67,15 @@
         "never": [
           "Use shadows that don't match element's semantic depth"
         ]
-      }
+      },
+      "dependsOn": [
+        "shadow-base-unit"
+      ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 1,
+      "containerQueryAware": false,
+      "description": "Shadow xs: Extra small shadow - subtle depth hint. Y: 0.25×base, Blur: 0.5×base",
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-sm",
@@ -88,14 +88,6 @@
         "buttons",
         "inputs"
       ],
-      "scalePosition": 2,
-      "progressionSystem": "minor-third",
-      "dependsOn": [
-        "shadow-base-unit"
-      ],
-      "description": "Shadow sm: Small shadow - slight elevation. Y: 0.25×base, Blur: 1×base",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for subtle depth",
@@ -104,7 +96,15 @@
         "never": [
           "Use shadows that don't match element's semantic depth"
         ]
-      }
+      },
+      "dependsOn": [
+        "shadow-base-unit"
+      ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 2,
+      "containerQueryAware": false,
+      "description": "Shadow sm: Small shadow - slight elevation. Y: 0.25×base, Blur: 1×base",
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow",
@@ -117,14 +117,6 @@
         "dropdowns",
         "floating-elements"
       ],
-      "scalePosition": 3,
-      "progressionSystem": "minor-third",
-      "dependsOn": [
-        "shadow-base-unit"
-      ],
-      "description": "Shadow DEFAULT: Default shadow - standard elevation. Y: 0.5×base, Blur: 1.5×base",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for hovering elements",
@@ -133,7 +125,15 @@
         "never": [
           "Use shadows that don't match element's semantic depth"
         ]
-      }
+      },
+      "dependsOn": [
+        "shadow-base-unit"
+      ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 3,
+      "containerQueryAware": false,
+      "description": "Shadow DEFAULT: Default shadow - standard elevation. Y: 0.5×base, Blur: 1.5×base",
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-md",
@@ -146,14 +146,6 @@
         "active-elements",
         "focus-states"
       ],
-      "scalePosition": 4,
-      "progressionSystem": "minor-third",
-      "dependsOn": [
-        "shadow-base-unit"
-      ],
-      "description": "Shadow md: Medium shadow - noticeable elevation. Y: 1×base, Blur: 2×base",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for hovering elements",
@@ -162,7 +154,15 @@
         "never": [
           "Use shadows that don't match element's semantic depth"
         ]
-      }
+      },
+      "dependsOn": [
+        "shadow-base-unit"
+      ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 4,
+      "containerQueryAware": false,
+      "description": "Shadow md: Medium shadow - noticeable elevation. Y: 1×base, Blur: 2×base",
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-lg",
@@ -175,14 +175,6 @@
         "dialogs",
         "floating-panels"
       ],
-      "scalePosition": 5,
-      "progressionSystem": "minor-third",
-      "dependsOn": [
-        "shadow-base-unit"
-      ],
-      "description": "Shadow lg: Large shadow - significant elevation. Y: 2×base, Blur: 4×base",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for floating elements",
@@ -191,7 +183,15 @@
         "never": [
           "Use shadows that don't match element's semantic depth"
         ]
-      }
+      },
+      "dependsOn": [
+        "shadow-base-unit"
+      ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 5,
+      "containerQueryAware": false,
+      "description": "Shadow lg: Large shadow - significant elevation. Y: 2×base, Blur: 4×base",
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-xl",
@@ -204,14 +204,6 @@
         "sheet-dialogs",
         "command-palettes"
       ],
-      "scalePosition": 6,
-      "progressionSystem": "minor-third",
-      "dependsOn": [
-        "shadow-base-unit"
-      ],
-      "description": "Shadow xl: Extra large shadow - high elevation. Y: 5×base, Blur: 6×base",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for floating elements",
@@ -220,7 +212,15 @@
         "never": [
           "Use shadows that don't match element's semantic depth"
         ]
-      }
+      },
+      "dependsOn": [
+        "shadow-base-unit"
+      ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 6,
+      "containerQueryAware": false,
+      "description": "Shadow xl: Extra large shadow - high elevation. Y: 5×base, Blur: 6×base",
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-2xl",
@@ -233,14 +233,6 @@
         "overlays",
         "drawer-panels"
       ],
-      "scalePosition": 7,
-      "progressionSystem": "minor-third",
-      "dependsOn": [
-        "shadow-base-unit"
-      ],
-      "description": "Shadow 2xl: Maximum shadow - highest elevation. Y: 6×base, Blur: 12×base",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for floating elements",
@@ -249,7 +241,15 @@
         "never": [
           "Use shadows that don't match element's semantic depth"
         ]
-      }
+      },
+      "dependsOn": [
+        "shadow-base-unit"
+      ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 7,
+      "containerQueryAware": false,
+      "description": "Shadow 2xl: Maximum shadow - highest elevation. Y: 6×base, Blur: 12×base",
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-primary",
@@ -265,9 +265,9 @@
         "shadow",
         "primary"
       ],
+      "containerQueryAware": false,
       "description": "Primary colored shadow for emphasis. Uses color-mix for proper OKLCH blending.",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-destructive",
@@ -283,9 +283,9 @@
         "shadow",
         "destructive"
       ],
+      "containerQueryAware": false,
       "description": "Destructive colored shadow for warnings. Uses color-mix for proper OKLCH blending.",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     },
     {
       "name": "shadow-progression",
@@ -293,9 +293,9 @@
       "category": "shadow",
       "namespace": "shadow",
       "semanticMeaning": "Metadata about the shadow progression system",
+      "containerQueryAware": false,
       "description": "Shadows use minor-third progression from spacing base.",
-      "generatedAt": "2026-03-29T04:05:15.695Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-03-29T04:05:15.695Z"
     }
   ]
 }
