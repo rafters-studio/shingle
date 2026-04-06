@@ -11,6 +11,9 @@ import H3 from '@/src/components/ui/typography-h3.astro';
 import P from '@/src/components/ui/typography-p.astro';
 import Small from '@/src/components/ui/typography-small.astro';
 import Card from '@/src/components/ui/card.astro';
+import CardHeader from '@/src/components/ui/card-header.astro';
+import CardContent from '@/src/components/ui/card-content.astro';
+import CardFooter from '@/src/components/ui/card-footer.astro';
 import Image from '@/src/components/ui/image.astro';
 import Button from '@/src/components/ui/button.astro';
 import readingTime from 'reading-time';
@@ -56,19 +59,19 @@ const grouped = sortedPosts.reduce<Record<string, typeof sortedPosts>>((acc, pos
                   alt={`Image for ${post.data.title}`}
                   size="full"
                 />
-                <Container gap="1" padding="4" background="primary">
+                <CardHeader>
                   <H3 size="xl" weight="bold" color="accent">{post.data.title}</H3>
                   <Small color="muted">{post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}</Small>
-                </Container>
-                <Container gap="2" padding="4">
+                </CardHeader>
+                <CardContent>
                   <P>{post.data.excerpt}</P>
-                </Container>
+                </CardContent>
               </a>
-              <Container padding="4">
+              <CardFooter>
                 <a href={`/posts/${slug}/`}>
                   <Button>READ MORE</Button>
                 </a>
-              </Container>
+              </CardFooter>
             </Card>
           );
         })}

@@ -8,6 +8,8 @@ import H2 from '@/src/components/ui/typography-h2.astro';
 import P from '@/src/components/ui/typography-p.astro';
 import Small from '@/src/components/ui/typography-small.astro';
 import Card from '@/src/components/ui/card.astro';
+import CardHeader from '@/src/components/ui/card-header.astro';
+import CardContent from '@/src/components/ui/card-content.astro';
 
 const stories = (await getCollection('stories'))
   .filter((story) => !story.data.draft)
@@ -25,7 +27,7 @@ const stories = (await getCollection('stories'))
       {stories.map((story) => (
         <a href={`/stories/${story.id}/`}>
           <Card as="article" interactive>
-            <Container padding="6" gap="2">
+            <CardHeader>
               <Small color="muted">
                 <time datetime={story.data.date.toISOString()}>
                   {story.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -38,8 +40,10 @@ const stories = (await getCollection('stories'))
                 )}
               </Small>
               <H2 size="2xl">{story.data.title}</H2>
+            </CardHeader>
+            <CardContent>
               <P size="sm" color="muted">{story.data.excerpt}</P>
-            </Container>
+            </CardContent>
           </Card>
         </a>
       ))}

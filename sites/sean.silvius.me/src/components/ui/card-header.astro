@@ -1,0 +1,14 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import classy from '@/lib/primitives/classy';
+import { cardHeaderClasses } from '@/components/ui/card.classes';
+
+interface Props extends HTMLAttributes<'div'> {}
+
+const { class: className, ...attrs } = Astro.props;
+const cls = classy(cardHeaderClasses, className);
+---
+
+<div data-slot="card-header" class={cls} {...attrs}>
+  <slot />
+</div>
