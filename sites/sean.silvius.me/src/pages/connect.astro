@@ -1,0 +1,26 @@
+---
+export const prerender = true;
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CalEmbed from '@/components/CalEmbed';
+---
+
+<BaseLayout
+  title="Connect"
+  description="Schedule a conversation with Sean Silvius. Pick a time that works and let's talk."
+>
+  <div class="mx-auto container max-w-7xl py-16 mt-16">
+    <div class="space-y-8 px-4">
+      <div class="space-y-4">
+        <h1 class="text-3xl md:text-4xl font-heading font-black text-blue-900 uppercase">Connect</h1>
+        <p class="text-slate-600 w-full text-lg">
+          Want to chat? Pick a time that works and let's have a conversation.
+        </p>
+      </div>
+
+      <div class="mt-10">
+        <CalEmbed client:load />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
