@@ -50,17 +50,17 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
                 alt={`Image for ${post.data.title}`}
                 size="full"
               />
-              <Container gap="1" background="primary">
+              <Container gap="1" padding="4" background="primary">
                 <H3 size="xl" weight="bold" color="accent">{post.data.title}</H3>
                 <Small color="muted">{post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}</Small>
               </Container>
-              <Container gap="2">
+              <Container gap="2" padding="4">
                 <P>{post.data.excerpt}</P>
               </Container>
             </a>
-            <Container>
+            <Container padding="4">
               <a href={`/posts/${slug}/`}>
-                <Button>Read More</Button>
+                <Button>READ MORE</Button>
               </a>
             </Container>
           </Card>
@@ -69,7 +69,7 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
     </Grid>
     <Container>
       <a href="/posts/">
-        <Button variant="outline">More Articles &rsaquo;</Button>
+        <Button variant="outline">MORE ARTICLES &rsaquo;</Button>
       </a>
     </Container>
   </Container>
