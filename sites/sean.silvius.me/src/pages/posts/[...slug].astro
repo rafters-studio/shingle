@@ -32,18 +32,29 @@ const dateIso = post.data.date.toISOString();
 <Base title={post.data.title} description={post.data.excerpt}>
 
   <Container size="5xl">
-    <Grid preset="linear" columns={1}>
-      <Typography as="span" variant="muted" class="uppercase tracking-widest">{post.data.title}</Typography>
-      <Typography as="span" variant="muted">
-        <time datetime={dateIso}>{formattedDate}</time> &bull; {rt.text}
-      </Typography>
-    </Grid>
+    <a href="/posts/" class="no-underline text-muted-foreground hover:text-foreground transition-colors duration-fast">
+      <Typography as="span" variant="muted">&larr; All posts</Typography>
+    </a>
   </Container>
 
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
-      <Typography as="h1" variant="h1">{post.data.excerpt}</Typography>
+      <Typography as="span" variant="small" class="uppercase tracking-widest text-muted-foreground">{post.data.title}</Typography>
+      <Typography as="span" variant="muted">
+        <time datetime={dateIso}>{formattedDate}</time> &bull; {rt.text}
+      </Typography>
+      {post.data.tags && post.data.tags.length > 0 && (
+        <Grid preset="linear" columns={6} gap="2">
+          {post.data.tags.map((tag: string) => (
+            <Badge variant="secondary" size="sm">{tag}</Badge>
+          ))}
+        </Grid>
+      )}
     </Grid>
+  </Container>
+
+  <Container size="5xl">
+    <Typography as="h1" variant="h1" class="animate-fade-in duration-normal">{post.data.excerpt}</Typography>
   </Container>
 
   <Container size="5xl">
@@ -56,19 +67,7 @@ const dateIso = post.data.date.toISOString();
   </Container>
 
   <Container size="3xl" as="article">
-    <Grid preset="linear" columns={1}>
-      <Content />
-    </Grid>
+    <Content />
   </Container>
-
-  {post.data.tags && post.data.tags.length > 0 && (
-    <Container size="3xl">
-      <Grid preset="linear" gap="2">
-        {post.data.tags.map((tag: string) => (
-          <Badge variant="outline">{tag}</Badge>
-        ))}
-      </Grid>
-    </Container>
-  )}
 
 </Base>

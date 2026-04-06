@@ -75,7 +75,7 @@ const footerColumns = [
       <slot />
     </main>
 
-    <footer class="bg-primary text-primary-foreground">
+    <footer class="bg-primary text-primary-foreground border-t border-border">
       <Container size="7xl">
         <Grid preset="linear" columns={3} gap="8">
           {footerColumns.map((col) => (
@@ -85,7 +85,7 @@ const footerColumns = [
                 {col.links.map((link) => (
                   <a
                     href={link.href}
-                    class="no-underline text-primary-foreground hover:text-secondary"
+                    class="no-underline text-primary-foreground hover:text-secondary transition-colors duration-fast"
                     {...('external' in link && link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   >
                     {link.label}
@@ -98,7 +98,7 @@ const footerColumns = [
         <Separator class="bg-primary-foreground/20" />
         <Grid preset="linear" columns={2}>
           <Typography as="p" variant="muted" class="text-primary-foreground/60">&copy; 2026 Sean Silvius. All rights reserved.</Typography>
-          <Typography as="p" variant="muted" class="text-primary-foreground/60 text-end">Built with love in the PNW</Typography>
+          <Typography as="p" variant="muted" class="text-primary-foreground/60 text-end">Built with love in the PNW <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline text-success"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M16 14v.2A3 3 0 0 1 14.9 20H11a3 3 0 0 1-1-5.8V14a3 3 0 0 1 6 0"/></svg></Typography>
         </Grid>
       </Container>
     </footer>
