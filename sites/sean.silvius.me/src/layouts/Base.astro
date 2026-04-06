@@ -86,7 +86,7 @@ const footerColumns = [
                   <a
                     href={link.href}
                     class="no-underline text-primary-foreground hover:text-secondary"
-                    {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    {...('external' in link && link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   >
                     {link.label}
                   </a>

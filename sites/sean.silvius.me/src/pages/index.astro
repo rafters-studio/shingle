@@ -2,26 +2,22 @@
 export const prerender = true;
 
 import { getCollection } from 'astro:content';
-import Base from '../layouts/Base.astro';
+import Base from '@/src/layouts/Base.astro';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
 import Typography from '@/src/components/ui/typography.astro';
 import Card from '@/src/components/ui/card.astro';
 import Button from '@/src/components/ui/button.astro';
-import readingTime from 'reading-time';
 
-const allPosts = await getCollection('posts', ({ data }) => {
-  const isProduction = import.meta.env.PROD;
-  return isProduction ? !data.draft && !data.archived : true;
-});
+const allPosts = (await getCollection('posts'))
+  .filter((post) => !post.data.draft && !post.data.archived)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-const featuredPosts = allPosts
-  .filter((post) => post.data.featured)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 6);
+const featuredPosts = allPosts.filter((post) => post.data.featured);
+const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : allPosts.slice(0, 6);
 ---
 
-<Base title="Sean Silvius" description="Articles on software engineering, product design, startups, and gaming from Sean Silvius.">
+<Base title="Sean Silvius">
 
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
@@ -37,41 +33,33 @@ const featuredPosts = allPosts
   <section class="bg-muted">
     <Container size="5xl">
       <Grid preset="linear" columns={1}>
-        <Typography as="h2" variant="h2" class="uppercase">Featured Articles</Typography>
+        <Typography as="h2" variant="muted" class="text-center uppercase tracking-widest">Featured Articles</Typography>
       </Grid>
-      <Grid preset="cards">
-        {featuredPosts.map((post) => {
-          const rt = readingTime(post.body || '');
+      <Grid preset="linear" columns={3}>
+        {displayPosts.map((post) => {
+          const slug = post.data.slug || post.id;
           return (
-            <a href={`/posts/${post.id}/`} class="no-underline">
-              <Card interactive>
+            <a href={`/posts/${slug}/`} class="group no-underline">
+              <Card as="article" interactive>
                 <img
-                  src={`/images/${post.id}.png`}
-                  alt={`Image for ${post.data.title}`}
-                  class="w-full object-cover"
+                  src={`/images/${slug}.png`}
+                  alt=""
                   loading="lazy"
                 />
                 <Container gap="2">
                   <Typography as="h3" variant="h4" class="text-secondary">{post.data.title}</Typography>
-                  <Typography as="p" variant="muted">
-                    {post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}
-                  </Typography>
-                  <Typography as="p" variant="p">{post.data.excerpt}</Typography>
-                </Container>
-                <Container>
-                  <Button>Read More</Button>
+                  <Typography as="p" variant="muted">{post.data.excerpt}</Typography>
+                  <Typography as="p" variant="small" class="uppercase tracking-wider text-primary">Read More</Typography>
                 </Container>
               </Card>
             </a>
           );
         })}
       </Grid>
-      <Container>
-        <div class="text-end">
-          <a href="/posts/" class="no-underline">
-            <Button variant="outline">More Articles</Button>
-          </a>
-        </div>
+      <Container class="text-center">
+        <a href="/posts/" class="no-underline">
+          <Button variant="outline">More Articles</Button>
+        </a>
       </Container>
     </Container>
   </section>
