@@ -171,7 +171,7 @@ export const tokens = {
     /** silver-true-citrine shade at 100 level - light background range */
     'silver-true-citrine-100': 'oklch(0.896 0.12 90)',
     /** silver-true-citrine shade at 200 level - light background range */
-    'silver-true-citrine-200': 'oklch(0.839 0.12 90)',
+    'silver-true-citrine-200': 'oklch(0.828 0.189 84)',
     /** silver-true-citrine shade at 300 level - light background range */
     'silver-true-citrine-300': 'oklch(0.78 0.12 90)',
     /** silver-true-citrine shade at 400 level - mid-tone for borders and secondary text */
@@ -215,11 +215,11 @@ export const tokens = {
     /** Complete silver-true-sky color family with 11-position scale */
     'silver-true-sky': 'oklch(0.645 0.120 210.0)',
     /** silver-true-violet shade at 50 level - light background range */
-    'silver-true-violet-50': 'oklch(0.95 0.036 270)',
+    'silver-true-violet-50': 'oklch(0.984 0.003 248)',
     /** silver-true-violet shade at 100 level - light background range */
     'silver-true-violet-100': 'oklch(0.896 0.12 270)',
     /** silver-true-violet shade at 200 level - light background range */
-    'silver-true-violet-200': 'oklch(0.839 0.12 270)',
+    'silver-true-violet-200': 'oklch(0.92 0.01 255)',
     /** silver-true-violet shade at 300 level - light background range */
     'silver-true-violet-300': 'oklch(0.78 0.12 270)',
     /** silver-true-violet shade at 400 level - mid-tone for borders and secondary text */
@@ -233,7 +233,7 @@ export const tokens = {
     /** silver-true-violet shade at 800 level - dark foreground range */
     'silver-true-violet-800': 'oklch(0.3 0.12 270)',
     /** silver-true-violet shade at 900 level - dark foreground range */
-    'silver-true-violet-900': 'oklch(0.175 0.12 270)',
+    'silver-true-violet-900': 'oklch(0.208 0.042 266)',
     /** silver-true-violet shade at 950 level - dark foreground range */
     'silver-true-violet-950': 'oklch(0.05 0.072 270)',
     /** Complete silver-true-violet color family with 11-position scale */
@@ -483,7 +483,7 @@ export const tokens = {
   },
   radius: {
     /** Base border radius - all other radii derive from this value */
-    'radius-base': '0.375rem',
+    'radius-base': '0',
     /** No border radius - sharp corners */
     'radius-none': '0',
     /** Small radius for subtle rounding */
@@ -507,7 +507,7 @@ export const tokens = {
     /** Primary page background color */
     'background': 'var(--color-neutral-50)',
     /** Primary text color */
-    'foreground': 'var(--color-neutral-900)',
+    'foreground': 'var(--color-silver-true-violet-900)',
     /** Card and contained surface background */
     'card': 'var(--color-neutral-50)',
     /** Text on card surfaces */
@@ -533,7 +533,7 @@ export const tokens = {
     /** Surface border color */
     'surface-border': '#005f6b',
     /** Primary interactive elements - buttons, links, focus states */
-    'primary': 'oklch(0.341 0.015 255.0)',
+    'primary': 'var(--color-silver-true-violet-900)',
     /** Text on primary color backgrounds */
     'primary-foreground': 'oklch(0.531 0.023 246.0)',
     /** Primary hover state */
@@ -555,7 +555,7 @@ export const tokens = {
     /** Text on subtle primary backgrounds */
     'primary-subtle-foreground': 'var(--color-neutral-900)',
     /** Secondary interactive elements - less prominent actions */
-    'secondary': 'oklch(0.798 0.080 60.0)',
+    'secondary': 'var(--color-silver-true-citrine-200)',
     /** Text on secondary color backgrounds */
     'secondary-foreground': 'oklch(0.760 0.034 225.0)',
     /** Secondary hover state */
@@ -573,7 +573,7 @@ export const tokens = {
     /** Secondary focus ring color */
     'secondary-ring': 'var(--color-neutral-400)',
     /** Muted backgrounds for subtle emphasis */
-    'muted': 'var(--color-neutral-100)',
+    'muted': 'var(--color-silver-true-violet-50)',
     /** Muted text for secondary information */
     'muted-foreground': 'var(--color-neutral-500)',
     /** Muted hover state */
@@ -585,7 +585,7 @@ export const tokens = {
     /** Muted border color */
     'muted-border': 'var(--color-neutral-200)',
     /** Accent for hover states and highlights */
-    'accent': 'oklch(0.722 0.080 60.0)',
+    'accent': 'var(--color-silver-true-citrine-200)',
     /** Text on accent backgrounds */
     'accent-foreground': 'oklch(0.531 0.023 246.0)',
     /** Accent hover state */
@@ -721,7 +721,7 @@ export const tokens = {
     /** Text on highlight active */
     'highlight-active-foreground': 'var(--color-silver-true-violet-950)',
     /** Default border color */
-    'border': 'var(--color-neutral-200)',
+    'border': 'var(--color-silver-true-violet-200)',
     /** Border hover state */
     'border-hover': 'var(--color-neutral-300)',
     /** Border focus state */

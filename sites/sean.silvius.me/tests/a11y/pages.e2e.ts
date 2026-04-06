@@ -17,9 +17,6 @@ test.describe("Accessibility", () => {
       const results = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa"])
         .exclude("iframe")
-        .disableRules([
-          "color-contrast", // Design decision - can be addressed later
-        ])
         .analyze();
 
       const criticalViolations = results.violations.filter((v) => v.impact === "critical");
