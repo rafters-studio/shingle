@@ -38,7 +38,7 @@ const grouped = sorted.reduce<Record<string, typeof sorted>>((acc, entry) => {
   <Container size="3xl">
     {Object.entries(grouped).map(([date, entries]) => (
       <Container gap="4">
-        <H2 size="sm" color="muted" weight="medium" tracking="widest">{date}</H2>
+        <H2 size="sm" color="muted" weight="medium" tracking="widest" transform="uppercase">{date}</H2>
         <Container gap="3">
           {entries.map((entry) => (
             <a href={`/night-shift/${entry.id}/`}>

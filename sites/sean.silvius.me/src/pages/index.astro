@@ -26,8 +26,8 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
 
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
-      <H1 size="6xl" family="serif" weight="semibold" line="none">Hi. I build complex things in a simple manner. With bits and bytes, with wood.</H1>
-      <P size="xl" color="muted" weight="medium">I log the things that have interested me, hopefully someone will find some of what I've
+      <H1 size="6xl" family="serif" weight="semibold" line="none" align="center">Hi. I build complex things in a simple manner. With bits and bytes, with wood.</H1>
+      <P size="xl" color="muted" weight="medium" align="center">I log the things that have interested me, hopefully someone will find some of what I've
         learned useful in their own endeavors. I tend to make mistakes and adjust just as any
         student of life does. Those mistakes are really the important things.</P>
     </Grid>
@@ -35,7 +35,7 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
 
   <Container size="5xl" background="muted">
     <Grid preset="linear" columns={1}>
-      <H2>Featured Articles</H2>
+      <H2 transform="uppercase" weight="black" align="center">Featured Articles</H2>
     </Grid>
     <Grid preset="linear" columns={3} gap="6">
       {displayPosts.map((post) => {
@@ -50,7 +50,7 @@ const displayPosts = featuredPosts.length >= 3 ? featuredPosts.slice(0, 6) : all
                 loading="lazy"
               />
               <Container gap="1" background="primary">
-                <H3 size="xl" weight="bold">{post.data.title}</H3>
+                <H3 size="xl" weight="bold" color="accent">{post.data.title}</H3>
                 <Small color="muted">{post.data.date.toLocaleDateString('en-US')} &bull; {rt.text}</Small>
               </Container>
               <Container gap="2">

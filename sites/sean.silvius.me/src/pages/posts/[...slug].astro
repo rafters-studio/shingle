@@ -41,7 +41,7 @@ const dateIso = post.data.date.toISOString();
 
   <Container size="5xl">
     <Grid preset="linear" columns={1}>
-      <Small tracking="widest" color="muted">{post.data.title}</Small>
+      <Small tracking="widest" color="muted" transform="uppercase">{post.data.title}</Small>
       <Small color="muted">
         <time datetime={dateIso}>{formattedDate}</time> &bull; {rt.text}
       </Small>
