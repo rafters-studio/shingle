@@ -63,7 +63,7 @@ const dateIso = post.data.date.toISOString();
 
   {post.data.tags && post.data.tags.length > 0 && (
     <Container size="3xl">
-      <Grid preset="row" gap="2">
+      <Grid preset="linear" gap="2">
         {post.data.tags.map((tag: string) => (
           <Badge variant="outline">{tag}</Badge>
         ))}

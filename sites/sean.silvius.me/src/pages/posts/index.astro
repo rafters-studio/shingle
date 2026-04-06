@@ -27,7 +27,7 @@ const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.
   </Container>
 
   <Container size="5xl">
-    <Grid preset="cards">
+    <Grid preset="linear" columns={3}>
       {sortedPosts.map((post) => {
         const rt = readingTime(post.body || '');
         return (

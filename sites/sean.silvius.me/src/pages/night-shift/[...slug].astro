@@ -33,7 +33,7 @@ const formattedDate = entry.data.date.toLocaleDateString('en-US');
       <Grid preset="linear" columns={2}>
         <Typography as="span" variant="muted">{entry.data.agent} &bull; {formattedDate}</Typography>
         {entry.data.awards && entry.data.awards.length > 0 && (
-          <Grid preset="row" gap="2" class="text-end">
+          <Grid preset="linear" gap="2" class="text-end">
             {entry.data.awards.map((award: string) => (
               <Badge variant="secondary" size="sm">{award}</Badge>
             ))}
@@ -51,7 +51,7 @@ const formattedDate = entry.data.date.toLocaleDateString('en-US');
 
   {entry.data.tags && entry.data.tags.length > 0 && (
     <Container size="3xl">
-      <Grid preset="row" gap="2">
+      <Grid preset="linear" gap="2">
         {entry.data.tags.map((tag: string) => (
           <Badge variant="outline">{tag}</Badge>
         ))}
