@@ -1,5 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
+import LegionHero from '../components/LegionHero.astro';
+import ArchitectureCanvas from '../components/ArchitectureCanvas.astro';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
 import Typography from '@/src/components/ui/typography.astro';
@@ -29,6 +31,8 @@ import Separator from '@/src/components/ui/separator.astro';
       <Typography as="code" variant="code">curl -fsSL https://raw.githubusercontent.com/runlegion/legion/main/install.sh | bash</Typography>
     </Container>
   </Container>
+
+  <LegionHero />
 
   <Separator />
 
@@ -118,6 +122,7 @@ Prime: Spawning 4 specialists. I'll deliver a PR.
   <Container size="5xl" padding="12">
     <Container gap="6">
       <Typography as="h2" variant="h2">Built with</Typography>
+      <ArchitectureCanvas />
       <Grid preset="linear" columns={2} gap="6">
         <Container gap="2">
           <Typography as="h3" variant="h4">Rust</Typography>
