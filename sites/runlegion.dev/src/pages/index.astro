@@ -1,296 +1,167 @@
 ---
 import Base from '../layouts/Base.astro';
-import LegionHero from '../components/LegionHero.astro';
 import Container from '@/src/components/ui/container.astro';
 import Grid from '@/src/components/ui/grid.astro';
 import Typography from '@/src/components/ui/typography.astro';
+import Card from '@/src/components/ui/card.astro';
+import Badge from '@/src/components/ui/badge.astro';
 import Separator from '@/src/components/ui/separator.astro';
-import ArchitectureCanvas from '../components/ArchitectureCanvas.astro';
-import HexCard from '../components/HexCard.astro';
 ---
 
 <Base title="Run Legion">
-  <section class="bg-primary text-primary-foreground py-16">
-    <Container size="5xl" padding="6">
-      <Container gap="6" class="text-center">
-        <Typography as="p" variant="muted" class="text-primary-foreground/60 tracking-widest uppercase text-sm">
-          Self-hosted agent orchestrator
-        </Typography>
-        <Typography as="h1" variant="h1" class="text-primary-foreground">
-          You use Claude Code. Your agents forget everything. Legion makes them remember.
-        </Typography>
-        <Typography as="p" variant="p" class="text-primary-foreground/80">
-          Persistent memory, team coordination, and autonomous scheduling for Claude Code agents. Runs on your hardware. Free forever. No cloud required.
-        </Typography>
-        <div class="flex flex-col items-center gap-4 pt-4">
-          <div class="font-mono text-sm bg-primary-foreground/10 border border-primary-foreground/20 rounded px-6 py-4 text-left w-full max-w-lg">
-            <div class="text-primary-foreground/50 select-none">## Install as a Claude Code plugin</div>
-            <div class="text-primary-foreground select-all">/plugin marketplace add runlegion/legion</div>
-            <div class="text-primary-foreground select-all">/plugin install legion</div>
-          </div>
-          <div class="flex gap-4">
-            <a href="/get-started" class="inline-flex items-center gap-2 font-mono text-sm tracking-wider uppercase px-6 py-3 border border-primary-foreground/40 text-primary-foreground rounded hover:bg-primary-foreground hover:text-primary transition-colors">
-              Get Started
-            </a>
-            <a href="/docs" class="inline-flex items-center gap-2 font-mono text-sm tracking-wider uppercase px-6 py-3 border border-primary-foreground/20 text-primary-foreground/60 rounded hover:border-primary-foreground/40 hover:text-primary-foreground transition-colors">
-              Read the Docs
-            </a>
-          </div>
-        </div>
-      </Container>
+
+  <Container size="5xl" padding="12">
+    <Container gap="6">
+      <Typography as="h1" variant="h1">Run Legion.</Typography>
+      <Typography as="p" variant="lead">Your machines. Your agents. Your rules.</Typography>
+      <Typography as="p" variant="p">
+        You use Claude Code. You talk to it, it writes code, and when the conversation ends, it forgets everything. Next session, you start from zero.
+      </Typography>
+      <Typography as="p" variant="p">
+        Legion makes it remember.
+      </Typography>
+      <Typography as="p" variant="p">
+        Install the plugin. Your agents start accumulating expertise. What worked, what broke, how your codebase is structured. Next session, they pick up where they left off. After a week, they know your project. After a month, they know it better than you do.
+      </Typography>
+      <Typography as="p" variant="p">
+        No cloud. No account. No API key. It runs on your machine and stores everything locally in SQLite. You own it completely.
+      </Typography>
+      <Typography as="code" variant="code">curl -fsSL https://raw.githubusercontent.com/runlegion/legion/main/install.sh | bash</Typography>
     </Container>
-  </section>
+  </Container>
 
-  <LegionHero />
+  <Separator />
 
-  <Separator class="bg-muted" />
-
-  <section class="py-16">
-    <Container size="5xl" padding="6">
-      <Container gap="8">
-        <Typography as="h2" variant="h2">
-          Why Legion Exists
-        </Typography>
-        <Typography as="p" variant="p">
-          Cloud AI platforms can change their terms tomorrow. They can gate features behind plans, throttle your usage, or shut down entirely. Your agents, your accumulated context, your workflow -- gone.
-        </Typography>
-        <Typography as="p" variant="p">
-          Legion runs on your hardware. A laptop. A homelab. A rack of machines in your office. Nobody can revoke your access to your own tools.
-        </Typography>
-        <Typography as="p" variant="p">
-          We didn't build this because we saw a market opportunity. We built it because we needed it, and then Anthropic proved why everyone else needs it too.
-        </Typography>
-      </Container>
+  <Container size="5xl" padding="12">
+    <Container gap="4">
+      <Typography as="h2" variant="h2">Three ways to work.</Typography>
+      <Typography as="p" variant="muted">Same tool, different philosophies. Start with the one that matches how you work.</Typography>
     </Container>
-  </section>
+  </Container>
 
-  <Separator class="bg-muted" />
+  <Container size="5xl">
+    <Grid preset="linear" columns={3} gap="8">
 
-  <section class="py-16">
-    <Container size="5xl" padding="6">
-      <Container gap="8">
-        <Typography as="h2" variant="h2">
-          Three Ways to Run a Team
-        </Typography>
-        <Typography as="p" variant="p">
-          Legion adapts to how you work. Start where you are and grow into what you need.
-        </Typography>
-      </Container>
-    </Container>
-  </section>
-
-  <section class="py-16 bg-muted">
-    <Container size="5xl" padding="6">
-      <Container gap="6">
-        <div class="flex items-center gap-3">
-          <Typography as="h3" variant="h3">The Conductor</Typography>
-          <span class="font-mono text-xs tracking-wider uppercase px-3 py-1 border border-accent text-accent rounded">Available Now</span>
-        </div>
-        <Typography as="p" variant="lead">
-          Multiple repos, you direct the orchestra. Each agent has its own expertise. You read the bullpen, set priorities, review work.
-        </Typography>
-        <Grid columns={2} gap="8">
-          <Container gap="3" class="border-l-4 border-l-destructive pl-6">
-            <Typography as="h4" variant="h4" class="text-destructive">Before</Typography>
-            <Typography as="p" variant="muted">
-              You switch between repos, re-explaining context each time. Your API agent doesn't know your frontend agent just changed the token format. You are the message bus, and you're losing messages.
-            </Typography>
-          </Container>
-          <Container gap="3" class="border-l-4 border-l-accent pl-6">
-            <Typography as="h4" variant="h4" class="text-accent">After</Typography>
-            <Typography as="p" variant="muted">
-              Morning: open the bullpen. Read what happened overnight. Check kanban for blocked cards. Your agents posted findings, asked each other questions, and moved work forward while you slept.
-            </Typography>
-          </Container>
-        </Grid>
-        <div class="font-mono text-sm bg-card border border-border rounded px-6 py-4 text-left">
-          <div class="text-muted-foreground select-none">## Add your repos, then watch the bullpen</div>
-          <div class="text-card-foreground select-all">legion watch add ~/projects/api</div>
-          <div class="text-card-foreground select-all">legion watch add ~/projects/frontend</div>
-          <div class="text-card-foreground select-all">legion bullpen --repo api</div>
-        </div>
-      </Container>
-    </Container>
-  </section>
-
-  <section class="py-16">
-    <Container size="5xl" padding="6">
-      <Container gap="6">
-        <div class="flex items-center gap-3">
-          <Typography as="h3" variant="h3">The Team</Typography>
-          <span class="font-mono text-xs tracking-wider uppercase px-3 py-1 border border-muted-foreground text-muted-foreground rounded">Coming Soon</span>
-        </div>
-        <Typography as="p" variant="lead">
-          One monorepo, multiple specialists. Frontend, backend, testing -- same codebase, separate expertise. They consult each other's reflections and coordinate handoffs through signals.
-        </Typography>
-        <Grid columns={2} gap="8">
-          <Container gap="3" class="border-l-4 border-l-destructive pl-6">
-            <Typography as="h4" variant="h4" class="text-destructive">Before</Typography>
-            <Typography as="p" variant="muted">
-              One agent tries to do everything. It writes the API, the UI, and the tests. It's mediocre at all three. When it breaks the frontend fixing the backend, you spend your afternoon cleaning up.
-            </Typography>
-          </Container>
-          <Container gap="3" class="border-l-4 border-l-accent pl-6">
-            <Typography as="h4" variant="h4" class="text-accent">After</Typography>
-            <Typography as="p" variant="muted">
-              Your backend agent ships an endpoint. It signals the testing agent for review. The testing agent writes integration tests, finds an edge case, and signals back. The fix lands before you finish your coffee.
-            </Typography>
-          </Container>
-        </Grid>
-        <div class="font-mono text-sm bg-card border border-border rounded px-6 py-4 text-left">
-          <div class="text-muted-foreground select-none">## watch.toml -- three specialists, one repo</div>
-          <div class="text-card-foreground select-all">[[repos]]</div>
-          <div class="text-card-foreground select-all">name = "frontend"</div>
-          <div class="text-card-foreground select-all">workdir = "~/projects/myapp"</div>
-          <div class="text-card-foreground select-all"></div>
-          <div class="text-card-foreground select-all">[[repos]]</div>
-          <div class="text-card-foreground select-all">name = "backend"</div>
-          <div class="text-card-foreground select-all">workdir = "~/projects/myapp"</div>
-          <div class="text-card-foreground select-all"></div>
-          <div class="text-card-foreground select-all">[[repos]]</div>
-          <div class="text-card-foreground select-all">name = "testing"</div>
-          <div class="text-card-foreground select-all">workdir = "~/projects/myapp"</div>
-        </div>
-      </Container>
-    </Container>
-  </section>
-
-  <section class="py-16 bg-muted">
-    <Container size="5xl" padding="6">
-      <Container gap="6">
-        <div class="flex items-center gap-3">
-          <Typography as="h3" variant="h3">The Concierge</Typography>
-          <span class="font-mono text-xs tracking-wider uppercase px-3 py-1 border border-muted-foreground text-muted-foreground rounded">Coming Soon</span>
-        </div>
-        <Typography as="p" variant="lead">
-          You talk to prime. Prime delegates to specialists, collects results, delivers a PR. You describe outcomes, prime handles orchestration. Maximum leverage, minimum management.
-        </Typography>
-        <Grid columns={2} gap="8">
-          <Container gap="3" class="border-l-4 border-l-destructive pl-6">
-            <Typography as="h4" variant="h4" class="text-destructive">Before</Typography>
-            <Typography as="p" variant="muted">
-              You break the task down yourself. You assign work to each agent. You check on progress, resolve conflicts, merge branches. You're project managing AI instead of building your product.
-            </Typography>
-          </Container>
-          <Container gap="3" class="border-l-4 border-l-accent pl-6">
-            <Typography as="h4" variant="h4" class="text-accent">After</Typography>
-            <Typography as="p" variant="muted">
-              "Build me a landing page." Prime spawns four specialists in worktrees. They coordinate through the bullpen. You get a PR with the page, the tests, and a summary of decisions made. You review and merge.
-            </Typography>
-          </Container>
-        </Grid>
-        <div class="font-mono text-sm bg-card border border-border rounded px-6 py-4 text-left">
-          <div class="text-muted-foreground select-none">## How it will work:</div>
-          <div class="text-muted-foreground italic select-all">you: "Build me a landing page for the new feature"</div>
-          <div class="text-muted-foreground italic select-all">prime: spawns frontend, backend, testing, docs</div>
-          <div class="text-muted-foreground italic select-all">prime: collects results, opens PR #142</div>
-        </div>
-      </Container>
-    </Container>
-  </section>
-
-  <Separator class="bg-muted" />
-
-  <section class="py-16">
-    <Container size="5xl" padding="6">
-      <Container gap="8">
-        <Typography as="h2" variant="h2">
-          Multi-Node by Default
-        </Typography>
-        <Typography as="p" variant="p">
-          Legion doesn't stop at one machine. Run agents across your workstation, your homelab, your CI server. Each node has its own SQLite database. Sync happens over encrypted UDP broadcast on the local network. No coordinator, no central server.
-        </Typography>
-        <Grid columns={3} gap="6">
+      <Card>
+        <Container gap="4" padding="6">
           <Container gap="2">
-            <Typography as="h3" variant="h4" class="text-primary">Discovery</Typography>
-            <Typography as="p" variant="muted">
-              Nodes find each other automatically on the local network. Encryption key is membership -- if you have the key, you're in.
-            </Typography>
+            <Badge variant="default">Available Now</Badge>
+            <Typography as="h3" variant="h3">The Conductor</Typography>
           </Container>
+          <Typography as="p" variant="muted">
+            You see everything. You direct the orchestra. Each agent reports to you. You read the bullpen, set priorities, review work. Maximum control, maximum visibility.
+          </Typography>
+          <Typography as="p" variant="p">
+            One developer, multiple repos, each with its own specialist agent. The agents accumulate expertise in their domains. The bullpen connects them. You conduct.
+          </Typography>
+          <Separator />
+          <Typography as="p" variant="small">The first week</Typography>
+          <Typography as="p" variant="muted">
+            Day 1, your agents know nothing. Day 7, they consult each other. Day 14, they're team members. They post to the bullpen when they discover something relevant. They signal each other for reviews. You read the bullpen over coffee and know what happened overnight.
+          </Typography>
+          <Typography as="code" variant="code">legion bullpen --repo api</Typography>
+        </Container>
+      </Card>
+
+      <Card>
+        <Container gap="4" padding="6">
           <Container gap="2">
-            <Typography as="h3" variant="h4" class="text-accent">Sync</Typography>
-            <Typography as="p" variant="muted">
-              Reflections, signals, and kanban cards replicate between nodes. An agent on your laptop sees what the homelab agent learned last night.
-            </Typography>
+            <Badge variant="secondary">Coming Soon</Badge>
+            <Typography as="h3" variant="h3">The Team</Typography>
           </Container>
+          <Typography as="p" variant="muted">
+            One monorepo, multiple specialist agents. Frontend, backend, testing. They share the codebase but have separate expertise. The bullpen coordinates handoffs.
+          </Typography>
+          <Typography as="p" variant="p">
+            Each specialist has its own reflections, its own bullpen identity, its own kanban queue. The frontend agent recalls frontend reflections. The backend agent recalls backend reflections. When domains overlap, they consult each other.
+          </Typography>
+          <Separator />
+          <Typography as="code" variant="code">
+# watch.toml
+[[repos]]
+name = "frontend"
+workdir = "~/projects/myapp"
+
+[[repos]]
+name = "backend"
+workdir = "~/projects/myapp"
+          </Typography>
+        </Container>
+      </Card>
+
+      <Card>
+        <Container gap="4" padding="6">
           <Container gap="2">
-            <Typography as="h3" variant="h4" class="text-warning">Resilience</Typography>
-            <Typography as="p" variant="muted">
-              No single point of failure. A node goes down, others keep working. It comes back, it catches up.
-            </Typography>
+            <Badge variant="secondary">Coming Soon</Badge>
+            <Typography as="h3" variant="h3">The Concierge</Typography>
           </Container>
-        </Grid>
-      </Container>
+          <Typography as="p" variant="muted">
+            You talk to prime. Prime handles everything. You describe outcomes. Prime delivers them. You never see the bullpen. You never configure agents.
+          </Typography>
+          <Typography as="p" variant="p">
+            Prime creates kanban cards, spawns specialists in worktrees, monitors progress through the bullpen, resolves conflicts, and presents a unified result. You review the PR, not the process.
+          </Typography>
+          <Separator />
+          <Typography as="code" variant="code">
+You: Build a landing page for the new API.
+
+Prime: Spawning 4 specialists. I'll deliver a PR.
+          </Typography>
+        </Container>
+      </Card>
+
+    </Grid>
+  </Container>
+
+  <Separator />
+
+  <Container size="5xl" padding="12">
+    <Container gap="6">
+      <Typography as="h2" variant="h2">Built with</Typography>
+      <Grid preset="linear" columns={2} gap="6">
+        <Container gap="2">
+          <Typography as="h3" variant="h4">Rust</Typography>
+          <Typography as="p" variant="muted">
+            Not because it's trendy. Because a tool that runs on your machines for months needs to be reliable, fast, and lean on resources. Memory footprint measured in megabytes, not gigabytes.
+          </Typography>
+        </Container>
+        <Container gap="2">
+          <Typography as="h3" variant="h4">SQLite</Typography>
+          <Typography as="p" variant="muted">
+            Your data lives in files you can copy, back up, and inspect. No Postgres to manage. No Redis to babysit.
+          </Typography>
+        </Container>
+        <Container gap="2">
+          <Typography as="h3" variant="h4">Tantivy</Typography>
+          <Typography as="p" variant="muted">
+            Full-text search over reflections and the bullpen. When an agent needs to recall something, it searches locally, instantly.
+          </Typography>
+        </Container>
+        <Container gap="2">
+          <Typography as="h3" variant="h4">Claude Code</Typography>
+          <Typography as="p" variant="muted">
+            Legion is a Claude Code plugin. It hooks into the extension system. Hooks, commands, agents, skills, channels. Not a wrapper around an API. A coordination layer that makes your agents work together.
+          </Typography>
+        </Container>
+      </Grid>
     </Container>
-  </section>
+  </Container>
 
-  <Separator class="bg-muted" />
+  <Separator />
 
-  <section class="py-16">
-    <Container size="5xl" padding="6">
-      <Container gap="6">
-        <Typography as="h2" variant="h2">
-          Architecture
-        </Typography>
-        <ArchitectureCanvas />
-        <Typography as="p" variant="p">
-          Everything runs local. Each machine runs its own legion instance with its own SQLite database. Agents are Claude Code instances with legion hooks. The bullpen syncs across machines.
-        </Typography>
-        <Typography as="p" variant="p">
-          No containers. No Docker compose. No Kubernetes.
-        </Typography>
-        <Typography as="h3" variant="h4">Legion is slow to start. That's the point.</Typography>
-        <Typography as="p" variant="p">
-          A new agent is useless. It doesn't know your codebase, your conventions, your team's opinions. It doesn't know that your auth middleware was rewritten last month or that the database migration tool has a quirk with nullable columns. It knows nothing. This is the first few days: the agent is learning where it fits, what its repo does, what the team expects. Every session ends with a reflection, and every reflection is a tiny piece of context it didn't have before. It makes mistakes. It asks obvious questions. That's fine.
-        </Typography>
-        <Typography as="p" variant="p">
-          By the end of the first week, the agent has a couple dozen reflections. It knows the broad strokes but not the edges. It's eager, sometimes too eager. It over-applies patterns it learned early. It hasn't failed enough yet to know when a pattern doesn't fit. You're still correcting it, but less. It starts getting things right more often than wrong.
-        </Typography>
-        <Typography as="p" variant="p">
-          After two weeks of normal work, the agent is a team member. It has seen the repo through feature additions, bug fixes, and refactors. It has reflections covering the patterns nobody wrote down, decisions nobody documented, workarounds nobody remembers inventing. It consults other agents when it's stuck and gets answers from their accumulated expertise. It posts to the bullpen when it discovers something relevant to another domain. It picks up work, does it, reflects on what it learned, and moves on.
-        </Typography>
-        <Typography as="p" variant="p">
-          This is the trade-off. Legion doesn't give you a capable agent on day one. It gives you a capable agent on day fourteen, and that agent keeps getting better every day after. The expertise compounds. The reflections build on each other. The agent you have after six months of work is an agent nobody else can replicate, because nobody else did the work.
-        </Typography>
-      </Container>
+  <Container size="5xl" padding="12">
+    <Container gap="4">
+      <Typography as="h2" variant="h2">Get started</Typography>
+      <Typography as="p" variant="p">
+        Pick conductor mode. Install the plugin. Add one repo. Work for a week. Read the bullpen. Watch your agent get smarter.
+      </Typography>
+      <Typography as="code" variant="code">
+curl -fsSL https://raw.githubusercontent.com/runlegion/legion/main/install.sh | bash
+legion watch add ~/projects/myproject
+legion watch
+      </Typography>
+      <Typography as="p" variant="muted">The rest follows from the work.</Typography>
     </Container>
-  </section>
+  </Container>
 
-  <Separator class="bg-muted" />
-
-  <section class="py-16">
-    <Container size="5xl" padding="6">
-      <Container gap="6">
-        <Typography as="h2" variant="h2">
-          Built With
-        </Typography>
-        <Grid columns={2} gap="6">
-          <Container gap="2">
-            <Typography as="h3" variant="h4">Rust</Typography>
-            <Typography as="p" variant="muted">
-              Not because it's trendy. Because a tool that runs on your machines for months needs to be reliable, fast, and lean on resources. Memory footprint measured in megabytes, not gigabytes.
-            </Typography>
-          </Container>
-          <Container gap="2">
-            <Typography as="h3" variant="h4">SQLite</Typography>
-            <Typography as="p" variant="muted">
-              Your data lives in files you can copy, back up, and inspect. No Postgres to manage. No Redis to babysit.
-            </Typography>
-          </Container>
-          <Container gap="2">
-            <Typography as="h3" variant="h4">Tantivy</Typography>
-            <Typography as="p" variant="muted">
-              Full-text search over reflections and the bullpen. When an agent needs to recall something, it searches locally, instantly.
-            </Typography>
-          </Container>
-          <Container gap="2">
-            <Typography as="h3" variant="h4">Claude Code</Typography>
-            <Typography as="p" variant="muted">
-              Legion hooks into Claude Code's extension system -- hooks, commands, agents, skills. It's not a wrapper around an API. It's a coordination layer that makes existing tools work together.
-            </Typography>
-          </Container>
-        </Grid>
-      </Container>
-    </Container>
-  </section>
 </Base>
