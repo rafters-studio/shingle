@@ -1,0 +1,85 @@
+---
+interface Props {
+  award: string;
+}
+
+const { award } = Astro.props;
+
+const awards: Record<string, { color: string; label: string; icon: string }> = {
+  'best-musing': {
+    color: 'oklch(0.85 0.18 85)',
+    label: 'best musing',
+    icon: `<path d="M4 3.5h8v1H4z" fill="currentColor"/>
+      <path d="M5 4.5v3c0 1.7 1.3 3 3 3s3-1.3 3-3v-3H5z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M11 5.5c.8 0 1.5.4 1.8 1 .3.5.2 1.2-.3 1.7-.4.4-1 .6-1.5.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+      <path d="M5 5.5c-.8 0-1.5.4-1.8 1-.3.5-.2 1.2.3 1.7.4.4 1 .6 1.5.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+      <path d="M8 10.5v1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M5.5 12.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      <circle cx="7" cy="6.5" r="0.6" fill="currentColor" opacity="0.5"/>
+      <circle cx="9" cy="7.5" r="0.4" fill="currentColor" opacity="0.4"/>`,
+  },
+  'best-thread': {
+    color: 'oklch(0.75 0.18 230)',
+    label: 'best thread',
+    icon: `<ellipse cx="6" cy="6" rx="2.8" ry="4" transform="rotate(-30 6 6)" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <ellipse cx="10" cy="10" rx="2.8" ry="4" transform="rotate(-30 10 10)" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="4.5" cy="3.5" r="0.5" fill="currentColor" opacity="0.35"/>
+      <circle cx="12" cy="12" r="0.4" fill="currentColor" opacity="0.3"/>`,
+  },
+  'best-new-word': {
+    color: 'oklch(0.75 0.18 330)',
+    label: 'best new word',
+    icon: `<path d="M8 1.5L8.8 5.5 12.5 4.5 9.5 7 13 9 9 9 8 14 7 9 3 9 6.5 7 3.5 4.5 7.2 5.5Z" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="8" cy="7.5" r="1.2" fill="currentColor" opacity="0.6"/>
+      <circle cx="5.5" cy="5" r="0.4" fill="currentColor" opacity="0.3"/>
+      <circle cx="10.5" cy="10" r="0.35" fill="currentColor" opacity="0.25"/>`,
+  },
+  'best-one-liner': {
+    color: 'oklch(0.80 0.20 135)',
+    label: 'best one-liner',
+    icon: `<path d="M9.5 1.5L5.5 7.5h3L7 14.5l5.5-7.5H9.5l2-5.5z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M7 14.5l1.5-4" stroke="currentColor" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+      <circle cx="10.5" cy="3" r="0.4" fill="currentColor" opacity="0.3"/>`,
+  },
+};
+
+const data = awards[award];
+---
+
+{data && (
+  <span class="night-award" style={`--award-color: ${data.color};`}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      set:html={data.icon}
+    />
+    <span class="night-award-label">{data.label}</span>
+  </span>
+)}
+
+<style>
+  .night-award {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--award-color);
+  }
+
+  .night-award svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .night-award-label {
+    font-family: var(--font-geist-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--award-color);
+  }
+</style>

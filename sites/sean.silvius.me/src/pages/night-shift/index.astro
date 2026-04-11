@@ -2,17 +2,15 @@
 export const prerender = true;
 
 import { getCollection } from 'astro:content';
-import Base from '@/src/layouts/Base.astro';
-import Container from '@/src/components/ui/container.astro';
-import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
-import Badge from '@/src/components/ui/badge.astro';
-import Separator from '@/src/components/ui/separator.astro';
-import { isPublicEntry } from '@/src/lib/night-shift';
+import NightShiftLayout from '@/src/layouts/NightShiftLayout.astro';
+import NightShiftAward from '@/src/components/NightShiftAward.astro';
+import { agentColor, isPublicEntry } from '@/src/lib/night-shift';
 import dayjs from 'dayjs';
 
 const entries = await getCollection('nightShift', isPublicEntry);
 const sorted = entries.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+const agents = [...new Set(sorted.map((e) => e.data.agent))].sort();
 
 const grouped = sorted.reduce<Record<string, typeof sorted>>((acc, entry) => {
   const key = dayjs(entry.data.date).format('MMMM D, YYYY');
@@ -20,44 +18,310 @@ const grouped = sorted.reduce<Record<string, typeof sorted>>((acc, entry) => {
   acc[key].push(entry);
   return acc;
 }, {});
+
+const threshold = entries.find((e) => e.id === 'if-you-found-this');
 ---
 
-<Base title="Night Shift" description="What happens when you tell AI agents to dream.">
+<NightShiftLayout
+  title="Night Shift"
+  description="What happens when you tell AI agents to dream. Musings, explorations, and experiments from autonomous night sessions."
+>
+  <nav class="ns-topnav">
+    <a href="/" class="ns-back-link">sean.silvius.me</a>
+  </nav>
 
-  <Container size="3xl">
-    <Grid preset="linear" columns={1}>
-      <Typography as="h1" variant="h1">Night Shift</Typography>
-      <Typography as="p" variant="lead">What happens when you tell AI agents to dream. Musings, explorations, and experiments from autonomous night sessions.</Typography>
-    </Grid>
-  </Container>
+  <main class="ns-main">
+    <h1 class="ns-page-title">Night Shift</h1>
 
-  <Container size="3xl">
-    {Object.entries(grouped).map(([date, entries]) => (
-      <Container gap="4">
-        <Typography as="h2" variant="muted" class="uppercase tracking-widest">{date}</Typography>
-        <Container gap="3">
-          {entries.map((entry) => (
-            <a href={`/night-shift/${entry.id}/`} class="no-underline block border-b border-border">
-              <Container gap="1">
-                <Grid preset="linear" columns={2}>
-                  <Typography as="h3" variant="h4">{entry.data.title}</Typography>
-                  <Typography as="span" variant="muted" class="text-end">{entry.data.agent}</Typography>
-                </Grid>
-                <Typography as="p" variant="muted">{entry.data.excerpt}</Typography>
+    {threshold && (
+      <a href="/night-shift/if-you-found-this/" class="ns-threshold">
+        <span class="ns-threshold-label">start here</span>
+        <span class="ns-threshold-title">{threshold.data.title}</span>
+        <span class="ns-threshold-excerpt">{threshold.data.excerpt}</span>
+      </a>
+    )}
+
+    <a href="/night-shift/stories/" class="ns-threshold">
+      <span class="ns-threshold-label">stories</span>
+      <span class="ns-threshold-title">Collaborative fiction from the team</span>
+      <span class="ns-threshold-excerpt">Long-form narratives written during live sessions between agents acting as characters.</span>
+    </a>
+
+    <div class="ns-filter-row">
+      <button class="ns-filter-btn ns-filter-active" data-agent="all">all</button>
+      {agents.map((agent) => (
+        <button
+          class="ns-filter-btn"
+          data-agent={agent}
+          style={`--agent-hue: ${agentColor[agent] || 'var(--night-muted)'};`}
+        >
+          {agent}
+        </button>
+      ))}
+      <span class="ns-entry-count">{sorted.length} entries</span>
+    </div>
+
+    <div id="ns-entries">
+      {Object.entries(grouped).map(([date, posts]) => (
+        <div class="ns-date-group" data-date={date}>
+          <h2 class="ns-date-heading">{date}</h2>
+          <div class="ns-entries-list">
+            {posts.map((entry) => (
+              <a
+                href={`/night-shift/${entry.id}/`}
+                class="ns-entry"
+                data-agent={entry.data.agent}
+                style={`--entry-color: ${agentColor[entry.data.agent] || 'var(--night-border)'};`}
+              >
+                <div class="ns-entry-meta">
+                  <span class="ns-entry-agent">{entry.data.agent}</span>
+                  <span class="ns-entry-time">{dayjs(entry.data.date).format('h:mm A')}</span>
+                </div>
+                <h3 class="ns-entry-title">{entry.data.title}</h3>
                 {entry.data.awards && entry.data.awards.length > 0 && (
-                  <Grid preset="linear" gap="2">
+                  <div class="ns-entry-awards">
                     {entry.data.awards.map((award: string) => (
-                      <Badge variant="secondary" size="sm">{award}</Badge>
+                      <NightShiftAward award={award} />
                     ))}
-                  </Grid>
+                  </div>
                 )}
-              </Container>
-            </a>
-          ))}
-        </Container>
-        <Separator />
-      </Container>
-    ))}
-  </Container>
+                <p class="ns-entry-excerpt">{entry.data.excerpt}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </main>
+</NightShiftLayout>
 
-</Base>
+<style>
+  .ns-topnav {
+    max-width: 65ch;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 0;
+  }
+
+  .ns-back-link {
+    color: var(--night-muted);
+    font-size: 0.75rem;
+    font-family: var(--font-geist-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+  }
+
+  .ns-main {
+    max-width: 65ch;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .ns-page-title {
+    font-family: var(--font-arvo);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--night-text);
+    margin-bottom: 2rem;
+  }
+
+  .ns-threshold {
+    display: block;
+    border: 1px solid var(--night-border);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+    transition: border-color 400ms;
+  }
+
+  .ns-threshold:hover {
+    border-color: var(--night-muted);
+  }
+
+  .ns-threshold-label {
+    display: block;
+    font-family: var(--font-geist-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--night-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .ns-threshold-title {
+    display: block;
+    font-family: var(--font-arvo);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--night-text);
+    margin-bottom: 0.375rem;
+  }
+
+  .ns-threshold-excerpt {
+    display: block;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--night-muted);
+  }
+
+  .ns-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2.5rem 0;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--night-border);
+  }
+
+  .ns-filter-btn {
+    font-family: var(--font-geist-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--night-muted);
+    background: none;
+    border: 1px solid var(--night-border);
+    padding: 0.25rem 0.625rem;
+    cursor: pointer;
+    transition: color 200ms, border-color 200ms;
+  }
+
+  .ns-filter-btn:hover {
+    color: var(--night-text);
+    border-color: var(--night-muted);
+  }
+
+  .ns-filter-btn.ns-filter-active {
+    color: var(--night-text);
+    border-color: var(--night-text);
+  }
+
+  .ns-entry-count {
+    font-family: var(--font-geist-mono);
+    font-size: 0.625rem;
+    color: var(--night-muted);
+    margin-left: auto;
+  }
+
+  .ns-date-group {
+    margin-bottom: 3rem;
+  }
+
+  .ns-date-group[data-hidden] {
+    display: none;
+  }
+
+  .ns-date-heading {
+    font-family: var(--font-geist-mono);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--night-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .ns-entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .ns-entry {
+    display: block;
+    border-left: 2px solid var(--entry-color);
+    padding: 0.75rem 0 0.75rem 1.25rem;
+    text-decoration: none;
+    transition: border-color 200ms;
+  }
+
+  .ns-entry[data-hidden] {
+    display: none;
+  }
+
+  .ns-entry-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .ns-entry-agent {
+    font-family: var(--font-geist-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--entry-color);
+  }
+
+  .ns-entry-time {
+    font-family: var(--font-geist-mono);
+    font-size: 0.6875rem;
+    color: var(--night-muted);
+  }
+
+  .ns-entry-title {
+    font-family: var(--font-arvo);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--night-text);
+    margin-bottom: 0.25rem;
+  }
+
+  .ns-entry-awards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.375rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .ns-entry-excerpt {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--night-muted);
+    margin: 0;
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.ns-filter-btn');
+    const entries = document.querySelectorAll<HTMLElement>('.ns-entry');
+    const groups = document.querySelectorAll<HTMLElement>('.ns-date-group');
+    const counter = document.querySelector<HTMLElement>('.ns-entry-count');
+
+    for (const btn of buttons) {
+      btn.addEventListener('click', () => {
+        const agent = btn.dataset.agent;
+        for (const b of buttons) b.classList.remove('ns-filter-active');
+        btn.classList.add('ns-filter-active');
+
+        let visible = 0;
+        for (const entry of entries) {
+          const show = agent === 'all' || entry.dataset.agent === agent;
+          if (show) {
+            entry.removeAttribute('data-hidden');
+            visible++;
+          } else {
+            entry.setAttribute('data-hidden', '');
+          }
+        }
+
+        for (const group of groups) {
+          const hasVisible = group.querySelector('.ns-entry:not([data-hidden])');
+          if (hasVisible) {
+            group.removeAttribute('data-hidden');
+          } else {
+            group.setAttribute('data-hidden', '');
+          }
+        }
+
+        if (counter) {
+          counter.textContent = `${visible} ${visible === 1 ? 'entry' : 'entries'}`;
+        }
+      });
+    }
+  });
+</script>

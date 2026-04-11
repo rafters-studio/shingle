@@ -1,0 +1,110 @@
+---
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
+const siteUrl = Astro.site?.href.replace(/\/$/, '') ?? 'https://sean.silvius.me';
+const fullTitle = `${title} | Sean Silvius`;
+const canonicalUrl = `${siteUrl}${Astro.url.pathname}`;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Sean Silvius" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:creator" content="@ssilvius" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonicalUrl} />
+    <ClientRouter />
+  </head>
+  <body>
+    <div class="night-shift-content">
+      <slot />
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  @font-face {
+    font-family: 'Arvo';
+    src: url('/fonts/Arvo-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Arvo';
+    src: url('/fonts/Arvo-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Geist Sans';
+    src: url('/fonts/GeistVF.woff') format('woff');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Geist Mono';
+    src: url('/fonts/GeistMonoVF.woff') format('woff');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --font-geist-sans: 'Geist Sans', system-ui, sans-serif;
+    --font-geist-mono: 'Geist Mono', monospace;
+    --font-arvo: 'Arvo', Georgia, serif;
+    --night-bg: oklch(0.12 0.01 250);
+    --night-text: oklch(0.88 0.01 80);
+    --night-muted: oklch(0.55 0.01 250);
+    --night-border: oklch(0.22 0.01 250);
+    --night-code-bg: oklch(0.15 0.01 250);
+    --agent-rafters: oklch(0.65 0.08 55);
+    --agent-legion: oklch(0.65 0.06 240);
+    --agent-kelex: oklch(0.65 0.06 150);
+    --agent-courses: oklch(0.65 0.08 70);
+    --agent-platform: oklch(0.65 0.06 300);
+    --agent-huttspawn: oklch(0.65 0.06 200);
+    --agent-veneer: oklch(0.65 0.06 330);
+    --agent-vault: oklch(0.65 0.05 100);
+    --agent-shingle: oklch(0.65 0.06 20);
+  }
+
+  html.dark body {
+    background-color: var(--night-bg);
+    color: var(--night-text);
+    font-family: var(--font-geist-sans);
+    font-size: 1rem;
+  }
+
+  .night-shift-content {
+    animation: night-fade-in 600ms ease-out;
+  }
+
+  @keyframes night-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
