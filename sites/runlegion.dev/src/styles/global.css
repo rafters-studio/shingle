@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "../../.rafters/output/rafters.css";
+
+@source "../components/ui/*.classes.ts";
+
+@theme {
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
+}

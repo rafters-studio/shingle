@@ -1,0 +1,212 @@
+---
+/**
+ * ArchitectureDiagram - P2P mesh visualization.
+ *
+ * Three nodes (laptop, server, homelab) in a triangle, connected by
+ * dashed lines, with animated message dots flowing between them and
+ * pulse rings on each node. Pure SVG + SMIL animation -- no runtime JS.
+ *
+ * The React source lives in /Users/seansilvius/projects/runlegion/mock.
+ */
+---
+
+<figure class="arch">
+  <svg
+    viewBox="0 0 800 500"
+    class="arch__svg"
+    role="img"
+    aria-labelledby="arch-title arch-desc"
+  >
+    <title id="arch-title">Peer-to-peer mesh</title>
+    <desc id="arch-desc">
+      Three legion nodes -- laptop, server, homelab -- connected in a
+      triangle. Messages flow between them and state syncs through smugglr.
+    </desc>
+
+    <text
+      x="400"
+      y="30"
+      text-anchor="middle"
+      class="arch__caption"
+    >Peer-to-peer mesh &#x2022; Every node is equal &#x2022; No single point of failure</text>
+
+    <line x1="400" y1="120" x2="200" y2="350" class="arch__edge" />
+    <line x1="200" y1="350" x2="600" y2="350" class="arch__edge" />
+    <line x1="600" y1="350" x2="400" y2="120" class="arch__edge" />
+
+    <g class="arch__node">
+      <circle cx="400" cy="120" r="90" class="arch__pulse" />
+      <rect x="325" y="45" width="150" height="150" rx="8" class="arch__box" />
+      <text x="400" y="75" text-anchor="middle" class="arch__node-title">laptop</text>
+      <text x="400" y="105" text-anchor="middle" class="arch__node-item">[agents]</text>
+      <text x="400" y="127" text-anchor="middle" class="arch__node-item">[bullpen]</text>
+      <text x="400" y="149" text-anchor="middle" class="arch__node-item">[reflections]</text>
+      <text x="400" y="171" text-anchor="middle" class="arch__node-item">[tasks]</text>
+    </g>
+
+    <g class="arch__node">
+      <circle cx="200" cy="350" r="90" class="arch__pulse" style="animation-delay:0.5s" />
+      <rect x="125" y="275" width="150" height="150" rx="8" class="arch__box" />
+      <text x="200" y="305" text-anchor="middle" class="arch__node-title">server</text>
+      <text x="200" y="335" text-anchor="middle" class="arch__node-item">[agents]</text>
+      <text x="200" y="357" text-anchor="middle" class="arch__node-item">[bullpen]</text>
+      <text x="200" y="379" text-anchor="middle" class="arch__node-item">[reflections]</text>
+      <text x="200" y="401" text-anchor="middle" class="arch__node-item">[tasks]</text>
+    </g>
+
+    <g class="arch__node">
+      <circle cx="600" cy="350" r="90" class="arch__pulse" style="animation-delay:1s" />
+      <rect x="525" y="275" width="150" height="150" rx="8" class="arch__box" />
+      <text x="600" y="305" text-anchor="middle" class="arch__node-title">homelab</text>
+      <text x="600" y="335" text-anchor="middle" class="arch__node-item">[agents]</text>
+      <text x="600" y="357" text-anchor="middle" class="arch__node-item">[bullpen]</text>
+      <text x="600" y="379" text-anchor="middle" class="arch__node-item">[reflections]</text>
+      <text x="600" y="401" text-anchor="middle" class="arch__node-item">[tasks]</text>
+    </g>
+
+    <g class="arch__sync">
+      <rect x="330" y="230" width="140" height="40" rx="6" class="arch__sync-box" />
+      <text x="400" y="255" text-anchor="middle" class="arch__sync-label">smugglr sync</text>
+    </g>
+
+    {/* Flowing messages between nodes */}
+    <circle r="5" class="arch__msg">
+      <animate attributeName="cx" values="400;200;400" dur="4s" repeatCount="indefinite" begin="0s" />
+      <animate attributeName="cy" values="120;350;120" dur="4s" repeatCount="indefinite" begin="0s" />
+      <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="0s" />
+    </circle>
+
+    <circle r="5" class="arch__msg">
+      <animate attributeName="cx" values="200;600;200" dur="4s" repeatCount="indefinite" begin="1.5s" />
+      <animate attributeName="cy" values="350;350;350" dur="4s" repeatCount="indefinite" begin="1.5s" />
+      <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="1.5s" />
+    </circle>
+
+    <circle r="5" class="arch__msg">
+      <animate attributeName="cx" values="600;400;600" dur="4s" repeatCount="indefinite" begin="3s" />
+      <animate attributeName="cy" values="350;120;350" dur="4s" repeatCount="indefinite" begin="3s" />
+      <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="3s" />
+    </circle>
+
+    <circle r="5" class="arch__msg">
+      <animate attributeName="cx" values="200;400;200" dur="4s" repeatCount="indefinite" begin="2s" />
+      <animate attributeName="cy" values="350;120;350" dur="4s" repeatCount="indefinite" begin="2s" />
+      <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="2s" />
+    </circle>
+
+    <circle r="5" class="arch__msg">
+      <animate attributeName="cx" values="600;200;600" dur="4s" repeatCount="indefinite" begin="3.5s" />
+      <animate attributeName="cy" values="350;350;350" dur="4s" repeatCount="indefinite" begin="3.5s" />
+      <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="3.5s" />
+    </circle>
+
+    <circle r="5" class="arch__msg">
+      <animate attributeName="cx" values="400;600;400" dur="4s" repeatCount="indefinite" begin="4.5s" />
+      <animate attributeName="cy" values="120;350;120" dur="4s" repeatCount="indefinite" begin="4.5s" />
+      <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="4.5s" />
+    </circle>
+  </svg>
+</figure>
+
+<style>
+  .arch {
+    width: 100%;
+    margin: 0;
+    padding: var(--spacing-8) 0;
+    overflow-x: auto;
+  }
+
+  .arch__svg {
+    width: 100%;
+    max-width: 56rem;
+    margin: 0 auto;
+    display: block;
+    min-width: 600px;
+  }
+
+  .arch__caption {
+    fill: var(--muted-foreground);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .arch__edge {
+    stroke: var(--border);
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+  }
+
+  .arch__box {
+    fill: var(--background);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+
+  .arch__node-title {
+    fill: var(--foreground);
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .arch__node-item {
+    fill: var(--muted-foreground);
+    font-family: var(--font-code);
+    font-size: 11px;
+  }
+
+  .arch__pulse {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1;
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: arch-pulse 3s ease-in-out infinite;
+  }
+
+  .arch__sync-box {
+    fill: color-mix(in oklab, var(--primary) 5%, transparent);
+    stroke: var(--primary);
+    stroke-width: 2;
+  }
+
+  .arch__sync-label {
+    fill: var(--foreground);
+    font-family: var(--font-code);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .arch__msg {
+    fill: var(--accent);
+  }
+
+  @keyframes arch-pulse {
+    0% {
+      opacity: 0.3;
+      transform: scale(0.9);
+    }
+    50% {
+      opacity: 0;
+      transform: scale(1.1);
+    }
+    100% {
+      opacity: 0.3;
+      transform: scale(0.9);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arch__pulse {
+      animation: none;
+      opacity: 0.3;
+    }
+    .arch__msg {
+      opacity: 0.6;
+    }
+    .arch__msg animate {
+      display: none;
+    }
+  }
+</style>

@@ -86,9 +86,24 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
+      typography-code.astro:
+        specifier: link:@/components/ui/typography-code.astro
+        version: link:@/components/ui/typography-code.astro
+      typography-h1.astro:
+        specifier: link:@/components/ui/typography-h1.astro
+        version: link:@/components/ui/typography-h1.astro
+      typography-p.astro:
+        specifier: link:@/components/ui/typography-p.astro
+        version: link:@/components/ui/typography-p.astro
+      typography.astro:
+        specifier: link:@/components/ui/typography.astro
+        version: link:@/components/ui/typography.astro
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.7

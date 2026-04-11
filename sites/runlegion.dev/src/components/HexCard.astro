@@ -1,0 +1,62 @@
+---
+// Card with a decorative hex accent behind it.
+// Hex is randomly positioned and rotated per-instance for organic feel.
+// Content uses normal card layout, hex is just atmosphere.
+
+interface Props {
+  class?: string;
+}
+
+const rotation = Math.floor(Math.random() * 60) - 30;
+const offsetX = Math.floor(Math.random() * 40) - 20;
+const offsetY = Math.floor(Math.random() * 30) - 15;
+const scale = 0.8 + Math.random() * 0.5;
+const colors = ["#00e5ff", "#00ff9d", "#ffb300", "#00e5ff", "#00ff9d", "#ffb300"];
+const color = colors[Math.floor(Math.random() * colors.length)];
+---
+
+<div class="hex-accent-card">
+  <svg
+    class="hex-accent"
+    viewBox="0 0 200 200"
+    preserveAspectRatio="xMidYMid meet"
+    style={`transform: translate(${offsetX}%, ${offsetY}%) rotate(${rotation}deg) scale(${scale}); filter: drop-shadow(0 0 8px ${color});`}
+  >
+    <polygon
+      points="100,10 178,48 178,124 100,162 22,124 22,48"
+      fill="none"
+      stroke={color}
+      stroke-width="1.5"
+      opacity="0.2"
+    />
+  </svg>
+  <div class="hex-accent-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .hex-accent-card {
+    position: relative;
+    background: var(--card, #04111f);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .hex-accent {
+    position: absolute;
+    inset: 5%;
+    width: 90%;
+    height: 90%;
+    pointer-events: none;
+  }
+
+  .hex-accent-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+</style>

@@ -1,0 +1,32 @@
+---
+layout: ../../../../layouts/Docs.astro
+title: "legion schedule create"
+description: "Create a new scheduled bullpen post"
+---
+layout: ../../../../layouts/Docs.astro
+
+{/* veneer:overview */}
+
+## Usage
+
+```bash
+legion schedule create [OPTIONS] --name <NAME> --cron <CRON> --command <COMMAND> --repo <REPO>
+```
+
+## Flags
+
+| Flag | Short | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--name` | `` | Yes |  | Human-readable name for the schedule |
+| `--verbose` | `-v` | No |  | Show informational messages on stderr (quiet by default) |
+| `--cron` | `` | Yes |  | Cron expression: "HH:MM" for daily or "*/Nm" for every N minutes |
+| `--command` | `` | Yes |  | Text to post to the bullpen when the schedule fires |
+| `--repo` | `` | Yes |  | Repository name for the post |
+| `--active-start` | `` | No |  | Active window start time (HH:MM UTC). Only fires within the window. Requires --active-end |
+| `--active-end` | `` | No |  | Active window end time (HH:MM UTC). Only fires within the window. Requires --active-start |
+
+{/* veneer:when-to-use */}
+
+{/* veneer:examples */}
+
+{/* veneer:gotchas */}

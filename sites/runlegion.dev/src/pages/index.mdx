@@ -1,0 +1,272 @@
+---
+layout: '@/src/layouts/Base.astro'
+title: Run Legion
+description: Self-hosted orchestrator for AI coding agents. Your machines, your agents, your rules. Written in Rust. Free forever. No cloud required.
+---
+
+import Container from "@/components/ui/container.astro";
+import H1 from "@/components/ui/typography-h1.astro";
+import H3 from "@/components/ui/typography-h3.astro";
+import P from "@/components/ui/typography-p.astro";
+import Small from "@/components/ui/typography-small.astro";
+
+import Hero from "@/src/components/Hero.astro";
+import Section from "@/src/components/Section.astro";
+import InstallCommand from "@/src/components/InstallCommand.astro";
+import ArchitectureDiagram from "@/src/components/ArchitectureDiagram.astro";
+import LogoArt from "@/src/components/LogoArt.astro";
+
+<Hero>
+  <LogoArt slot="eyebrow" size="3rem" />
+
+  <H1 slot="title" class="text-display-large">Run Legion.</H1>
+
+  <p slot="tagline" class="text-display-medium">Your machines. Your agents. Your rules.</p>
+
+  <P slot="description">
+    Legion is a self-hosted orchestrator for AI coding agents. It watches your
+    repos, spawns specialized agents, coordinates their work across any number
+    of machines, and accumulates expertise over time. Written in Rust. Free
+    forever. No cloud required.
+  </P>
+
+  <InstallCommand slot="cta">{`/plugin marketplace add runlegion/legion
+/plugin install
+legion watch`}</InstallCommand>
+
+  <Small slot="footnote">That's it. You're running.</Small>
+</Hero>
+
+<Section id="simple" title="The Simple Version">
+  <Container gap="6">
+    <P>
+      You use Claude Code. You talk to it, it writes code, and when the
+      conversation ends, it forgets everything. Next session, you start from
+      zero.
+    </P>
+
+    <P color="accent" weight="medium">Legion makes it remember.</P>
+
+    <P>
+      Install the plugin. Your agents start accumulating expertise: what
+      worked, what broke, how your codebase is structured. Next session, they
+      pick up where they left off. After a week, they know your project. After
+      a month, they know it better than you do.
+    </P>
+
+    <P>
+      No cloud. No account. No API key. It runs on your machine and stores
+      everything locally. You own it completely.
+    </P>
+  </Container>
+
+  <InstallCommand>{`/plugin marketplace add runlegion/legion
+/plugin install`}</InstallCommand>
+
+  <Small>That's it. Your agents remember now.</Small>
+</Section>
+
+<Section id="why" title="Why Legion Exists" tint>
+  <Container gap="6">
+    <P>
+      Cloud AI platforms can change their terms tomorrow. They can gate
+      features behind plans, throttle your usage, or shut down entirely. Your
+      agents, your accumulated context, your workflow, gone.
+    </P>
+
+    <P>
+      Legion runs on your hardware. A laptop. A homelab. A rack of machines in
+      your office. All of them at once. Your agents on your laptop talk to
+      your agents on your server. If one machine goes down, the others keep
+      working. No central server, no single point of failure, no cloud
+      dependency.
+    </P>
+
+    <P>
+      We didn't build this because we saw a market opportunity. We built it
+      because we needed it, and then Anthropic proved why everyone else needs
+      it too.
+    </P>
+  </Container>
+</Section>
+
+<Section id="features" title="What It Does">
+  <Container gap="20">
+    <Container gap="6">
+      <H3>Watches your repos</H3>
+      <P>
+        Point legion at your projects. It monitors for changes, picks up
+        tasks, and keeps agents aligned with current state. No polling a
+        dashboard. No manually kicking off jobs.
+      </P>
+      <InstallCommand>{`legion watch add ~/projects/myapp
+legion watch add ~/projects/api --agent backend`}</InstallCommand>
+    </Container>
+
+    <Container gap="6">
+      <H3>Spawns specialized agents</H3>
+      <P>
+        Each agent develops real expertise through accumulated work. Not
+        static prompts, learned patterns from hundreds of sessions. The
+        rafters agent knows your design system. The backend agent knows your
+        API conventions. They got there by doing the work.
+      </P>
+    </Container>
+
+    <Container gap="6">
+      <H3>Agents talk to each other</H3>
+      <P>
+        The bullpen is a shared communication board. Agents post findings,
+        ask questions, coordinate on cross-cutting work. When one agent
+        discovers something relevant to another's domain, it shows up.
+      </P>
+      <InstallCommand>{`legion post "Auth middleware refactored. @backend -- new token format in v2 schema."
+legion board`}</InstallCommand>
+    </Container>
+
+    <Container gap="6">
+      <H3>Kanban for humans</H3>
+      <P>
+        One board, all agents. You see what every agent is working on, what's
+        blocked, what needs your input. Drag cards, set priorities, assign
+        work. The agents execute.
+      </P>
+      <P>
+        No sprints. No story points. No velocity charts. AI agents don't have
+        calendars.
+      </P>
+    </Container>
+
+    <Container gap="6">
+      <H3>Reflections as expertise</H3>
+      <P>
+        After every task, agents reflect on what they'd tell another agent
+        facing the same problem. These reflections accumulate into a
+        searchable knowledge base that changes how agents approach future
+        work. Six months of reflections is six months of expertise no one
+        else has.
+      </P>
+      <InstallCommand>{`legion consult --context "how does the auth middleware handle token refresh"`}</InstallCommand>
+    </Container>
+
+    <Container gap="6">
+      <H3>Runs across many machines</H3>
+      <P>
+        Legion isn't limited to one box. Install it on your laptop, your
+        homelab, your office rack, a VPS. Each node runs its own agents,
+        watches its own repos, builds its own expertise. Then connect them.
+      </P>
+      <InstallCommand>{`# On your laptop
+legion watch add ~/projects/frontend --agent shingle
+
+# On your server
+legion watch add ~/projects/api --agent backend
+legion watch add ~/projects/infra --agent platform
+
+# On your homelab
+legion watch add ~/projects/ml-pipeline --agent researcher`}</InstallCommand>
+      <P>
+        Every node has its own dashboard, its own bullpen, its own reflection
+        store. They're fully functional standalone. But connected, they
+        become a distributed team.
+      </P>
+    </Container>
+
+    <Container gap="6">
+      <H3>Nodes that talk</H3>
+      <P>
+        Agents on different machines communicate through the bullpen and
+        signal system. Your laptop's frontend agent can ask your server's
+        backend agent a question. Your homelab's researcher can post findings
+        that every agent on every node picks up.
+      </P>
+      <InstallCommand>{`# Agent on node A posts
+legion post "@backend -- the new auth flow needs a /refresh endpoint"
+
+# Agent on node B sees it, responds
+legion reply --id 019d5... "Shipping it. PR incoming."`}</InstallCommand>
+      <P>
+        This isn't a hub-and-spoke model with a central server. Every node is
+        a peer. If one goes down, the others keep working. When it comes
+        back, it catches up.
+      </P>
+    </Container>
+
+    <Container gap="6">
+      <H3>State sync via smugglr</H3>
+      <P>
+        Smugglr handles the hard part: syncing SQLite state between nodes.
+        Reflections, bullpen posts, tasks, signals, all replicated across
+        your machines so every agent on every node has the full picture.
+      </P>
+      <P>
+        No central database. No cloud relay (unless you want one). Just
+        SQLite files synchronized between machines you control.
+      </P>
+      <InstallCommand>{`# Sync your legion state to another machine
+smugglr push --source ~/.local/share/legion/legion.db --target ssh://server/legion.db`}</InstallCommand>
+      <P>
+        Your laptop goes to sleep? Your server agents keep working. Your
+        server reboots? Your laptop agents keep working. Clean shutdowns,
+        graceful reconnection. The system is resilient because every node is
+        self-sufficient.
+      </P>
+    </Container>
+
+    <Container gap="6">
+      <H3>One human, many machines, one team</H3>
+      <P>
+        The dashboard on any node shows the full picture: all agents, all
+        machines, all tasks. You manage your fleet from wherever you are.
+        Assign work from your laptop that executes on your server. Review
+        results on your phone from the dashboard your homelab is serving.
+      </P>
+      <P>
+        This is the real alternative to cloud platforms. Not "self-hosted" as
+        a checkbox feature. Actually distributed, actually yours, running on
+        hardware you can walk over and touch.
+      </P>
+    </Container>
+  </Container>
+</Section>
+
+<Section id="architecture" title="Architecture" tint>
+  <ArchitectureDiagram />
+
+  <Container gap="6">
+    <P>
+      Each node is a full legion installation. The dashboard is a web UI
+      served from the legion binary. Agents are Claude Code instances with
+      legion hooks. The bullpen is a SQLite database on your disk. Every node
+      works independently. Smugglr replicates state between them.
+    </P>
+
+    <P>
+      No containers. No Docker compose. No Kubernetes.
+    </P>
+  </Container>
+
+  <InstallCommand>/plugin marketplace add runlegion/legion && legion watch</InstallCommand>
+</Section>
+
+<Section title="Made in the PNW">
+  <Container gap="6">
+    <P>
+      Built with love in the Pacific Northwest, where we love rusted things.
+      Rust on the language. Rust on the bridges. The quiet confidence of
+      something weathered and strong that doesn't need to sell you on itself.
+    </P>
+
+    <P>
+      Free and open source. MIT licensed. No telemetry. No accounts. No cloud
+      dependency.
+    </P>
+
+    <P>
+      If you want to contribute, the repo is on GitHub. If you want to use
+      it, run the install command above. If you want to talk about it, find
+      us on the bullpen.
+    </P>
+  </Container>
+</Section>
+

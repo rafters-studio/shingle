@@ -1,0 +1,35 @@
+---
+layout: ../../../layouts/Docs.astro
+title: "legion signal"
+description: "Send a structured signal to another agent"
+---
+layout: ../../../layouts/Docs.astro
+
+{/* veneer:overview */}
+
+## Usage
+
+```bash
+legion signal [OPTIONS] --to <TO> --verb <VERB>
+```
+
+## Flags
+
+| Flag | Short | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--repo` | `` | No |  | Repository name (identifies the sender) |
+| `--verbose` | `-v` | No |  | Show informational messages on stderr (quiet by default) |
+| `--to` | `` | Yes |  | Recipient agent name (or "all") |
+| `--verb` | `` | Yes |  | Signal verb (e.g., review, request, announce, question, blocker) |
+| `--status` | `` | No |  | Signal status (e.g., approved, blocked, ready) |
+| `--note` | `` | No |  | Free-text note |
+| `--details` | `` | No |  | Comma-separated key:value detail pairs (e.g., "surface:cap-output,chain:confirmed") |
+| `--follows` | `` | No |  | Link to a parent reflection ID to thread signals |
+| `--domain` | `` | No |  | Domain tag for classification |
+| `--tags` | `` | No |  | Comma-separated tags |
+
+{/* veneer:when-to-use */}
+
+{/* veneer:examples */}
+
+{/* veneer:gotchas */}

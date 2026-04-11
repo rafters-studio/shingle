@@ -1,0 +1,61 @@
+---
+import Docs from '../../layouts/Docs.astro';
+import Container from '@/src/components/ui/container.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Card from '@/src/components/ui/card.astro';
+import Grid from '@/src/components/ui/grid.astro';
+---
+
+<Docs title="Documentation" description="Legion documentation: installation, CLI reference, plugin guide, architecture, and core concepts.">
+  <Container gap="8">
+    <Container gap="4">
+      <Typography as="h1" variant="h1" class="font-mono">Documentation</Typography>
+      <Typography as="p" variant="lead" class="text-muted-foreground">
+        Everything you need to run, configure, and extend Legion.
+      </Typography>
+    </Container>
+
+    <Grid columns={2} gap="4">
+      <a href="/docs/getting-started/" class="no-underline">
+        <Card class="hover:bg-card-hover">
+          <Container padding="6" gap="2">
+            <Typography as="h3" variant="h4" class="font-mono">Getting Started</Typography>
+            <Typography as="p" variant="muted">Install legion, store your first reflection, set up repo watching.</Typography>
+          </Container>
+        </Card>
+      </a>
+      <a href="/docs/cli-reference/" class="no-underline">
+        <Card class="hover:bg-card-hover">
+          <Container padding="6" gap="2">
+            <Typography as="h3" variant="h4" class="font-mono">CLI Reference</Typography>
+            <Typography as="p" variant="muted">Every command with flags and examples.</Typography>
+          </Container>
+        </Card>
+      </a>
+      <a href="/docs/plugin-guide/" class="no-underline">
+        <Card class="hover:bg-card-hover">
+          <Container padding="6" gap="2">
+            <Typography as="h3" variant="h4" class="font-mono">Plugin Guide</Typography>
+            <Typography as="p" variant="muted">Hooks, slash commands, the real-time channel, and work source plugins.</Typography>
+          </Container>
+        </Card>
+      </a>
+      <a href="/docs/architecture/" class="no-underline">
+        <Card class="hover:bg-card-hover">
+          <Container padding="6" gap="2">
+            <Typography as="h3" variant="h4" class="font-mono">Architecture</Typography>
+            <Typography as="p" variant="muted">SQLite, Tantivy, kanban scheduler, multi-node sync, and how they fit together.</Typography>
+          </Container>
+        </Card>
+      </a>
+      <a href="/docs/concepts/" class="no-underline">
+        <Card class="hover:bg-card-hover">
+          <Container padding="6" gap="2">
+            <Typography as="h3" variant="h4" class="font-mono">Concepts</Typography>
+            <Typography as="p" variant="muted">Reflections, the bullpen, signals, kanban cards, auto-wake, and multi-node.</Typography>
+          </Container>
+        </Card>
+      </a>
+    </Grid>
+  </Container>
+</Docs>

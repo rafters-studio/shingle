@@ -1,0 +1,29 @@
+---
+layout: ../../../layouts/Docs.astro
+title: "legion health"
+description: "Show current system health and recent trend"
+---
+layout: ../../../layouts/Docs.astro
+
+{/* veneer:overview */}
+
+## Usage
+
+```bash
+legion health [OPTIONS]
+```
+
+## Flags
+
+| Flag | Short | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--history` | `` | No |  | Show history for the last N duration (e.g., "1h", "30m", "24h") |
+| `--verbose` | `-v` | No |  | Show informational messages on stderr (quiet by default) |
+| `--all-hosts` | `` | No |  | Show health for all hosts (after smuggler replication) |
+| `--json` | `` | No |  | Output as JSON |
+
+{/* veneer:when-to-use */}
+
+{/* veneer:examples */}
+
+{/* veneer:gotchas */}

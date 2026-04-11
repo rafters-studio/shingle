@@ -1,0 +1,258 @@
+---
+import LogoArt from "@/src/components/LogoArt.astro";
+
+interface Props {
+    title: string;
+    description?: string;
+}
+
+const {
+    title,
+    description = "Legion is a self-hosted AI agent orchestrator you own completely. Written in Rust. Free forever. No cloud required.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content={description} />
+        <title>{title} | Legion</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+Condensed:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <header class="site-nav" data-visible="false">
+            <div class="site-nav__inner">
+                <a class="site-nav__brand" href="/" aria-label="Legion home">
+                    <img src="/logo.svg" alt="Legion" width="160" height="24" />
+                </a>
+
+                <nav aria-label="Main navigation" class="site-nav__links">
+                    <a href="#simple">Overview</a>
+                    <a href="#why">Why</a>
+                    <a href="#features">Features</a>
+                    <a href="#architecture">Architecture</a>
+                    <a
+                        href="https://github.com/runlegion/legion"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="GitHub repository"
+                        class="site-nav__icon"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"
+                            ></path>
+                            <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                        </svg>
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <slot />
+        </main>
+
+        <footer class="site-footer">
+            <div class="site-footer__inner">
+                <LogoArt size="2rem" />
+
+                <p class="site-footer__tagline">
+                    Legion &middot; Free and open source &middot; MIT licensed
+                </p>
+
+                <div class="site-footer__links">
+                    <a
+                        href="https://github.com/runlegion/legion"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="site-footer__gh"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"
+                            ></path>
+                            <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                        </svg>
+                        GitHub
+                    </a>
+                    <span aria-hidden="true">&middot;</span>
+                    <a
+                        href="https://rafters.studio"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        A Rafters Studio project
+                    </a>
+                </div>
+            </div>
+        </footer>
+
+        <script>
+            // Reveal nav only after the user scrolls past the hero.
+            const nav = document.querySelector<HTMLElement>(".site-nav");
+            if (nav) {
+                const update = () => {
+                    const scrolled = window.scrollY > window.innerHeight * 0.8;
+                    nav.dataset.visible = scrolled ? "true" : "false";
+                };
+                update();
+                window.addEventListener("scroll", update, { passive: true });
+            }
+        </script>
+    </body>
+</html>
+
+<style is:global>
+    @import "../styles/global.css";
+
+    :root {
+        --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont,
+            "Segoe UI", sans-serif;
+        --font-heading: "IBM Plex Sans Condensed", -apple-system,
+            BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont,
+            "Segoe UI", sans-serif;
+        --font-code: "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code",
+            monospace;
+        --font-mono: "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code",
+            monospace;
+    }
+
+    body {
+        background-color: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-body);
+    }
+
+    .site-nav {
+        position: fixed;
+        inset-inline: 0;
+        top: 0;
+        z-index: 50;
+        background-color: color-mix(in oklab, var(--background) 95%, transparent);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid var(--border);
+        transform: translateY(-100%);
+        opacity: 0;
+        transition: transform 300ms ease, opacity 300ms ease;
+    }
+
+    .site-nav[data-visible="true"] {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .site-nav__inner {
+        max-width: 72rem;
+        margin-inline: auto;
+        padding: var(--spacing-4) var(--spacing-6);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-8);
+    }
+
+    .site-nav__brand img {
+        display: block;
+        height: 1.5rem;
+        width: auto;
+    }
+
+    .site-nav__links {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-8);
+        font-size: var(--font-size-sm);
+    }
+
+    .site-nav__links a {
+        color: color-mix(in oklab, var(--foreground) 70%, transparent);
+        text-decoration: none;
+        transition: color 120ms ease;
+    }
+
+    .site-nav__links a:hover {
+        color: var(--foreground);
+    }
+
+    .site-nav__icon svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        display: block;
+    }
+
+    .site-footer {
+        border-top: 1px solid var(--border);
+        padding-block: var(--spacing-16);
+        color: var(--muted-foreground);
+    }
+
+    .site-footer__inner {
+        max-width: 56rem;
+        margin-inline: auto;
+        padding-inline: var(--spacing-6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-4);
+        text-align: center;
+    }
+
+    .site-footer__tagline {
+        font-size: var(--font-size-sm);
+        margin: 0;
+    }
+
+    .site-footer__links {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-4);
+        font-size: var(--font-size-sm);
+    }
+
+    .site-footer__links a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 120ms ease;
+    }
+
+    .site-footer__links a:hover {
+        color: var(--foreground);
+    }
+
+    .site-footer__gh {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-2);
+    }
+
+    .site-footer__gh svg {
+        width: 1rem;
+        height: 1rem;
+        display: block;
+    }
+</style>

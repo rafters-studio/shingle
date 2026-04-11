@@ -1,0 +1,29 @@
+---
+layout: ../../../layouts/Docs.astro
+title: "legion comment"
+description: "Post a comment on an issue or PR via work source plugins"
+---
+layout: ../../../layouts/Docs.astro
+
+{/* veneer:overview */}
+
+## Usage
+
+```bash
+legion comment [OPTIONS] --repo <REPO> --number <NUMBER> --body <BODY>
+```
+
+## Flags
+
+| Flag | Short | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--repo` | `` | Yes |  | Repository name (resolves work source config from watch.toml) |
+| `--verbose` | `-v` | No |  | Show informational messages on stderr (quiet by default) |
+| `--number` | `` | Yes |  | Issue or PR number |
+| `--body` | `` | Yes |  | Comment body |
+
+{/* veneer:when-to-use */}
+
+{/* veneer:examples */}
+
+{/* veneer:gotchas */}

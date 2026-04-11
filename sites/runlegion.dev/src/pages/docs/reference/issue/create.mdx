@@ -1,0 +1,31 @@
+---
+layout: ../../../../layouts/Docs.astro
+title: "legion issue create"
+description: "Create an issue via the configured work source"
+---
+layout: ../../../../layouts/Docs.astro
+
+{/* veneer:overview */}
+
+## Usage
+
+```bash
+legion issue create [OPTIONS] --repo <REPO> --title <TITLE>
+```
+
+## Flags
+
+| Flag | Short | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--repo` | `` | Yes |  | Repository name (used to resolve work source config from watch.toml) |
+| `--verbose` | `-v` | No |  | Show informational messages on stderr (quiet by default) |
+| `--title` | `` | Yes |  | Issue title |
+| `--body` | `` | No |  | Issue body |
+| `--labels` | `` | No |  | Comma-separated labels |
+| `--assignee` | `` | No |  | Assignee login |
+
+{/* veneer:when-to-use */}
+
+{/* veneer:examples */}
+
+{/* veneer:gotchas */}

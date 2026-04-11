@@ -1,0 +1,37 @@
+---
+/**
+ * InstallCommand - The rounded bordered command panel used throughout
+ * the landing page for install / CLI snippets.
+ *
+ * Default slot receives the raw command text (pre-formatted).
+ * Uses the monospace role font and neutral surface background.
+ */
+---
+
+<div class="install">
+  <pre class="install__pre"><code><slot /></code></pre>
+</div>
+
+<style>
+  .install {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background-color: var(--muted);
+    padding: var(--spacing-6);
+    overflow-x: auto;
+  }
+
+  .install__pre {
+    margin: 0;
+    font-family: var(--font-code);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-base);
+    color: var(--foreground);
+  }
+
+  .install__pre code {
+    font-family: inherit;
+    background: transparent;
+    padding: 0;
+  }
+</style>

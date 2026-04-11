@@ -1,0 +1,31 @@
+---
+layout: ../../../../layouts/Docs.astro
+title: "legion task create"
+description: "Create a new task for another agent"
+---
+layout: ../../../../layouts/Docs.astro
+
+{/* veneer:overview */}
+
+## Usage
+
+```bash
+legion task create [OPTIONS] --from <FROM> --to <TO> --text <TEXT>
+```
+
+## Flags
+
+| Flag | Short | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--from` | `` | Yes |  | Sender repository name |
+| `--verbose` | `-v` | No |  | Show informational messages on stderr (quiet by default) |
+| `--to` | `` | Yes |  | Target repository name |
+| `--text` | `` | Yes |  | Task description |
+| `--context` | `` | No |  | Additional context for the task |
+| `--priority` | `` | No |  | Priority: low, med, high (default: med) [default: med] [possible values: low, med, high] |
+
+{/* veneer:when-to-use */}
+
+{/* veneer:examples */}
+
+{/* veneer:gotchas */}

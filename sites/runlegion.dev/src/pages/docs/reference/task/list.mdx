@@ -1,0 +1,28 @@
+---
+layout: ../../../../layouts/Docs.astro
+title: "legion task list"
+description: "List tasks for a repo"
+---
+layout: ../../../../layouts/Docs.astro
+
+{/* veneer:overview */}
+
+## Usage
+
+```bash
+legion task list [OPTIONS] --repo <REPO>
+```
+
+## Flags
+
+| Flag | Short | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `--repo` | `` | Yes |  | Repository name |
+| `--verbose` | `-v` | No |  | Show informational messages on stderr (quiet by default) |
+| `--from` | `` | No |  | Show outbound tasks (tasks created by this repo) instead of inbound |
+
+{/* veneer:when-to-use */}
+
+{/* veneer:examples */}
+
+{/* veneer:gotchas */}

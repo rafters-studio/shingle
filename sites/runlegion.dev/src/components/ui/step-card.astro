@@ -1,0 +1,128 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import classy from '@/lib/primitives/classy';
+import Card from '@/components/ui/card.astro';
+import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import Typography from '@/components/ui/typography.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+  number: number;
+  color?: 'cyan' | 'green' | 'amber';
+  title: string;
+  subtitle?: string;
+  quote?: string;
+}
+
+const { number, color = 'cyan', title, subtitle, quote, class: className, ...attrs } = Astro.props;
+
+const badgeColorClass = `step-badge-${color}`;
+
+const barColorClass = `step-bar-${color}`;
+---
+
+<div class={classy('step-card-wrap', className)} {...attrs}>
+  <div class={classy('step-badge', badgeColorClass)}>
+    {number}
+  </div>
+  <Card class="step-card-inner overflow-hidden">
+    <div class="step-card-grid">
+      <div class="step-visual-area">
+        <Container size="full">
+          <Grid preset="linear" columns={1} gap="4" padding="6">
+            <slot name="terminal" />
+          </Grid>
+        </Container>
+      </div>
+      <div class={classy('step-bar', barColorClass)}></div>
+      <div>
+        <Container size="full">
+          <Grid preset="linear" columns={1} gap="3" padding="6">
+            <Typography as="h2" variant="h2">{title}</Typography>
+            {subtitle && <Typography as="h3" variant="h4" class="text-muted-foreground">{subtitle}</Typography>}
+            {quote && (
+              <Typography as="p" variant="muted" class="border-l-2 border-border pl-4">
+                <em>{quote}</em>
+              </Typography>
+            )}
+            <slot />
+            <slot name="columns" />
+          </Grid>
+        </Container>
+      </div>
+    </div>
+  </Card>
+</div>
+
+<style is:global>
+  .step-card-wrap {
+    position: relative;
+    margin-bottom: 4rem;
+  }
+
+  .step-badge {
+    position: absolute;
+    top: -1.5rem;
+    left: -1.5rem;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    z-index: 2;
+    background: var(--background);
+    border-width: 3px;
+    border-style: solid;
+  }
+
+  .step-badge-cyan {
+    border-color: oklch(0.82 0.15 195);
+    color: oklch(0.82 0.15 195);
+    box-shadow: 0 0 24px oklch(0.82 0.15 195 / 0.4), 0 0 48px oklch(0.82 0.15 195 / 0.15);
+  }
+
+  .step-badge-green {
+    border-color: oklch(0.85 0.2 160);
+    color: oklch(0.85 0.2 160);
+    box-shadow: 0 0 24px oklch(0.85 0.2 160 / 0.4), 0 0 48px oklch(0.85 0.2 160 / 0.15);
+  }
+
+  .step-badge-amber {
+    border-color: oklch(0.82 0.15 75);
+    color: oklch(0.82 0.15 75);
+    box-shadow: 0 0 24px oklch(0.82 0.15 75 / 0.4), 0 0 48px oklch(0.82 0.15 75 / 0.15);
+  }
+
+  .step-card-grid {
+    display: grid;
+    grid-template-columns: 20rem 4px 1fr;
+  }
+
+  .step-visual-area {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .step-visual-area pre {
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .step-visual-area code { font-family: inherit; }
+  .step-visual-area .p { color: var(--muted-foreground); }
+  .step-visual-area .o { color: rgba(255, 255, 255, 0.35); }
+
+  .step-bar {
+    width: 4px;
+  }
+
+  .step-bar-cyan { background: oklch(0.82 0.15 195); }
+  .step-bar-green { background: oklch(0.85 0.2 160); }
+  .step-bar-amber { background: oklch(0.82 0.15 75); }
+</style>
