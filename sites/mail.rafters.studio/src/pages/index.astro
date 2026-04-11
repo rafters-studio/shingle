@@ -1,0 +1,225 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Rafters Mail" description="A full-stack email framework for Cloudflare Workers.">
+  <div class="site-shell">
+    <header class="site-header">
+      <span class="site-wordmark">Rafters Mail</span>
+      <nav class="site-nav">
+        <a href="/docs/">Docs</a>
+        <a href="https://github.com/rafters-studio/mail">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="site-main">
+      <div class="hero">
+        <p class="hero-label">Rafters Mail</p>
+        <h1 class="hero-headline">Email infrastructure for<br />Cloudflare Workers.</h1>
+        <p class="hero-body">
+          Receive, compose, thread, and store email in a Workers-native framework.
+          IMAP included. No third-party inbox required.
+        </p>
+        <div class="hero-actions">
+          <a href="/docs/getting-started/" class="btn-primary">Get started</a>
+          <a href="/docs/" class="btn-secondary">Read the docs</a>
+        </div>
+        <pre class="install-block"><code>pnpm add @rafters/mail</code></pre>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature">
+          <p class="feature-heading">Inbound and outbound</p>
+          <p class="feature-body">
+            Parse incoming email with InboundAdapter. Compose and send with EmailProvider.
+            One framework, both directions.
+          </p>
+        </div>
+        <div class="feature">
+          <p class="feature-heading">IMAP server built in</p>
+          <p class="feature-body">
+            Native IMAP support via Cloudflare Spectrum TCP. Connect any mail client
+            directly to your Worker.
+          </p>
+        </div>
+        <div class="feature">
+          <p class="feature-heading">Threading and classification</p>
+          <p class="feature-body">
+            RFC 5322 conversation grouping. Workers AI classification with DeBERTa-v3.
+            Zero-config inbox intelligence.
+          </p>
+        </div>
+        <div class="feature">
+          <p class="feature-heading">Bring your own auth</p>
+          <p class="feature-body">
+            The AuthAdapter contract gives you full control over authentication.
+            Plug in better-auth, your own session system, or anything else.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>Rafters Mail is part of the <a href="https://rafters.studio">Rafters</a> project.</p>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  .site-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-4) var(--spacing-8);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .site-wordmark {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+
+  .site-nav {
+    display: flex;
+    gap: var(--spacing-6);
+  }
+
+  .site-nav a {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    text-decoration: none;
+  }
+
+  .site-nav a:hover {
+    color: var(--color-foreground);
+  }
+
+  .site-main {
+    flex: 1;
+    padding: var(--spacing-20) var(--spacing-8);
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero {
+    margin-bottom: var(--spacing-20);
+  }
+
+  .hero-label {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .hero-headline {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-4xl);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--color-foreground);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .hero-body {
+    font-size: var(--font-size-lg);
+    line-height: 1.7;
+    color: var(--color-muted-foreground);
+    max-width: 52ch;
+    margin-bottom: var(--spacing-8);
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-8);
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: var(--spacing-2) var(--spacing-5);
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    padding: var(--spacing-2) var(--spacing-5);
+    border: 1px solid var(--color-border);
+    color: var(--color-foreground);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+  }
+
+  .install-block {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    background-color: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-3) var(--spacing-5);
+    color: var(--color-foreground);
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-8);
+  }
+
+  .feature-heading {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .feature-body {
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+    color: var(--color-muted-foreground);
+  }
+
+  .site-footer {
+    padding: var(--spacing-8);
+    border-top: 1px solid var(--color-border);
+    text-align: center;
+  }
+
+  .site-footer p {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+  }
+
+  .site-footer a {
+    color: var(--color-muted-foreground);
+  }
+
+  @media (max-width: 640px) {
+    .hero-headline {
+      font-size: var(--font-size-2xl);
+    }
+
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
