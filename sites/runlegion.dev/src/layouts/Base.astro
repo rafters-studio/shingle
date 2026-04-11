@@ -20,6 +20,8 @@ const navLinks = [
     { href: "#features", label: "Features" },
     { href: "#architecture", label: "Architecture" },
 ];
+
+const linkClass = "no-underline text-muted-foreground hover:text-foreground";
 ---
 
 <!doctype html>
@@ -48,7 +50,7 @@ const navLinks = [
                             navLinks.map((link) => (
                                 <a
                                     href={link.href}
-                                    class="no-underline text-muted-foreground hover:text-foreground"
+                                    class={linkClass}
                                 >
                                     <Small>{link.label}</Small>
                                 </a>
@@ -59,7 +61,7 @@ const navLinks = [
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="GitHub repository"
-                            class="no-underline text-muted-foreground hover:text-foreground"
+                            class={linkClass}
                         >
                             <svg
                                 viewBox="0 0 24 24"
@@ -98,7 +100,7 @@ const navLinks = [
                             href="https://github.com/runlegion/legion"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="no-underline text-muted-foreground hover:text-foreground"
+                            class={linkClass}
                         >
                             <Small>GitHub</Small>
                         </a>
@@ -106,7 +108,7 @@ const navLinks = [
                             href="https://rafters.studio"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="no-underline text-muted-foreground hover:text-foreground"
+                            class={linkClass}
                         >
                             <Small>A Rafters Studio project</Small>
                         </a>
