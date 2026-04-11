@@ -1,51 +1,19 @@
 ---
-/**
- * Section - Reusable titled section for MDX pages.
- *
- * Props:
- *   id         - anchor id for scroll navigation
- *   title      - string rendered as an H2 at the top of the section
- *   eyebrow    - optional kicker text above the title
- *   tint       - if true, section gets a subtle background tint for
- *                alternating visual rhythm
- *
- * Default slot receives the body content (prose, code blocks, diagrams).
- */
 import Container from "@/components/ui/container.astro";
 import H2 from "@/components/ui/typography-h2.astro";
-import Small from "@/components/ui/typography-small.astro";
 
 interface Props {
   id?: string;
   title?: string;
-  eyebrow?: string;
   tint?: boolean;
 }
 
-const { id, title, eyebrow, tint = false } = Astro.props;
+const { id, title, tint = false } = Astro.props;
 ---
 
-<section id={id} class:list={["section", { "section--tint": tint }]}>
-  <Container size="4xl" gap="10">
-    {eyebrow && <Small><span class="section__eyebrow">{eyebrow}</span></Small>}
+<section id={id} class:list={[tint && "bg-muted"]}>
+  <Container size="4xl" padding="16" gap="12">
     {title && <H2>{title}</H2>}
     <slot />
   </Container>
 </section>
-
-<style>
-  .section {
-    padding-block: var(--spacing-32);
-  }
-
-  .section--tint {
-    background-color: var(--muted);
-  }
-
-  .section__eyebrow {
-    font-family: var(--font-code);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted-foreground);
-  }
-</style>

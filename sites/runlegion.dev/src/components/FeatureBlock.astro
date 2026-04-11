@@ -1,0 +1,20 @@
+---
+/**
+ * FeatureBlock - One feature entry inside the "What It Does" section.
+ * Title plus body slot. Kept here so the MDX reads as a list of features
+ * instead of a wall of Container+H3+P+Codeblock repetition.
+ */
+import Container from "@/components/ui/container.astro";
+import H3 from "@/components/ui/typography-h3.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<Container gap="6">
+  <H3>{title}</H3>
+  <slot />
+</Container>

@@ -1,22 +1,13 @@
 ---
 /**
- * Hero - Full-viewport landing hero.
- *
- * Named slots let MDX callers compose the content:
- *   eyebrow   - small ASCII / logo / kicker element above the title
- *   title     - the display heading (required)
- *   tagline   - larger secondary statement
- *   description - prose block describing the product
- *   cta       - call to action (code block or button)
- *   footnote  - small line beneath the CTA
- *
- * The hero owns its own vertical centering so consumer code stays clean.
+ * Hero - Landing hero composed of named slots an MDX caller fills.
+ * Slots: eyebrow, title, tagline, description, cta, footnote.
  */
 import Container from "@/components/ui/container.astro";
 ---
 
-<section class="hero">
-  <Container size="4xl" gap="8">
+<section>
+  <Container size="4xl" padding="16" gap="10">
     <slot name="eyebrow" />
     <slot name="title" />
     <slot name="tagline" />
@@ -25,13 +16,3 @@ import Container from "@/components/ui/container.astro";
     <slot name="footnote" />
   </Container>
 </section>
-
-<style>
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-block: var(--spacing-20);
-  }
-</style>
