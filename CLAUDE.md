@@ -4,7 +4,7 @@ Monorepo for rafters-studio sites (runlegion.dev, sean.silvius.me, huttspawn.com
 
 ## Hard rules
 
-These re-parse every turn. Do not demote to memory — they exist here precisely because they drift back under idle-gap pressure.
+These re-parse every turn. Do not demote to memory; they exist here precisely because they drift back under idle-gap pressure.
 
 ### Rafters consumer rules
 
