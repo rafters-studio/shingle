@@ -2,7 +2,7 @@
   "mcpServers": {
     "rafters": {
       "command": "pnpx",
-      "args": ["rafters@latest", "mcp", "--project-root", "sites/sean.silvius.me"]
+      "args": ["rafters@latest", "mcp"]
     }
   }
 }

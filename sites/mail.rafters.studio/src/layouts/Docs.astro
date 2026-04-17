@@ -7,6 +7,7 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const base = '/mail/';
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
 type NavItem = { label: string; href: string };
@@ -16,50 +17,51 @@ const nav: NavGroup[] = [
   {
     heading: 'Start',
     items: [
-      { label: 'Overview', href: '/docs' },
-      { label: 'Getting Started', href: '/docs/getting-started' },
-      { label: 'Quickstart: Cloudflare', href: '/docs/quickstart-cloudflare' },
+      { label: 'Overview', href: `${base}docs` },
+      { label: 'Getting Started', href: `${base}docs/getting-started` },
+      { label: 'Quickstart: Cloudflare', href: `${base}docs/quickstart-cloudflare` },
     ],
   },
   {
     heading: 'Architecture',
     items: [
-      { label: 'Architecture', href: '/docs/architecture' },
-      { label: 'Adapters Guide', href: '/docs/adapters' },
+      { label: 'Architecture', href: `${base}docs/architecture` },
+      { label: 'Adapters Guide', href: `${base}docs/adapters` },
     ],
   },
   {
     heading: 'Core',
     items: [
-      { label: 'Core Reference', href: '/docs/core-reference' },
-      { label: 'Threading', href: '/docs/threading' },
-      { label: 'Migrations', href: '/docs/migrations' },
+      { label: 'Core Reference', href: `${base}docs/core-reference` },
+      { label: 'Threading', href: `${base}docs/threading` },
+      { label: 'Migrations', href: `${base}docs/migrations` },
     ],
   },
   {
     heading: 'Inbound & Outbound',
     items: [
-      { label: 'Inbound Email', href: '/docs/inbound' },
-      { label: 'Outbound Email', href: '/docs/outbound' },
-      { label: 'Blob Storage', href: '/docs/blob-storage' },
-      { label: 'Email Classification', href: '/docs/classification' },
-      { label: 'Newsletters and Broadcasts', href: '/docs/newsletters' },
+      { label: 'Inbound Email', href: `${base}docs/inbound` },
+      { label: 'Outbound Email', href: `${base}docs/outbound` },
+      { label: 'Blob Storage', href: `${base}docs/blob-storage` },
+      { label: 'Email Classification', href: `${base}docs/classification` },
+      { label: 'Newsletters and Broadcasts', href: `${base}docs/newsletters` },
     ],
   },
   {
     heading: 'IMAP',
     items: [
-      { label: 'IMAP Quickstart', href: '/docs/imap-quickstart' },
-      { label: 'IMAP Command Reference', href: '/docs/imap-commands' },
-      { label: 'IMAP Authentication', href: '/docs/app-passwords' },
-      { label: 'IMAP Deployment Guide', href: '/docs/imap-deployment' },
+      { label: 'IMAP Quickstart', href: `${base}docs/imap-quickstart` },
+      { label: 'IMAP Command Reference', href: `${base}docs/imap-commands` },
+      { label: 'IMAP Authentication', href: `${base}docs/app-passwords` },
+      { label: 'IMAP Deployment Guide', href: `${base}docs/imap-deployment` },
     ],
   },
 ];
 
 function isActive(href: string): boolean {
-  if (href === '/docs') {
-    return currentPath === '/docs' || currentPath === '';
+  const docsRoot = `${base}docs`;
+  if (href === docsRoot) {
+    return currentPath === docsRoot;
   }
   return currentPath === href || currentPath.startsWith(href + '/');
 }
@@ -68,9 +70,9 @@ function isActive(href: string): boolean {
 <Base title={title} description={description}>
   <div class="docs-shell">
     <header class="docs-header">
-      <a href="/" class="docs-wordmark">Rafters Mail</a>
+      <a href={base} class="docs-wordmark">Rafters Mail</a>
       <nav class="docs-header-nav">
-        <a href="/docs">Docs</a>
+        <a href={`${base}docs/`}>Docs</a>
         <a href="https://github.com/rafters-studio/mail">GitHub</a>
       </nav>
     </header>
