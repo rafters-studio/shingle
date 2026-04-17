@@ -1,0 +1,352 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const currentPath = Astro.url.pathname.replace(/\/$/, '');
+
+type NavItem = { label: string; href: string };
+type NavGroup = { heading: string; items: NavItem[] };
+
+const nav: NavGroup[] = [
+  {
+    heading: 'Start',
+    items: [
+      { label: 'Overview', href: '/docs' },
+      { label: 'Getting Started', href: '/docs/getting-started' },
+      { label: 'Quickstart: Cloudflare', href: '/docs/quickstart-cloudflare' },
+    ],
+  },
+  {
+    heading: 'Architecture',
+    items: [
+      { label: 'Architecture', href: '/docs/architecture' },
+      { label: 'Adapters Guide', href: '/docs/adapters' },
+    ],
+  },
+  {
+    heading: 'Core',
+    items: [
+      { label: 'Core Reference', href: '/docs/core-reference' },
+      { label: 'Threading', href: '/docs/threading' },
+      { label: 'Migrations', href: '/docs/migrations' },
+    ],
+  },
+  {
+    heading: 'Inbound & Outbound',
+    items: [
+      { label: 'Inbound Email', href: '/docs/inbound' },
+      { label: 'Outbound Email', href: '/docs/outbound' },
+      { label: 'Blob Storage', href: '/docs/blob-storage' },
+      { label: 'Email Classification', href: '/docs/classification' },
+      { label: 'Newsletters and Broadcasts', href: '/docs/newsletters' },
+    ],
+  },
+  {
+    heading: 'IMAP',
+    items: [
+      { label: 'IMAP Quickstart', href: '/docs/imap-quickstart' },
+      { label: 'IMAP Command Reference', href: '/docs/imap-commands' },
+      { label: 'IMAP Authentication', href: '/docs/app-passwords' },
+      { label: 'IMAP Deployment Guide', href: '/docs/imap-deployment' },
+    ],
+  },
+];
+
+function isActive(href: string): boolean {
+  if (href === '/docs') {
+    return currentPath === '/docs' || currentPath === '';
+  }
+  return currentPath === href || currentPath.startsWith(href + '/');
+}
+---
+
+<Base title={title} description={description}>
+  <div class="docs-shell">
+    <header class="docs-header">
+      <a href="/" class="docs-wordmark">Rafters Mail</a>
+      <nav class="docs-header-nav">
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/rafters-studio/mail">GitHub</a>
+      </nav>
+    </header>
+
+    <div class="docs-body">
+      <aside class="docs-sidebar">
+        <nav>
+          {nav.map((group) => (
+            <div class="docs-nav-group">
+              <p class="docs-nav-heading">{group.heading}</p>
+              <ul>
+                {group.items.map((item) => (
+                  <li>
+                    <a
+                      href={item.href + '/'}
+                      class:list={['docs-nav-link', { 'docs-nav-link--active': isActive(item.href) }]}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </aside>
+
+      <main class="docs-content">
+        <article class="docs-article">
+          <slot />
+        </article>
+      </main>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .docs-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .docs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-4) var(--spacing-6);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    background-color: var(--color-background);
+    z-index: 20;
+  }
+
+  .docs-wordmark {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-foreground);
+    text-decoration: none;
+  }
+
+  .docs-header-nav {
+    display: flex;
+    gap: var(--spacing-6);
+  }
+
+  .docs-header-nav a {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    text-decoration: none;
+  }
+
+  .docs-header-nav a:hover {
+    color: var(--color-foreground);
+  }
+
+  .docs-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .docs-sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    padding: var(--spacing-8) var(--spacing-4);
+    border-right: 1px solid var(--color-border);
+    overflow-y: auto;
+    position: sticky;
+    top: 57px;
+    height: calc(100vh - 57px);
+  }
+
+  .docs-nav-group {
+    margin-bottom: var(--spacing-6);
+  }
+
+  .docs-nav-heading {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted-foreground);
+    padding: 0 var(--spacing-3);
+    margin-bottom: var(--spacing-1);
+  }
+
+  .docs-nav-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .docs-nav-link {
+    display: block;
+    padding: var(--spacing-1) var(--spacing-3);
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    line-height: 1.5;
+  }
+
+  .docs-nav-link:hover {
+    color: var(--color-foreground);
+    background-color: var(--color-muted);
+  }
+
+  .docs-nav-link--active {
+    color: var(--color-primary);
+    background-color: var(--color-primary-subtle);
+    font-weight: 500;
+  }
+
+  .docs-content {
+    flex: 1;
+    min-width: 0;
+    padding: var(--spacing-12) var(--spacing-8);
+  }
+
+  .docs-article {
+    max-width: 72ch;
+  }
+
+  .docs-article :global(h1) {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-3xl);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-foreground);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .docs-article :global(h2) {
+    font-family: var(--font-heading);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-foreground);
+    margin-top: var(--spacing-10);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .docs-article :global(h3) {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-top: var(--spacing-8);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .docs-article :global(h4) {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-top: var(--spacing-6);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .docs-article :global(p) {
+    font-size: var(--font-size-base);
+    line-height: 1.75;
+    color: var(--color-foreground);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .docs-article :global(a) {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .docs-article :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background-color: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.35em;
+  }
+
+  .docs-article :global(pre) {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    overflow-x: auto;
+    margin-bottom: var(--spacing-6);
+  }
+
+  .docs-article :global(pre code) {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: var(--font-size-sm);
+  }
+
+  .docs-article :global(ul),
+  .docs-article :global(ol) {
+    padding-left: var(--spacing-6);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .docs-article :global(li) {
+    font-size: var(--font-size-base);
+    line-height: 1.75;
+    color: var(--color-foreground);
+    margin-bottom: var(--spacing-1);
+  }
+
+  .docs-article :global(blockquote) {
+    border-left: 3px solid var(--color-border);
+    padding-left: var(--spacing-4);
+    color: var(--color-muted-foreground);
+    margin: var(--spacing-6) 0;
+  }
+
+  .docs-article :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .docs-article :global(th) {
+    text-align: left;
+    font-weight: 600;
+    padding: var(--spacing-2) var(--spacing-3);
+    border-bottom: 2px solid var(--color-border);
+    color: var(--color-foreground);
+  }
+
+  .docs-article :global(td) {
+    padding: var(--spacing-2) var(--spacing-3);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-foreground);
+    vertical-align: top;
+  }
+
+  .docs-article :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--spacing-8) 0;
+  }
+
+  @media (max-width: 768px) {
+    .docs-sidebar {
+      display: none;
+    }
+
+    .docs-content {
+      padding: var(--spacing-6) var(--spacing-4);
+    }
+  }
+</style>
