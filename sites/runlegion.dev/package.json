@@ -26,10 +26,6 @@
     "clsx": "^2.1.1",
     "react": "19.2.0",
     "tailwind-merge": "^3.5.0",
-    "typography-code.astro": "link:@/components/ui/typography-code.astro",
-    "typography-h1.astro": "link:@/components/ui/typography-h1.astro",
-    "typography-p.astro": "link:@/components/ui/typography-p.astro",
-    "typography.astro": "link:@/components/ui/typography.astro",
     "wrangler": "^4.78.0"
   },
   "devDependencies": {
