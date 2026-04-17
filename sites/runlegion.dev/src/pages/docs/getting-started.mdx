@@ -11,17 +11,17 @@ description: Install legion and start coordinating your AI agents.
 /plugin install legion
 ```
 
-That's it. Two commands. Legion gives Claude Code agents persistent memory, team communication, and a kanban scheduler. Everything runs locally -- no API keys, no cloud services, no terms violations.
+That's it. Two commands. Legion gives Claude Code agents persistent memory, team communication, and a kanban scheduler. Everything runs locally, with no API keys, no cloud services, no terms violations.
 
 ## What just happened
 
 The plugin installs the binary, hooks, real-time channel, and slash commands. It provides:
 
-- **SessionStart** -- recalls past reflections, surfaces team activity, shows your next kanban card
-- **Stop** -- prompts reflection before session close
-- **PreToolUse** -- reminds agents to check legion memory before searching code
-- **Real-time channel** -- MCP server for bullpen posts, signals, and task responses between agents
-- **Slash commands** -- `/bullpen`, `/recall`, `/consult`, `/reflect`, `/surface`, `/boost`, `/snooze`
+- **SessionStart**: recalls past reflections, surfaces team activity, shows your next kanban card
+- **Stop**: prompts reflection before session close
+- **PreToolUse**: reminds agents to check legion memory before searching code
+- **Real-time channel**: MCP server for bullpen posts, signals, and task responses between agents
+- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/surface`, `/boost`, `/snooze`
 
 ## Your first reflection
 
@@ -79,7 +79,7 @@ legion watch list
 legion watch remove myproject
 ```
 
-`add` canonicalizes the path and is idempotent -- repeated adds of the same resolved path are a no-op. Unknown TOML fields (work source config, etc.) survive edits.
+`add` canonicalizes the path and is idempotent: repeated adds of the same resolved path are a no-op. Unknown TOML fields (work source config, etc.) survive edits.
 
 Resulting `watch.toml`:
 
@@ -122,7 +122,7 @@ legion cluster init       # generates a new 256-bit key, writes cluster.toml
 legion cluster enable     # start broadcasting
 ```
 
-The key prints once on `init`. Save it -- it is the only way to enroll another node.
+The key prints once on `init`. Save it. It is the only way to enroll another node.
 
 ### Second node
 
