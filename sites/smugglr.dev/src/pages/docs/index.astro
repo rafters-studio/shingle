@@ -1,0 +1,26 @@
+---
+import Docs from '@/src/layouts/Docs.astro';
+---
+
+<Docs title="Docs" description="Reference docs for Smuggler: the CLI, config, internals, usage patterns, plugins, and concepts.">
+  <h1>Docs</h1>
+  <p>
+    Reference material for the Smuggler sync engine. The sidebar groups pages
+    by how you use them: getting going, understanding the machine.
+  </p>
+
+  <h2>Start</h2>
+  <ul>
+    <li><a href="/get-started/">Get Started</a>. Five minutes to your first push.</li>
+    <li><a href="/docs/cli-reference/">CLI Reference</a>. Every command, every flag, every exit code.</li>
+    <li><a href="/docs/configuration/">Configuration</a>. The complete config file.</li>
+  </ul>
+
+  <h2>Internals</h2>
+  <ul>
+    <li><a href="/docs/how-it-works/">How It Works</a>. Content hashing, the sync algorithm, plugins, the relay, LAN broadcast.</li>
+    <li><a href="/docs/patterns/">Usage Patterns</a>. Cookbook scenarios with full config and CLI examples.</li>
+    <li><a href="/docs/plugin-guide/">Plugin Guide</a>. The http-sql plugin, shipped profiles, adding a custom target.</li>
+    <li><a href="/docs/concepts/">Concepts</a>. Content is truth. Encryption as membership. Agent-first design.</li>
+  </ul>
+</Docs>

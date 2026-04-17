@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "smugglr-shingle",
+  "compatibility_date": "2026-01-30",
+  "assets": {
+    "directory": "dist",
+  },
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true,
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1,
+    },
+  },
+  "routes": [
+    {
+      "pattern": "smugglr.dev",
+      "zone_id": "TODO_SMUGGLR_ZONE_ID",
+      "custom_domain": true,
+    },
+  ],
+}
