@@ -21,15 +21,12 @@
       "container",
       "grid",
       "image",
-      "navigation-menu",
       "separator",
       "typography"
     ],
     "primitives": [
       "classy",
-      "escape-keydown",
-      "outside-click",
-      "slot"
+      "fill-resolver"
     ],
     "composites": []
   }
