@@ -1,0 +1,36 @@
+---
+import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+---
+
+<header
+  id="site-topbar"
+  class="bg-background"
+  style="position:fixed;top:0;left:0;right:0;z-index:50;opacity:0;pointer-events:none;transition:opacity 0.2s ease"
+>
+  <Container size="7xl" padding="8">
+    <Grid columns={2} gap="4">
+      <a href="/">
+        <img src="/logo.svg" alt="Rafters" class="w-24 h-auto fill-current" />
+      </a>
+      <Grid columns={2} gap="8" class="justify-self-end w-fit">
+        <a href="/docs/">Docs</a>
+        <a href="https://github.com/rafters-studio/rafters">GitHub</a>
+      </Grid>
+    </Grid>
+  </Container>
+</header>
+
+<script is:inline>
+  (function () {
+    var bar = document.getElementById("site-topbar");
+    if (!bar) return;
+    function update() {
+      var show = window.scrollY > window.innerHeight * 0.8;
+      bar.style.opacity = show ? "1" : "0";
+      bar.style.pointerEvents = show ? "auto" : "none";
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+  })();
+</script>
