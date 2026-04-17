@@ -1,0 +1,19 @@
+---
+import Container from "@/components/ui/container.astro";
+import H2 from "@/components/ui/typography-h2.astro";
+
+interface Props {
+  id?: string;
+  title?: string;
+  tint?: boolean;
+}
+
+const { id, title, tint = false } = Astro.props;
+---
+
+<section id={id} class:list={[tint && "bg-muted"]}>
+  <Container size="4xl" padding="16" gap="12">
+    {title && <H2>{title}</H2>}
+    <slot />
+  </Container>
+</section>

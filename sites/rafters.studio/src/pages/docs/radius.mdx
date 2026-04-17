@@ -1,0 +1,36 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Radius
+description: Corner radius as brand personality. One token decision cascades to every component.
+---
+
+# Radius
+
+Corners tell you who made this. Apple rounds everything. Audi sharpens everything. Your brand's corners are your brand's personality at the pixel level.
+
+## Four Corners, One Decision
+
+Every component has four corner radii. They all default to `radius-base`. Override one corner and every component in the system gets the override.
+
+A Star Wars game sets `radius-br: 0` and every card, button, and input gets a sharp bottom-right cutout. The angular aesthetic propagates from one token change. No component files touched.
+
+## The Scale
+
+Radius uses the same mathematical progression as spacing. `radius-base` is the anchor. The scale multiplies from there.
+
+| Token | Role |
+|-------|------|
+| `radius-none` | Sharp. Tables, inline elements, intentionally angular. |
+| `radius-sm` | Subtle. Checkboxes, keyboard indicators, small controls. |
+| `radius-md` | Default. Buttons, inputs, toggles. The workhorse. |
+| `radius-lg` | Prominent. Cards, dialogs, sheets. |
+| `radius-xl` | Emphasized. Hero cards, featured panels. |
+| `radius-full` | Circular. Avatars, badges, pills. |
+
+Change `radius-base` from 6px to 2px and the entire scale compresses. Every component sharpens. The progression ratio maintains the relationship between sm, md, and lg. They don't collapse to the same value, they all shift proportionally.
+
+## Brand Identity in Corners
+
+Our research across design systems found that radius is the strongest single signal of brand personality. Users can't articulate why one interface feels "professional" and another feels "approachable", but the difference is often 2px vs 8px on the corners.
+
+This is why radius is not a detail to pick per-component. It's a system-level decision that cascades everywhere. The designer makes it once. The system enforces it everywhere.

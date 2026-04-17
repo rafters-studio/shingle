@@ -1,0 +1,201 @@
+{
+  "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
+  "namespace": "fill",
+  "version": "1.0.0",
+  "generatedAt": "2026-04-17T08:27:38.258Z",
+  "tokens": [
+    {
+      "name": "fill-surface",
+      "value": "{\"color\":\"neutral-900\",\"foreground\":\"neutral-100\"}",
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "Primary content surface",
+      "usageContext": [
+        "surface"
+      ],
+      "dependsOn": [
+        "neutral-900",
+        "neutral-100"
+      ],
+      "description": "Fill token \"surface\" -- solid neutral-900 (Primary content surface)",
+      "generatedAt": "2026-04-17T08:27:38.211Z",
+      "containerQueryAware": true,
+      "scalePosition": 0,
+      "usagePatterns": {
+        "do": [
+          "Use fill=\"surface\" on surface components (Container, Card) for primary content surface"
+        ],
+        "never": [
+          "Do not use raw bg-* classes when a fill token exists for the purpose",
+          "Do not hardcode opacity values -- use the fill token instead"
+        ]
+      }
+    },
+    {
+      "name": "fill-panel",
+      "value": "{\"color\":\"neutral-800\",\"opacity\":0.95,\"foreground\":\"neutral-100\"}",
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "Elevated panel",
+      "usageContext": [
+        "surface"
+      ],
+      "dependsOn": [
+        "neutral-800",
+        "neutral-100"
+      ],
+      "description": "Fill token \"panel\" -- neutral-800 at 95% opacity (Elevated panel)",
+      "generatedAt": "2026-04-17T08:27:38.211Z",
+      "containerQueryAware": true,
+      "scalePosition": 1,
+      "usagePatterns": {
+        "do": [
+          "Use fill=\"panel\" on surface components (Container, Card) for elevated panel"
+        ],
+        "never": [
+          "Do not use raw bg-* classes when a fill token exists for the purpose",
+          "Do not hardcode opacity values -- use the fill token instead"
+        ]
+      }
+    },
+    {
+      "name": "fill-overlay",
+      "value": "{\"color\":\"neutral-950\",\"opacity\":0.8,\"foreground\":\"neutral-50\",\"backdropBlur\":\"sm\"}",
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "Modal backdrop",
+      "usageContext": [
+        "surface"
+      ],
+      "dependsOn": [
+        "neutral-950",
+        "neutral-50"
+      ],
+      "description": "Fill token \"overlay\" -- neutral-950 at 80% opacity with backdrop-blur-sm (Modal backdrop)",
+      "generatedAt": "2026-04-17T08:27:38.211Z",
+      "containerQueryAware": true,
+      "scalePosition": 2,
+      "usagePatterns": {
+        "do": [
+          "Use fill=\"overlay\" on surface components (Container, Card) for modal backdrop"
+        ],
+        "never": [
+          "Do not use raw bg-* classes when a fill token exists for the purpose",
+          "Do not hardcode opacity values -- use the fill token instead"
+        ]
+      }
+    },
+    {
+      "name": "fill-glass",
+      "value": "{\"color\":\"neutral-900\",\"opacity\":0.6,\"foreground\":\"neutral-100\",\"backdropBlur\":\"md\"}",
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "Glass morphism",
+      "usageContext": [
+        "surface"
+      ],
+      "dependsOn": [
+        "neutral-900",
+        "neutral-100"
+      ],
+      "description": "Fill token \"glass\" -- neutral-900 at 60% opacity with backdrop-blur-md (Glass morphism)",
+      "generatedAt": "2026-04-17T08:27:38.211Z",
+      "containerQueryAware": true,
+      "scalePosition": 3,
+      "usagePatterns": {
+        "do": [
+          "Use fill=\"glass\" on surface components (Container, Card) for glass morphism"
+        ],
+        "never": [
+          "Do not use raw bg-* classes when a fill token exists for the purpose",
+          "Do not hardcode opacity values -- use the fill token instead"
+        ]
+      }
+    },
+    {
+      "name": "fill-primary",
+      "value": "{\"color\":\"primary\",\"foreground\":\"primary-foreground\"}",
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "Primary brand surface",
+      "usageContext": [
+        "surface",
+        "text"
+      ],
+      "dependsOn": [
+        "primary",
+        "primary-foreground"
+      ],
+      "description": "Fill token \"primary\" -- solid primary (Primary brand surface)",
+      "generatedAt": "2026-04-17T08:27:38.211Z",
+      "containerQueryAware": true,
+      "scalePosition": 4,
+      "usagePatterns": {
+        "do": [
+          "Use fill=\"primary\" on surface components (Container, Card) for primary brand surface"
+        ],
+        "never": [
+          "Do not use raw bg-* classes when a fill token exists for the purpose",
+          "Do not hardcode opacity values -- use the fill token instead"
+        ]
+      }
+    },
+    {
+      "name": "fill-muted",
+      "value": "{\"color\":\"muted\",\"foreground\":\"muted-foreground\"}",
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "Subdued surface for secondary content",
+      "usageContext": [
+        "surface"
+      ],
+      "dependsOn": [
+        "muted",
+        "muted-foreground"
+      ],
+      "description": "Fill token \"muted\" -- solid muted (Subdued surface for secondary content)",
+      "generatedAt": "2026-04-17T08:27:38.211Z",
+      "containerQueryAware": true,
+      "scalePosition": 5,
+      "usagePatterns": {
+        "do": [
+          "Use fill=\"muted\" on surface components (Container, Card) for subdued surface for secondary content"
+        ],
+        "never": [
+          "Do not use raw bg-* classes when a fill token exists for the purpose",
+          "Do not hardcode opacity values -- use the fill token instead"
+        ]
+      }
+    },
+    {
+      "name": "fill-hero",
+      "value": "{\"foreground\":\"primary-foreground\",\"gradient\":{\"direction\":\"to-b\",\"stops\":[{\"color\":\"primary\"},{\"color\":\"primary\",\"opacity\":0}]}}",
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "Hero fade gradient",
+      "usageContext": [
+        "surface",
+        "text"
+      ],
+      "dependsOn": [
+        "primary-foreground",
+        "primary",
+        "primary"
+      ],
+      "description": "Fill token \"hero\" -- gradient to-b: primary to primary (Hero fade gradient)",
+      "generatedAt": "2026-04-17T08:27:38.211Z",
+      "containerQueryAware": true,
+      "scalePosition": 6,
+      "usagePatterns": {
+        "do": [
+          "Use fill=\"hero\" on surface components (Container, Card) for hero fade gradient",
+          "Use color=\"hero\" on Typography for gradient text effect"
+        ],
+        "never": [
+          "Do not use raw bg-* classes when a fill token exists for the purpose",
+          "Do not hardcode opacity values -- use the fill token instead"
+        ]
+      }
+    }
+  ]
+}

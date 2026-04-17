@@ -1,0 +1,166 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Cognitive Load Scoring
+description: How Rafters assigns every component a 0-10 cognitive load score across five dimensions, and how screen-level budgets keep compositions legible.
+---
+
+# Cognitive Load Scoring Model
+
+Rafters assigns every UI component a cognitive load score from 0 to 10. This document explains the theory behind the scores, the five dimensions that produce them, and how screen-level budgets work when components compose together.
+
+No existing design system or academic framework provides a quantitative per-component scoring model. NN/g's CASTLE framework mentions cognitive load as one of six UX dimensions but recommends post-hoc surveys (NASA-TLX), not automated scoring. Rafters is the first system to assign static, intrinsic scores to components and enforce budgets at composition time.
+
+---
+
+## The Five Dimensions
+
+Every component score is the sum of five dimensions, each contributing 0-2 points. The maximum possible score is 10.
+
+### 1. Decision Demand (0-2)
+
+How many decisions does the user need to make?
+
+| Score | Meaning | Examples |
+|-------|---------|---------|
+| 0 | No decision required | Separator, Container, Skeleton |
+| 1 | Single binary or obvious choice | Button (click or don't), Toggle (on/off), Checkbox |
+| 2 | Multiple options or consequential choice | AlertDialog (proceed or cancel with stakes), Combobox (search and select from many) |
+
+A Button scores 1 here: the user decides whether to click. An AlertDialog scores 2: the user must weigh consequences and choose between action and cancellation.
+
+### 2. Information Density (0-2)
+
+How much information must the user process simultaneously?
+
+| Score | Meaning | Examples |
+|-------|---------|---------|
+| 0 | No information to process | Separator, AspectRatio |
+| 1 | Single piece of information | Badge (one label), Tooltip (one message), Spinner |
+| 2 | Multiple pieces of information competing for attention | DataTable (rows and columns), Calendar (grid of dates), Command palette (filtered list and keyboard hints) |
+
+A Button scores 0 here: the label is the entire information payload, and you already know what it says before you look at it. A Combobox scores 2: the user reads the input value, scans filtered options, and compares matches simultaneously.
+
+### 3. Interaction Complexity (0-2)
+
+How many distinct interaction modes does the component support?
+
+| Score | Meaning | Examples |
+|-------|---------|---------|
+| 0 | No interaction (display only) | Separator, Badge, Skeleton, Kbd |
+| 1 | Single interaction mode (click, toggle, type) | Button (click), Switch (toggle), Input (type) |
+| 2 | Multiple interaction modes | Combobox (type, scan, select), DatePicker (click button, navigate calendar, select date), ColorPicker (drag area, click bar, type values) |
+
+A Button scores 1: you click it. A Combobox scores 2: you type to filter, arrow-key through results, and press Enter or click to select. These are three distinct interaction modes the user must coordinate.
+
+### 4. Context Disruption (0-2)
+
+How much does the component disrupt the user's current task context?
+
+| Score | Meaning | Examples |
+|-------|---------|---------|
+| 0 | No disruption, operates within the existing flow | Inline elements (Badge, Label, Typography), layout (Container, Grid) |
+| 1 | Partial disruption, adds a layer but preserves context | Popover, Sheet, Drawer (main content visible but dimmed) |
+| 2 | Full disruption, blocks everything else | Dialog, AlertDialog (modal overlay, focus trap, no escape except resolution) |
+
+A Button scores 0: clicking it doesn't inherently change context. An AlertDialog scores 2: it blocks the entire application and forces the user into a decision before they can return to anything else.
+
+### 5. Learning Curve (0-2)
+
+How much prior knowledge does the component require to use correctly?
+
+| Score | Meaning | Examples |
+|-------|---------|---------|
+| 0 | Universally understood, no learning | Button, Checkbox, Text input |
+| 1 | Familiar pattern with some convention to learn | Accordion (click to expand isn't universal), Tabs (spatial model), Pagination (page numbers) |
+| 2 | Requires learning specific interactions or mental models | Command palette (keyboard shortcuts, search syntax), Menubar (nested submenus, accelerators), Combobox (type-ahead behavior, fuzzy matching) |
+
+A Button scores 0: every person who has used a computer knows what a button does. A Command palette scores 2: the user must learn that it exists, how to invoke it, the search syntax, and keyboard navigation.
+
+---
+
+## Scoring Walkthrough: Why a Button is a 3
+
+| Dimension | Score | Reasoning |
+|-----------|-------|-----------|
+| Decision Demand | 1 | Click or don't click. One binary decision. |
+| Information Density | 0 | The label is the entire payload. "Save", "Delete", "Submit". |
+| Interaction Complexity | 1 | Click. That's it. |
+| Context Disruption | 0 | The button itself doesn't disrupt. It stays inline, doesn't overlay, doesn't trap focus. |
+| Learning Curve | 0 | Universal. Toddlers can use buttons. |
+| **Total** | **3** | |
+
+The `@attention-economics` metadata adds nuance: variant hierarchy, size hierarchy, and the rule "maximum 1 primary per section." But the cognitive load score measures intrinsic processing cost, not attention weight.
+
+---
+
+## Scoring Walkthrough: Why an AlertDialog is a 7
+
+| Dimension | Score | Reasoning |
+|-----------|-------|-----------|
+| Decision Demand | 2 | Consequential choice: proceed with destructive action or cancel. |
+| Information Density | 1 | Title, description, action labels. More than a button, focused on one question. |
+| Interaction Complexity | 1 | Click one of two buttons. Simple interaction even though the decision is hard. |
+| Context Disruption | 2 | Full modal overlay. Focus trap. All other interactions blocked. |
+| Learning Curve | 1 | Most users understand dialogs, but confirmation patterns require some cognitive effort. |
+| **Total** | **7** | |
+
+The high score comes from disruption and decision stakes, not interaction complexity. This is why AlertDialog has `@attention-economics Full attention capture` and `@trust-building Focus defaults to Cancel`.
+
+---
+
+## Screen-Level Budgets
+
+Individual component scores don't exist in isolation. When components compose into screens, their loads add up. But not linearly. The user doesn't process every component simultaneously. They focus on one region at a time, with peripheral elements fading into background awareness.
+
+### The Budget Tiers
+
+| Tier | Budget | Context | Examples |
+|------|--------|---------|----------|
+| **Focused** | 15 | Single-purpose interaction with clear entry and exit | Confirmation dialog, login form, payment modal |
+| **Page** | 30 | Standard application view with primary and secondary content | Settings page, data table view, list and detail |
+| **App** | 45 | Multi-panel workspace with concurrent activity zones | IDE layout, email client, multi-panel editor |
+
+Raw additive scoring overcounts because users focus attentionally, familiarity reduces load on return visits, and progressive disclosure gates content. The tiers account for this.
+
+### Applying the Budget
+
+When evaluating a screen composition:
+
+1. Sum the component scores for everything visible simultaneously.
+2. Identify the tier based on the interaction context.
+3. Compare sum against tier budget.
+4. If over budget, look for components scoring 4+ that could be simplified, hidden behind progressive disclosure, or moved to a separate view.
+
+The budget is a lint, not a hard wall. Going 10% over is a design conversation. Going 50% over is a design problem.
+
+---
+
+## What the Score Does Not Measure
+
+The cognitive load score is an intrinsic property of the component. It measures the processing cost of the component itself, independent of:
+
+- **Content**: a Table is always 3/10 whether it has 5 rows or 5,000.
+- **Context**: a Button in a toolbar costs the same as a Button in a dialog. The screen budget accounts for context.
+- **Frequency**: how often a user encounters the component doesn't change its intrinsic cost.
+- **Aesthetic quality**: a beautifully styled Combobox costs the same as an ugly one.
+
+The companion `@attention-economics` tag captures the contextual, relative aspects.
+
+---
+
+## Scoring Reference Table
+
+All 52+ UI components with their scores and primary cost drivers:
+
+| Score | Components | Primary Cost Driver |
+|-------|-----------|-------------------|
+| 0 | Separator, Container, AspectRatio | Structural only, no cognitive demand |
+| 1 | Skeleton, Kbd | Display only, minimal information |
+| 2 | Badge, Breadcrumb, Label, Checkbox, Switch, Toggle, ButtonGroup, Card, Collapsible, Avatar, ScrollArea, Tooltip, Typography, Spinner, Empty, ToggleGroup | Simple state or single information piece |
+| 3 | Button, Alert, Sidebar, Accordion, Slider, RadioGroup, Table, Resizable, Field, HoverCard, Image, Embed, Item | One decision and one interaction mode |
+| 4 | Input, Textarea, InputGroup, InputOTP, Carousel, Tabs, ContextMenu, DropdownMenu, Popover, Progress, Drawer, Grid, BlockWrapper, InlineToolbar, EditorToolbar | Data entry or menu scanning |
+| 5 | Sheet, DatePicker, Calendar, Select, NavigationMenu, Menubar, ColorPicker, BlockCanvas | Multi-step interaction or spatial reasoning |
+| 6 | Dialog, Command, Combobox | Compound interaction modes or learning curve |
+| 7 | AlertDialog | Full context disruption and consequential decision |
+
+No Rafters component scores above 7. Components that would score 8-10 are too complex for a single component: they should be decomposed into multiple lower-scoring components composed together.

@@ -1,0 +1,30 @@
+{
+  "framework": "astro",
+  "componentTarget": "astro",
+  "componentsPath": "src/components/ui",
+  "primitivesPath": "src/lib/primitives",
+  "compositesPath": "src/composites",
+  "cssPath": "src/styles/global.css",
+  "shadcn": false,
+  "exports": {
+    "tailwind": true,
+    "typescript": false,
+    "dtcg": false,
+    "compiled": false
+  },
+  "installed": {
+    "components": [
+      "card",
+      "container",
+      "grid",
+      "item",
+      "table",
+      "typography"
+    ],
+    "primitives": [
+      "classy",
+      "fill-resolver"
+    ],
+    "composites": []
+  }
+}
