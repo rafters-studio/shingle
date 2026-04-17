@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "rafters-studio",
+  "name": "rafters-studio-shingle",
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-01-30",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -25,8 +25,9 @@
   },
   "routes": [
     {
-      "pattern": "rafters.studio/*",
+      "pattern": "rafters.studio",
       "zone_id": "142da5fc1cd70bb8bb80be9926f83750",
+      "custom_domain": true,
     },
   ],
 }
