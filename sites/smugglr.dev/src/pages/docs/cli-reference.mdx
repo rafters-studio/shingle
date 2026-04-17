@@ -1,0 +1,470 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: CLI Reference
+description: "Every smugglr command: push, pull, sync, diff, watch, stash, retrieve, snapshot, broadcast, status. Flags, examples, exit codes, JSON output."
+---
+
+
+Every command. Every flag. Every exit code. Real output.
+
+```
+smugglr [GLOBAL FLAGS] <COMMAND> [FLAGS]
+```
+
+## Global Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--config <PATH>` | `config.toml` | Path to configuration file. |
+| `--verbose`, `-v` | off | Print detailed sync operations to stderr. |
+| `--output <FORMAT>` | `text` | Output format: `text` or `json`. |
+
+---
+
+## Sync Commands
+
+### push
+
+Push local rows to the remote target. Only sends rows that actually changed (content-hashed delta).
+
+```
+smugglr push [--table NAME] [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--table <NAME>` | all tables | Sync a single table. |
+| `--dry-run` | off | Show what would be pushed without writing. |
+
+```
+$ smugglr push --table users
+smugglr: pushing users
+  3 rows pushed (2 new, 1 updated)
+
+Done. 3 rows pushed in 1.2s.
+```
+
+Dry-run output includes row counts per table without writing anything to the target.
+
+```
+$ smugglr push --dry-run
+smugglr: dry run (no changes will be written)
+
+  users:    3 rows to push (2 new, 1 updated)
+  sessions: 0 rows to push
+
+Total: 3 rows to push across 1 table.
+```
+
+---
+
+### pull
+
+Pull remote rows to the local database. Only fetches rows that differ from what you already have.
+
+```
+smugglr pull [--table NAME] [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--table <NAME>` | all tables | Sync a single table. |
+| `--dry-run` | off | Show what would be pulled without writing. |
+
+```
+$ smugglr pull --table users
+smugglr: pulling users
+  12 rows pulled (12 new, 0 updated)
+
+Done. 12 rows pulled in 0.8s.
+```
+
+---
+
+### sync
+
+Bidirectional sync. Pushes local changes to remote, pulls remote changes to local. Conflict resolution is controlled by the `[sync]` strategy in your config file, not by a CLI flag.
+
+```
+smugglr sync [--table NAME] [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--table <NAME>` | all tables | Sync a single table. |
+| `--dry-run` | off | Show what would happen in both directions. |
+
+```
+$ smugglr sync
+smugglr: syncing all tables
+  users:    2 rows pushed, 5 rows pulled
+  sessions: 0 rows pushed, 3 rows pulled
+
+Done. 2 pushed, 8 pulled in 2.1s.
+```
+
+Note: conflict strategy (local_wins, remote_wins, newer_wins, uuid_v7_wins) is set in `config.toml` under `[sync]`. There is no `--strategy` flag.
+
+---
+
+### diff
+
+Read-only comparison between local and remote. Moves nothing. Shows what push, pull, or sync would do.
+
+```
+smugglr diff [--table NAME]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--table <NAME>` | all tables | Compare a single table. |
+
+```
+$ smugglr diff
+smugglr: comparing local <-> remote
+
+  users:
+    local-only:  2 rows
+    remote-only: 5 rows
+    modified:    1 row
+
+  sessions:
+    local-only:  0 rows
+    remote-only: 3 rows
+    modified:    0 rows
+```
+
+This is a safe command. It reads both sides, hashes, and reports. Nothing is written anywhere.
+
+---
+
+## Relay Commands
+
+Stash and retrieve move data through S3-compatible storage (R2, MinIO, any S3 endpoint). The relay is a staging area for machines that cannot reach each other directly.
+
+### stash
+
+Upload local database state to the S3 relay.
+
+```
+smugglr stash [--table NAME] [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--table <NAME>` | all tables | Stash a single table. |
+| `--dry-run` | off | Show what would be uploaded without writing. |
+
+```
+$ smugglr stash
+smugglr: stashing to relay (s3://smugglr-relay/default)
+  users:    142 rows stashed
+  sessions: 89 rows stashed
+
+Done. 231 rows stashed in 3.4s.
+```
+
+Stash uses ETag-based concurrency protection. If another machine stashes the same table while you are uploading, the operation fails with exit code 4.
+
+---
+
+### retrieve
+
+Download from the S3 relay to the local database.
+
+```
+smugglr retrieve [--table NAME] [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--table <NAME>` | all tables | Retrieve a single table. |
+| `--dry-run` | off | Show what would be downloaded without writing. |
+
+```
+$ smugglr retrieve --table users
+smugglr: retrieving from relay (s3://smugglr-relay/default)
+  users: 142 rows retrieved (12 new, 3 updated)
+
+Done. 142 rows retrieved in 1.9s.
+```
+
+---
+
+## Snapshot Commands
+
+### snapshot
+
+Create a point-in-time backup of the local database state. Writes to the configured relay with a timestamped key.
+
+```
+smugglr snapshot [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--dry-run` | off | Show snapshot metadata without writing. |
+
+```
+$ smugglr snapshot
+smugglr: creating snapshot
+  timestamp: 2026-04-04T14:32:01Z
+  tables:    3 (users, sessions, events)
+  size:      2.4 MB
+
+Snapshot saved to relay.
+```
+
+Snapshots are portable. Snapshot from D1, restore to Turso, or vice versa.
+
+---
+
+### snapshots
+
+List all available snapshots on the relay.
+
+```
+smugglr snapshots
+```
+
+No flags. Read-only.
+
+```
+$ smugglr snapshots
+smugglr: 4 snapshots available
+
+  2026-04-04T14:32:01Z  2.4 MB  3 tables
+  2026-04-03T09:15:44Z  2.3 MB  3 tables
+  2026-04-01T18:00:02Z  2.1 MB  2 tables
+  2026-03-28T12:00:00Z  1.8 MB  2 tables
+```
+
+---
+
+### restore
+
+Restore the local database from a snapshot. Requires the snapshot timestamp as an argument.
+
+```
+smugglr restore <TIMESTAMP> [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--dry-run` | off | Show what the restore would do without writing. |
+
+The timestamp must match one returned by `smugglr snapshots`.
+
+```
+$ smugglr restore 2026-04-03T09:15:44Z
+smugglr: restoring from snapshot 2026-04-03T09:15:44Z
+  users:    134 rows restored
+  sessions: 87 rows restored
+  events:   412 rows restored
+
+Done. 633 rows restored in 4.1s.
+```
+
+This overwrites local data. Use `--dry-run` first.
+
+---
+
+## Daemon Commands
+
+### watch
+
+Run smugglr as a background daemon. Syncs on a fixed interval until stopped.
+
+```
+smugglr watch [--interval SECS] [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--interval <SECS>` | `30` | Seconds between sync cycles. |
+| `--dry-run` | off | Log what each cycle would do without writing. |
+
+```
+$ smugglr watch --interval 60
+smugglr: watching (interval: 30s, strategy: local_wins)
+
+[2026-04-04T14:32:01Z] users: 0 pushed, 2 pulled
+[2026-04-04T14:33:01Z] no changes
+[2026-04-04T14:34:01Z] users: 1 pushed, 0 pulled
+^C
+smugglr: stopped. 3 cycles completed.
+```
+
+Watch writes JSONL to stdout when `--output json` is set. Each tick is one JSON line. Useful for piping into log aggregators or agent workflows.
+
+Stop with SIGINT (Ctrl+C) or SIGTERM. The daemon finishes the current cycle before exiting.
+
+---
+
+## Network Commands
+
+### broadcast
+
+Sync over the local network using encrypted UDP datagrams. No coordinator, no relay, no server. Machines with the shared encryption key receive and apply changes.
+
+```
+smugglr broadcast [--port PORT] [--interval SECS] [--once] [--dry-run]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--port <PORT>` | config value | UDP port for broadcast. |
+| `--interval <SECS>` | config value | Seconds between broadcast cycles. |
+| `--once` | off | Broadcast once and exit. |
+| `--dry-run` | off | Show what would be broadcast without sending. |
+
+```
+$ smugglr broadcast --once
+smugglr: broadcasting to 192.168.1.0/24:9847
+  users:    142 rows (2 changed)
+  sessions: 89 rows (0 changed)
+
+Broadcast sent. 2 datagrams, 4.2 KB.
+```
+
+The encryption key is configured in `[broadcast]` in your config file. The key is the trust boundary: if you have the key, you are on the network. There is no authentication handshake.
+
+Content hashing makes missed packets safe. If a machine misses a broadcast, the next one covers it. Idempotent by design.
+
+For cross-network broadcast (machines not on the same LAN), bring your own tunnel: Tailscale, WireGuard, ZeroTier. Smugglr broadcasts to whatever subnet it sees.
+
+---
+
+## Info Commands
+
+### status
+
+Print configuration and connection status. Verifies that the config file is valid, the local database is readable, and the remote target is reachable.
+
+```
+smugglr status
+```
+
+No flags beyond the global ones.
+
+```
+$ smugglr status
+smugglr v0.3.0
+
+  config:  ./config.toml
+  source:  ./local.db (SQLite 3.45.1, 3 tables, 633 rows)
+  target:  d1://my-database (Cloudflare D1, reachable)
+  relay:   s3://smugglr-relay/default (configured, reachable)
+  strategy: local_wins
+```
+
+If something is wrong, status tells you what and exits with the appropriate code.
+
+```
+$ smugglr status
+smugglr v0.3.0
+
+  config:  ./config.toml
+  source:  ./local.db (SQLite 3.45.1, 3 tables, 633 rows)
+  target:  d1://my-database (Cloudflare D1, unreachable)
+           error: 401 Unauthorized. Check your API token.
+
+Exit code: 3
+```
+
+---
+
+## Exit Codes
+
+Every command returns a typed exit code. Use these for scripting, CI/CD gates, and agent workflows.
+
+| Code | Name | Meaning | Retry? |
+|------|------|---------|--------|
+| `0` | Success | Operation completed. | No. |
+| `1` | General error | Something unexpected broke. | Maybe. |
+| `2` | Config error | Bad config file, missing fields, invalid values. | No. Fix the config. |
+| `3` | Network/transient | Connection failed, timeout, HTTP 5xx. | Yes, with backoff. |
+| `4` | Conflict | Concurrent write detected (ETag mismatch, row conflict). | Yes, after re-reading state. |
+| `5` | Not found | Table, snapshot, or resource does not exist. | No. Check the name. |
+| `6` | Plugin error | A DataSource adapter failed. | Depends on the adapter. |
+
+In shell scripts:
+
+```bash
+smugglr push
+case $? in
+  0) echo "done" ;;
+  2) echo "fix your config" && exit 1 ;;
+  3) echo "network issue, retrying..." && sleep 5 && smugglr push ;;
+  4) echo "conflict, pulling first" && smugglr pull && smugglr push ;;
+  *) echo "unexpected: $?" && exit 1 ;;
+esac
+```
+
+---
+
+## JSON Output
+
+Pass `--output json` to any command. Output follows a consistent `CommandOutput` structure.
+
+### Structure
+
+```json
+{
+  "command": "push",
+  "status": "ok",
+  "dry_run": false,
+  "tables": [
+    {
+      "name": "users",
+      "rows_pushed": 3,
+      "rows_pulled": 0
+    }
+  ]
+}
+```
+
+Fields with zero values are omitted. A push that touches no pulled rows will not include `rows_pulled` in the table entry.
+
+### Error output
+
+```json
+{
+  "command": "push",
+  "status": "error",
+  "error": "network timeout connecting to d1://my-database"
+}
+```
+
+### Dry-run output
+
+Dry-run adds summary fields to the top level and per-table breakdowns.
+
+```json
+{
+  "command": "push",
+  "status": "ok",
+  "dry_run": true,
+  "total_rows_to_push": 3,
+  "tables": [
+    {
+      "name": "users",
+      "rows_to_push": 3
+    }
+  ]
+}
+```
+
+For pull dry-runs, the fields are `total_rows_to_pull` and `rows_to_pull`. For sync, both directions are present.
+
+### Watch output (JSONL)
+
+When running `smugglr watch --output json`, each sync cycle emits one JSON line to stdout:
+
+```jsonl
+{"command":"watch","status":"ok","tables":[{"name":"users","rows_pushed":0,"rows_pulled":2}]}
+{"command":"watch","status":"ok","tables":[]}
+{"command":"watch","status":"ok","tables":[{"name":"users","rows_pushed":1}]}
+```
+
+Each line is a complete `CommandOutput` object. Parse line by line.

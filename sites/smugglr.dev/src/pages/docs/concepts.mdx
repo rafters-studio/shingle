@@ -1,0 +1,31 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Concepts
+description: "Short essays on the ideas behind smugglr: content is truth, adapters and portability, agent-first design, the watch pattern, encryption as membership."
+---
+
+# Concepts
+
+The mental model behind smugglr. Short essays on the ideas that shape the tool.
+
+Work in progress. Draft content below; full essays land with the next content pass.
+
+## Content is truth
+
+Timestamps lie. Sequence numbers need a coordinator. Content hashing needs neither. Hash the row, compare, move the ones that differ. The same answer falls out whether you run the sync once, twice, or on an interval with packet loss. The hash of the row is the identity of the row.
+
+## Adapters and portability
+
+Vendor lock-in is usually a data problem, not a product problem. If your data is in SQLite, you have infinite portability: SQLite reads on every platform. smugglr's target adapters push that same portability outward: D1 today, Turso tomorrow, rqlite the week after. Same config shape, same conflict strategy, same exit codes.
+
+## Agent-first design
+
+Pretty terminal output costs an AI agent parseability. Structured JSON costs a human nothing they can't recover with a pipe. smugglr defaults to human output and upgrades to JSON on `--output json`. Exit codes are typed: an agent knows whether to retry, fix config, or escalate.
+
+## The watch pattern
+
+Background sync without a server. `smugglr watch` polls, syncs, logs, repeats. No shared state, no coordinator, no daemon registry. If the process dies, restart it. Content hashing makes the restart a no-op when nothing changed.
+
+## Encryption as membership
+
+LAN broadcast has no authentication handshake. The encryption key is the membership token. If you have the key, you are on the network. Key rotation is how you remove a machine. This is the simplest trust model that holds up under packet loss and replay.

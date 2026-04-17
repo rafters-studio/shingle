@@ -1,0 +1,392 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Configuration Reference
+description: "The complete smugglr config.toml: source, target, sync, watch, stash, broadcast, plugins. Minimal and maximal examples."
+---
+
+
+smugglr reads configuration from `config.toml` in the current directory, or from a path specified with `--config`.
+
+---
+
+## Quick Start
+
+Minimal config to push a local SQLite database to Cloudflare D1:
+
+```toml
+local_db = "./app.db"
+
+[target]
+type = "d1"
+account_id = "your-cloudflare-account-id"
+database_id = "your-d1-database-id"
+api_token = "your-cloudflare-api-token"
+```
+
+Four lines. Run `smugglr push --dry-run` to see what would happen, then `smugglr push` to do it.
+
+---
+
+## Full Annotated Config
+
+Every field, every default. Copy this and delete what you do not need.
+
+```toml
+# ──────────────────────────────────────────────
+# TARGET: where data goes (or comes from)
+# ──────────────────────────────────────────────
+
+[target]
+type = "d1"                              # "d1", "sqlite", or "plugin"
+account_id = "abc123"                    # Cloudflare account ID (d1 only)
+database_id = "def456"                   # D1 database ID (d1 only)
+api_token = "sk-xxx"                     # Cloudflare API token (d1 only)
+url = ""                                 # Optional. Override endpoint for DO bridge (d1 only)
+path = "./local.db"                      # Database file path (sqlite only)
+name = "turso"                           # Plugin name or path (plugin only)
+
+[target.config]                          # Plugin-specific config (plugin only)
+# Keys here are passed to the plugin. See plugin docs.
+
+# ──────────────────────────────────────────────
+# SYNC: how data moves
+# ──────────────────────────────────────────────
+
+[sync]
+tables = []                              # Tables to sync. Empty = all tables.
+exclude_tables = []                      # Tables to skip. Glob patterns.
+exclude_columns = []                     # Columns to skip. Glob patterns.
+timestamp_column = "updated_at"          # Column used for newer_wins resolution
+conflict_resolution = "local_wins"       # "local_wins", "remote_wins", "newer_wins", "uuid_v7_wins"
+batch_size = 100                         # Rows per write batch
+max_statement_bytes = 92160              # Max bytes per SQL statement (D1 limit: 90 KB)
+max_retries = 5                          # Retry attempts on transient failure
+initial_retry_delay_ms = 100             # First retry delay in milliseconds
+max_retry_delay_ms = 30000               # Retry delay ceiling in milliseconds
+backoff_multiplier = 2.0                 # Exponential backoff factor
+
+# ──────────────────────────────────────────────
+# STASH: cross-machine relay via object storage
+# ──────────────────────────────────────────────
+
+[stash]
+url = "s3://my-bucket/smugglr/"          # s3:// or file:// URI
+access_key_id = "AKIA..."               # S3 access key
+secret_access_key = "wJal..."           # S3 secret key
+region = "us-east-1"                     # S3 region
+endpoint = "https://abc.r2.cloudflarestorage.com"  # Custom S3-compatible endpoint (R2, MinIO, etc.)
+
+# ──────────────────────────────────────────────
+# BROADCAST: encrypted LAN sync
+# ──────────────────────────────────────────────
+
+[broadcast]
+port = 31337                             # UDP port for broadcast traffic
+interval_secs = 30                       # Seconds between broadcast ticks
+instance_id = ""                         # Node identifier. Defaults to hostname.
+secret = ""                              # 64 hex characters. XChaCha20-Poly1305 key.
+```
+
+---
+
+## Section Reference
+
+### [target]
+
+Defines the remote (or second local) database endpoint. Three target types, each with different required fields.
+
+#### Target type: `d1`
+
+Cloudflare D1 over the REST API.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `type` | string | -- | Must be `"d1"` |
+| `account_id` | string | -- | Cloudflare account ID |
+| `database_id` | string | -- | D1 database UUID |
+| `api_token` | string | -- | Cloudflare API token with D1 permissions |
+| `url` | string | `""` | Override the D1 API endpoint. Use this when routing through a Durable Objects HTTP bridge or a proxy. |
+
+#### Target type: `sqlite`
+
+A second SQLite file on the local filesystem.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `type` | string | -- | Must be `"sqlite"` |
+| `path` | string | -- | Path to the .db file. Relative paths resolve from the config file location. |
+
+#### Target type: `plugin`
+
+Delegates to a runtime plugin for the connection. Used for Turso, rqlite, StarbaseDB, Datasette, SQLite Cloud, and custom adapters.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `type` | string | -- | Must be `"plugin"` |
+| `name` | string | -- | Plugin name (e.g., `"turso"`) or filesystem path to a plugin binary |
+| `[target.config]` | table | `{}` | Arbitrary key-value pairs passed to the plugin. Contents depend on the plugin. |
+
+#### Legacy flat fields
+
+For backward compatibility, these top-level fields still work. They map to `type = "d1"`.
+
+| Field | Maps to |
+|-------|---------|
+| `cloudflare_account_id` | `[target] account_id` |
+| `cloudflare_api_token` | `[target] api_token` |
+| `database_id` | `[target] database_id` |
+
+Legacy fields are deprecated. Use the `[target]` section in new configs.
+
+---
+
+### [sync]
+
+Controls what gets synced and how conflicts are resolved.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `tables` | array of strings | `[]` | Tables to include. Empty array means all tables. |
+| `exclude_tables` | array of strings | `[]` | Tables to exclude. Supports glob patterns (`"_cf_*"`, `"tmp_*"`). |
+| `exclude_columns` | array of strings | `[]` | Columns to exclude from sync. Supports glob patterns (`"*_embedding"`, `"cache_*"`). Excluded columns are omitted from content hashing and data transfer. |
+| `timestamp_column` | string | `"updated_at"` | Column name used by `newer_wins` conflict resolution to compare row age. |
+| `conflict_resolution` | string | `"local_wins"` | Strategy for resolving conflicts. See below. |
+| `batch_size` | integer | `100` | Maximum rows per write batch. |
+| `max_statement_bytes` | integer | `92160` | Maximum bytes per SQL statement. The D1 API limit is 90 KB (92160 bytes). Reduce for targets with smaller limits. |
+| `max_retries` | integer | `5` | Number of retry attempts on transient failure (network errors, rate limits). |
+| `initial_retry_delay_ms` | integer | `100` | Delay before the first retry, in milliseconds. |
+| `max_retry_delay_ms` | integer | `30000` | Maximum delay between retries, in milliseconds. The backoff will not exceed this ceiling. |
+| `backoff_multiplier` | float | `2.0` | Multiplier applied to the delay after each retry. Delay = previous delay * multiplier, capped at `max_retry_delay_ms`. |
+
+#### Conflict Resolution Strategies
+
+| Strategy | Behavior |
+|----------|----------|
+| `local_wins` | Local row always overwrites remote. Default. Safe for one-way push workflows. |
+| `remote_wins` | Remote row always overwrites local. Safe for one-way pull workflows. |
+| `newer_wins` | Row with the more recent `timestamp_column` value wins. Requires both sides to have the configured timestamp column populated. |
+| `uuid_v7_wins` | Row with the higher UUIDv7 primary key wins. UUIDv7 encodes creation time, so the newest row wins without requiring a separate timestamp column. No clock sync needed across machines. |
+
+---
+
+### [stash]
+
+Configures the cross-machine relay. The relay is S3-compatible object storage used as a staging area. `smugglr stash` writes to it; `smugglr retrieve` reads from it. Not a sync target. A way to move data between machines that cannot reach each other directly.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `url` | string | -- | Relay location. `s3://bucket/prefix/` for S3-compatible storage. `file:///path/to/dir/` for local filesystem (useful for testing). |
+| `access_key_id` | string | -- | S3 access key ID. |
+| `secret_access_key` | string | -- | S3 secret access key. |
+| `region` | string | -- | S3 region (e.g., `"us-east-1"`, `"auto"` for R2). |
+| `endpoint` | string | -- | Custom S3-compatible endpoint URL. Required for R2, MinIO, Backblaze B2, and other non-AWS providers. |
+
+---
+
+### [broadcast]
+
+Configures encrypted LAN broadcast sync. Machines on the same network exchange changes as encrypted UDP datagrams. No coordinator, no relay, no ACKs. Content hashing makes missed packets safe. The encryption key is the membership credential: have the key, you are in the group.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `port` | integer | `31337` | UDP port for broadcast traffic. All nodes in the group must use the same port. |
+| `interval_secs` | integer | `30` | Seconds between broadcast ticks. Lower values mean faster convergence and more network traffic. |
+| `instance_id` | string | hostname | Identifier for this node in log output and diagnostics. Defaults to the machine hostname. |
+| `secret` | string | -- | 64-character hex string (32 bytes). Used as the XChaCha20-Poly1305 symmetric key. All nodes in the group must share the same secret. |
+
+Generate a broadcast secret:
+
+```sh
+openssl rand -hex 32
+```
+
+---
+
+### [plugins]
+
+Plugin configuration lives under `[target.config]`, not in a separate `[plugins]` section. Each plugin defines its own config schema. See the plugin's documentation for available fields.
+
+Example for a Turso plugin:
+
+```toml
+[target]
+type = "plugin"
+name = "turso"
+
+[target.config]
+url = "libsql://your-db.turso.io"
+auth_token = "eyJ..."
+```
+
+Example for a custom plugin loaded from disk:
+
+```toml
+[target]
+type = "plugin"
+name = "./plugins/my-adapter"
+
+[target.config]
+endpoint = "https://my-service.example.com/sql"
+api_key = "sk-xxx"
+```
+
+---
+
+## Environment Variables
+
+Any string field in `config.toml` supports environment variable substitution using the `$VAR` or `${VAR}` syntax:
+
+```toml
+[target]
+type = "d1"
+account_id = "$CF_ACCOUNT_ID"
+database_id = "$CF_DATABASE_ID"
+api_token = "$CF_API_TOKEN"
+
+[stash]
+url = "s3://my-bucket/smugglr/"
+access_key_id = "$AWS_ACCESS_KEY_ID"
+secret_access_key = "$AWS_SECRET_ACCESS_KEY"
+
+[broadcast]
+secret = "$SMUGGLR_BROADCAST_SECRET"
+```
+
+This keeps secrets out of config files. Recommended for CI/CD pipelines and shared team configs where the TOML is committed but credentials are injected at runtime.
+
+---
+
+## Examples
+
+### Local to D1
+
+The most common setup. Push a local SQLite database to Cloudflare D1.
+
+```toml
+[target]
+type = "d1"
+account_id = "$CF_ACCOUNT_ID"
+database_id = "$CF_DATABASE_ID"
+api_token = "$CF_API_TOKEN"
+
+[sync]
+conflict_resolution = "local_wins"
+exclude_tables = ["_cf_*", "sqlite_*"]
+```
+
+### Local to Turso
+
+Push to a Turso (libSQL) database via the plugin system.
+
+```toml
+[target]
+type = "plugin"
+name = "turso"
+
+[target.config]
+url = "libsql://my-db-myorg.turso.io"
+auth_token = "$TURSO_AUTH_TOKEN"
+
+[sync]
+exclude_tables = ["_litestream_*"]
+```
+
+### Bidirectional Sync
+
+Two-way sync between local and remote. Uses `uuid_v7_wins` so the newest row wins without clock coordination.
+
+```toml
+[target]
+type = "d1"
+account_id = "$CF_ACCOUNT_ID"
+database_id = "$CF_DATABASE_ID"
+api_token = "$CF_API_TOKEN"
+
+[sync]
+conflict_resolution = "uuid_v7_wins"
+tables = ["users", "posts", "comments"]
+batch_size = 50
+```
+
+```sh
+smugglr sync --dry-run    # see what would change in both directions
+smugglr sync              # do it
+```
+
+### Watch + Stash Combo
+
+Run a background watch daemon that syncs to D1 on change, with stash configured for cross-machine relay.
+
+```toml
+[target]
+type = "d1"
+account_id = "$CF_ACCOUNT_ID"
+database_id = "$CF_DATABASE_ID"
+api_token = "$CF_API_TOKEN"
+
+[sync]
+conflict_resolution = "local_wins"
+batch_size = 100
+
+[stash]
+url = "s3://my-relay-bucket/smugglr/"
+access_key_id = "$AWS_ACCESS_KEY_ID"
+secret_access_key = "$AWS_SECRET_ACCESS_KEY"
+region = "auto"
+endpoint = "https://abc123.r2.cloudflarestorage.com"
+```
+
+```sh
+smugglr watch              # continuous sync to D1
+smugglr stash              # snapshot current state to relay
+# on another machine:
+smugglr retrieve           # pull latest from relay
+```
+
+### LAN Broadcast Setup
+
+Three machines on the same network, keeping a shared database in sync. No relay, no server.
+
+**Step 1.** Generate a shared secret:
+
+```sh
+openssl rand -hex 32
+# outputs: a1b2c3d4e5f6...  (64 hex chars)
+```
+
+**Step 2.** Same config on every machine:
+
+```toml
+[broadcast]
+port = 31337
+interval_secs = 30
+secret = "$SMUGGLR_BROADCAST_SECRET"
+```
+
+**Step 3.** Start the daemon on each machine:
+
+```sh
+export SMUGGLR_BROADCAST_SECRET="a1b2c3d4e5f6..."
+smugglr broadcast
+```
+
+Every machine broadcasts changes and listens for changes from peers. Content hashing ensures applying the same row twice is a no-op. If a machine misses a broadcast, the next tick covers it.
+
+For machines on different physical networks, put them on the same subnet with Tailscale, WireGuard, or ZeroTier. smugglr broadcasts to whatever subnet it is on and does not care how that subnet was built.
+
+### D1 via Durable Objects Bridge
+
+Route D1 traffic through a Durable Objects HTTP bridge instead of the public API:
+
+```toml
+[target]
+type = "d1"
+account_id = "$CF_ACCOUNT_ID"
+database_id = "$CF_DATABASE_ID"
+api_token = "$CF_API_TOKEN"
+url = "https://my-do-bridge.my-worker.workers.dev"
+
+[sync]
+conflict_resolution = "local_wins"
+max_statement_bytes = 92160
+```
