@@ -1,7 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-
-const BASE = import.meta.env.BASE_URL;
 ---
 
 <Base title="Rafters Mail" description="A full-stack email framework for Cloudflare Workers.">
@@ -9,7 +7,7 @@ const BASE = import.meta.env.BASE_URL;
     <header class="site-header">
       <span class="site-wordmark">Rafters Mail</span>
       <nav class="site-nav">
-        <a href={`${BASE}docs/`}>Docs</a>
+        <a href="/docs/">Docs</a>
         <a href="https://github.com/rafters-studio/mail">GitHub</a>
       </nav>
     </header>
@@ -23,8 +21,8 @@ const BASE = import.meta.env.BASE_URL;
           IMAP included. No third-party inbox required.
         </p>
         <div class="hero-actions">
-          <a href={`${BASE}docs/getting-started/`} class="btn-primary">Get started</a>
-          <a href={`${BASE}docs/`} class="btn-secondary">Read the docs</a>
+          <a href="/docs/getting-started/" class="btn-primary">Get started</a>
+          <a href="/docs/" class="btn-secondary">Read the docs</a>
         </div>
         <pre class="install-block"><code>pnpm add @rafters/mail</code></pre>
       </div>

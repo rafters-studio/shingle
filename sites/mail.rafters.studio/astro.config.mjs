@@ -13,7 +13,6 @@ const prettyCodeOptions = {
 // https://astro.build/config
 export default defineConfig({
   site: 'https://rafters.studio',
-  base: '/mail',
   trailingSlash: 'always',
 
   integrations: [
