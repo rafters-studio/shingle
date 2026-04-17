@@ -1,5 +1,7 @@
 ---
 import Docs from '../../layouts/Docs.astro';
+
+const BASE = import.meta.env.BASE_URL;
 ---
 
 <Docs title="Rafters Mail Documentation" description="A full-stack email framework for Cloudflare Workers.">
@@ -24,8 +26,8 @@ import Docs from '../../layouts/Docs.astro';
     to receiving and sending email on a real Worker.
   </p>
   <ul>
-    <li><a href="/docs/getting-started/">Getting Started</a> -- install, configure, and receive your first email</li>
-    <li><a href="/docs/quickstart-cloudflare/">Quickstart: Cloudflare</a> -- a faster path if you already know Workers</li>
+    <li><a href={`${BASE}docs/getting-started/`}>Getting Started</a> -- install, configure, and receive your first email</li>
+    <li><a href={`${BASE}docs/quickstart-cloudflare/`}>Quickstart: Cloudflare</a> -- a faster path if you already know Workers</li>
   </ul>
 
   <h2>Architecture</h2>
@@ -33,8 +35,8 @@ import Docs from '../../layouts/Docs.astro';
     Understand how the framework is assembled before building on top of it.
   </p>
   <ul>
-    <li><a href="/docs/architecture/">Architecture</a> -- the full internal design reference</li>
-    <li><a href="/docs/adapters/">Adapters Guide</a> -- how adapters connect the core to vendors</li>
+    <li><a href={`${BASE}docs/architecture/`}>Architecture</a> -- the full internal design reference</li>
+    <li><a href={`${BASE}docs/adapters/`}>Adapters Guide</a> -- how adapters connect the core to vendors</li>
   </ul>
 
   <h2>Core</h2>
@@ -42,9 +44,9 @@ import Docs from '../../layouts/Docs.astro';
     The schema, API surface, threading model, and database migration system.
   </p>
   <ul>
-    <li><a href="/docs/core-reference/">Core Reference</a> -- the complete schema and API reference</li>
-    <li><a href="/docs/threading/">Threading</a> -- RFC 5322 conversation grouping</li>
-    <li><a href="/docs/migrations/">Migrations</a> -- the inbox and newsletter table schema</li>
+    <li><a href={`${BASE}docs/core-reference/`}>Core Reference</a> -- the complete schema and API reference</li>
+    <li><a href={`${BASE}docs/threading/`}>Threading</a> -- RFC 5322 conversation grouping</li>
+    <li><a href={`${BASE}docs/migrations/`}>Migrations</a> -- the inbox and newsletter table schema</li>
   </ul>
 
   <h2>Inbound and outbound</h2>
@@ -52,11 +54,11 @@ import Docs from '../../layouts/Docs.astro';
     The full email processing pipeline: receiving, sending, storage, and classification.
   </p>
   <ul>
-    <li><a href="/docs/inbound/">Inbound Email</a> -- flow, InboundAdapter, and parsing</li>
-    <li><a href="/docs/outbound/">Outbound Email</a> -- compose, reply, EmailProvider, and webhooks</li>
-    <li><a href="/docs/blob-storage/">Blob Storage</a> -- BlobStorage interface and R2 implementation</li>
-    <li><a href="/docs/classification/">Email Classification</a> -- Workers AI and DeBERTa-v3</li>
-    <li><a href="/docs/newsletters/">Newsletters and Broadcasts</a> -- mailing lists and platform mirror tables</li>
+    <li><a href={`${BASE}docs/inbound/`}>Inbound Email</a> -- flow, InboundAdapter, and parsing</li>
+    <li><a href={`${BASE}docs/outbound/`}>Outbound Email</a> -- compose, reply, EmailProvider, and webhooks</li>
+    <li><a href={`${BASE}docs/blob-storage/`}>Blob Storage</a> -- BlobStorage interface and R2 implementation</li>
+    <li><a href={`${BASE}docs/classification/`}>Email Classification</a> -- Workers AI and DeBERTa-v3</li>
+    <li><a href={`${BASE}docs/newsletters/`}>Newsletters and Broadcasts</a> -- mailing lists and platform mirror tables</li>
   </ul>
 
   <h2>IMAP</h2>
@@ -64,9 +66,9 @@ import Docs from '../../layouts/Docs.astro';
     Native IMAP support for connecting mail clients directly to your Worker.
   </p>
   <ul>
-    <li><a href="/docs/imap-quickstart/">IMAP Quickstart</a> -- pick a runtime, deploy, connect a client</li>
-    <li><a href="/docs/imap-commands/">IMAP Command Reference</a> -- full RFC-cited command list</li>
-    <li><a href="/docs/app-passwords/">IMAP Authentication</a> -- the AuthAdapter contract</li>
-    <li><a href="/docs/imap-deployment/">IMAP Deployment Guide</a> -- Fly, Railway, Fargate, Docker, VPS</li>
+    <li><a href={`${BASE}docs/imap-quickstart/`}>IMAP Quickstart</a> -- pick a runtime, deploy, connect a client</li>
+    <li><a href={`${BASE}docs/imap-commands/`}>IMAP Command Reference</a> -- full RFC-cited command list</li>
+    <li><a href={`${BASE}docs/app-passwords/`}>IMAP Authentication</a> -- the AuthAdapter contract</li>
+    <li><a href={`${BASE}docs/imap-deployment/`}>IMAP Deployment Guide</a> -- Fly, Railway, Fargate, Docker, VPS</li>
   </ul>
 </Docs>
