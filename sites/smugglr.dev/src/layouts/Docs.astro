@@ -1,0 +1,84 @@
+---
+import Base from './Base.astro';
+import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import GridItem from '@/components/ui/grid-item.astro';
+import Small from '@/components/ui/typography-small.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const rawProps = Astro.props as Props & { frontmatter?: Partial<Props> };
+const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
+const { title = '', description } = merged;
+const currentPath = Astro.url.pathname.replace(/\/$/, '');
+
+type NavItem = { label: string; href: string };
+type NavGroup = { heading: string; items: NavItem[] };
+
+const nav: NavGroup[] = [
+  {
+    heading: 'Start',
+    items: [
+      { label: 'Get Started', href: '/get-started' },
+      { label: 'CLI Reference', href: '/docs/cli-reference' },
+      { label: 'Configuration', href: '/docs/configuration' },
+    ],
+  },
+  {
+    heading: 'Internals',
+    items: [
+      { label: 'How It Works', href: '/docs/how-it-works' },
+      { label: 'Usage Patterns', href: '/docs/patterns' },
+      { label: 'Plugin Guide', href: '/docs/plugin-guide' },
+      { label: 'Concepts', href: '/docs/concepts' },
+    ],
+  },
+];
+
+function isActive(href: string): boolean {
+  return currentPath === href || currentPath.startsWith(href + '/');
+}
+---
+
+<Base title={title} description={description}>
+  <Container size="7xl" padding="8" gap="10">
+    <Grid columns={2} gap="4" class="@sm:mb-8 @md:mb-16 @lg:mb-32">
+      <a href="/">
+        <img src="/logo.webp" alt="Smuggler" class="w-24 h-auto" />
+      </a>
+      <Grid columns={2} gap="8" class="justify-self-end w-fit">
+        <a href="/docs/">Docs</a>
+        <a href="https://github.com/rafters-studio/smugglr">GitHub</a>
+      </Grid>
+    </Grid>
+
+    <Grid columns={4} gap="8">
+      <GridItem colSpan={1}>
+        <Container as="aside" gap="8">
+          {nav.map((group) => (
+            <Container gap="2">
+              <Small>{group.heading}</Small>
+              {group.items.map((item) => (
+                <a
+                  href={item.href + '/'}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </Container>
+          ))}
+        </Container>
+      </GridItem>
+
+      <GridItem colSpan={3}>
+        <Container as="article" gap="6">
+          <slot />
+        </Container>
+      </GridItem>
+    </Grid>
+  </Container>
+</Base>

@@ -1,0 +1,27 @@
+---
+layout: '@/src/layouts/Base.astro'
+title: Smuggler
+description: "Universal SQLite sync engine: content hashing, delta sync, LAN broadcast, S3 relay. Agent-friendly."
+stickyTopbar: true
+---
+import Container from "@/components/ui/container.astro";
+import H1 from "@/components/ui/typography-h1.astro";
+import P from "@/components/ui/typography-p.astro";
+import Small from "@/components/ui/typography-small.astro";
+import Codeblock from "@/components/ui/typography-codeblock.astro";
+
+import Hero from "@/components/Hero.astro";
+
+<Hero>
+    <img slot="logo" src="/logo.webp" alt="Smuggler" class="w-48 h-auto" />
+
+    <H1 slot="title">Smuggle data between SQLite, D1, and S3.</H1>
+
+    <P slot="tagline" size="display-medium" color="muted-foreground">Fast. Stateless. Encrypted. A universal sync engine with LAN broadcast, S3 relay, and agent-friendly JSON output.</P>
+
+    <P slot="description">Smuggler compares content hashes row by row, moves only what changed, and leaves no state behind. It runs as a CLI, a Rust crate, and a WASM npm package. Production-tested since early 2026 at huttspawn.com.</P>
+
+    <Codeblock slot="cta">{`cargo install smugglr`}</Codeblock>
+
+    <Small slot="footnote">Beta. Kessel Run Certified. Shaving parsecs, not days.</Small>
+</Hero>

@@ -1,0 +1,35 @@
+{
+  "name": "smugglr.dev",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "start": "astro preview",
+    "typecheck": "astro check && tsc --noEmit",
+    "lint": "oxlint ./src",
+    "lint:fix": "oxlint ./src --fix",
+    "format": "oxfmt ./src",
+    "format:check": "oxfmt --check ./src",
+    "preflight": "pnpm lint && pnpm typecheck && pnpm build",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^5.0.0",
+    "@astrojs/sitemap": "^3.7.1",
+    "astro": "^6.0.3",
+    "nanostores": "^1.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.7",
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/node": "^25.5.0",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.78.0"
+  }
+}

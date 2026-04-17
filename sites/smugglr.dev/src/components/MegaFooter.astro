@@ -1,0 +1,51 @@
+---
+import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import Small from "@/components/ui/typography-small.astro";
+---
+
+<footer>
+  <Container fill="surface" size="full" padding="16" gap="12">
+    <Container size="7xl" gap="12">
+      <a href="/" aria-label="Smuggler" class="text-muted-foreground">
+        <img src="/logo.webp" alt="Smuggler" class="w-32 h-auto" />
+      </a>
+
+      <Grid columns={4} gap="10">
+        <Container gap="3">
+          <Small transform="uppercase" tracking="wider" color="muted-foreground">Docs</Small>
+          <a href="/docs/">Overview</a>
+          <a href="/get-started/">Get Started</a>
+          <a href="/docs/cli-reference/">CLI Reference</a>
+          <a href="/docs/configuration/">Configuration</a>
+        </Container>
+
+        <Container gap="3">
+          <Small transform="uppercase" tracking="wider" color="muted-foreground">Internals</Small>
+          <a href="/docs/how-it-works/">How It Works</a>
+          <a href="/docs/patterns/">Usage Patterns</a>
+          <a href="/docs/plugin-guide/">Plugin Guide</a>
+          <a href="/docs/concepts/">Concepts</a>
+        </Container>
+
+        <Container gap="3">
+          <Small transform="uppercase" tracking="wider" color="muted-foreground">Projects</Small>
+          <a href="https://rafters.studio">Rafters</a>
+          <a href="https://runlegion.dev">Legion</a>
+          <a href="https://rafters.studio/mail/">Mail</a>
+          <a href="https://gitpress.app">Gitpress</a>
+          <a href="https://github.com/rafters-studio/kelex">Kelex</a>
+          <a href="https://github.com/rafters-studio/ledger">Ledger</a>
+          <a href="https://github.com/rafters-studio/veneer">Veneer</a>
+        </Container>
+
+        <Container gap="3">
+          <Small transform="uppercase" tracking="wider" color="muted-foreground">Smuggler</Small>
+          <a href="https://github.com/rafters-studio/smugglr">GitHub</a>
+          <a href="/llms.txt">llms.txt</a>
+          <a href="/llms-full.txt">llms-full.txt</a>
+        </Container>
+      </Grid>
+    </Container>
+  </Container>
+</footer>

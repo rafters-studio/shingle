@@ -317,6 +317,46 @@ importers:
         specifier: ^4.72.0
         version: 4.78.0
 
+  sites/smugglr.dev:
+    dependencies:
+      '@astrojs/mdx':
+        specifier: ^5.0.0
+        version: 5.0.3(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3))
+      '@astrojs/sitemap':
+        specifier: ^3.7.1
+        version: 3.7.2
+      astro:
+        specifier: ^6.0.3
+        version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
+      nanostores:
+        specifier: ^1.2.0
+        version: 1.2.0
+    devDependencies:
+      '@astrojs/check':
+        specifier: ^0.9.7
+        version: 0.9.8(prettier@3.8.1)(typescript@5.9.3)
+      '@tailwindcss/vite':
+        specifier: ^4.2.1
+        version: 4.2.2(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.5.0
+      oxfmt:
+        specifier: ^0.36.0
+        version: 0.36.0
+      oxlint:
+        specifier: ^1.51.0
+        version: 1.57.0
+      tailwindcss:
+        specifier: ^4.2.1
+        version: 4.2.2
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      wrangler:
+        specifier: ^4.78.0
+        version: 4.78.0
+
 packages:
 
   '@adobe/css-tools@4.4.4':
@@ -2884,6 +2924,10 @@ packages:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  nanostores@1.2.0:
+    resolution: {integrity: sha512-F0wCzbsH80G7XXo0Jd9/AVQC7ouWY6idUCTnMwW5t/Rv9W8qmO6endavDwg7TNp5GbugwSukFMVZqzPSrSMndg==}
+    engines: {node: ^20.0.0 || >=22.0.0}
 
   negotiator@0.6.4:
     resolution: {integrity: sha512-myRT3DiWPHqho5PrJaIRyaMv2kgYf0mUVgBNOYMuCH5Ki1yEiQaf/ZJuQ62nvpc44wL5WDbTX7yGJi1Neevw8w==}
@@ -6624,6 +6668,8 @@ snapshots:
   muggle-string@0.4.1: {}
 
   nanoid@3.3.11: {}
+
+  nanostores@1.2.0: {}
 
   negotiator@0.6.4: {}
 
