@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "../../.rafters/output/rafters.css";
+
+@source "../components/ui/*.classes.ts";
+
+/*
+ * Rafters typography role utilities are @utility declarations. Tailwind
+ * only emits them when it sees the class name as a literal in scanned
+ * source files. The Typography token props build class names at runtime
+ * via template literal (`text-${size}`), which the scanner can't see.
+ * Safelist them here so `<H1 size="display-large">` actually compiles.
+ */
+@source inline("text-display-large text-display-medium text-title-large text-title-medium text-title-small text-body-large text-body-medium text-body-small text-label-large text-label-medium text-label-small text-code-large text-code-small");

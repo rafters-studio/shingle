@@ -1,0 +1,114 @@
+---
+import Base from './Base.astro';
+import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import GridItem from '@/components/ui/grid-item.astro';
+import Small from '@/components/ui/typography-small.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+// MDX pages deliver frontmatter under Astro.props.frontmatter; .astro pages
+// pass props directly. Merge both so either entry point works.
+const rawProps = Astro.props as Props & {
+  frontmatter?: Partial<Props>;
+};
+const { title, description } = {
+  ...rawProps.frontmatter,
+  ...rawProps,
+} as Props;
+
+const currentPath = Astro.url.pathname;
+
+const siteOrigin = Astro.site?.origin ?? 'https://runlegion.dev';
+const pageUrl = new URL(currentPath, siteOrigin).href;
+
+const techArticle: Record<string, unknown> = {
+  '@type': 'TechArticle',
+  '@id': `${pageUrl}#article`,
+  headline: title,
+  description,
+  url: pageUrl,
+  inLanguage: 'en',
+  isPartOf: { '@id': `${siteOrigin}/#website` },
+  publisher: { '@id': `${siteOrigin}/#organization` },
+  about: { '@id': `${siteOrigin}/#software` },
+};
+
+const docsSections = [
+  {
+    title: 'Start',
+    links: [
+      { href: '/docs/', label: 'Overview' },
+      { href: '/docs/getting-started/', label: 'Getting Started' },
+    ],
+  },
+  {
+    title: 'Reference',
+    links: [
+      { href: '/docs/cli-reference/', label: 'CLI Reference' },
+      { href: '/docs/plugin-guide/', label: 'Plugin Guide' },
+    ],
+  },
+  {
+    title: 'Deep Dive',
+    links: [
+      { href: '/docs/architecture/', label: 'Architecture' },
+      { href: '/docs/concepts/', label: 'Concepts' },
+    ],
+  },
+  {
+    title: 'For LLMs',
+    links: [
+      { href: '/llms.txt', label: 'llms.txt' },
+      { href: '/llms-full.txt', label: 'llms-full.txt' },
+    ],
+  },
+];
+
+const navItemClass =
+  'no-underline text-muted-foreground hover:text-foreground';
+const navItemActiveClass = 'no-underline text-primary';
+const sectionLabelClass =
+  'uppercase tracking-widest text-muted-foreground';
+---
+
+<Base
+  title={title}
+  description={description}
+  type="article"
+  extraJsonLd={[techArticle]}
+>
+  <Container size="7xl" padding="6">
+    <Grid columns={4} gap="8">
+      <Container as="aside" gap="6" class="sticky top-0">
+        {docsSections.map((section) => (
+          <Container gap="2">
+            <Small class={sectionLabelClass}>{section.title}</Small>
+            <Container gap="1">
+              {section.links.map((link) => {
+                const isActive = currentPath === link.href;
+                return (
+                  <a
+                    href={link.href}
+                    class={isActive ? navItemActiveClass : navItemClass}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <Small>{link.label}</Small>
+                  </a>
+                );
+              })}
+            </Container>
+          </Container>
+        ))}
+      </Container>
+      <GridItem colSpan={3}>
+        <Container as="main" size="full" gap="6">
+          <slot />
+        </Container>
+      </GridItem>
+    </Grid>
+  </Container>
+</Base>

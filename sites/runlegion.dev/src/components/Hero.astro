@@ -1,0 +1,18 @@
+---
+/**
+ * Hero - Landing hero composed of named slots an MDX caller fills.
+ * Slots: eyebrow, title, tagline, description, cta, footnote.
+ */
+import Container from "@/components/ui/container.astro";
+---
+
+<section>
+  <Container size="4xl" padding="16" gap="10">
+    <slot name="eyebrow" />
+    <slot name="title" />
+    <slot name="tagline" />
+    <slot name="description" />
+    <slot name="cta" />
+    <slot name="footnote" />
+  </Container>
+</section>

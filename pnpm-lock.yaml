@@ -118,6 +118,64 @@ importers:
         specifier: ^4.72.0
         version: 4.78.0
 
+  sites/runlegion.dev:
+    dependencies:
+      '@astrojs/mdx':
+        specifier: ^5.0.0
+        version: 5.0.3(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3))
+      '@astrojs/sitemap':
+        specifier: ^3.7.1
+        version: 3.7.2
+      astro:
+        specifier: ^6.0.3
+        version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.5.0
+      typography-code.astro:
+        specifier: link:@/components/ui/typography-code.astro
+        version: link:@/components/ui/typography-code.astro
+      typography-h1.astro:
+        specifier: link:@/components/ui/typography-h1.astro
+        version: link:@/components/ui/typography-h1.astro
+      typography-p.astro:
+        specifier: link:@/components/ui/typography-p.astro
+        version: link:@/components/ui/typography-p.astro
+      typography.astro:
+        specifier: link:@/components/ui/typography.astro
+        version: link:@/components/ui/typography.astro
+    devDependencies:
+      '@astrojs/check':
+        specifier: ^0.9.7
+        version: 0.9.8(prettier@3.8.1)(typescript@5.9.3)
+      '@tailwindcss/vite':
+        specifier: ^4.2.1
+        version: 4.2.2(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))
+      oxfmt:
+        specifier: ^0.36.0
+        version: 0.36.0
+      oxlint:
+        specifier: ^1.51.0
+        version: 1.57.0
+      shiki:
+        specifier: ^4.0.1
+        version: 4.0.2
+      tailwindcss:
+        specifier: ^4.2.1
+        version: 4.2.2
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   sites/sean.silvius.me:
     dependencies:
       '@astrojs/cloudflare':
@@ -223,52 +281,6 @@ importers:
       wrangler:
         specifier: ^4.72.0
         version: 4.78.0
-
-  sites/smugglr.dev:
-    dependencies:
-      '@astrojs/mdx':
-        specifier: ^5.0.0
-        version: 5.0.3(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3))
-      '@astrojs/sitemap':
-        specifier: ^3.7.1
-        version: 3.7.2
-      astro:
-        specifier: ^6.0.3
-        version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      react:
-        specifier: 19.2.0
-        version: 19.2.0
-      tailwind-merge:
-        specifier: ^3.5.0
-        version: 3.5.0
-    devDependencies:
-      '@astrojs/check':
-        specifier: ^0.9.7
-        version: 0.9.8(prettier@3.8.1)(typescript@5.9.3)
-      '@tailwindcss/vite':
-        specifier: ^4.2.1
-        version: 4.2.2(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))
-      oxfmt:
-        specifier: ^0.36.0
-        version: 0.36.0
-      oxlint:
-        specifier: ^1.51.0
-        version: 1.57.0
-      shiki:
-        specifier: ^4.0.1
-        version: 4.0.2
-      tailwindcss:
-        specifier: ^4.2.1
-        version: 4.2.2
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
 
 packages:
 

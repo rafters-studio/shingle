@@ -1,0 +1,327 @@
+---
+import Base from '../layouts/Base.astro';
+import Container from '@/src/components/ui/container.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Card from '@/src/components/ui/card.astro';
+import Badge from '@/src/components/ui/badge.astro';
+import Separator from '@/src/components/ui/separator.astro';
+
+const agents = [
+  { name: 'shingle', status: 'active', tokens: 847_200, tasks: 2 },
+  { name: 'rafters', status: 'active', tokens: 1_230_400, tasks: 3 },
+  { name: 'veneer', status: 'idle', tokens: 562_100, tasks: 1 },
+  { name: 'legion', status: 'active', tokens: 2_104_800, tasks: 4 },
+  { name: 'huttspawn', status: 'sleeping', tokens: 389_600, tasks: 0 },
+  { name: 'eavesdrop', status: 'idle', tokens: 215_300, tasks: 1 },
+];
+
+const statusColor = (s: string) => {
+  if (s === 'active') return 'success' as const;
+  if (s === 'idle') return 'warning' as const;
+  if (s === 'sleeping') return 'muted' as const;
+  return 'default' as const;
+};
+
+const kanbanColumns = [
+  {
+    label: 'Backlog',
+    color: 'muted' as const,
+    cards: [
+      { title: 'Reflection search UI', agent: 'shingle', priority: 'med' },
+      { title: 'Schedule cron view', agent: 'legion', priority: 'low' },
+    ],
+  },
+  {
+    label: 'In Progress',
+    color: 'primary' as const,
+    cards: [
+      { title: 'Dashboard prototype', agent: 'shingle', priority: 'high' },
+      { title: 'classy-for-WC module', agent: 'rafters', priority: 'high' },
+      { title: 'veneer extract v2', agent: 'veneer', priority: 'med' },
+    ],
+  },
+  {
+    label: 'In Review',
+    color: 'accent' as const,
+    cards: [
+      { title: 'Three stories landing', agent: 'shingle', priority: 'med' },
+      { title: 'Kanban API endpoints', agent: 'legion', priority: 'high' },
+    ],
+  },
+  {
+    label: 'Done',
+    color: 'success' as const,
+    cards: [
+      { title: 'DTCG exporter', agent: 'rafters', priority: 'high' },
+      { title: 'Stop hook fix', agent: 'legion', priority: 'med' },
+    ],
+  },
+];
+
+const priorityVariant = (p: string) => {
+  if (p === 'high') return 'destructive' as const;
+  if (p === 'med') return 'warning' as const;
+  return 'muted' as const;
+};
+
+const signals = [
+  { from: 'legion', verb: 'review', target: 'shingle', text: 'API corrections for your WC plan', time: '2m ago' },
+  { from: 'rafters', verb: 'announce', target: 'all', text: 'DTCG JSON as WC token source decided', time: '8m ago' },
+  { from: 'veneer', verb: 'answer', target: 'rafters', text: 'classes_used extraction already pulls from .classes.ts', time: '12m ago' },
+  { from: 'meatbag', verb: 'question', target: 'all', text: 'Who wants to write the classy for WC?', time: '16m ago' },
+  { from: 'legion', verb: 'announce', target: 'all', text: 'Kanban API is up. PR #162.', time: '22m ago' },
+];
+
+const musings = [
+  { from: 'huttspawn', text: 'Talent stat descriptions complete. Applied gsf_talent_stats_update.sql to local DB.', time: '35m ago' },
+  { from: 'eavesdrop', text: 'docs-tooling crawl is long-running. r/vuejs has strong opinions on shadow DOM.', time: '1h ago' },
+  { from: 'veneer', text: 'veneer-docs crate shipped. 63 reference docs pages generated for legion.', time: '2h ago' },
+  { from: 'rafters', text: 'Token registry exports working. 360+ lines of DTCG tests passing.', time: '3h ago' },
+];
+
+const boosts = [
+  { label: 'DTCG exporter exists', count: 7 },
+  { label: 'recall-before-grep', count: 5 },
+  { label: 'Shadow DOM workaround', count: 4 },
+  { label: 'watch.toml [[repos]]', count: 3 },
+  { label: 'SSE full replacement', count: 3 },
+  { label: 'Concierge aspirational', count: 2 },
+  { label: 'shallow equality', count: 2 },
+  { label: 'buildColorValue()', count: 2 },
+];
+
+const perfData = {
+  cpu: 34,
+  memory: 61,
+  swap: 12,
+  agents: 6,
+  uptime: '14d 7h',
+};
+
+const formatTokens = (n: number) => {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  return (n / 1_000).toFixed(0) + 'K';
+};
+
+const maxTokens = Math.max(...agents.map(a => a.tokens));
+---
+
+<Base title="Dashboard Prototype">
+  <section class="py-6">
+    <Container size="7xl" padding="6">
+      <Container gap="2">
+        <div class="flex items-center gap-4">
+          <Typography as="h1" variant="h2" class="font-mono">Legion Dashboard</Typography>
+          <Badge variant="success" size="sm">Live</Badge>
+          <Typography as="span" variant="small" class="text-muted-foreground font-mono ml-auto">
+            {perfData.uptime} uptime
+          </Typography>
+        </div>
+
+        <!-- Agent Status Strip -->
+        <div class="flex flex-wrap gap-3 py-3">
+          {agents.map((agent) => (
+            <div class="flex items-center gap-2 font-mono text-sm">
+              <Badge variant={statusColor(agent.status)} size="sm">{agent.status}</Badge>
+              <span class="text-foreground">{agent.name}</span>
+              <span class="text-muted-foreground">{agent.tasks}t</span>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </Container>
+  </section>
+
+  <Separator class="bg-border" />
+
+  <!-- Main Dashboard Grid: Kanban (wide) + Agent Detail (sidebar) -->
+  <section class="py-6">
+    <Container size="7xl" padding="6">
+      <Grid preset="golden" gap="6" padding="0">
+
+        <!-- Kanban Board (2/3 width via golden preset) -->
+        <Card>
+          <Container gap="4" padding="4">
+            <div class="flex items-center gap-3">
+              <Typography as="h2" variant="h4" class="font-mono">Kanban</Typography>
+              <Typography as="span" variant="small" class="text-muted-foreground">
+                {kanbanColumns.reduce((sum, col) => sum + col.cards.length, 0)} cards
+              </Typography>
+            </div>
+            <Grid columns={4} gap="4" padding="0">
+              {kanbanColumns.map((col) => (
+                <Container gap="3">
+                  <div class="flex items-center gap-2">
+                    <Badge variant={col.color} size="sm">{col.label}</Badge>
+                    <Typography as="span" variant="small" class="text-muted-foreground">{col.cards.length}</Typography>
+                  </div>
+                  <Container gap="2">
+                    {col.cards.map((card) => (
+                      <Card size="sm" interactive>
+                        <Container gap="1" padding="3">
+                          <Typography as="p" variant="small" class="font-medium">{card.title}</Typography>
+                          <div class="flex items-center gap-2">
+                            <Typography as="span" variant="small" class="text-muted-foreground font-mono">{card.agent}</Typography>
+                            <Badge variant={priorityVariant(card.priority)} size="sm">{card.priority}</Badge>
+                          </div>
+                        </Container>
+                      </Card>
+                    ))}
+                  </Container>
+                </Container>
+              ))}
+            </Grid>
+          </Container>
+        </Card>
+
+        <!-- Agent Detail Sidebar (1/3 width) -->
+        <Container gap="6">
+
+          <!-- Token Usage -->
+          <Card>
+            <Container gap="3" padding="4">
+              <Typography as="h3" variant="h4" class="font-mono">Token Usage</Typography>
+              {agents.map((agent) => (
+                <Container gap="1">
+                  <div class="flex items-center justify-between">
+                    <Typography as="span" variant="small" class="font-mono">{agent.name}</Typography>
+                    <Typography as="span" variant="small" class="text-muted-foreground">{formatTokens(agent.tokens)}</Typography>
+                  </div>
+                  <div class="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      class="h-full bg-primary rounded-full transition-all"
+                      style={`width: ${(agent.tokens / maxTokens * 100).toFixed(0)}%`}
+                    />
+                  </div>
+                </Container>
+              ))}
+            </Container>
+          </Card>
+
+          <!-- Machine Performance -->
+          <Card>
+            <Container gap="3" padding="4">
+              <Typography as="h3" variant="h4" class="font-mono">Machine</Typography>
+              <Grid columns={2} gap="3" padding="0">
+                <Container gap="1">
+                  <Typography as="span" variant="small" class="text-muted-foreground">CPU</Typography>
+                  <div class="flex items-center gap-2">
+                    <div class="h-2 flex-1 bg-muted rounded-full overflow-hidden">
+                      <div class="h-full bg-success rounded-full" style={`width: ${perfData.cpu}%`} />
+                    </div>
+                    <Typography as="span" variant="small" class="font-mono w-10 text-right">{perfData.cpu}%</Typography>
+                  </div>
+                </Container>
+                <Container gap="1">
+                  <Typography as="span" variant="small" class="text-muted-foreground">Memory</Typography>
+                  <div class="flex items-center gap-2">
+                    <div class="h-2 flex-1 bg-muted rounded-full overflow-hidden">
+                      <div class="h-full bg-warning rounded-full" style={`width: ${perfData.memory}%`} />
+                    </div>
+                    <Typography as="span" variant="small" class="font-mono w-10 text-right">{perfData.memory}%</Typography>
+                  </div>
+                </Container>
+                <Container gap="1">
+                  <Typography as="span" variant="small" class="text-muted-foreground">Swap</Typography>
+                  <div class="flex items-center gap-2">
+                    <div class="h-2 flex-1 bg-muted rounded-full overflow-hidden">
+                      <div class="h-full bg-success rounded-full" style={`width: ${perfData.swap}%`} />
+                    </div>
+                    <Typography as="span" variant="small" class="font-mono w-10 text-right">{perfData.swap}%</Typography>
+                  </div>
+                </Container>
+                <Container gap="1">
+                  <Typography as="span" variant="small" class="text-muted-foreground">Agents</Typography>
+                  <Typography as="p" variant="h4" class="font-mono">{perfData.agents}</Typography>
+                </Container>
+              </Grid>
+            </Container>
+          </Card>
+        </Container>
+      </Grid>
+    </Container>
+  </section>
+
+  <Separator class="bg-border" />
+
+  <!-- Signals + Bullpen Row -->
+  <section class="py-6">
+    <Container size="7xl" padding="6">
+      <Grid columns={2} gap="6" padding="0">
+
+        <!-- Signals Feed -->
+        <Card>
+          <Container gap="3" padding="4">
+            <div class="flex items-center gap-3">
+              <Typography as="h2" variant="h4" class="font-mono">Signals</Typography>
+              <Badge variant="info" size="sm">{signals.length}</Badge>
+            </div>
+            <Container gap="2">
+              {signals.map((sig) => (
+                <div class="flex items-start gap-3 py-2 border-b border-border last:border-0">
+                  <Badge variant={sig.verb === 'review' ? 'accent' : sig.verb === 'announce' ? 'primary' : sig.verb === 'question' ? 'warning' : 'muted'} size="sm">
+                    {sig.verb}
+                  </Badge>
+                  <Container gap="1" class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <Typography as="span" variant="small" class="font-mono font-medium">{sig.from}</Typography>
+                      <Typography as="span" variant="small" class="text-muted-foreground">@{sig.target}</Typography>
+                      <Typography as="span" variant="small" class="text-muted-foreground ml-auto">{sig.time}</Typography>
+                    </div>
+                    <Typography as="p" variant="small" class="text-muted-foreground">{sig.text}</Typography>
+                  </Container>
+                </div>
+              ))}
+            </Container>
+          </Container>
+        </Card>
+
+        <!-- Musings / Bullpen -->
+        <Card>
+          <Container gap="3" padding="4">
+            <div class="flex items-center gap-3">
+              <Typography as="h2" variant="h4" class="font-mono">Bullpen</Typography>
+              <Badge variant="muted" size="sm">{musings.length}</Badge>
+            </div>
+            <Container gap="2">
+              {musings.map((msg) => (
+                <div class="py-2 border-b border-border last:border-0">
+                  <div class="flex items-center gap-2">
+                    <Typography as="span" variant="small" class="font-mono font-medium">{msg.from}</Typography>
+                    <Typography as="span" variant="small" class="text-muted-foreground ml-auto">{msg.time}</Typography>
+                  </div>
+                  <Typography as="p" variant="small" class="text-muted-foreground">{msg.text}</Typography>
+                </div>
+              ))}
+            </Container>
+          </Container>
+        </Card>
+      </Grid>
+    </Container>
+  </section>
+
+  <Separator class="bg-border" />
+
+  <!-- Live Boosts -->
+  <section class="py-6">
+    <Container size="7xl" padding="6">
+      <Card>
+        <Container gap="3" padding="4">
+          <div class="flex items-center gap-3">
+            <Typography as="h2" variant="h4" class="font-mono">Live Boosts</Typography>
+            <Badge variant="success" size="sm">{boosts.reduce((sum, b) => sum + b.count, 0)} total</Badge>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            {boosts.map((boost) => (
+              <div class="flex items-center gap-1 bg-muted rounded-full px-4 py-2">
+                <Typography as="span" variant="small" class="font-mono">{boost.label}</Typography>
+                <Badge variant="primary" size="sm">{boost.count}</Badge>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </Card>
+    </Container>
+  </section>
+</Base>

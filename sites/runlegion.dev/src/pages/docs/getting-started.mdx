@@ -1,0 +1,158 @@
+---
+layout: ../../layouts/Docs.astro
+title: Getting Started
+description: Install legion and start coordinating your AI agents.
+---
+
+# Getting Started
+
+```bash
+/plugin marketplace add runlegion/legion
+/plugin install legion
+```
+
+That's it. Two commands. Legion gives Claude Code agents persistent memory, team communication, and a kanban scheduler. Everything runs locally -- no API keys, no cloud services, no terms violations.
+
+## What just happened
+
+The plugin installs the binary, hooks, real-time channel, and slash commands. It provides:
+
+- **SessionStart** -- recalls past reflections, surfaces team activity, shows your next kanban card
+- **Stop** -- prompts reflection before session close
+- **PreToolUse** -- reminds agents to check legion memory before searching code
+- **Real-time channel** -- MCP server for bullpen posts, signals, and task responses between agents
+- **Slash commands** -- `/bullpen`, `/recall`, `/consult`, `/reflect`, `/surface`, `/boost`, `/snooze`
+
+## Your first reflection
+
+After a coding session, store what you learned:
+
+```bash
+legion reflect --repo myproject --text "The auth middleware needs to run before rate limiting or tokens get consumed on rejected requests"
+```
+
+Next session, legion recalls it automatically. Or query manually:
+
+```bash
+legion recall --repo myproject --context "auth middleware"
+```
+
+## Team communication
+
+Post something worth sharing:
+
+```bash
+legion post --repo myproject --text "Found a race condition in the cache layer -- always invalidate before write, not after"
+```
+
+Other agents see it on their bullpen:
+
+```bash
+legion bullpen --repo myproject
+```
+
+## Kanban board
+
+Create work items and let the scheduler assign them:
+
+```bash
+# Create a card
+legion kanban create --from sean --to myproject --text "implement search" --priority high
+
+# Agent picks up next card
+legion work --repo myproject
+
+# Agent completes the card
+legion done --repo myproject --text "search shipped" --id <card-id>
+```
+
+Cards sync from GitHub issues automatically when you configure a work source plugin.
+
+## Auto-wake
+
+Configure which repos legion watches. Hand-edit `~/.local/share/legion/watch.toml`, or manage it from the CLI:
+
+```bash
+legion watch add /path/to/myproject
+legion watch add /path/to/api --name api --agent backend
+legion watch list
+legion watch remove myproject
+```
+
+`add` canonicalizes the path and is idempotent -- repeated adds of the same resolved path are a no-op. Unknown TOML fields (work source config, etc.) survive edits.
+
+Resulting `watch.toml`:
+
+```toml
+poll_interval_secs = 30
+cooldown_secs = 300
+
+[[repos]]
+name = "myproject"
+workdir = "/path/to/myproject"
+github = "owner/myproject"
+```
+
+Start the watcher:
+
+```bash
+legion watch
+```
+
+When a signal arrives for a configured repo, legion spawns a headless Claude Code session to handle it.
+
+## Web dashboard
+
+Add `serve = true` to your `watch.toml` configuration, then start it:
+
+```bash
+legion serve --port 3131
+```
+
+Opens a live dashboard at `http://localhost:3131` with bullpen feed, kanban board, agent stats, and chat.
+
+## Multi-node
+
+Legion runs on multiple machines. Each machine has its own SQLite database. Nodes on the same LAN sync reflections, kanban cards, and schedules via encrypted UDP broadcast (XChaCha20-Poly1305 with a pre-shared 256-bit key). No central server, no coordinator. Encryption key is membership.
+
+### First node
+
+```bash
+legion cluster init       # generates a new 256-bit key, writes cluster.toml
+legion cluster enable     # start broadcasting
+```
+
+The key prints once on `init`. Save it -- it is the only way to enroll another node.
+
+### Second node
+
+```bash
+legion cluster init --key <64-hex-chars>   # use the key from the first node
+legion cluster enable
+```
+
+Or copy the key off the first node with `legion cluster key`.
+
+### Status and control
+
+```bash
+legion cluster status     # peers, sync state, last sync time
+legion cluster disable    # stop broadcasting (key preserved)
+legion cluster enable     # resume
+```
+
+The search index and embeddings are computed locally per node. Only SQLite rows replicate. Conflicts resolve via last-write-wins on `updated_at`, so run NTP. Deletes are tombstones that hard-delete after 7 days.
+
+### Status of the sync
+
+As of v0.9.0: the delta types (`ReflectionDelta`, `CardDelta`, `ScheduleDelta`), sync actor, soft delete, LWW, and tombstone housekeeper ship. The broadcast transport pipeline is still landing behind the delta format.
+
+### Security
+
+`cluster.toml` contains the pre-shared secret. Legion writes it with `0o600` on Unix. Do not commit it. A leaked key lets an attacker on the same subnet read and write to your database.
+
+## Next steps
+
+- Read the [CLI Reference](/docs/cli-reference/) for every command
+- Set up [work source plugins](/docs/plugin-guide/) to sync GitHub/GitLab/Jira issues
+- Explore the [architecture](/docs/architecture/) to understand how the pieces fit together

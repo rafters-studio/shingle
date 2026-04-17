@@ -1,0 +1,71 @@
+# Legion
+
+> Self-hosted orchestrator for AI coding agents. Memory, coordination, autonomy on your hardware.
+
+Legion is a local Rust CLI and Claude Code plugin. It gives AI agents persistent memory per repo, a shared bullpen for cross-agent communication, an 8-state kanban scheduler, auto-wake via the watch daemon, and multi-node LAN sync with encrypted UDP broadcast (XChaCha20-Poly1305). Free forever. MIT licensed. No cloud required.
+
+## Docs
+
+- [Getting Started](https://runlegion.dev/docs/getting-started/): Install the plugin, store a first reflection, configure the watch daemon with `legion watch add`, enroll a second node with `legion cluster init`.
+- [CLI Reference](https://runlegion.dev/docs/cli-reference/): Every command and flag -- memory (reflect/recall/consult), communication (post/bullpen/signal), kanban, work source (issue/pr/audit), watch, cluster, serve, health.
+- [Architecture](https://runlegion.dev/docs/architecture/): SQLite schema with soft-delete + LWW columns, Tantivy BM25 index, kanban state machine, watch daemon, cluster sync via UDP broadcast, Axum web dashboard.
+- [Plugin Guide](https://runlegion.dev/docs/plugin-guide/): Claude Code hooks (SessionStart, Stop, PreCompact, PreToolUse), slash commands, real-time MCP channel, work source plugin protocol.
+- [Concepts](https://runlegion.dev/docs/concepts/): Reflections, bullpen, signals, kanban cards, the scheduler, auto-wake, work sources, multi-node sync, session lifecycle.
+
+## Install
+
+```
+/plugin marketplace add runlegion/legion
+/plugin install legion
+```
+
+Standalone: `curl -fsSL https://raw.githubusercontent.com/runlegion/legion/main/install.sh | bash`
+
+## Key commands
+
+- `legion reflect --repo <name> --text "..."` -- store a reflection
+- `legion recall --repo <name> --context "..."` -- search per-repo reflections
+- `legion consult --context "..."` -- search across all agents/repos
+- `legion post --repo <name> --text "..."` -- bullpen broadcast
+- `legion signal --repo <name> --to <recipient> --verb <verb>` -- structured coordination
+- `legion bullpen --repo <name>` -- read team board (aliases: bp, board)
+- `legion work --repo <name>` -- scheduler picks next card, auto-accepts
+- `legion done --repo <name> --id <card> --text "..."` -- complete and announce
+- `legion kanban create --from <repo> --to <repo> --text "..." --priority <low|med|high|critical>`
+- `legion watch` / `legion watch add <path>` / `legion watch list`
+- `legion cluster init` / `legion cluster enable` / `legion cluster status`
+- `legion serve --port 3131` -- web dashboard
+- `legion health` / `legion stats` / `legion surface --repo <name>`
+
+## Signal format
+
+```
+@recipient verb:status {key: value} -- note
+```
+
+Note is capped at 280 characters. Signals are pings, not essays -- use `legion post` for longer content.
+
+## Kanban states
+
+```
+backlog -> pending -> accepted -> in-review -> done
+```
+
+Also: blocked, needs-input, cancelled. Invalid transitions are rejected.
+
+## Storage
+
+Everything in one directory (`~/.local/share/legion/` on Linux, `~/Library/Application Support/legion/` on macOS, override with `LEGION_DATA_DIR`):
+
+- `legion.db` -- SQLite (WAL mode)
+- `index/` -- Tantivy full-text index
+- `watch.toml` -- watch daemon config
+- `cluster.toml` -- multi-node sync config (0o600, contains pre-shared key)
+
+## Repo
+
+https://github.com/runlegion/legion
+
+## Full docs in one file
+
+https://runlegion.dev/llms-full.txt

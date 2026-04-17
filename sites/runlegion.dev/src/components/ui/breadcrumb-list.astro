@@ -1,0 +1,11 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import classy from '@/lib/primitives/classy';
+import { breadcrumbListClasses } from '@/components/ui/breadcrumb.classes';
+
+interface Props extends HTMLAttributes<'ol'> {}
+
+const { class: className, ...attrs } = Astro.props;
+---
+
+<ol class={classy(breadcrumbListClasses, className)} {...attrs}><slot /></ol>

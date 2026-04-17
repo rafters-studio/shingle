@@ -1,0 +1,34 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import classy from '@/lib/primitives/classy';
+import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import Typography from '@/components/ui/typography.astro';
+
+interface Props extends HTMLAttributes<'div'> {
+  leftLabel: string;
+  rightLabel: string;
+  leftColor?: string;
+  leftItems: string[];
+  rightItems: string[];
+}
+
+const { leftLabel, rightLabel, leftColor = 'text-primary', leftItems, rightItems, class: className, ...attrs } = Astro.props;
+---
+
+<div class={classy('border-t border-border', className)} {...attrs}>
+  <Grid preset="linear" columns={2} gap="6" padding="4">
+    <Container gap="2">
+      <Typography as="span" variant="muted" class={classy('font-mono uppercase tracking-widest font-semibold', leftColor)}>{leftLabel}</Typography>
+      {leftItems.map((item) => (
+        <Typography as="p" variant="muted">{item}</Typography>
+      ))}
+    </Container>
+    <Container gap="2">
+      <Typography as="span" variant="muted" class="font-mono uppercase tracking-widest font-semibold">{rightLabel}</Typography>
+      {rightItems.map((item) => (
+        <Typography as="p" variant="muted">{item}</Typography>
+      ))}
+    </Container>
+  </Grid>
+</div>
