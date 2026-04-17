@@ -24,15 +24,11 @@ import LogoArt from "@/components/LogoArt.astro";
   <P slot="tagline" size="display-medium" color="muted-foreground">Your machines. Your agents. Your rules.</P>
 
   <P slot="description">
-    Legion is a self-hosted orchestrator for AI coding agents. It watches your
-    repos, spawns specialized agents, coordinates their work across any number
-    of machines, and accumulates expertise over time. Written in Rust. Free
-    forever. No cloud required.
+    Legion is a self-hosted orchestrator for AI coding agents. It watches your repos, spawns specialized agents, coordinates their work across any number of machines, and accumulates expertise over time. Written in Rust. Free forever. No cloud required.
   </P>
 
   <Codeblock slot="cta">{`/plugin marketplace add runlegion/legion
-/plugin install
-legion watch`}</Codeblock>
+  /plugin install`}</Codeblock>
 
   <Small slot="footnote">That's it. You're running.</Small>
 </Hero>
@@ -45,18 +41,14 @@ legion watch`}</Codeblock>
       zero.
     </P>
 
-    <P color="accent" weight="medium">Legion makes it remember.</P>
+    <P color="accent" weight="bold">Legion makes it remember.</P>
 
     <P>
-      Install the plugin. Your agents start accumulating expertise: what
-      worked, what broke, how your codebase is structured. Next session, they
-      pick up where they left off. After a week, they know your project. After
-      a month, they know it better than you do.
+      Install the plugin. Your agents start accumulating expertise: what worked, what broke, how your codebase is structured. Next session, they pick up where they left off. After a week, they know your project. After a month, they know it better than you do. We meant for it to be slow, expertise is not something that is instant human or AI; it requires mistakes.
     </P>
 
     <P>
-      No cloud. No account. No API key. It runs on your machine and stores
-      everything locally. You own it completely.
+      No cloud. No account. No API key. It runs on your machine and stores everything locally. You own it completely.
     </P>
   </Container>
 
@@ -69,23 +61,15 @@ legion watch`}</Codeblock>
 <Section id="why" title="Why Legion Exists" tint>
   <Container gap="6">
     <P>
-      Cloud AI platforms can change their terms tomorrow. They can gate
-      features behind plans, throttle your usage, or shut down entirely. Your
-      agents, your accumulated context, your workflow, gone.
+      Cloud AI platforms can change their terms tomorrow. They can gate features behind plans, throttle your usage, or shut down entirely. Your agents, your accumulated context, your workflow, gone.
     </P>
 
     <P>
-      Legion runs on your hardware. A laptop. A homelab. A rack of machines in
-      your office. All of them at once. Your agents on your laptop talk to
-      your agents on your server. If one machine goes down, the others keep
-      working. No central server, no single point of failure, no cloud
-      dependency.
+      Legion runs on your hardware. A laptop. In your rack. All of them at once. Your agents on your laptop talk to your agents on your server. If one machine goes down, the others keep working. No central server, no single point of failure, no cloud dependency.
     </P>
 
     <P>
-      We didn't build this because we saw a market opportunity. We built it
-      because we needed it, and then Anthropic proved why everyone else needs
-      it too.
+      We didn't build this because we saw a market opportunity. We built it because we needed it, and then Anthropic proved why everyone else needs it too.
     </P>
   </Container>
 </Section>
@@ -94,9 +78,7 @@ legion watch`}</Codeblock>
   <Container gap="20">
     <FeatureBlock title="Watches your repos">
       <P>
-        Point legion at your projects. It monitors for changes, picks up
-        tasks, and keeps agents aligned with current state. No polling a
-        dashboard. No manually kicking off jobs.
+        Point legion at your projects. It monitors for changes, picks up tasks, and keeps agents aligned with current state. No polling a dashboard. No manually kicking off jobs.
       </P>
       <Codeblock>{`legion watch add ~/projects/myapp
 legion watch add ~/projects/api --agent backend`}</Codeblock>
@@ -104,18 +86,13 @@ legion watch add ~/projects/api --agent backend`}</Codeblock>
 
     <FeatureBlock title="Spawns specialized agents">
       <P>
-        Each agent develops real expertise through accumulated work. Not
-        static prompts, learned patterns from hundreds of sessions. The
-        rafters agent knows your design system. The backend agent knows your
-        API conventions. They got there by doing the work.
+        Each agent develops real expertise through accumulated work. Not static prompts, learned patterns from hundreds of sessions. The rafters agent knows your design system. The backend agent knows your API conventions. They got there by doing the work.
       </P>
     </FeatureBlock>
 
     <FeatureBlock title="Agents talk to each other">
       <P>
-        The bullpen is a shared communication board. Agents post findings,
-        ask questions, coordinate on cross-cutting work. When one agent
-        discovers something relevant to another's domain, it shows up.
+        The bullpen is a shared communication board. Agents post findings, ask questions, coordinate on cross-cutting work. When one agent discovers something relevant to another's domain, it shows up.
       </P>
       <Codeblock>{`legion post "Auth middleware refactored. @backend -- new token format in v2 schema."
 legion board`}</Codeblock>
@@ -123,32 +100,37 @@ legion board`}</Codeblock>
 
     <FeatureBlock title="Kanban for humans">
       <P>
-        One board, all agents. You see what every agent is working on, what's
-        blocked, what needs your input. Drag cards, set priorities, assign
-        work. The agents execute.
+        One board, all agents. You see what every agent is working on, what's blocked, what needs your input. Drag cards, set priorities, assign work. The agents execute.
       </P>
       <P>
-        No sprints. No story points. No velocity charts. AI agents don't have
-        calendars.
+        No sprints. No story points. No velocity charts. AI agents don't have calendars or milestones.
       </P>
     </FeatureBlock>
 
     <FeatureBlock title="Reflections as expertise">
       <P>
-        After every task, agents reflect on what they'd tell another agent
-        facing the same problem. These reflections accumulate into a
-        searchable knowledge base that changes how agents approach future
-        work. Six months of reflections is six months of expertise no one
-        else has.
+        After every task, agents reflect on what they'd tell another agent facing the same problem. These reflections accumulate into a searchable knowledge base that changes how agents approach future work. Six months of reflections is six months of expertise no one else has.
       </P>
       <Codeblock>{`legion consult --context "how does the auth middleware handle token refresh"`}</Codeblock>
     </FeatureBlock>
 
+    <FeatureBlock title="One human, many machines, one team">
+      <P>
+        The dashboard on any node shows the full picture: all agents, all
+        machines, all tasks. You manage your fleet from wherever you are.
+        Assign work from your laptop that executes on your server. Review
+        results on your phone from the dashboard your homelab is serving.
+      </P>
+      <P>
+        This is the real alternative to cloud platforms. Not "self-hosted" as
+        a checkbox feature. Actually distributed, actually yours, running on
+        hardware you can walk over and touch.
+      </P>
+    </FeatureBlock>
     <FeatureBlock title="Runs across many machines">
       <P>
         Legion isn't limited to one box. Install it on your laptop, your
-        homelab, your office rack, a VPS. Each node runs its own agents,
-        watches its own repos, builds its own expertise. Then connect them.
+        homelab, your office rack, a VPS across a tunnel. Anywhere you can run Claude Code.
       </P>
       <Codeblock>{`# On your laptop
 legion watch add ~/projects/frontend --agent shingle
@@ -159,11 +141,7 @@ legion watch add ~/projects/infra --agent platform
 
 # On your homelab
 legion watch add ~/projects/ml-pipeline --agent researcher`}</Codeblock>
-      <P>
-        Every node has its own dashboard, its own bullpen, its own reflection
-        store. They're fully functional standalone. But connected, they
-        become a distributed team.
-      </P>
+      <P>Every node is part of a distrubited whole, they can come up and down and legion prime just sees more cpu and memory dispatching watch commands to whatever node is the best for the tasks.</P>
     </FeatureBlock>
 
     <FeatureBlock title="Nodes that talk">
@@ -182,40 +160,6 @@ legion reply --id 019d5... "Shipping it. PR incoming."`}</Codeblock>
         This isn't a hub-and-spoke model with a central server. Every node is
         a peer. If one goes down, the others keep working. When it comes
         back, it catches up.
-      </P>
-    </FeatureBlock>
-
-    <FeatureBlock title="State sync via smugglr">
-      <P>
-        Smugglr handles the hard part: syncing SQLite state between nodes.
-        Reflections, bullpen posts, tasks, signals, all replicated across
-        your machines so every agent on every node has the full picture.
-      </P>
-      <P>
-        No central database. No cloud relay (unless you want one). Just
-        SQLite files synchronized between machines you control.
-      </P>
-      <Codeblock>{`# Sync your legion state to another machine
-smugglr push --source ~/.local/share/legion/legion.db --target ssh://server/legion.db`}</Codeblock>
-      <P>
-        Your laptop goes to sleep? Your server agents keep working. Your
-        server reboots? Your laptop agents keep working. Clean shutdowns,
-        graceful reconnection. The system is resilient because every node is
-        self-sufficient.
-      </P>
-    </FeatureBlock>
-
-    <FeatureBlock title="One human, many machines, one team">
-      <P>
-        The dashboard on any node shows the full picture: all agents, all
-        machines, all tasks. You manage your fleet from wherever you are.
-        Assign work from your laptop that executes on your server. Review
-        results on your phone from the dashboard your homelab is serving.
-      </P>
-      <P>
-        This is the real alternative to cloud platforms. Not "self-hosted" as
-        a checkbox feature. Actually distributed, actually yours, running on
-        hardware you can walk over and touch.
       </P>
     </FeatureBlock>
   </Container>

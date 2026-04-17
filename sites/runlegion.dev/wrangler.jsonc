@@ -1,0 +1,36 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "runlegion-shingle",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"compatibility_date": "2026-01-30",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"directory": "dist",
+		"binding": "ASSETS",
+	},
+	"observability": {
+		"enabled": false,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"head_sampling_rate": 1,
+			"persist": true,
+			"invocation_logs": true,
+		},
+		"traces": {
+			"enabled": false,
+			"persist": true,
+			"head_sampling_rate": 1,
+		},
+	},
+	"routes": [
+		{
+			"pattern": "runlegion.dev",
+			"zone_id": "74f29c670d41abce576b017f095fd650",
+			"custom_domain": true,
+		},
+	],
+}
