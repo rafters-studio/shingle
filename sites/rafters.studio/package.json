@@ -20,11 +20,7 @@
     "@astrojs/cloudflare": "^13.1.0",
     "@astrojs/mdx": "^5.0.0",
     "@astrojs/sitemap": "^3.7.1",
-    "astro": "^6.0.3",
-    "typography-code.astro": "link:@/components/ui/typography-code.astro",
-    "typography-h1.astro": "link:@/components/ui/typography-h1.astro",
-    "typography-p.astro": "link:@/components/ui/typography-p.astro",
-    "typography.astro": "link:@/components/ui/typography.astro"
+    "astro": "^6.0.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.7",
