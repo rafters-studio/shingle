@@ -9,9 +9,32 @@ interface Props {
   description?: string;
 }
 
-const { title, description } = Astro.props;
+// MDX pages deliver frontmatter under Astro.props.frontmatter; .astro pages
+// pass props directly. Merge both so either entry point works.
+const rawProps = Astro.props as Props & {
+  frontmatter?: Partial<Props>;
+};
+const { title, description } = {
+  ...rawProps.frontmatter,
+  ...rawProps,
+} as Props;
 
 const currentPath = Astro.url.pathname;
+
+const siteOrigin = Astro.site?.origin ?? 'https://runlegion.dev';
+const pageUrl = new URL(currentPath, siteOrigin).href;
+
+const techArticle: Record<string, unknown> = {
+  '@type': 'TechArticle',
+  '@id': `${pageUrl}#article`,
+  headline: title,
+  description,
+  url: pageUrl,
+  inLanguage: 'en',
+  isPartOf: { '@id': `${siteOrigin}/#website` },
+  publisher: { '@id': `${siteOrigin}/#organization` },
+  about: { '@id': `${siteOrigin}/#software` },
+};
 
 const docsSections = [
   {
@@ -45,7 +68,12 @@ const docsSections = [
 ];
 ---
 
-<Base title={title} description={description}>
+<Base
+  title={title}
+  description={description}
+  type="article"
+  extraJsonLd={[techArticle]}
+>
   <div class="docs-shell">
     <aside class="docs-sidebar">
       <nav class="docs-sidebar-nav" aria-label="Documentation">
