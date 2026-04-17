@@ -19,13 +19,14 @@ const navLinks = [
     { href: "#why", label: "Why" },
     { href: "#features", label: "Features" },
     { href: "#architecture", label: "Architecture" },
+    { href: "/docs", label: "Docs" },
 ];
 
 const linkClass = "no-underline text-muted-foreground hover:text-foreground";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,21 +38,44 @@ const linkClass = "no-underline text-muted-foreground hover:text-foreground";
             href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
             rel="stylesheet"
         />
+        <link
+            rel="alternate"
+            type="text/plain"
+            href="/llms.txt"
+            title="Legion docs index for LLMs"
+        />
+        <link
+            rel="alternate"
+            type="text/plain"
+            href="/llms-full.txt"
+            title="Legion docs (full) for LLMs"
+        />
     </head>
     <body class="bg-background text-foreground">
-        <header class="border-b border-border">
+        <header
+            id="site-header"
+            class="border-b border-border bg-background"
+            style="position:fixed;top:0;left:0;right:0;z-index:50;opacity:0;pointer-events:none;transition:opacity 0.2s ease"
+        >
             <Container size="6xl" padding="4">
                 <Grid preset="linear" columns={2} gap="6">
                     <a href="/" aria-label="Legion home" class="no-underline">
-                        <img src="/logo.svg" alt="Legion" width="160" height="24" />
+                        <img
+                            src="/logo.svg"
+                            alt="Legion"
+                            width="160"
+                            height="24"
+                        />
                     </a>
-                    <Grid preset="linear" columns={navLinks.length + 1} gap="6" class="text-end">
+                    <Grid
+                        preset="linear"
+                        columns={navLinks.length + 1}
+                        gap="6"
+                        class="text-end"
+                    >
                         {
                             navLinks.map((link) => (
-                                <a
-                                    href={link.href}
-                                    class={linkClass}
-                                >
+                                <a href={link.href} class={linkClass}>
                                     <Small>{link.label}</Small>
                                 </a>
                             ))
@@ -93,7 +117,8 @@ const linkClass = "no-underline text-muted-foreground hover:text-foreground";
                 <Container gap="4">
                     <LogoArt height="2rem" />
                     <Small>
-                        Legion &middot; Free and open source &middot; MIT licensed
+                        Legion &middot; Free and open source &middot; MIT
+                        licensed
                     </Small>
                     <Grid preset="linear" columns={2} gap="4">
                         <a
@@ -112,10 +137,28 @@ const linkClass = "no-underline text-muted-foreground hover:text-foreground";
                         >
                             <Small>A Rafters Studio project</Small>
                         </a>
+                        <a href="/llms.txt" class={linkClass}>
+                            <Small>llms.txt</Small>
+                        </a>
+                        <a href="/llms-full.txt" class={linkClass}>
+                            <Small>llms-full.txt</Small>
+                        </a>
                     </Grid>
                 </Container>
             </Container>
         </footer>
+        <script is:inline>
+            (function () {
+                var header = document.getElementById("site-header");
+                if (!header) return;
+                function updateNav() {
+                    var show = window.scrollY > window.innerHeight * 0.8;
+                    header.style.opacity = show ? "1" : "0";
+                    header.style.pointerEvents = show ? "auto" : "none";
+                }
+                window.addEventListener("scroll", updateNav, { passive: true });
+            })();
+        </script>
     </body>
 </html>
 
@@ -123,15 +166,18 @@ const linkClass = "no-underline text-muted-foreground hover:text-foreground";
     @import "../styles/global.css";
 
     :root {
-        --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont,
+        --font-sans:
+            "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+            sans-serif;
+        --font-heading:
+            "IBM Plex Sans Condensed", -apple-system, BlinkMacSystemFont,
             "Segoe UI", sans-serif;
-        --font-heading: "IBM Plex Sans Condensed", -apple-system,
-            BlinkMacSystemFont, "Segoe UI", sans-serif;
-        --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont,
-            "Segoe UI", sans-serif;
-        --font-code: "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code",
-            monospace;
-        --font-mono: "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code",
-            monospace;
+        --font-body:
+            "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+            sans-serif;
+        --font-code:
+            "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code", monospace;
+        --font-mono:
+            "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code", monospace;
     }
 </style>
