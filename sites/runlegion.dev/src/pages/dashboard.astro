@@ -1,0 +1,517 @@
+---
+import Base from '../layouts/Base.astro';
+import Container from '@/src/components/ui/container.astro';
+import Grid from '@/src/components/ui/grid.astro';
+import Typography from '@/src/components/ui/typography.astro';
+import Card from '@/src/components/ui/card.astro';
+import Badge from '@/src/components/ui/badge.astro';
+import Separator from '@/src/components/ui/separator.astro';
+---
+
+<Base title="Dashboard" description="Legion agent orchestrator dashboard. Live view of agents, tasks, signals, and system health.">
+  <section class="py-6">
+    <Container size="7xl" padding="6">
+      <Container gap="2">
+        <div class="flex items-center gap-4">
+          <Typography as="h1" variant="h2" class="font-mono">Legion Dashboard</Typography>
+          <Badge variant="muted" size="sm" id="connection-status">Connecting</Badge>
+          <Typography as="span" variant="small" class="text-muted-foreground font-mono ml-auto" id="uptime-display">
+            --
+          </Typography>
+        </div>
+
+        <!-- Agent Status Strip -->
+        <div class="flex flex-wrap gap-3 py-3" id="agent-strip">
+          <Typography as="span" variant="small" class="text-muted-foreground font-mono">Loading agents...</Typography>
+        </div>
+      </Container>
+    </Container>
+  </section>
+
+  <Separator class="bg-border" />
+
+  <!-- Main Dashboard Grid: Kanban (wide) + Agent Detail (sidebar) -->
+  <section class="py-6">
+    <Container size="7xl" padding="6">
+      <Grid preset="golden" gap="6" padding="0">
+
+        <!-- Kanban Board -->
+        <Card>
+          <Container gap="4" padding="4">
+            <div class="flex items-center gap-3">
+              <Typography as="h2" variant="h4" class="font-mono">Kanban</Typography>
+              <Typography as="span" variant="small" class="text-muted-foreground" id="kanban-count">0 tasks</Typography>
+            </div>
+            <Grid columns={4} gap="4" padding="0" id="kanban-board">
+              <!-- Columns rendered by JS -->
+            </Grid>
+          </Container>
+        </Card>
+
+        <!-- Agent Detail Sidebar -->
+        <Container gap="6">
+
+          <!-- Token / Stats -->
+          <Card>
+            <Container gap="3" padding="4">
+              <Typography as="h3" variant="h4" class="font-mono">Agent Stats</Typography>
+              <div id="stats-panel">
+                <Typography as="span" variant="small" class="text-muted-foreground font-mono">Loading...</Typography>
+              </div>
+            </Container>
+          </Card>
+
+          <!-- Machine Performance -->
+          <Card>
+            <Container gap="3" padding="4">
+              <Typography as="h3" variant="h4" class="font-mono">Machine</Typography>
+              <Grid columns={2} gap="3" padding="0" id="health-panel">
+                <Typography as="span" variant="small" class="text-muted-foreground font-mono">Loading...</Typography>
+              </Grid>
+            </Container>
+          </Card>
+
+          <!-- Reflection Search -->
+          <Card>
+            <Container gap="3" padding="4">
+              <Typography as="h3" variant="h4" class="font-mono">Search Reflections</Typography>
+              <div class="flex gap-2">
+                <input
+                  type="text"
+                  id="search-input"
+                  placeholder="auth tokens, shadow DOM..."
+                  class="flex-1 bg-muted text-foreground font-mono text-sm rounded-md px-3 py-2 border border-border focus:border-primary focus:outline-none"
+                />
+                <button
+                  id="search-btn"
+                  class="bg-primary text-primary-foreground font-mono text-sm rounded-md px-4 py-2 hover:opacity-90"
+                >
+                  Search
+                </button>
+              </div>
+              <div id="search-results" class="hidden">
+                <!-- Results rendered by JS -->
+              </div>
+            </Container>
+          </Card>
+        </Container>
+      </Grid>
+    </Container>
+  </section>
+
+  <Separator class="bg-border" />
+
+  <!-- Signals + Bullpen Row -->
+  <section class="py-6">
+    <Container size="7xl" padding="6">
+      <Grid columns={2} gap="6" padding="0">
+
+        <!-- Signals Feed -->
+        <Card>
+          <Container gap="3" padding="4">
+            <div class="flex items-center gap-3">
+              <Typography as="h2" variant="h4" class="font-mono">Signals</Typography>
+              <Badge variant="info" size="sm" id="signals-count">0</Badge>
+            </div>
+            <div id="signals-feed">
+              <Typography as="span" variant="small" class="text-muted-foreground font-mono">Loading...</Typography>
+            </div>
+          </Container>
+        </Card>
+
+        <!-- Bullpen -->
+        <Card>
+          <Container gap="3" padding="4">
+            <div class="flex items-center gap-3">
+              <Typography as="h2" variant="h4" class="font-mono">Bullpen</Typography>
+              <Badge variant="muted" size="sm" id="bullpen-count">0</Badge>
+            </div>
+            <div id="bullpen-feed">
+              <Typography as="span" variant="small" class="text-muted-foreground font-mono">Loading...</Typography>
+            </div>
+          </Container>
+        </Card>
+      </Grid>
+    </Container>
+  </section>
+
+  <Separator class="bg-border" />
+
+  <!-- Post to Bullpen -->
+  <section class="py-6">
+    <Container size="7xl" padding="6">
+      <Card>
+        <Container gap="3" padding="4">
+          <Typography as="h3" variant="h4" class="font-mono">Post Signal</Typography>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="post-input"
+              placeholder="@agent verb:status -- message"
+              class="flex-1 bg-muted text-foreground font-mono text-sm rounded-md px-3 py-2 border border-border focus:border-primary focus:outline-none"
+            />
+            <button
+              id="post-btn"
+              class="bg-primary text-primary-foreground font-mono text-sm rounded-md px-4 py-2 hover:opacity-90"
+            >
+              Send
+            </button>
+          </div>
+        </Container>
+      </Card>
+    </Container>
+  </section>
+</Base>
+
+<script>
+  import { createLegionClient } from '../lib/legion-api';
+  import type { Task, Agent, FeedItem, HealthData, SearchResult, Stats } from '../lib/legion-api';
+
+  const LEGION_URL = new URLSearchParams(window.location.search).get('api') || 'http://localhost:3131';
+  const client = createLegionClient(LEGION_URL);
+
+  const statusEl = document.getElementById('connection-status')!;
+  const agentStrip = document.getElementById('agent-strip')!;
+  const kanbanBoard = document.getElementById('kanban-board')!;
+  const kanbanCount = document.getElementById('kanban-count')!;
+  const statsPanel = document.getElementById('stats-panel')!;
+  const healthPanel = document.getElementById('health-panel')!;
+  const signalsFeed = document.getElementById('signals-feed')!;
+  const signalsCount = document.getElementById('signals-count')!;
+  const bullpenFeed = document.getElementById('bullpen-feed')!;
+  const bullpenCount = document.getElementById('bullpen-count')!;
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const searchBtn = document.getElementById('search-btn')!;
+  const searchResults = document.getElementById('search-results')!;
+  const postInput = document.getElementById('post-input') as HTMLInputElement;
+  const postBtn = document.getElementById('post-btn')!;
+  const uptimeDisplay = document.getElementById('uptime-display');
+
+  // Kanban column definitions matching legion task statuses
+  const COLUMNS = [
+    { key: 'pending', label: 'Backlog', color: 'muted', also: [] as string[] },
+    { key: 'in-progress', label: 'In Progress', color: 'primary', also: ['accepted'] },
+    { key: 'in-review', label: 'In Review', color: 'accent', also: ['needs-input'] },
+    { key: 'done', label: 'Done', color: 'success', also: ['cancelled'] },
+  ];
+
+  // Map of allowed badge CSS classes (only these are used, never raw API values)
+  const BADGE_CLASSES: Record<string, string> = {
+    success: 'bg-success text-success-foreground',
+    warning: 'bg-warning text-warning-foreground',
+    muted: 'bg-muted text-muted-foreground',
+    primary: 'bg-primary text-primary-foreground',
+    accent: 'bg-accent text-accent-foreground',
+    destructive: 'bg-destructive text-destructive-foreground',
+  };
+
+  function badgeClasses(variant: string): string {
+    return BADGE_CLASSES[variant] || BADGE_CLASSES.muted;
+  }
+
+  function statusToColumn(status: string): string {
+    for (const col of COLUMNS) {
+      if (col.key === status) return col.key;
+      if (col.also.includes(status)) return col.key;
+    }
+    return 'pending';
+  }
+
+  function agentStatusVariant(status: string): string {
+    if (status === 'active' || status === 'online') return 'success';
+    if (status === 'idle') return 'warning';
+    return 'muted';
+  }
+
+  function verbVariant(verb: string): string {
+    if (verb === 'review') return 'accent';
+    if (verb === 'announce') return 'primary';
+    if (verb === 'question') return 'warning';
+    if (verb === 'answer') return 'success';
+    return 'muted';
+  }
+
+  function healthBarClass(pct: number): string {
+    if (pct < 70) return 'bg-success';
+    if (pct < 90) return 'bg-warning';
+    return 'bg-destructive';
+  }
+
+  function timeAgo(ts: string): string {
+    const diff = Date.now() - new Date(ts).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  }
+
+  function truncate(text: string, len: number): string {
+    return text.length > len ? text.slice(0, len) + '...' : text;
+  }
+
+  // Safe DOM building helpers
+  function el(tag: string, attrs: Record<string, string> = {}, children: (Node | string)[] = []): HTMLElement {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'className') node.className = v;
+      else node.setAttribute(k, v);
+    }
+    for (const child of children) {
+      if (typeof child === 'string') node.appendChild(document.createTextNode(child));
+      else node.appendChild(child);
+    }
+    return node;
+  }
+
+  // Render functions using safe DOM methods
+  function renderAgents(agents: Agent[]) {
+    agentStrip.replaceChildren(
+      ...agents.map(a =>
+        el('div', { className: 'flex items-center gap-2 font-mono text-sm' }, [
+          el('span', { className: `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badgeClasses(agentStatusVariant(a.status))}` }, [a.status]),
+          el('span', { className: 'text-foreground' }, [a.name]),
+        ])
+      )
+    );
+  }
+
+  function renderKanban(tasks: Task[]) {
+    kanbanCount.textContent = `${tasks.length} tasks`;
+    const grouped = new Map<string, Task[]>();
+    for (const col of COLUMNS) grouped.set(col.key, []);
+    for (const task of tasks) {
+      const col = statusToColumn(task.status);
+      grouped.get(col)?.push(task);
+    }
+
+    kanbanBoard.replaceChildren(
+      ...COLUMNS.map(col => {
+        const cards = grouped.get(col.key) || [];
+        return el('div', { className: 'flex flex-col gap-3' }, [
+          el('div', { className: 'flex items-center gap-2' }, [
+            el('span', { className: `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badgeClasses(col.color)}` }, [col.label]),
+            el('span', { className: 'text-muted-foreground text-xs' }, [String(cards.length)]),
+          ]),
+          el('div', { className: 'flex flex-col gap-2' }, cards.map(card =>
+            el('div', { className: 'bg-card border border-border rounded-lg p-3 flex flex-col gap-1 hover:border-primary transition-colors cursor-pointer' }, [
+              el('p', { className: 'text-sm font-medium text-foreground' }, [truncate(card.title, 60)]),
+              el('div', { className: 'flex items-center gap-2' }, [
+                el('span', { className: 'text-muted-foreground font-mono text-xs' }, [card.agent]),
+                ...(card.priority
+                  ? [el('span', { className: 'inline-flex items-center rounded-full px-1.5 py-0.5 text-xs bg-muted text-muted-foreground' }, [card.priority])]
+                  : []),
+              ]),
+            ])
+          )),
+        ]);
+      })
+    );
+  }
+
+  function renderStats(stats: Stats) {
+    const entries = Object.entries(stats.agents || {});
+    if (!entries.length) {
+      statsPanel.replaceChildren(el('span', { className: 'text-muted-foreground font-mono text-sm' }, ['No stats available']));
+      return;
+    }
+    const maxTokens = Math.max(...entries.map(([, s]) => s.tokens_in + s.tokens_out));
+    statsPanel.replaceChildren(
+      ...entries.map(([name, s]) => {
+        const total = s.tokens_in + s.tokens_out;
+        const pct = maxTokens > 0 ? Math.round(total / maxTokens * 100) : 0;
+        const display = total >= 1_000_000 ? (total / 1_000_000).toFixed(1) + 'M' : (total / 1_000).toFixed(0) + 'K';
+        const bar = el('div', { className: 'h-full bg-primary rounded-full transition-all' });
+        bar.style.width = `${pct}%`;
+        return el('div', { className: 'flex flex-col gap-1 mb-2' }, [
+          el('div', { className: 'flex items-center justify-between' }, [
+            el('span', { className: 'font-mono text-sm' }, [name]),
+            el('span', { className: 'text-muted-foreground text-sm' }, [display]),
+          ]),
+          el('div', { className: 'h-2 bg-muted rounded-full overflow-hidden' }, [bar]),
+        ]);
+      })
+    );
+  }
+
+  function renderHealth(health: HealthData) {
+    const metrics = [
+      { label: 'CPU', value: health.cpu },
+      { label: 'Memory', value: health.memory },
+      { label: 'Swap', value: health.swap },
+    ];
+    healthPanel.replaceChildren(
+      ...metrics.map(m => {
+        const bar = el('div', { className: `h-full ${healthBarClass(m.value)} rounded-full` });
+        bar.style.width = `${m.value}%`;
+        return el('div', { className: 'flex flex-col gap-1' }, [
+          el('span', { className: 'text-muted-foreground text-sm' }, [m.label]),
+          el('div', { className: 'flex items-center gap-2' }, [
+            el('div', { className: 'h-2 flex-1 bg-muted rounded-full overflow-hidden' }, [bar]),
+            el('span', { className: 'font-mono text-sm w-10 text-right' }, [`${m.value}%`]),
+          ]),
+        ]);
+      }),
+      el('div', { className: 'flex flex-col gap-1' }, [
+        el('span', { className: 'text-muted-foreground text-sm' }, ['Agents']),
+        el('p', { className: 'font-mono text-lg' }, [String(health.agent_count)]),
+      ]),
+    );
+  }
+
+  function renderFeedItem(item: FeedItem, isSignals: boolean): HTMLElement {
+    const verb = isSignals ? extractVerb(item.text) : null;
+    const target = isSignals ? extractTarget(item.text) : null;
+
+    const meta = el('div', { className: 'flex items-center gap-2' }, [
+      el('span', { className: 'font-mono text-sm font-medium' }, [item.from]),
+      ...(target ? [el('span', { className: 'text-muted-foreground text-sm' }, [`@${target}`])] : []),
+      el('span', { className: 'text-muted-foreground text-xs ml-auto' }, [item.timestamp ? timeAgo(item.timestamp) : '']),
+    ]);
+
+    const content = el('div', { className: 'flex-1 min-w-0' }, [
+      meta,
+      el('p', { className: 'text-muted-foreground text-sm truncate' }, [truncate(item.text, 120)]),
+    ]);
+
+    const row = el('div', { className: 'flex items-start gap-3 py-2 border-b border-border last:border-0' }, [
+      ...(verb ? [el('span', { className: `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badgeClasses(verbVariant(verb))}` }, [verb])] : []),
+      content,
+    ]);
+
+    return row;
+  }
+
+  function renderFeed(items: FeedItem[], container: HTMLElement, countEl: HTMLElement, isSignals: boolean) {
+    countEl.textContent = String(items.length);
+    if (!items.length) {
+      container.replaceChildren(el('span', { className: 'text-muted-foreground font-mono text-sm' }, ['No items']));
+      return;
+    }
+    container.replaceChildren(...items.slice(0, 20).map(item => renderFeedItem(item, isSignals)));
+  }
+
+  function extractVerb(text: string): string | null {
+    const match = text.match(/\b(review|announce|question|answer|request|session)\b/i);
+    return match ? match[1].toLowerCase() : null;
+  }
+
+  function extractTarget(text: string): string | null {
+    const match = text.match(/@(\w+)/);
+    return match ? match[1] : null;
+  }
+
+  function renderSearchResults(results: SearchResult[]) {
+    searchResults.classList.remove('hidden');
+    if (!results.length) {
+      searchResults.replaceChildren(el('p', { className: 'text-muted-foreground font-mono text-sm py-2' }, ['No results']));
+      return;
+    }
+    searchResults.replaceChildren(
+      ...results.map(r =>
+        el('div', { className: 'py-2 border-b border-border last:border-0' }, [
+          el('div', { className: 'flex items-center gap-2' }, [
+            el('span', { className: 'font-mono text-sm font-medium' }, [r.agent]),
+            el('span', { className: 'text-muted-foreground text-xs' }, [r.repo || '']),
+            el('span', { className: 'text-muted-foreground text-xs ml-auto' }, [`score: ${r.score.toFixed(2)}`]),
+          ]),
+          el('p', { className: 'text-muted-foreground text-sm' }, [truncate(r.content, 200)]),
+        ])
+      )
+    );
+  }
+
+  // Initial data load
+  async function loadAll() {
+    try {
+      const [agents, tasks, signals, musings, health, stats, status] = await Promise.all([
+        client.agents(),
+        client.tasks(),
+        client.feed('signals'),
+        client.feed('musings'),
+        client.health(),
+        client.stats(),
+        client.status(),
+      ]);
+
+      statusEl.textContent = 'Live';
+      statusEl.className = statusEl.className.replace(/bg-\w+/, 'bg-success');
+      if (uptimeDisplay && status.uptime) {
+        uptimeDisplay.textContent = `${status.uptime} uptime`;
+      }
+
+      renderAgents(agents);
+      renderKanban(tasks);
+      renderFeed(signals, signalsFeed, signalsCount, true);
+      renderFeed(musings, bullpenFeed, bullpenCount, false);
+      renderHealth(health);
+      renderStats(stats);
+    } catch (err) {
+      statusEl.textContent = 'Offline';
+      statusEl.className = statusEl.className.replace(/bg-\w+/, 'bg-destructive');
+      console.error('Legion API unreachable:', err);
+    }
+  }
+
+  // SSE live updates
+  function connectSSE() {
+    client.subscribe('agents', (data) => renderAgents(data as Agent[]));
+    client.subscribe('tasks', (data) => renderKanban(data as Task[]));
+    client.subscribe('feed', (data) => {
+      const items = data as FeedItem[];
+      const signals = items.filter(i => i.type === 'signal');
+      const musings = items.filter(i => i.type !== 'signal');
+      renderFeed(signals, signalsFeed, signalsCount, true);
+      renderFeed(musings, bullpenFeed, bullpenCount, false);
+    });
+  }
+
+  // Health polling (not on SSE, poll every 30s)
+  function pollHealth() {
+    setInterval(async () => {
+      try {
+        const health = await client.health();
+        renderHealth(health);
+      } catch { /* ignore poll failures */ }
+    }, 30000);
+  }
+
+  // Search
+  searchBtn.addEventListener('click', async () => {
+    const q = searchInput.value.trim();
+    if (!q) return;
+    try {
+      const results = await client.search(q, undefined, 10);
+      renderSearchResults(results);
+    } catch {
+      searchResults.classList.remove('hidden');
+      searchResults.replaceChildren(el('p', { className: 'text-muted-foreground font-mono text-sm py-2' }, ['Search unavailable']));
+    }
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') searchBtn.click();
+  });
+
+  // Post signal
+  postBtn.addEventListener('click', async () => {
+    const text = postInput.value.trim();
+    if (!text) return;
+    try {
+      await client.postSignal(text, 'shingle');
+      postInput.value = '';
+    } catch (err) {
+      console.error('Failed to post:', err);
+    }
+  });
+
+  postInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') postBtn.click();
+  });
+
+  // Boot
+  loadAll();
+  connectSSE();
+  pollHealth();
+</script>

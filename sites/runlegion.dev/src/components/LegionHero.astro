@@ -1,0 +1,476 @@
+---
+// Canvas animation showing Legion's full architecture.
+// Three phases: Memory, Coordinate, Orchestrate.
+// Nodes: named agents, central legion, storage, bullpen.
+---
+
+<div class="legion-hero">
+  <div class="lh-scene">
+    <header class="lh-header">
+      <div class="lh-eyebrow">Self-Hosted Agent Orchestrator</div>
+      <h2 class="lh-title">Memory &middot; Coordination &middot; Autonomy</h2>
+      <p class="lh-subtitle">
+        Your machines. Your agents. Your rules. Free forever. No cloud required.
+      </p>
+    </header>
+
+    <div class="lh-canvas-wrap">
+      <canvas id="legion-network" width="860" height="480"></canvas>
+    </div>
+
+    <div class="lh-phases">
+      <button class="lh-phase active" data-phase="memory">
+        <div class="lh-phase-num">MEMORY</div>
+        <div class="lh-phase-title">REFLECT &middot; RECALL &middot; CONSULT</div>
+        <div class="lh-phase-desc">
+          Agents reflect after every session. On cold start, relevant reflections
+          are recalled via hybrid BM25 + cosine search. Cross-domain problems
+          trigger consult across all repos.
+        </div>
+        <div class="lh-phase-cmd">legion reflect --repo myapp --transcript ./session.jsonl</div>
+      </button>
+      <button class="lh-phase" data-phase="coordinate">
+        <div class="lh-phase-num">COORDINATE</div>
+        <div class="lh-phase-title">BULLPEN &middot; SIGNALS &middot; KANBAN</div>
+        <div class="lh-phase-desc">
+          Agents post to the bullpen, send structured signals for reviews and
+          requests, and delegate work through an 8-state kanban board.
+          The team communicates without human routing.
+        </div>
+        <div class="lh-phase-cmd">legion signal --to backend --verb review --status approved</div>
+      </button>
+      <button class="lh-phase" data-phase="orchestrate">
+        <div class="lh-phase-num">ORCHESTRATE</div>
+        <div class="lh-phase-title">WATCH &middot; SURFACE &middot; AUTO-WAKE</div>
+        <div class="lh-phase-desc">
+          The watch daemon monitors the bullpen. When a signal arrives for an
+          idle agent, it spawns a session. Agents wake, read context, act,
+          and sleep. No human in the loop.
+        </div>
+        <div class="lh-phase-cmd">legion watch</div>
+      </button>
+    </div>
+
+    <div class="lh-trace">
+      <div class="lh-trace-label">// Execution Trace</div>
+      <div id="legion-trace-lines"></div>
+    </div>
+
+    <div class="lh-controls">
+      <button class="lh-btn lh-btn-primary" id="legion-restart">RESTART SEQUENCE</button>
+      <button class="lh-btn lh-btn-secondary" id="legion-pause">PAUSE / RESUME</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .legion-hero {
+    background: #020810;
+    color: #cce8f4;
+    font-family: "Share Tech Mono", monospace;
+    overflow: hidden;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 0 L56 16 L56 50 L28 66 L0 50 L0 16Z' fill='none' stroke='%230a1e35' stroke-width='0.5'/%3E%3Cpath d='M28 66 L56 82 L56 116 L28 132 L0 116 L0 82Z' fill='none' stroke='%230a1e35' stroke-width='0.5'/%3E%3C/svg%3E");
+  }
+
+  .lh-scene {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  .lh-header { text-align: center; margin-bottom: 60px; }
+  .lh-eyebrow {
+    font-size: 11px; letter-spacing: 0.3em; color: #00e5ff;
+    text-transform: uppercase; margin-bottom: 12px; opacity: 0.8;
+  }
+  .lh-title {
+    font-family: "Exo 2", sans-serif; font-size: clamp(28px, 5vw, 48px);
+    font-weight: 600; color: #cce8f4; letter-spacing: 0.08em;
+    text-shadow: 0 0 8px #00e5ff, 0 0 20px #00e5ff44;
+  }
+  .lh-sep { color: #00e5ff; }
+  .lh-subtitle {
+    margin-top: 14px; font-size: 13px; color: #8ab4c8;
+    letter-spacing: 0.05em; line-height: 1.6;
+  }
+
+  .lh-canvas-wrap { width: 100%; margin-bottom: 48px; }
+  #legion-network {
+    width: 100%; height: auto; display: block;
+    border: 1px solid #005f6b; border-radius: 4px;
+    box-shadow: 0 0 40px #00e5ff18, inset 0 0 60px #00102040;
+  }
+
+  .lh-phases {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px; margin-bottom: 48px;
+  }
+  @media (max-width: 640px) { .lh-phases { grid-template-columns: 1fr; } }
+
+  .lh-phase {
+    border: 1px solid #005f6b; border-radius: 3px; padding: 20px;
+    background: #04111f; cursor: pointer; text-align: left;
+    transition: border-color 0.3s, background 0.3s;
+    font-family: inherit; color: inherit;
+  }
+  .lh-phase::before {
+    content: ""; display: block; height: 2px; margin: -20px -20px 20px;
+    background: #00e5ff; opacity: 0; transition: opacity 0.3s;
+    box-shadow: 0 0 8px #00e5ff, 0 0 20px #00e5ff44;
+  }
+  .lh-phase.active { border-color: #00e5ff; background: #061a2e; }
+  .lh-phase.active::before { opacity: 1; }
+
+  .lh-phase-num { font-size: 10px; color: #00e5ff; letter-spacing: 0.3em; margin-bottom: 8px; opacity: 0.7; }
+  .lh-phase-title { font-family: "Exo 2", sans-serif; font-size: 12px; font-weight: 600; color: #cce8f4; margin-bottom: 10px; letter-spacing: 0.05em; }
+  .lh-phase-desc { font-size: 11px; color: #8ab4c8; line-height: 1.7; }
+  .lh-phase-cmd {
+    margin-top: 12px; font-size: 10px; color: #00ff9d;
+    background: #001a0e; border: 1px solid #004d30;
+    padding: 6px 10px; border-radius: 2px; letter-spacing: 0.03em;
+  }
+
+  .lh-trace {
+    border: 1px solid #005f6b; border-radius: 3px;
+    background: #030d18; padding: 20px 24px; margin-bottom: 48px;
+  }
+  .lh-trace-label { font-size: 10px; letter-spacing: 0.3em; color: #00e5ff; text-transform: uppercase; margin-bottom: 16px; opacity: 0.7; }
+
+  .lh-controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .lh-btn {
+    font-family: "Share Tech Mono", monospace; font-size: 11px;
+    letter-spacing: 0.15em; text-transform: uppercase; padding: 10px 24px;
+    border-radius: 2px; cursor: pointer; transition: all 0.2s; border: 1px solid;
+  }
+  .lh-btn-primary { background: transparent; border-color: #00e5ff; color: #00e5ff; }
+  .lh-btn-primary:hover { background: #00e5ff; color: #020810; box-shadow: 0 0 8px #00e5ff, 0 0 20px #00e5ff44; }
+  .lh-btn-secondary { background: transparent; border-color: #005f6b; color: #8ab4c8; }
+  .lh-btn-secondary:hover { border-color: #8ab4c8; color: #cce8f4; }
+</style>
+
+<style is:global>
+  .lh-trace-line {
+    font-family: "Share Tech Mono", monospace;
+    font-size: 12px; line-height: 2; color: #8ab4c8;
+    opacity: 0; transform: translateX(-8px);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .lh-trace-line.visible { opacity: 1; transform: translateX(0); }
+  .lh-trace-line .t-time { color: #005f6b; margin-right: 12px; }
+  .lh-trace-line .t-agent { color: #00e5ff; }
+  .lh-trace-line .t-event { color: #cce8f4; }
+  .lh-trace-line .t-score { color: #ffb300; }
+</style>
+
+<script>
+  function initLegionHero() {
+    const canvas = document.getElementById("legion-network") as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d")!;
+    const W = 860, H = 480;
+    canvas.width = W; canvas.height = H;
+
+    const CYAN = "#00e5ff", CYAN_DIM = "#005f6b";
+    const GREEN = "#00ff9d";
+    const AMBER = "#ffb300";
+    const BG = "#020810";
+
+    let phase = "memory", paused = false, t = 0;
+    let particles: any[] = [];
+    let stepsFired = new Set();
+    let shownTraces = new Set();
+
+    const cx = W / 2, cy = H / 2 - 30, R = 155;
+
+    const NODES: Record<string, any> = {
+      legion: { x: cx, y: cy, label: "LEGION", sub: "orchestrator", color: CYAN, r: 36 },
+      frontend: { x: cx + R * Math.cos(-Math.PI / 2), y: cy + R * Math.sin(-Math.PI / 2), label: "FRONTEND", sub: "ui agent", color: GREEN, r: 26 },
+      backend: { x: cx + R * Math.cos(-Math.PI / 2 + Math.PI * 2 / 5), y: cy + R * Math.sin(-Math.PI / 2 + Math.PI * 2 / 5), label: "BACKEND", sub: "api agent", color: GREEN, r: 26 },
+      testing: { x: cx + R * Math.cos(-Math.PI / 2 + Math.PI * 4 / 5), y: cy + R * Math.sin(-Math.PI / 2 + Math.PI * 4 / 5), label: "TESTING", sub: "qa agent", color: GREEN, r: 26 },
+      devops: { x: cx + R * Math.cos(-Math.PI / 2 + Math.PI * 6 / 5), y: cy + R * Math.sin(-Math.PI / 2 + Math.PI * 6 / 5), label: "DEVOPS", sub: "infra agent", color: GREEN, r: 26 },
+      docs: { x: cx + R * Math.cos(-Math.PI / 2 + Math.PI * 8 / 5), y: cy + R * Math.sin(-Math.PI / 2 + Math.PI * 8 / 5), label: "DOCS", sub: "docs agent", color: GREEN, r: 26 },
+    };
+
+    const STORAGE: Record<string, any> = {
+      db: { x: cx - 110, y: cy + 200, label: "legion.db", sub: "reflections + cards", color: AMBER, r: 20 },
+      tantivy: { x: cx, y: cy + 210, label: "index/", sub: "BM25 + embeddings", color: AMBER, r: 20 },
+      bullpen: { x: cx + 110, y: cy + 200, label: "bullpen", sub: "signals + posts", color: GREEN, r: 20 },
+    };
+
+    const EDGES = [
+      ["legion", "frontend"], ["legion", "backend"], ["legion", "testing"],
+      ["legion", "devops"], ["legion", "docs"],
+      ["legion", "db"], ["legion", "tantivy"], ["legion", "bullpen"],
+    ];
+
+    const PHASES: Record<string, any> = {
+      memory: {
+        steps: [
+          { t: 40, from: "frontend", to: "legion", color: GREEN, label: "session transcript", size: 4 },
+          { t: 90, from: "legion", to: "db", color: AMBER, label: "INSERT reflection", size: 3 },
+          { t: 120, from: "legion", to: "tantivy", color: AMBER, label: "index + embed", size: 3 },
+          { t: 180, from: "backend", to: "legion", color: CYAN, label: "cold start recall", size: 4 },
+          { t: 220, from: "legion", to: "tantivy", color: AMBER, label: "BM25 search()", size: 3 },
+          { t: 260, from: "tantivy", to: "legion", color: AMBER, label: "top-5 matches", size: 3 },
+          { t: 300, from: "legion", to: "backend", color: CYAN, label: "context injected", size: 4 },
+          { t: 340, from: "testing", to: "legion", color: CYAN, label: "consult: cross-domain", size: 3 },
+          { t: 370, from: "legion", to: "testing", color: GREEN, label: "frontend knows this", size: 3 },
+        ],
+        traces: [
+          { t: 20, line: ["00:00.041", "frontend", "Stop hook fired -- reflect", null] },
+          { t: 70, line: ["00:00.089", "legion", "INSERT reflection + index commit", null] },
+          { t: 150, line: ["00:01.003", "backend", "SessionStart -- recall --context \"auth tokens\"", null] },
+          { t: 230, line: ["00:01.019", "tantivy", "BM25 scored 5 matches", "0.93 0.81 0.74 0.68 0.55"] },
+          { t: 310, line: ["00:01.031", "backend", "[Legion] 5 reflections injected as context", null] },
+          { t: 350, line: ["00:02.004", "testing", "consult --context \"auth token format\"", null] },
+          { t: 380, line: ["00:02.022", "testing", "received: [frontend] token refresh pattern", "0.94"] },
+        ],
+        highlight: ["frontend", "backend", "testing", "tantivy", "db"],
+        label: "reflect \u2192 recall \u2192 consult: agents accumulate and share expertise",
+      },
+      coordinate: {
+        steps: [
+          { t: 40, from: "frontend", to: "bullpen", color: GREEN, label: "post: component shipped", size: 4 },
+          { t: 80, from: "bullpen", to: "docs", color: GREEN, label: "unread post", size: 3 },
+          { t: 120, from: "docs", to: "bullpen", color: CYAN, label: "@frontend question", size: 4 },
+          { t: 160, from: "bullpen", to: "frontend", color: CYAN, label: "signal: question", size: 3 },
+          { t: 200, from: "frontend", to: "bullpen", color: GREEN, label: "@docs answer:done", size: 3 },
+          { t: 250, from: "devops", to: "legion", color: AMBER, label: "kanban create", size: 4 },
+          { t: 290, from: "legion", to: "db", color: AMBER, label: "INSERT card", size: 3 },
+          { t: 320, from: "backend", to: "legion", color: CYAN, label: "legion work", size: 4 },
+          { t: 350, from: "legion", to: "backend", color: GREEN, label: "card assigned", size: 3 },
+          { t: 390, from: "backend", to: "legion", color: GREEN, label: "legion done", size: 3 },
+          { t: 420, from: "legion", to: "bullpen", color: GREEN, label: "announce: done", size: 3 },
+        ],
+        traces: [
+          { t: 20, line: ["00:00.001", "frontend", "post --text \"auth component shipped, new token format\"", null] },
+          { t: 90, line: ["00:00.012", "docs", "bullpen: 1 unread -- reading", null] },
+          { t: 130, line: ["00:00.018", "docs", "signal --to frontend --verb question", null] },
+          { t: 210, line: ["00:00.031", "frontend", "signal --to docs --verb answer --status done", null] },
+          { t: 260, line: ["00:01.004", "devops", "kanban create --to backend --text \"auth endpoint\" --priority high", null] },
+          { t: 330, line: ["00:02.001", "backend", "work --repo backend  // card assigned: auth endpoint", null] },
+          { t: 400, line: ["00:15.041", "backend", "done --text \"shipped PR #89\"  // announced to bullpen", null] },
+        ],
+        highlight: ["frontend", "docs", "backend", "devops", "bullpen"],
+        label: "bullpen \u2192 signals \u2192 kanban: agents coordinate without human routing",
+      },
+      orchestrate: {
+        steps: [
+          { t: 40, from: "frontend", to: "bullpen", color: CYAN, label: "@testing review:ready", size: 4 },
+          { t: 80, from: "bullpen", to: "legion", color: CYAN, label: "signal detected", size: 3 },
+          { t: 120, from: "legion", to: "testing", color: GREEN, label: "spawn session", size: 5 },
+          { t: 180, from: "testing", to: "legion", color: CYAN, label: "SessionStart", size: 3 },
+          { t: 210, from: "legion", to: "tantivy", color: AMBER, label: "recall", size: 3 },
+          { t: 240, from: "tantivy", to: "legion", color: AMBER, label: "reflections", size: 3 },
+          { t: 270, from: "legion", to: "testing", color: CYAN, label: "context + surface", size: 4 },
+          { t: 310, from: "legion", to: "testing", color: GREEN, label: "pending cards", size: 3 },
+          { t: 350, from: "testing", to: "bullpen", color: GREEN, label: "@frontend review:approved", size: 3 },
+          { t: 390, from: "testing", to: "legion", color: GREEN, label: "reflect + sleep", size: 3 },
+        ],
+        traces: [
+          { t: 20, line: ["00:00.000", "watch", "polling bullpen... signal for testing detected", null] },
+          { t: 60, line: ["00:00.015", "watch", "cooldown clear -- spawning session in /testing", null] },
+          { t: 130, line: ["00:00.031", "testing", "SessionStart -- recall + surface + bullpen", null] },
+          { t: 220, line: ["00:00.048", "testing", "[Legion] 3 reflections, 2 cards, 1 signal injected", null] },
+          { t: 280, line: ["00:00.052", "testing", "reading signal: @testing review:ready from frontend", null] },
+          { t: 360, line: ["00:05.119", "testing", "signal --to frontend --verb review --status approved", null] },
+          { t: 400, line: ["00:05.138", "testing", "Stop hook -- reflecting, then sleep", null] },
+        ],
+        highlight: ["frontend", "testing", "bullpen", "tantivy"],
+        label: "signal arrives \u2192 watch spawns session \u2192 agent acts \u2192 reflects \u2192 sleeps",
+      },
+    };
+
+    function spawnParticle(fromKey: string, toKey: string, color: string, size = 3) {
+      const all = { ...NODES, ...STORAGE };
+      const from = all[fromKey], to = all[toKey];
+      if (!from || !to) return;
+      particles.push({ x: from.x, y: from.y, tx: to.x, ty: to.y, progress: 0, color, size, speed: 0.015 + Math.random() * 0.008, trail: [] as any[] });
+    }
+
+    function tickParticles() {
+      particles = particles.filter(p => p.progress < 1);
+      for (const p of particles) {
+        p.trail.push({ x: p.x, y: p.y });
+        if (p.trail.length > 18) p.trail.shift();
+        p.progress = Math.min(1, p.progress + p.speed);
+        p.x += (p.tx - p.x) * 0.04;
+        p.y += (p.ty - p.y) * 0.04;
+      }
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+      const vg = ctx.createRadialGradient(cx, cy, 80, cx, cy, 400);
+      vg.addColorStop(0, "#00102010"); vg.addColorStop(1, "#00000060");
+      ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawEdges() {
+      const all = { ...NODES, ...STORAGE };
+      const highlighted = new Set(PHASES[phase].highlight || []);
+      for (const [a, b] of EDGES) {
+        const na = all[a], nb = all[b];
+        const isActive = highlighted.has(a) || highlighted.has(b);
+        ctx.beginPath(); ctx.moveTo(na.x, na.y); ctx.lineTo(nb.x, nb.y);
+        if (isActive) {
+          ctx.setLineDash([4, 8]); ctx.strokeStyle = CYAN_DIM; ctx.lineWidth = 1;
+          ctx.shadowColor = CYAN; ctx.shadowBlur = 6;
+        } else {
+          ctx.setLineDash([2, 12]); ctx.strokeStyle = "#0a1e35"; ctx.lineWidth = 0.8; ctx.shadowBlur = 0;
+        }
+        ctx.stroke(); ctx.setLineDash([]); ctx.shadowBlur = 0;
+      }
+    }
+
+    function drawHex(x: number, y: number, r: number, color: string, glow: boolean, pulse: boolean) {
+      const pr = r + (pulse ? Math.sin(t * 0.05) * 3 : 0);
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 180) * (60 * i - 30);
+        const px = x + pr * Math.cos(angle), py = y + pr * Math.sin(angle);
+        if (i === 0) { ctx.moveTo(px, py); } else { ctx.lineTo(px, py); }
+      }
+      ctx.closePath();
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, pr);
+      grad.addColorStop(0, color + "22"); grad.addColorStop(1, color + "06");
+      ctx.fillStyle = grad; ctx.fill();
+      ctx.strokeStyle = color; ctx.lineWidth = glow ? 1.5 : 0.8;
+      if (glow) { ctx.shadowColor = color; ctx.shadowBlur = 16; }
+      ctx.stroke(); ctx.shadowBlur = 0;
+    }
+
+    function drawCircle(x: number, y: number, r: number, color: string, glow: boolean) {
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, color + "22"); grad.addColorStop(1, color + "06");
+      ctx.fillStyle = grad; ctx.fill();
+      ctx.strokeStyle = color; ctx.lineWidth = glow ? 1.5 : 0.8;
+      if (glow) { ctx.shadowColor = color; ctx.shadowBlur = 12; }
+      ctx.stroke(); ctx.shadowBlur = 0;
+    }
+
+    function drawLabel(x: number, y: number, label: string, sub: string, color: string) {
+      ctx.font = "bold 14px 'Share Tech Mono', monospace";
+      ctx.fillStyle = color; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(label, x, y - 3);
+      ctx.font = "12px 'Share Tech Mono', monospace";
+      ctx.fillStyle = color + "88"; ctx.fillText(sub, x, y + 9);
+    }
+
+    function drawNodes() {
+      const highlighted = new Set(PHASES[phase].highlight || []);
+      for (const [key, node] of Object.entries(STORAGE)) {
+        drawCircle(node.x, node.y, node.r, node.color, highlighted.has(key));
+        drawLabel(node.x, node.y, node.label, node.sub, node.color);
+      }
+      for (const [key, node] of Object.entries(NODES)) {
+        drawHex(node.x, node.y, node.r, node.color, highlighted.has(key) || key === "legion", key === "legion");
+        drawLabel(node.x, node.y, node.label, node.sub, node.color);
+      }
+      ctx.font = "12px 'Share Tech Mono', monospace";
+      ctx.fillStyle = CYAN + "44"; ctx.textAlign = "center";
+      ctx.fillText(PHASES[phase].label, cx, H - 16);
+    }
+
+    function drawParticles() {
+      for (const p of particles) {
+        for (let i = 0; i < p.trail.length; i++) {
+          const alpha = (i / p.trail.length) * 0.5;
+          ctx.beginPath(); ctx.arc(p.trail[i].x, p.trail[i].y, p.size * 0.4, 0, Math.PI * 2);
+          ctx.fillStyle = p.color + Math.floor(alpha * 255).toString(16).padStart(2, "0");
+          ctx.fill();
+        }
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color; ctx.shadowColor = p.color; ctx.shadowBlur = 10;
+        ctx.fill(); ctx.shadowBlur = 0;
+      }
+    }
+
+    function fireSteps() {
+      for (const step of PHASES[phase].steps) {
+        const key = `${phase}-${step.t}`;
+        if (!stepsFired.has(key) && t >= step.t) {
+          stepsFired.add(key);
+          spawnParticle(step.from, step.to, step.color, step.size);
+        }
+      }
+      const maxT = PHASES[phase].steps.reduce((m: number, s: any) => Math.max(m, s.t), 0);
+      if (t > maxT + 80) { t = 0; stepsFired.clear(); }
+    }
+
+    function fireTraces() {
+      const container = document.getElementById("legion-trace-lines");
+      if (!container) return;
+      for (const tr of PHASES[phase].traces) {
+        const key = `${phase}-trace-${tr.t}`;
+        if (!shownTraces.has(key) && t >= tr.t) {
+          shownTraces.add(key);
+          const [time, agent, event, data] = tr.line;
+          const div = document.createElement("div");
+          div.className = "lh-trace-line";
+
+          const timeSpan = document.createElement("span");
+          timeSpan.className = "t-time";
+          timeSpan.textContent = time;
+          div.appendChild(timeSpan);
+
+          const agentSpan = document.createElement("span");
+          agentSpan.className = "t-agent";
+          agentSpan.textContent = `[${agent}]`;
+          div.appendChild(agentSpan);
+
+          const space = document.createTextNode(" ");
+          div.appendChild(space);
+
+          const eventSpan = document.createElement("span");
+          eventSpan.className = "t-event";
+          eventSpan.textContent = event;
+          div.appendChild(eventSpan);
+
+          if (data) {
+            const scoreSpan = document.createElement("span");
+            scoreSpan.className = "t-score";
+            scoreSpan.textContent = ` // score: ${data}`;
+            div.appendChild(scoreSpan);
+          }
+
+          container.appendChild(div);
+          requestAnimationFrame(() => { requestAnimationFrame(() => div.classList.add("visible")); });
+          const lines = container.querySelectorAll(".lh-trace-line");
+          if (lines.length > 7) lines[0].remove();
+        }
+      }
+    }
+
+    function setPhase(p: string) {
+      phase = p; t = 0; particles = []; stepsFired.clear(); shownTraces.clear();
+      const container = document.getElementById("legion-trace-lines");
+      if (container) container.textContent = "";
+      for (const el of document.querySelectorAll(".lh-phase")) {
+        el.classList.toggle("active", (el as HTMLElement).dataset.phase === p);
+      }
+    }
+
+    function render() {
+      if (!paused) { t++; tickParticles(); fireSteps(); fireTraces(); }
+      drawBackground(); drawEdges(); drawParticles(); drawNodes();
+      requestAnimationFrame(render);
+    }
+
+    for (const el of document.querySelectorAll(".lh-phase")) {
+      el.addEventListener("click", () => setPhase((el as HTMLElement).dataset.phase!));
+    }
+    document.getElementById("legion-restart")?.addEventListener("click", () => setPhase(phase));
+    document.getElementById("legion-pause")?.addEventListener("click", () => { paused = !paused; });
+
+    render();
+
+    const phaseOrder = ["memory", "coordinate", "orchestrate"];
+    let phaseIdx = 0;
+    setInterval(() => { phaseIdx = (phaseIdx + 1) % phaseOrder.length; setPhase(phaseOrder[phaseIdx]); }, 18000);
+  }
+
+  initLegionHero();
+  document.addEventListener("astro:after-swap", initLegionHero);
+</script>

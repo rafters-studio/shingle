@@ -1,0 +1,137 @@
+---
+/**
+ * ArchitectureDiagram - P2P mesh visualization.
+ *
+ * Three nodes in a triangle, pulse rings, animated messages flowing between
+ * them, smugglr sync box in the center. SMIL drives the message motion.
+ * A single keyframes block drives the pulse rings (SMIL can't portably
+ * transform-scale circles); component-internal, unavoidable.
+ */
+import Container from "@/components/ui/container.astro";
+
+interface Node {
+  cx: number;
+  cy: number;
+  label: string;
+  delay: number;
+}
+
+const nodes: Node[] = [
+  { cx: 400, cy: 120, label: "laptop", delay: 0 },
+  { cx: 200, cy: 350, label: "server", delay: 0.5 },
+  { cx: 600, cy: 350, label: "homelab", delay: 1 },
+];
+
+const items = ["agents", "bullpen", "reflections", "tasks"];
+
+const edges: Array<[number, number, number, number]> = [
+  [400, 120, 200, 350],
+  [200, 350, 600, 350],
+  [600, 350, 400, 120],
+];
+
+interface Message {
+  cx: [number, number, number];
+  cy: [number, number, number];
+  begin: number;
+}
+
+const messages: Message[] = [
+  { cx: [400, 200, 400], cy: [120, 350, 120], begin: 0 },
+  { cx: [200, 600, 200], cy: [350, 350, 350], begin: 1.5 },
+  { cx: [600, 400, 600], cy: [350, 120, 350], begin: 3 },
+  { cx: [200, 400, 200], cy: [350, 120, 350], begin: 2 },
+  { cx: [600, 200, 600], cy: [350, 350, 350], begin: 3.5 },
+  { cx: [400, 600, 400], cy: [120, 350, 120], begin: 4.5 },
+];
+---
+
+<Container size="4xl">
+  <svg viewBox="0 0 800 500" role="img" aria-labelledby="arch-title arch-desc">
+    <title id="arch-title">Peer-to-peer mesh</title>
+    <desc id="arch-desc">
+      Three legion nodes -- laptop, server, homelab -- connected in a triangle.
+      Messages flow between them and state syncs through smugglr.
+    </desc>
+
+    <text
+      x="400"
+      y="30"
+      text-anchor="middle"
+      font-size="14"
+      font-style="italic"
+      class="fill-muted-foreground"
+    >Peer-to-peer mesh &#x2022; Every node is equal &#x2022; No single point of failure</text>
+
+    {edges.map(([x1, y1, x2, y2]) => (
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke-width="2" stroke-dasharray="4 4" class="stroke-border" />
+    ))}
+
+    {nodes.map((node) => (
+      <g>
+        <circle
+          cx={node.cx}
+          cy={node.cy}
+          r="90"
+          fill="none"
+          stroke-width="1"
+          class="stroke-accent arch-pulse"
+          style={`animation-delay:${node.delay}s`}
+        />
+        <rect
+          x={node.cx - 75}
+          y={node.cy - 75}
+          width="150"
+          height="150"
+          rx="8"
+          stroke-width="2"
+          class="fill-background stroke-accent"
+        />
+        <text x={node.cx} y={node.cy - 45} text-anchor="middle" font-size="16" font-weight="600" class="fill-foreground">
+          {node.label}
+        </text>
+        {items.map((item, idx) => (
+          <text
+            x={node.cx}
+            y={node.cy - 15 + idx * 22}
+            text-anchor="middle"
+            font-size="11"
+            class="fill-muted-foreground font-mono"
+          >
+            [{item}]
+          </text>
+        ))}
+      </g>
+    ))}
+
+    <rect x="330" y="230" width="140" height="40" rx="6" stroke-width="2" class="fill-muted stroke-primary" />
+    <text x="400" y="255" text-anchor="middle" font-size="13" font-weight="500" class="fill-foreground font-mono">
+      smugglr sync
+    </text>
+
+    {messages.map((msg) => (
+      <circle r="5" class="fill-accent">
+        <animate attributeName="cx" values={msg.cx.join(";")} dur="4s" repeatCount="indefinite" begin={`${msg.begin}s`} />
+        <animate attributeName="cy" values={msg.cy.join(";")} dur="4s" repeatCount="indefinite" begin={`${msg.begin}s`} />
+        <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin={`${msg.begin}s`} />
+      </circle>
+    ))}
+  </svg>
+</Container>
+
+<style>
+  .arch-pulse {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: arch-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes arch-pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.9); }
+    50%      { opacity: 0;   transform: scale(1.1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arch-pulse { animation: none; opacity: 0.3; }
+  }
+</style>
