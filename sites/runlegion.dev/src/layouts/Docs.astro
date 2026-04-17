@@ -1,8 +1,9 @@
 ---
 import Base from './Base.astro';
-import Container from '@/src/components/ui/container.astro';
-import Grid from '@/src/components/ui/grid.astro';
-import Typography from '@/src/components/ui/typography.astro';
+import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import GridItem from '@/components/ui/grid-item.astro';
+import Small from '@/components/ui/typography-small.astro';
 
 interface Props {
   title: string;
@@ -66,6 +67,12 @@ const docsSections = [
     ],
   },
 ];
+
+const navItemClass =
+  'no-underline text-muted-foreground hover:text-foreground';
+const navItemActiveClass = 'no-underline text-primary';
+const sectionLabelClass =
+  'uppercase tracking-widest text-muted-foreground';
 ---
 
 <Base
@@ -74,96 +81,34 @@ const docsSections = [
   type="article"
   extraJsonLd={[techArticle]}
 >
-  <div class="docs-shell">
-    <aside class="docs-sidebar">
-      <nav class="docs-sidebar-nav" aria-label="Documentation">
+  <Container size="7xl" padding="6">
+    <Grid columns={4} gap="8">
+      <Container as="aside" gap="6" class="sticky top-0">
         {docsSections.map((section) => (
-          <div class="docs-nav-group">
-            <span class="docs-group-title">{section.title}</span>
-            {section.links.map((link) => {
-              const isActive = currentPath === link.href;
-              return (
-                <a
-                  href={link.href}
-                  class:list={['docs-nav-item', isActive && 'docs-nav-active']}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
-          </div>
+          <Container gap="2">
+            <Small class={sectionLabelClass}>{section.title}</Small>
+            <Container gap="1">
+              {section.links.map((link) => {
+                const isActive = currentPath === link.href;
+                return (
+                  <a
+                    href={link.href}
+                    class={isActive ? navItemActiveClass : navItemClass}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <Small>{link.label}</Small>
+                  </a>
+                );
+              })}
+            </Container>
+          </Container>
         ))}
-      </nav>
-    </aside>
-    <main class="docs-main">
-      <Container size="full" as="article">
-        <Grid preset="linear" columns={1}>
-          <slot />
-        </Grid>
       </Container>
-    </main>
-  </div>
+      <GridItem colSpan={3}>
+        <Container as="main" size="full" gap="6">
+          <slot />
+        </Container>
+      </GridItem>
+    </Grid>
+  </Container>
 </Base>
-
-<style>
-  .docs-shell {
-    display: grid;
-    grid-template-columns: 13rem 1fr;
-    min-height: calc(100vh - 8rem);
-  }
-
-  .docs-sidebar {
-    border-right: 1px solid var(--border);
-  }
-
-  .docs-sidebar-nav {
-    position: sticky;
-    top: 0;
-    padding: 1.5rem 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    max-height: 100vh;
-    overflow-y: auto;
-  }
-
-  .docs-nav-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-  }
-
-  .docs-group-title {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.625rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--muted-foreground);
-    margin-bottom: 0.375rem;
-  }
-
-  .docs-nav-item {
-    display: block;
-    font-family: 'Exo 2', sans-serif;
-    font-size: 0.8125rem;
-    color: var(--muted-foreground);
-    text-decoration: none;
-    padding: 0.1875rem 0;
-    transition: color 0.15s;
-  }
-
-  .docs-nav-item:hover {
-    color: var(--foreground);
-  }
-
-  .docs-nav-active {
-    color: var(--primary);
-    font-weight: 500;
-  }
-
-  .docs-main {
-    min-width: 0;
-  }
-</style>
