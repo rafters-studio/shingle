@@ -136,18 +136,6 @@ importers:
       astro:
         specifier: ^6.0.3
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
-      typography-code.astro:
-        specifier: link:@/components/ui/typography-code.astro
-        version: link:@/components/ui/typography-code.astro
-      typography-h1.astro:
-        specifier: link:@/components/ui/typography-h1.astro
-        version: link:@/components/ui/typography-h1.astro
-      typography-p.astro:
-        specifier: link:@/components/ui/typography-p.astro
-        version: link:@/components/ui/typography-p.astro
-      typography.astro:
-        specifier: link:@/components/ui/typography.astro
-        version: link:@/components/ui/typography.astro
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.7
@@ -197,18 +185,6 @@ importers:
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
-      typography-code.astro:
-        specifier: link:@/components/ui/typography-code.astro
-        version: link:@/components/ui/typography-code.astro
-      typography-h1.astro:
-        specifier: link:@/components/ui/typography-h1.astro
-        version: link:@/components/ui/typography-h1.astro
-      typography-p.astro:
-        specifier: link:@/components/ui/typography-p.astro
-        version: link:@/components/ui/typography-p.astro
-      typography.astro:
-        specifier: link:@/components/ui/typography.astro
-        version: link:@/components/ui/typography.astro
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.7
