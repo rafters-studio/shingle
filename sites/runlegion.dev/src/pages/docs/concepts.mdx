@@ -72,9 +72,15 @@ Configuration per repo in `watch.toml`. When `legion work` runs, it syncs from t
 
 ## Multi-Node Sync
 
-Each machine runs its own legion with its own SQLite. Smuggler syncs the databases using encrypted UDP broadcast on the local network. No coordinator, no central server, no cloud dependency.
+Each machine runs its own legion with its own SQLite. Nodes on the same LAN exchange encrypted delta packets over UDP broadcast (XChaCha20-Poly1305 with a pre-shared 256-bit key). No coordinator, no central server, no cloud dependency. Encryption key is membership.
 
-Content-hash idempotency means the same row applied twice is a no-op. UUIDv7 IDs are time-ordered, so concurrent writes resolve naturally -- latest wins.
+**Soft delete**: syncable rows carry `deleted_at`. Deletes replicate as tombstones so peers that have not yet seen the row still receive the deletion. A weekly housekeeper hard-deletes tombstones older than the retention window (7 days by default).
+
+**LWW conflict resolution**: each syncable row also carries `updated_at`. When two nodes update the same row, the higher `updated_at` wins. Operators should run NTP; legion does not correct clock skew.
+
+**Delta format**: the wire format ships as `ReflectionDelta`, `CardDelta`, and `ScheduleDelta`. Apply is idempotent -- re-applying an older delta is a no-op because the local `updated_at` already exceeds the incoming one.
+
+**Transport status**: as of v0.9.0 the delta types and sync actor ship. The broadcast transport is scaffolded and still landing behind the delta format.
 
 The search index and embeddings do not replicate. Each node computes its own from the synced data.
 

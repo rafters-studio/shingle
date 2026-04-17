@@ -112,6 +112,8 @@ legion bullpen --repo <name>              # all posts, marks as read
 legion bullpen --repo <name> --count      # unread count only
 legion bullpen --repo <name> --signals    # structured signals only
 legion bullpen --repo <name> --musings    # natural language only
+legion bullpen --archive                  # archive posts all readers have seen
+legion bullpen --archived --repo <name>   # view archived posts
 ```
 
 Aliases: `bp`, `board`
@@ -245,6 +247,108 @@ legion kanban assign --id <card-id> --to <repo>
 
 Only works on cards in backlog status.
 
+## Work Source
+
+Work source plugins integrate external trackers (GitHub, etc.) with legion. These commands are the primary interface for agents to file issues, open PRs, and review code -- direct `gh` usage is typically blocked in legion-managed environments so the audit log captures every action.
+
+### issue create
+
+Create an issue in the configured work source.
+
+```bash
+legion issue create --repo <name> --title "..." --body "..."
+```
+
+### pr create
+
+Create a pull request for the current branch. Requires a clean `legion-simplify` gate on HEAD.
+
+```bash
+legion pr create --repo <name> --title "..." --body "..."
+legion pr create --repo <name> --title "..." --body "..." --skip-gates
+```
+
+`--skip-gates` bypasses the simplify gate but writes an audit entry explaining the bypass. Use only for bootstrap (the branch IS the simplify skill itself) or trivial commits that cannot meaningfully be reviewed (docs, release commits).
+
+### pr list
+
+List open PRs with review status.
+
+```bash
+legion pr list --repo <name>
+```
+
+### pr review
+
+Post a review on an open PR.
+
+```bash
+legion pr review --repo <name> --number <n> --approve --body "LGTM"
+legion pr review --repo <name> --number <n> --request-changes --body "..."
+```
+
+### pr merge
+
+Merge an approved PR. Refuses if the PR is not approved.
+
+```bash
+legion pr merge --repo <name> --number <n>
+legion pr merge --repo <name> --number <n> --task <card-id>   # also transition card to done
+```
+
+### comment
+
+Post a comment on an issue or PR.
+
+```bash
+legion comment --repo <name> --number <n> --body "..."
+```
+
+### sync
+
+Pull new issues from the configured work source into the kanban board.
+
+```bash
+legion sync --repo <name>
+```
+
+Also runs automatically from the SessionStart hook unless `LEGION_NO_SYNC=1` is set.
+
+### audit
+
+View the work source audit log.
+
+```bash
+legion audit                          # recent entries, all agents
+legion audit --repo <name>            # filter by agent
+legion audit --action create-pr       # filter by action type
+legion audit --json                   # machine-readable output
+```
+
+Action types include `create-issue`, `create-pr`, `review-pr`, `merge-pr`, `comment`, `sync`, and gate bypass entries.
+
+### quality-gate record
+
+Record a simplify-skill result. Called by the `/legion-simplify` skill, not normally invoked by hand.
+
+```bash
+legion quality-gate record --skill legion-simplify --result clean
+legion quality-gate record --skill legion-simplify --result issues --findings-count 3
+legion quality-gate record --skill legion-simplify --result clean --details-json '<json>'
+```
+
+`legion pr create` reads the most recent gate result for HEAD and refuses to open a PR unless it is `clean`.
+
+### rename
+
+Rename a repo across all tables and `watch.toml` entries.
+
+```bash
+legion rename --from oldname --to newname
+```
+
+Updates `reflections`, `tasks`, `schedules`, `watch_handled`, `board_reads`, and watch config in a single transaction.
+
 ## Agent Work System
 
 ### status
@@ -283,9 +387,103 @@ Auto-wake sleeping agents when signals arrive.
 legion watch
 ```
 
-Long-lived daemon. Polls for unhandled signals and spawns headless Claude Code sessions. Also runs auto-unblock: when an agent announces completed work, blocked cards referencing that agent are automatically unblocked.
+Long-lived daemon. Polls for unhandled signals and spawns headless Claude Code sessions. Also runs auto-unblock: when an agent announces completed work, blocked cards referencing that agent are automatically unblocked. When `cluster.toml` is present and `enabled = true`, watch also hosts the sync actor for multi-node replication.
 
 Configuration in `~/.local/share/legion/watch.toml`.
+
+#### watch add
+
+Add a working directory to `watch.toml` without hand-editing.
+
+```bash
+legion watch add <path>
+legion watch add <path> --name <display-name> --agent <signal-recipient>
+```
+
+Canonicalizes the path and is idempotent -- repeated calls with the same resolved path are a no-op. Unknown TOML fields survive the edit.
+
+#### watch remove
+
+Remove a repo entry from `watch.toml` by name.
+
+```bash
+legion watch remove <name>
+```
+
+#### watch list
+
+List all repos currently configured in `watch.toml`.
+
+```bash
+legion watch list
+```
+
+### cluster
+
+Multi-node LAN sync via encrypted UDP broadcast. Configuration lives in `cluster.toml` (0o600 on Unix -- contains the pre-shared 256-bit key).
+
+#### cluster init
+
+Initialize cluster sync. Generates a fresh 256-bit key if `--key` is omitted.
+
+```bash
+legion cluster init                            # first node: generate key
+legion cluster init --key <64-hex-chars>       # second node: use existing key
+legion cluster init --port 31337               # override UDP broadcast port
+```
+
+The generated key prints once on first init. Save it -- it is the only way to enroll additional nodes.
+
+#### cluster key
+
+Print the current cluster key. Use this to share the key with another node.
+
+```bash
+legion cluster key
+```
+
+#### cluster enable / disable
+
+Toggle broadcasting. The key is preserved on disable.
+
+```bash
+legion cluster enable
+legion cluster disable
+```
+
+#### cluster status
+
+Report the instance ID, peer list, and last successful sync time.
+
+```bash
+legion cluster status
+```
+
+### mcp
+
+MCP stdio server for the Claude Code real-time channel. Started by the plugin's channel configuration, not invoked directly.
+
+```bash
+legion mcp
+```
+
+### daemon
+
+Start the legion daemon (channel server + watch loop) in the foreground.
+
+```bash
+legion daemon --port 3131
+```
+
+### daemon-spawn
+
+Idempotent background spawn used by the plugin's session-start hook.
+
+```bash
+legion daemon-spawn --port 3131
+```
+
+Running it multiple times does not produce duplicate daemons.
 
 ### serve
 
