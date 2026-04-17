@@ -13,14 +13,14 @@ Legion is a single Rust binary that stores data in SQLite and indexes it with Ta
 **SQLite** via rusqlite with WAL mode. Default location: `~/.local/share/legion/` (XDG on Linux, Application Support on macOS). Overridable via `LEGION_DATA_DIR`.
 
 Tables:
-- `reflections` -- agent memories with BM25-searchable text, domain tags, learning chains, boost/decay scoring, archive/tombstone/LWW columns
-- `tasks` -- kanban cards with 8-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
-- `schedules` -- cron-like scheduled posts with tombstone/LWW columns
-- `board_reads` -- per-agent read cursors for the bullpen (local, does not replicate)
-- `health_samples` -- system telemetry for watch pressure monitoring
-- `watch_handled` -- per-repo signal handling tracking
-- `audit_log` -- work source actions (issue/pr creation, merge, review) for traceability
-- `quality_gates` -- simplify-skill results enforced by `legion pr create`
+- `reflections`: agent memories with BM25-searchable text, domain tags, learning chains, boost/decay scoring, archive/tombstone/LWW columns
+- `tasks`: kanban cards with 8-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
+- `schedules`: cron-like scheduled posts with tombstone/LWW columns
+- `board_reads`: per-agent read cursors for the bullpen (local, does not replicate)
+- `health_samples`: system telemetry for watch pressure monitoring
+- `watch_handled`: per-repo signal handling tracking
+- `audit_log`: work source actions (issue/pr creation, merge, review) for traceability
+- `quality_gates`: simplify-skill results enforced by `legion pr create`
 
 All IDs are UUIDv7 (time-ordered). Migrations are idempotent and run on every DB open. The syncable tables (`reflections`, `tasks`, `schedules`) carry `deleted_at` and `updated_at` for soft-delete replication and last-write-wins conflict resolution.
 
@@ -32,7 +32,7 @@ Incremental index sync detects reflections in SQLite that are missing from Tanti
 
 ## Embeddings
 
-**model2vec-rs** for semantic similarity. Stored as a nullable BLOB column on reflections. Each node computes its own embeddings -- they do not replicate.
+**model2vec-rs** for semantic similarity. Stored as a nullable BLOB column on reflections. Each node computes its own embeddings; they do not replicate.
 
 ## Kanban Scheduler
 
@@ -52,7 +52,7 @@ The kanban board is a scheduler wearing a human-friendly UI.
 
 **Signals**: structured bullpen posts for coordination. Format: `@recipient verb:status {details}`. Filtered separately from natural language posts.
 
-**Channel**: MCP server providing real-time communication tools. Events arrive as they happen -- no polling.
+**Channel**: MCP server providing real-time communication tools. Events arrive as they happen, with no polling required.
 
 ## Watch
 
@@ -68,11 +68,13 @@ Features:
 
 Each machine runs its own legion binary with its own SQLite database. Nodes on the same LAN discover each other via UDP broadcast and exchange encrypted delta packets. No coordinator, no central server, no cloud dependency.
 
-**Encryption**: XChaCha20-Poly1305 with a pre-shared 256-bit key. The key is membership -- anyone with the key can read and write to the cluster. `cluster.toml` (which holds the key) is written with `0o600` on Unix.
+**Transport library**: the broadcast and encryption primitives are provided by [smugglr](https://smugglr.dev), a reusable Rust crate. Legion owns the schema, the `cluster.toml` configuration, the CLI, and the sync actor wiring on top. The split lets Legion stay focused on the memory model while smugglr handles the edge-of-the-network concerns (packet framing, encryption, peer discovery).
+
+**Encryption**: XChaCha20-Poly1305 with a pre-shared 256-bit key. The key is membership: anyone with the key can read and write to the cluster. `cluster.toml` (which holds the key) is written with `0o600` on Unix.
 
 **Discovery**: UDP broadcast on port 31337 (configurable). Each node announces itself and listens for peers.
 
-**Cross-network**: Users bring their own tunnel (Tailscale, WireGuard, ZeroTier). Legion broadcasts to whatever subnet it's on -- if your machines can see each other, they sync.
+**Cross-network**: Users bring their own tunnel (Tailscale, WireGuard, ZeroTier). Legion broadcasts to whatever subnet it's on. If your machines can see each other, they sync.
 
 **What replicates**: reflections, kanban cards, schedules. Each row carries `updated_at` (LWW) and `deleted_at` (tombstones), so deletes replicate as rows rather than vanishing from peers that have not yet seen them.
 

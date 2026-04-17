@@ -2,10 +2,13 @@
 /**
  * ArchitectureDiagram - P2P mesh visualization.
  *
- * Three nodes in a triangle, pulse rings, animated messages flowing between
- * them, smugglr sync box in the center. SMIL drives the message motion.
- * A single keyframes block drives the pulse rings (SMIL can't portably
- * transform-scale circles); component-internal, unavoidable.
+ * Three legion nodes in a triangle, pulse rings, animated messages flowing
+ * directly between peers. SMIL drives the message motion. A single keyframes
+ * block drives the pulse rings (SMIL can't portably transform-scale circles);
+ * component-internal, unavoidable.
+ *
+ * Transport primitives come from smugglr-core; Legion owns the nodes and the
+ * schema. Credit appears as a small label under the mesh.
  */
 import Container from "@/components/ui/container.astro";
 
@@ -50,8 +53,9 @@ const messages: Message[] = [
   <svg viewBox="0 0 800 500" role="img" aria-labelledby="arch-title arch-desc">
     <title id="arch-title">Peer-to-peer mesh</title>
     <desc id="arch-desc">
-      Three legion nodes -- laptop, server, homelab -- connected in a triangle.
-      Messages flow between them and state syncs through smugglr.
+      Three legion nodes (laptop, server, homelab) connected in a triangle.
+      Messages flow directly between peers. Transport primitives are
+      provided by smugglr-core.
     </desc>
 
     <text
@@ -104,11 +108,6 @@ const messages: Message[] = [
       </g>
     ))}
 
-    <rect x="330" y="230" width="140" height="40" rx="6" stroke-width="2" class="fill-muted stroke-primary" />
-    <text x="400" y="255" text-anchor="middle" font-size="13" font-weight="500" class="fill-foreground font-mono">
-      smugglr sync
-    </text>
-
     {messages.map((msg) => (
       <circle r="5" class="fill-accent">
         <animate attributeName="cx" values={msg.cx.join(";")} dur="4s" repeatCount="indefinite" begin={`${msg.begin}s`} />
@@ -116,6 +115,14 @@ const messages: Message[] = [
         <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin={`${msg.begin}s`} />
       </circle>
     ))}
+
+    <text
+      x="400"
+      y="475"
+      text-anchor="middle"
+      font-size="11"
+      class="fill-muted-foreground font-mono"
+    >transport: smugglr-core &#x2022; encryption: XChaCha20-Poly1305</text>
   </svg>
 </Container>
 
