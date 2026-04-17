@@ -331,9 +331,6 @@ importers:
       nanostores:
         specifier: ^1.2.0
         version: 1.2.0
-      react:
-        specifier: 19.2.0
-        version: 19.2.0
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.7
