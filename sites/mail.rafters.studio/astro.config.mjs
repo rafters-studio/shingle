@@ -1,20 +1,18 @@
-import { defineConfig } from 'astro/config';
-import mdx from '@astrojs/mdx';
-import tailwindcss from '@tailwindcss/vite';
-import sitemap from '@astrojs/sitemap';
-import cloudflare from '@astrojs/cloudflare';
-import rehypePrettyCode from 'rehype-pretty-code';
+import { defineConfig } from "astro/config";
+import mdx from "@astrojs/mdx";
+import tailwindcss from "@tailwindcss/vite";
+import sitemap from "@astrojs/sitemap";
+import cloudflare from "@astrojs/cloudflare";
+import rehypePrettyCode from "rehype-pretty-code";
 
 const prettyCodeOptions = {
-  theme: 'github-light',
+  theme: "github-light",
   keepBackground: true,
 };
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://rafters.studio',
-  base: '/mail',
-  trailingSlash: 'always',
+  site: "https://rafters.studio",
 
   integrations: [
     mdx({
@@ -29,19 +27,19 @@ export default defineConfig({
     platformProxy: {
       enabled: true,
     },
-    imageService: 'cloudflare',
+    imageService: "cloudflare",
   }),
 
   vite: {
     plugins: [tailwindcss()],
     ssr: {
       external: [
-        'stream',
-        'util',
-        'node:fs/promises',
-        'node:path',
-        'node:url',
-        'node:crypto',
+        "stream",
+        "util",
+        "node:fs/promises",
+        "node:path",
+        "node:url",
+        "node:crypto",
       ],
     },
   },
