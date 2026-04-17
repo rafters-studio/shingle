@@ -1,12 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "runlegion-shingle",
-  "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-01-30",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
-    "directory": "dist/client",
-    "binding": "ASSETS",
+    "directory": "dist",
   },
   "observability": {
     "enabled": false,
