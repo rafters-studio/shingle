@@ -1,5 +1,6 @@
 packages:
   - sites/*
+  - packages/*
 
 ignoredBuiltDependencies:
   - lefthook

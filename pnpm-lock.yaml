@@ -12,6 +12,12 @@ importers:
         specifier: ^4.78.0
         version: 4.78.0
 
+  packages/install:
+    dependencies:
+      astro:
+        specifier: ^6.0.0
+        version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
+
   sites/gitpress.app:
     dependencies:
       '@astrojs/cloudflare':
@@ -325,6 +331,9 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.7.1
         version: 3.7.2
+      '@shingle/install':
+        specifier: workspace:*
+        version: link:../../packages/install
       astro:
         specifier: ^6.0.3
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)

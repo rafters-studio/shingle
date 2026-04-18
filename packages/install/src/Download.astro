@@ -1,0 +1,155 @@
+---
+import type { ReleaseInfo, PlatformKey } from "./releases.ts";
+import { PLATFORM_DOWNLOAD_LABEL, DEFAULT_PLATFORM } from "./releases.ts";
+
+interface Props {
+  release: ReleaseInfo | null;
+  subline?: string;
+  class?: string;
+}
+
+const { release, subline, class: className } = Astro.props;
+
+const platformsByKey = new Map<PlatformKey, (typeof release)["platforms"][number] | undefined>();
+if (release) {
+  for (const p of release.platforms) platformsByKey.set(p.platform, p);
+}
+
+const defaultPlatform: PlatformKey = platformsByKey.get(DEFAULT_PLATFORM)?.platform ?? DEFAULT_PLATFORM;
+const defaultAsset = platformsByKey.get(defaultPlatform);
+const defaultLabel = PLATFORM_DOWNLOAD_LABEL[defaultPlatform];
+const defaultUrl = defaultAsset?.url ?? release?.allReleasesUrl ?? "";
+
+const optionOrder: PlatformKey[] = [
+  "macos-arm64",
+  "macos-x64",
+  "linux-x64",
+  "linux-arm64",
+  "windows-x64",
+];
+---
+
+<div class:list={["flex flex-col gap-3", className]}>
+  {release ? (
+    <>
+      <a
+        href={defaultUrl}
+        data-download-btn
+        class="inline-flex items-center justify-between gap-2 h-11 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors"
+      >
+        <span data-download-label>{defaultLabel}</span>
+        <span class="font-mono opacity-70" aria-hidden="true">&darr;</span>
+      </a>
+
+      <select
+        aria-label="Other platforms"
+        data-os-select
+        class="bg-background text-foreground border border-border rounded-md px-3 py-2 pr-8 font-mono text-xs cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 appearance-none bg-no-repeat bg-right-[10px] bg-center"
+        style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>'); background-position: right 10px center;"
+      >
+        {optionOrder.map((key) => {
+          const asset = platformsByKey.get(key);
+          if (!asset) return null;
+          return (
+            <option value={key} data-url={asset.url} selected={key === defaultPlatform}>
+              {asset.label}
+            </option>
+          );
+        })}
+      </select>
+
+      <p class="text-xs text-muted-foreground font-mono">
+        {subline ?? (
+          <>
+            Signed release. <a href={release.allReleasesUrl} class="underline decoration-muted-foreground/40 hover:decoration-foreground">All releases</a>.
+          </>
+        )}
+      </p>
+    </>
+  ) : (
+    <p class="text-sm text-muted-foreground">
+      <a href={`https://github.com/releases`} class="underline decoration-muted-foreground/40 hover:decoration-foreground">
+        Releases on GitHub
+      </a>
+    </p>
+  )}
+</div>
+
+<script>
+  import { PLATFORM_DOWNLOAD_LABEL as LABEL, type PlatformKey } from "./releases.ts";
+
+  const STORAGE_KEY = "shingle-install-platform";
+
+  function detectPlatform(): PlatformKey {
+    try {
+      const ua = navigator.userAgent || "";
+      interface UaData {
+        platform?: string;
+        getHighEntropyValues?: (hints: string[]) => Promise<{ architecture?: string }>;
+      }
+      const uad = (navigator as Navigator & { userAgentData?: UaData }).userAgentData;
+
+      let os: "macos" | "linux" | "windows" = "macos";
+      if (/Windows/i.test(ua) || uad?.platform === "Windows") os = "windows";
+      else if (/Linux/i.test(ua) && !/Android/i.test(ua)) os = "linux";
+      else if (/Mac/i.test(ua) || uad?.platform === "macOS") os = "macos";
+
+      if (os === "macos") {
+        const isIntel = /Intel/i.test(ua) && !/Apple/.test(navigator.platform || "");
+        return isIntel ? "macos-x64" : "macos-arm64";
+      }
+      if (os === "linux") return "linux-x64";
+      return "windows-x64";
+    } catch {
+      return "macos-arm64";
+    }
+  }
+
+  function applyPlatform(key: PlatformKey) {
+    const selects = document.querySelectorAll<HTMLSelectElement>("select[data-os-select]");
+    selects.forEach((sel) => {
+      const optionExists = Array.from(sel.options).some((o) => o.value === key);
+      if (!optionExists) return;
+      if (sel.value !== key) sel.value = key;
+      const selected = sel.options[sel.selectedIndex];
+      const url = selected?.dataset.url;
+      const container = sel.closest("[data-download-container]") ?? sel.parentElement;
+      if (!container) return;
+      const btn = container.querySelector<HTMLAnchorElement>("[data-download-btn]");
+      const label = container.querySelector<HTMLElement>("[data-download-label]");
+      if (btn && url) btn.href = url;
+      if (label) label.textContent = LABEL[key];
+    });
+  }
+
+  function wireSelects() {
+    document.querySelectorAll<HTMLSelectElement>("select[data-os-select]").forEach((sel) => {
+      if (sel.dataset.osWired === "true") return;
+      sel.dataset.osWired = "true";
+      sel.addEventListener("change", () => {
+        const key = sel.value as PlatformKey;
+        try {
+          sessionStorage.setItem(STORAGE_KEY, key);
+        } catch {}
+        applyPlatform(key);
+      });
+    });
+  }
+
+  function refine() {
+    let key: PlatformKey | null = null;
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored && stored in LABEL) key = stored as PlatformKey;
+    } catch {}
+    if (!key) key = detectPlatform();
+    applyPlatform(key);
+  }
+
+  wireSelects();
+  refine();
+  document.addEventListener("astro:page-load", () => {
+    wireSelects();
+    refine();
+  });
+</script>

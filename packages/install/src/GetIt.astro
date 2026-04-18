@@ -1,0 +1,66 @@
+---
+import Install from "./Install.astro";
+import Download from "./Download.astro";
+import { getLatestRelease } from "./releases.ts";
+
+interface Props {
+  repo: string;
+  command: string;
+  installSubline?: string;
+  downloadSubline?: string;
+  class?: string;
+}
+
+const {
+  repo,
+  command,
+  installSubline,
+  downloadSubline,
+  class: className,
+} = Astro.props;
+
+const release = await getLatestRelease(repo);
+const version = release?.tag ?? "";
+---
+
+<div class:list={["@container", className]}>
+  <div class="grid grid-cols-1 @md:grid-cols-[1fr_auto_1fr] gap-4 items-stretch text-left">
+    <section class="rounded-lg border border-border bg-background overflow-hidden flex flex-col min-w-0">
+      <header class="flex items-baseline justify-between gap-2 bg-muted px-4 py-2 border-b border-border font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+        <span>Install</span>
+        <span>shell</span>
+      </header>
+      <div class="p-4 flex-1">
+        <Install command={command} subline={installSubline} />
+      </div>
+    </section>
+
+    <div
+      class="hidden @md:flex flex-col items-center justify-center px-4 self-stretch"
+      aria-hidden="true"
+    >
+      <div class="flex-1 w-px bg-border"></div>
+      <span class="my-2 bg-background border border-border rounded-sm px-2 py-1 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">or</span>
+      <div class="flex-1 w-px bg-border"></div>
+    </div>
+
+    <div
+      class="@md:hidden flex items-center justify-center py-2"
+      aria-hidden="true"
+    >
+      <div class="flex-1 h-px bg-border"></div>
+      <span class="mx-3 bg-background border border-border rounded-sm px-2 py-1 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">or</span>
+      <div class="flex-1 h-px bg-border"></div>
+    </div>
+
+    <section class="rounded-lg border border-border bg-background overflow-hidden flex flex-col min-w-0" data-download-container>
+      <header class="flex items-baseline justify-between gap-2 bg-muted px-4 py-2 border-b border-border font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+        <span>Download</span>
+        {version ? <span>{version}</span> : null}
+      </header>
+      <div class="p-4 flex-1">
+        <Download release={release} subline={downloadSubline} />
+      </div>
+    </section>
+  </div>
+</div>

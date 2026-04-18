@@ -19,6 +19,7 @@
   "dependencies": {
     "@astrojs/mdx": "^5.0.0",
     "@astrojs/sitemap": "^3.7.1",
+    "@shingle/install": "workspace:*",
     "astro": "^6.0.3",
     "nanostores": "^1.2.0"
   },
