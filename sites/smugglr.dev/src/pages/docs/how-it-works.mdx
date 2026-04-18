@@ -1,0 +1,371 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: How It Works
+description: "Content hashing, the sync algorithm, the plugin system, the S3 relay, LAN broadcast, and the watch daemon. The internals that make smugglr stateless."
+---
+
+
+## Overview
+
+smugglr is a bidirectional sync engine for SQLite databases. It reads rows from two databases, computes a SHA256 content hash per row, diffs the hash maps to find what changed, applies a conflict resolution strategy to disputed rows, then writes the results in batched transactions that respect backend rate limits. The same engine compiles to native Rust (CLI and crate) or WASM (npm package). Every operation is stateless and idempotent: no journals, no sequence numbers, no sync metadata tables. Content is truth.
+
+## Content Hashing
+
+The hash is the foundation of everything smugglr does. Every row gets a deterministic SHA256 digest of its actual data. Two rows with identical content produce identical hashes regardless of when they were written or where they live.
+
+### How the hash is computed
+
+1. Query the table schema via `PRAGMA table_info(table_name)`. This returns columns in their declared order (by `cid`).
+2. Exclude `updated_at` and `created_at`. Exclude any columns listed in the user's `exclude_columns` config. Primary key columns remain in the hash input (the PK is also used separately as the row identifier).
+3. For each remaining column, read the value as a string. NULL becomes empty string (`""`).
+4. Join all values with a pipe separator (`|`).
+5. SHA256 hash the resulting string. Output: 64-character lowercase hex.
+
+### Concrete example
+
+Given a table:
+
+```sql
+CREATE TABLE products (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  price REAL,
+  description TEXT,
+  updated_at TEXT
+);
+```
+
+And a row:
+
+| id | name | price | description | updated_at |
+|----|------|-------|-------------|------------|
+| `prod_01` | `Widget` | `29.99` | `NULL` | `2026-04-01T12:00:00Z` |
+
+The hash input after exclusions (drop `id` as PK, drop `updated_at`):
+
+```
+Widget|29.99|
+```
+
+Note: `description` is NULL, so it contributes an empty string. The trailing pipe is from the join.
+
+SHA256 of `Widget|29.99|` = `a3b1c9...` (64-char hex).
+
+### Why content hashing
+
+Timestamps lie. Clocks drift. Sequence numbers require coordination. A content hash answers exactly one question: "Is this row the same data as that row?" If yes, skip it. If no, something changed. This makes every sync operation safe to rerun. You can crash mid-sync, restart, and get the same result. No state to corrupt.
+
+### Edge cases
+
+**Column ordering matters.** Two databases with the same columns in different `CREATE TABLE` order will produce different hashes. smugglr uses `PRAGMA table_info` order (the `cid` field), which reflects declaration order. Schema must match between source and target.
+
+**Float representation.** SQLite stores reals as IEEE 754 doubles. The string representation depends on how SQLite renders them. `29.99` and `29.990000` hash differently. In practice this is stable within a single SQLite version, but cross-platform syncs (e.g., local SQLite to D1) should watch for this.
+
+**BLOB columns.** Binary data is hex-encoded before hashing. smugglr converts `Vec<u8>` to a hex string, then that string participates in the pipe-joined hash input. BLOBs participate in the hash unless explicitly excluded via `exclude_columns`.
+
+**Empty vs NULL.** Both produce empty string in the hash input. A column that changes from `NULL` to `""` will not be detected as a change. This is by design: smugglr syncs data content, not SQL type semantics.
+
+## The Sync Algorithm
+
+A sync operation runs these steps in order. Every step is the same whether you're syncing two local files or pushing to D1 over HTTP.
+
+### Step 1: Read
+
+Query both databases. For each configured table, read every row's primary key and compute its content hash. The result is a `HashMap<PrimaryKey, RowMeta>` per side, where `RowMeta` holds the hash, and optionally a timestamp column value (if conflict resolution needs it).
+
+For remote databases accessed via the plugin system, this means issuing `SELECT` queries over HTTP and processing JSON responses. For local databases, it is direct rusqlite access.
+
+### Step 2: Hash
+
+Content hashes are computed during the read step. Each side now has a complete map of `PK -> hash` for every configured table.
+
+### Step 3: Diff
+
+Compare the two hash maps. Every row falls into exactly one of six categories:
+
+| Category | Meaning |
+|----------|---------|
+| `local_only` | PK exists locally but not remotely. Candidate for insert on remote. |
+| `remote_only` | PK exists remotely but not locally. Candidate for insert locally. |
+| `local_newer` | PK exists on both sides, hashes differ, local timestamp is newer. |
+| `remote_newer` | PK exists on both sides, hashes differ, remote timestamp is newer. |
+| `content_differs` | PK exists on both sides, hashes differ, no timestamp comparison (or timestamps are equal). |
+| `identical` | PK exists on both sides, hashes match. No action. |
+
+The `local_newer` and `remote_newer` categories only apply when the conflict strategy uses timestamps. Otherwise, rows with differing hashes land in `content_differs`.
+
+### Step 4: Resolve
+
+Apply the configured conflict resolution strategy to `content_differs` rows. This determines which side's data wins. See [Conflict Resolution](#conflict-resolution) below.
+
+Rows in `local_only` and `remote_only` are not conflicts. On a `push`, local-only rows are inserted remotely. On a `pull`, remote-only rows are inserted locally. On a `sync`, both directions apply.
+
+### Step 5: Batch
+
+Group resolved writes into batches that respect the target's limits. Cloudflare D1 accepts a maximum of 100 rows per API call. Other backends have their own limits. The `batch_size` config controls this.
+
+If a batch fails due to rate limiting, smugglr retries with exponential backoff:
+
+| Parameter | Default |
+|-----------|---------|
+| `max_retries` | 5 |
+| `initial_retry_delay_ms` | 100 |
+| `backoff_multiplier` | 2.0 |
+
+Retry sequence: 100ms, 200ms, 400ms, 800ms, 1600ms, then fail.
+
+### Step 6: Write
+
+Execute the batched INSERT/UPDATE/DELETE statements against the target. For HTTP backends, this means POST requests with SQL payloads. For local databases, this is a transaction.
+
+### Step 7: Report
+
+Emit a summary. In JSON output mode (`--output json`), this is a structured object with per-table counts for each diff category and every row that moved. In human mode, it is a table showing what changed. Dry-run mode (`--dry-run`) runs steps 1 through 4 and reports without writing.
+
+### Idempotency
+
+Running the same sync twice produces the same result. The second run reads both sides, finds all hashes identical, classifies everything as `identical`, writes nothing, and reports zero changes. There is no sync state to accumulate or corrupt.
+
+## Conflict Resolution
+
+A conflict occurs when the same primary key exists on both sides with different content hashes. Four strategies decide what happens.
+
+### `local_wins` (default)
+
+Local data overwrites remote. No timestamp comparison. Simple and predictable.
+
+When to use: you trust the local database as the source of truth. Typical for push-from-dev workflows.
+
+Example: local row has `price = 29.99`, remote has `price = 34.99`. After sync, both have `29.99`.
+
+### `remote_wins`
+
+Remote data overwrites local. The inverse of `local_wins`.
+
+When to use: the remote database is authoritative. Typical for pull-to-dev workflows.
+
+Example: same scenario. After sync, both have `34.99`.
+
+### `newer_wins`
+
+Compare the value of a configured `timestamp_column` on each side. The row with the more recent timestamp wins. Requires a column containing a sortable timestamp (ISO 8601, Unix epoch, anything that sorts correctly as a string).
+
+When to use: both sides are actively written and you want last-write-wins semantics with real timestamps.
+
+Example: local row has `updated_at = 2026-04-01T12:00:00Z`, remote has `updated_at = 2026-04-01T14:00:00Z`. Remote wins. After sync, both have the remote's data.
+
+Edge case: if timestamps are identical but content differs, the row is flagged as an unresolved conflict and smugglr exits with code 4. Identical timestamps with different content means your clocks are lying or two writes landed in the same clock tick. smugglr will not guess.
+
+### `uuid_v7_wins`
+
+Extract the timestamp from a UUIDv7 primary key. UUIDv7 encodes a millisecond-precision Unix timestamp in its first 48 bits. smugglr parses this and uses it for last-write-wins.
+
+When to use: your PKs are UUIDv7 and you do not have a separate timestamp column. Common in systems that use UUIDv7 as their sole ordering mechanism.
+
+Example: local PK `019078a0-0000-7000-8000-000000000001` (timestamp A), remote PK is the same (same row), but content differs. smugglr extracts the embedded timestamp from the PK. Since both sides have the same PK, the timestamps are identical. This strategy falls back to the same identical-timestamp conflict behavior as `newer_wins`.
+
+Where `uuid_v7_wins` actually resolves conflicts: when rows were created at different times and the UUIDv7 PKs encode those different creation times. The row with the later UUIDv7 wins. This is most useful in `local_only` vs `remote_only` decisions when doing full bidirectional sync, where both sides independently created rows for the same logical entity with different UUIDv7 PKs.
+
+## The Plugin System
+
+smugglr uses a runtime plugin architecture to communicate with remote databases. One plugin, `http-sql`, handles every HTTP-based SQLite backend. It ships as a separate binary that smugglr invokes as a child process.
+
+### JSON-RPC over stdin/stdout
+
+The plugin protocol is JSON-RPC 2.0 over standard I/O. smugglr spawns the plugin binary, sends JSON-RPC requests on stdin, reads JSON-RPC responses from stdout. No sockets, no ports, no service discovery.
+
+```
+smugglr CLI <--stdin/stdout--> http-sql plugin binary
+```
+
+This keeps plugins sandboxed. A plugin crash does not bring down smugglr. A misbehaving plugin can be killed by the parent process. Plugin authors need no Rust knowledge: implement JSON-RPC over stdio in any language.
+
+### Profiles
+
+The `http-sql` plugin uses profiles to handle differences between backends. A profile encodes:
+
+| Field | Purpose |
+|-------|---------|
+| `auth_format` | How to authenticate. Bearer token, API key header, basic auth, etc. |
+| `request_format` | How to structure the SQL request body. JSON shape varies per backend. |
+| `response_paths` | JSONPath-like expressions to extract rows from the response. Each backend nests results differently. |
+| `bind_param_limit` | Maximum number of bind parameters per request. D1 caps at 100. |
+
+Seven profiles ship with smugglr:
+
+| Profile | Backend | Auth | Bind limit |
+|---------|---------|------|------------|
+| `d1` | Cloudflare D1 | Bearer token | 100 |
+| `turso` | Turso / libSQL | JWT | 999 |
+| `rqlite` | rqlite | Basic / none | Unlimited |
+| `datasette` | Datasette | Token / basic | Unlimited |
+| `starbasedb` | StarbaseDB | API key | Unlimited |
+| `sqlite-cloud` | SQLite Cloud | API key | Unlimited |
+| `local` | Local SQLite | None | Unlimited |
+
+Adding a new backend is a TOML configuration change. Define the profile fields, point smugglr at it, and the `http-sql` plugin handles the rest. No code changes required for any backend that accepts SQL over HTTP and returns JSON.
+
+### What the plugin does not do
+
+The plugin does not compute hashes, run diffs, or resolve conflicts. It is a transport layer. It translates "execute this SQL" into the target's HTTP dialect and returns the result rows. All sync logic stays in smugglr-core.
+
+## The Relay
+
+The relay is a staging area for moving SQLite data between machines that cannot reach each other directly. It uses any S3-compatible object storage (R2, MinIO, AWS S3, Backblaze B2).
+
+### Stash
+
+`smugglr stash` serializes the local database and uploads it to the relay bucket. The upload uses a tempfile pattern: write to a temporary key, then rename to the final key. If the upload fails mid-stream, the temporary key is cleaned up and the relay is never left in a corrupt state.
+
+### Retrieve
+
+`smugglr retrieve` downloads the stashed database from the relay to a local file. The download also uses a tempfile: write to a local temporary file, validate SQLite integrity, then atomic rename to the target path. If download is interrupted, the target file is untouched.
+
+### ETag concurrency
+
+The relay uses S3 ETag headers for optimistic concurrency control. When stashing, smugglr sends an `If-None-Match` header to prevent overwriting a stash that another machine uploaded concurrently. If the ETag check fails, the stash aborts with a conflict error rather than silently clobbering another machine's data.
+
+This is not a lock. It is a check-and-set operation. Two machines stashing simultaneously: one succeeds, one gets a 412 Precondition Failed and retries or reports the conflict. No distributed locks, no coordination service.
+
+### What the relay is not
+
+The relay is not a sync target. You do not push rows to the relay or pull rows from it. You stash a whole database file, and another machine retrieves it. The sync engine (hash, diff, resolve, write) operates between two databases. The relay moves a database from point A to point B so the sync engine can access it.
+
+## Snapshots
+
+Snapshots are point-in-time copies of a database stored on the relay for disaster recovery.
+
+### Storage format
+
+```
+{relay-dir}/snapshots/{timestamp}.sqlite
+{relay-dir}/snapshots/{timestamp}.meta.json
+```
+
+The `.sqlite` file is a full copy of the database at that moment. The `.meta.json` sidecar contains metadata: source database path, table count, row counts per table, SHA256 of the snapshot file, and the smugglr version that created it.
+
+### Creating a snapshot
+
+`smugglr snapshot` copies the local database to the relay with a UTC timestamp key. The copy is a SQLite backup (using the backup API, not file copy) to ensure a consistent snapshot even if the database is actively being written.
+
+### Restoring a snapshot
+
+`smugglr restore <timestamp>` downloads the snapshot and replaces the local database. Before replacing:
+
+1. Download to a temporary file.
+2. Run `PRAGMA integrity_check` on the downloaded file.
+3. Compare the file's SHA256 against the hash stored in `.meta.json`.
+4. If both checks pass, atomic rename over the target database.
+5. If either check fails, abort. The existing database is untouched.
+
+This means a corrupted download or a tampered snapshot on the relay will never replace your working database.
+
+### Listing snapshots
+
+`smugglr snapshots` lists all available snapshots on the relay with their timestamps and metadata. Combined with bucket lifecycle rules (e.g., keep daily for 30 days, weekly for 90), snapshots become zero-config backup rotation.
+
+## LAN Broadcast
+
+Broadcast mode syncs SQLite databases between machines on the same network using encrypted UDP. No relay, no server, no coordinator. Every node is equal.
+
+### Discovery
+
+Each smugglr daemon broadcasts a discovery beacon on startup and at regular intervals. The beacon contains:
+
+| Field | Purpose |
+|-------|---------|
+| `instance_id` | Unique identifier for this smugglr instance. |
+| `db_path_hash` | Hash of the database path. Only peers syncing the same database respond. |
+
+Broadcast address: `255.255.255.255` on the configured port. Peers that share the encryption key and the same `db_path_hash` recognize each other as members of the same sync group.
+
+Peers expire after 3x the broadcast interval. If a peer has not sent a beacon in that window, it is removed from the peer list. No tombstones, no protocol negotiation, no goodbye messages.
+
+### Encryption
+
+All broadcast traffic is encrypted with XChaCha20-Poly1305. Every datagram gets a fresh 24-byte random nonce. The nonce is transmitted alongside the ciphertext (it is not secret, only unique).
+
+The encryption key is the sole access control mechanism. Possession of the key is membership. There is no auth handshake, no identity verification, no certificates. If you can decrypt the datagram, you are in the group. If you cannot, the datagram is indistinguishable from noise.
+
+Key distribution is the user's responsibility. Config file, environment variable, secret manager. smugglr reads the key; it never generates or rotates it.
+
+### Why lost packets are safe
+
+UDP provides no delivery guarantee. Packets get dropped. On a busy network, this is expected, not exceptional.
+
+smugglr's content hashing makes this harmless. Every row has a deterministic hash. Applying the same row twice is a no-op (hash matches, skip). Missing a broadcast means one peer is temporarily behind, but the next broadcast cycle covers it. The watch daemon rebroadcasts current state on every tick. There is no sequence to maintain, no gap to detect, no retransmission to request.
+
+This is the IoT pattern: fire-and-forget encrypted broadcasts, application-layer idempotency. Delivery guarantees are pushed up to the content layer where they are trivially cheap (hash comparison) rather than down to the transport layer where they are expensive (TCP, ACKs, retransmission buffers).
+
+### Cross-network
+
+smugglr broadcasts to whatever subnet it is on. If that subnet spans multiple physical networks via a tunnel (Tailscale, WireGuard, ZeroTier), smugglr does not know or care. Bring your own tunnel; smugglr provides the sync protocol.
+
+## Watch Daemon
+
+`smugglr watch` runs the sync algorithm on a repeating interval, turning smugglr from a one-shot CLI into a background sync daemon.
+
+### Polling
+
+The daemon polls on a configurable interval (default: 30 seconds). Each tick runs a full read-hash-diff-resolve-batch-write cycle. There are no filesystem watchers, no inotify hooks, no WAL intercepts. Polling is simple, predictable, and works identically across platforms.
+
+### Cursor persistence
+
+The daemon tracks a `last_sync` cursor per table. On each tick, it queries only rows with a timestamp newer than the cursor (if a timestamp column is configured). This reduces the per-tick read cost from "every row in the database" to "rows changed since last tick." Without a timestamp column, every tick reads every row. Content hashing still prevents redundant writes either way.
+
+The cursor is held in memory. If the daemon restarts, it does a full read on the first tick, then resumes incremental reads. No cursor file to corrupt.
+
+### WAL considerations
+
+SQLite in WAL (Write-Ahead Log) mode allows concurrent readers and a single writer. smugglr's read operations (computing hashes) are readers. Write operations (applying resolved diffs) acquire a write lock.
+
+If another process holds the write lock, smugglr's write will block until the lock is released or a timeout is hit. The daemon does not retry on lock timeout within a single tick. It logs the failure and waits for the next tick. This avoids cascading lock contention: if the database is under heavy write load, smugglr backs off naturally.
+
+When running the watch daemon alongside an application that writes to the same database, WAL mode is strongly recommended. In rollback journal mode, any reader blocks all writers (and vice versa), making concurrent access unreliable.
+
+### Output
+
+Each tick emits a sync report. In JSON mode (`--output json`), this is a structured event per tick, suitable for piping to log aggregation. In human mode, it prints a summary line per tick.
+
+## Distribution
+
+smugglr ships in three forms that share a single core engine.
+
+### CLI (`smugglr`)
+
+Native binary. Cross-platform: Linux (x86_64, aarch64), macOS (x86_64, aarch64), Windows (x86_64). Install via `cargo install smugglr`, Homebrew, or pre-built binaries with SHA256 checksums.
+
+The CLI is a thin wrapper over smugglr-core. It handles argument parsing, config file loading, output formatting, and process lifecycle (daemon mode, signal handling). All sync logic lives in the core crate.
+
+### Crate (`smugglr-core`)
+
+The engine as a Rust library. Feature-gated for two compilation targets:
+
+**Without the `native` feature (default):**
+
+Only the diff/sync engine and trait definitions compile. No filesystem access, no network calls, no SQLite bindings. This is the WASM-compatible surface:
+
+- Content hashing
+- Diff algorithm (HashMap comparison, six-category classification)
+- Conflict resolution strategies
+- Batch planning (grouping writes by size limit)
+- `DataSource` trait definition
+
+**With the `native` feature:**
+
+Full stack. Adds:
+
+- `rusqlite` for local SQLite access
+- `reqwest` for HTTP transport
+- Plugin system (child process management, JSON-RPC client)
+- Relay client (S3 operations)
+- Broadcast module (UDP, XChaCha20-Poly1305)
+- Snapshot operations (backup API, integrity checks)
+
+This split means the core sync algorithm compiles to ~50KB of WASM with no system dependencies. The full native binary includes everything.
+
+### npm package (`smugglr`)
+
+smugglr-core compiled to WASM via `wasm-pack`, published as an npm package. Browser and Node.js compatible. Provides the sync engine (hash, diff, resolve) in JavaScript. The calling application provides the data source integration: fetch rows from the target API, pass them to smugglr for diffing, get back the resolved changeset, apply it however you want.
+
+This is the local-first play. A browser application can import smugglr, sync its local SQLite (via OPFS or sql.js) against a remote database, and resolve conflicts entirely client-side. No server infrastructure required for the sync logic itself.

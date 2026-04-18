@@ -5,12 +5,19 @@ description: "Universal SQLite sync engine: content hashing, delta sync, LAN bro
 stickyTopbar: true
 ---
 import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import Card from "@/components/ui/card.astro";
+import CardHeader from "@/components/ui/card-header.astro";
+import CardTitle from "@/components/ui/card-title.astro";
+import CardContent from "@/components/ui/card-content.astro";
 import H1 from "@/components/ui/typography-h1.astro";
 import P from "@/components/ui/typography-p.astro";
 import Small from "@/components/ui/typography-small.astro";
 import Codeblock from "@/components/ui/typography-codeblock.astro";
 
 import Hero from "@/components/Hero.astro";
+import Section from "@/components/Section.astro";
+import FeatureBlock from "@/components/FeatureBlock.astro";
 
 <Hero>
     <img slot="logo" src="/logo.webp" alt="Smuggler" class="w-48 h-auto" />
@@ -25,3 +32,167 @@ import Hero from "@/components/Hero.astro";
 
     <Small slot="footnote">Beta. Kessel Run Certified. Shaving parsecs, not days.</Small>
 </Hero>
+
+<Section id="what" title="What It Does." tint>
+    <P>A universal sync engine for SQLite databases. It started as a way to move local dev data to Cloudflare D1 and grew into a general-purpose content-hashed delta sync across every SQLite backend anyone cares about.</P>
+
+    <Grid columns={2} gap="4">
+        <Card>
+            <CardHeader>
+                <CardTitle>Content hashing.</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P>SHA256 comparison of actual row data, not just timestamps. Two databases converge on identity, not on clocks.</P>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Delta sync.</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P>Only the rows that changed move. Bidirectional. Push, pull, or both, with configurable conflict resolution.</P>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>LAN broadcast.</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P>UDP peer discovery and encrypted delta exchange between machines on the same subnet. No coordinator, no server.</P>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Agent-friendly.</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P><code>--output json</code> across every command. Structured exit codes. Watch emits JSONL per tick.</P>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>No state files.</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P>Fresh comparison every run. No stale state to haunt you. Idempotent by construction.</P>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Pluggable backends.</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P>A <code>DataSource</code> trait abstracts any SQLite-like backend: D1, Turso, rqlite, Datasette, StarbaseDB, SQLite Cloud.</P>
+            </CardContent>
+        </Card>
+    </Grid>
+</Section>
+
+<Section id="patterns" title="Six Usage Patterns.">
+    <P>One engine, six shapes. Pick the one that matches where your data needs to go.</P>
+
+    <FeatureBlock title="Direct sync.">
+        <P>Push, pull, or full bidirectional sync between a local SQLite file and a remote target. The everyday case.</P>
+        <Codeblock>{`smugglr push            # local -> remote
+smugglr pull            # remote -> local
+smugglr sync            # both directions, with conflict strategy`}</Codeblock>
+    </FeatureBlock>
+
+    <FeatureBlock title="Watch daemon.">
+        <P>Background sync on a fixed interval. Set it and forget it. Emits JSONL per tick for pipelines.</P>
+        <Codeblock>{`smugglr watch --interval 30`}</Codeblock>
+    </FeatureBlock>
+
+    <FeatureBlock title="Fan-out (LAN broadcast).">
+        <P>Encrypted UDP datagrams across a subnet. The encryption key is the membership token. No auth handshake, no coordinator. IoT-shaped.</P>
+        <Codeblock>{`smugglr broadcast --interval 10`}</Codeblock>
+    </FeatureBlock>
+
+    <FeatureBlock title="Stash and retrieve.">
+        <P>S3-compatible object storage as a relay between machines that cannot see each other directly. Works with R2, MinIO, or any S3 endpoint.</P>
+        <Codeblock>{`smugglr stash               # upload to relay
+smugglr retrieve            # download to local`}</Codeblock>
+    </FeatureBlock>
+
+    <FeatureBlock title="Snapshot and restore.">
+        <P>Point-in-time backup to the relay. Portable across backends: snapshot from D1, restore to Turso.</P>
+        <Codeblock>{`smugglr snapshot
+smugglr snapshots
+smugglr restore 2026-04-03T09:15:44Z`}</Codeblock>
+    </FeatureBlock>
+
+    <FeatureBlock title="Diff.">
+        <P>Read-only comparison. Moves nothing. Shows what push, pull, or sync would do.</P>
+        <Codeblock>{`smugglr diff`}</Codeblock>
+    </FeatureBlock>
+</Section>
+
+<Section id="install" title="Three Ways to Install." tint>
+    <P>Smuggler ships as a native CLI, a Rust crate, and a WASM npm package. Pick the one that matches how you want to call it.</P>
+
+    <Grid columns={3} gap="4">
+        <Card>
+            <CardHeader>
+                <CardTitle>CLI.</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P>Install once, run anywhere. Pre-built binaries for macOS, Linux, and Windows; cargo for everyone else.</P>
+                <Codeblock>{`cargo install smugglr`}</Codeblock>
+                <P>Or the one-line installer:</P>
+                <Codeblock>{`curl -sSL smugglr.dev/install.sh | sh`}</Codeblock>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Crate.</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P>Embed the sync engine in a Rust service. Same algorithm, same adapters, programmatic API.</P>
+                <Codeblock>{`cargo add smugglr-core`}</Codeblock>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>npm (WASM).</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <P>A WASM build for JavaScript and TypeScript projects. Node, Bun, and modern browsers supported.</P>
+                <Codeblock>{`npm install smugglr`}</Codeblock>
+            </CardContent>
+        </Card>
+    </Grid>
+</Section>
+
+<Section id="docs" title="Go Deeper.">
+    <Grid columns={4} gap="4">
+        <FeatureBlock title="Get Started.">
+            <P>Five minutes to your first push.</P>
+            <P><a href="/get-started/">/get-started</a></P>
+        </FeatureBlock>
+        <FeatureBlock title="CLI Reference.">
+            <P>Every command, every flag, every exit code.</P>
+            <P><a href="/docs/cli-reference/">/docs/cli-reference</a></P>
+        </FeatureBlock>
+        <FeatureBlock title="Configuration.">
+            <P>The complete config.toml.</P>
+            <P><a href="/docs/configuration/">/docs/configuration</a></P>
+        </FeatureBlock>
+        <FeatureBlock title="How It Works.">
+            <P>Content hashing, the sync algorithm, plugins, the relay.</P>
+            <P><a href="/docs/how-it-works/">/docs/how-it-works</a></P>
+        </FeatureBlock>
+    </Grid>
+</Section>
+
+<Section id="open-source" title="Open Source.">
+    <P>MIT licensed. The CLI, the core crate, the WASM package, the http-sql plugin, the relay adapters. No hosted service, no plan tier, no feature gate.</P>
+
+    <P><a href="https://github.com/rafters-studio/smugglr">GitHub</a></P>
+</Section>

@@ -1,0 +1,40 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Plugin Guide
+description: "The http-sql plugin, shipped target profiles, adding a custom profile, auth methods, and endpoint resolution."
+---
+
+# Plugin Guide
+
+How the http-sql plugin works and how to teach smugglr about a new target.
+
+Work in progress. The full guide is waiting on a technical dump from the smuggler agent.
+
+## What is a profile
+
+A profile is a TOML block that tells the http-sql plugin how to talk to one specific backend. Adding a new target is usually a profile change, not a code change.
+
+## Shipped profiles
+
+smugglr ships profiles for these backends out of the box:
+
+- Cloudflare D1
+- Turso
+- rqlite
+- Datasette
+- StarbaseDB
+- SQLite Cloud
+
+Each profile handles the backend's quirks: endpoint shape, auth header format, per-request statement limits, error response parsing.
+
+## Adding a custom profile
+
+Work in progress. The shape is a TOML block under `[plugins.http-sql.profiles.<name>]` with endpoint, auth, and batch-size fields.
+
+## Auth methods per target
+
+Work in progress. Bearer token, basic auth, signed requests, and unauthenticated dev setups are all supported per profile.
+
+## How the plugin resolves HTTP endpoints
+
+Work in progress. The plugin resolves `<backend>://<name>` URLs against the active profile to produce the real HTTPS endpoint and auth headers.
