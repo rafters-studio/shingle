@@ -1,1 +1,2 @@
 @import "../../.rafters/output/rafters.css";
+@source "../../../../packages/install/src/**/*.{astro,ts}";

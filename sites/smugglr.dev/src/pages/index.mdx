@@ -1,15 +1,11 @@
 ---
 layout: '@/src/layouts/Base.astro'
 title: Smuggler
-description: "Universal SQLite sync engine: content hashing, delta sync, LAN broadcast, S3 relay. Agent-friendly."
+description: "The missing ops layer for SQLite. Content-hashed delta sync, one config, any LIKE backend."
 stickyTopbar: true
 ---
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
-import Card from "@/components/ui/card.astro";
-import CardHeader from "@/components/ui/card-header.astro";
-import CardTitle from "@/components/ui/card-title.astro";
-import CardContent from "@/components/ui/card-content.astro";
 import H1 from "@/components/ui/typography-h1.astro";
 import P from "@/components/ui/typography-p.astro";
 import Small from "@/components/ui/typography-small.astro";
@@ -18,159 +14,106 @@ import Codeblock from "@/components/ui/typography-codeblock.astro";
 import Hero from "@/components/Hero.astro";
 import Section from "@/components/Section.astro";
 import FeatureBlock from "@/components/FeatureBlock.astro";
+import GetIt from "@shingle/install/GetIt.astro";
 
 <Hero>
     <img slot="logo" src="/logo.webp" alt="Smuggler" class="w-48 h-auto" />
 
-    <H1 slot="title">Smuggle data between SQLite, D1, and S3.</H1>
+    <H1 slot="title">The missing ops layer for SQLite.</H1>
 
-    <P slot="tagline" size="display-medium" color="muted-foreground">Fast. Stateless. Encrypted. A universal sync engine with LAN broadcast, S3 relay, and agent-friendly JSON output.</P>
+    <P slot="tagline" size="display-medium" color="muted-foreground">Move data between the places SQLite actually runs. Local files, cloud APIs, across networks.</P>
 
-    <P slot="description">Smuggler compares content hashes row by row, moves only what changed, and leaves no state behind. It runs as a CLI, a Rust crate, and a WASM npm package. Production-tested since early 2026 at huttspawn.com.</P>
+    <P slot="description">One config, any LIKE target. Content-hashed delta sync. No server in the middle. Production since early 2026 at huttspawn.com.</P>
 
-    <Codeblock slot="cta">{`cargo install smugglr`}</Codeblock>
+    <GetIt
+        slot="cta"
+        repo="rafters-studio/smugglr"
+        command="curl -fsSL https://smugglr.dev/install | bash"
+        installSubline="Installs the latest signed binary. macOS 14 or later. Linux and Windows supported."
+    />
 
-    <Small slot="footnote">Beta. Kessel Run Certified. Shaving parsecs, not days.</Small>
+    <Small slot="footnote">Beta. Kessel Run Certified.</Small>
 </Hero>
 
-<Section id="what" title="What It Does." tint>
-    <P>A universal sync engine for SQLite databases. It started as a way to move local dev data to Cloudflare D1 and grew into a general-purpose content-hashed delta sync across every SQLite backend anyone cares about.</P>
+<Section id="show" title="Show it running." tint>
+    <P>A short TOML file, one dry-run, one push. The whole product in thirty seconds.</P>
 
-    <Grid columns={2} gap="4">
-        <Card>
-            <CardHeader>
-                <CardTitle>Content hashing.</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P>SHA256 comparison of actual row data, not just timestamps. Two databases converge on identity, not on clocks.</P>
-            </CardContent>
-        </Card>
+    <Codeblock>{`[source]
+path = "./local.db"
 
-        <Card>
-            <CardHeader>
-                <CardTitle>Delta sync.</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P>Only the rows that changed move. Bidirectional. Push, pull, or both, with configurable conflict resolution.</P>
-            </CardContent>
-        </Card>
+[target]
+type = "d1"
+database = "my-db"
+account_id = "abc123"
+api_token = "..."`}</Codeblock>
 
-        <Card>
-            <CardHeader>
-                <CardTitle>LAN broadcast.</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P>UDP peer discovery and encrypted delta exchange between machines on the same subnet. No coordinator, no server.</P>
-            </CardContent>
-        </Card>
+    <Codeblock>{`$ smugglr push --dry-run
+Comparing source and target...
+  abilities        47 new, 0 changed, 0 missing
+  missions          3 new, 1 changed, 0 missing
+  characters        0 new, 0 changed, 0 missing
+51 rows to write. 0 conflicts. No data moved.`}</Codeblock>
 
-        <Card>
-            <CardHeader>
-                <CardTitle>Agent-friendly.</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P><code>--output json</code> across every command. Structured exit codes. Watch emits JSONL per tick.</P>
-            </CardContent>
-        </Card>
+    <Codeblock>{`$ smugglr push
+  abilities        47 inserted
+  missions          3 inserted, 1 updated
+  characters        no change
+51 rows written in 2.3s. exit 0.`}</Codeblock>
 
-        <Card>
-            <CardHeader>
-                <CardTitle>No state files.</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P>Fresh comparison every run. No stale state to haunt you. Idempotent by construction.</P>
-            </CardContent>
-        </Card>
-
-        <Card>
-            <CardHeader>
-                <CardTitle>Pluggable backends.</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P>A <code>DataSource</code> trait abstracts any SQLite-like backend: D1, Turso, rqlite, Datasette, StarbaseDB, SQLite Cloud.</P>
-            </CardContent>
-        </Card>
-    </Grid>
+    <P>The dry-run writes nothing. The push writes exactly what the dry-run described. Same output, same counts. No surprises.</P>
 </Section>
 
-<Section id="patterns" title="Six Usage Patterns.">
-    <P>One engine, six shapes. Pick the one that matches where your data needs to go.</P>
+<Section id="moat" title="One plugin, any LIKE backend.">
+    <P>Every remote target smugglr reaches goes through one plugin, <code>smugglr-http-sql</code>. Each backend is a profile, defined in TOML. Swapping targets is a config change, not a fork, not a recompile.</P>
 
-    <FeatureBlock title="Direct sync.">
-        <P>Push, pull, or full bidirectional sync between a local SQLite file and a remote target. The everyday case.</P>
-        <Codeblock>{`smugglr push            # local -> remote
-smugglr pull            # remote -> local
-smugglr sync            # both directions, with conflict strategy`}</Codeblock>
-    </FeatureBlock>
+    <P>Six profiles ship today:</P>
 
-    <FeatureBlock title="Watch daemon.">
-        <P>Background sync on a fixed interval. Set it and forget it. Emits JSONL per tick for pipelines.</P>
-        <Codeblock>{`smugglr watch --interval 30`}</Codeblock>
-    </FeatureBlock>
+    <Codeblock>{`d1            # Cloudflare D1
+turso         # Turso / libSQL
+rqlite        # rqlite
+datasette     # Datasette
+starbasedb    # StarbaseDB
+sqlite-cloud  # SQLite Cloud`}</Codeblock>
 
-    <FeatureBlock title="Fan-out (LAN broadcast).">
-        <P>Encrypted UDP datagrams across a subnet. The encryption key is the membership token. No auth handshake, no coordinator. IoT-shaped.</P>
-        <Codeblock>{`smugglr broadcast --interval 10`}</Codeblock>
-    </FeatureBlock>
+    <P>This target points at D1:</P>
 
-    <FeatureBlock title="Stash and retrieve.">
-        <P>S3-compatible object storage as a relay between machines that cannot see each other directly. Works with R2, MinIO, or any S3 endpoint.</P>
-        <Codeblock>{`smugglr stash               # upload to relay
-smugglr retrieve            # download to local`}</Codeblock>
-    </FeatureBlock>
+    <Codeblock>{`[target]
+type = "d1"
+database = "my-db"
+account_id = "abc123"
+api_token = "..."`}</Codeblock>
 
-    <FeatureBlock title="Snapshot and restore.">
-        <P>Point-in-time backup to the relay. Portable across backends: snapshot from D1, restore to Turso.</P>
-        <Codeblock>{`smugglr snapshot
-smugglr snapshots
-smugglr restore 2026-04-03T09:15:44Z`}</Codeblock>
-    </FeatureBlock>
+    <P>This one at Turso:</P>
 
-    <FeatureBlock title="Diff.">
-        <P>Read-only comparison. Moves nothing. Shows what push, pull, or sync would do.</P>
-        <Codeblock>{`smugglr diff`}</Codeblock>
-    </FeatureBlock>
+    <Codeblock>{`[target]
+type = "turso"
+url = "https://my-db.turso.io"
+auth_token = "..."`}</Codeblock>
+
+    <P>Same config file, same commands, same diff engine, different profile. If you have a new LIKE backend that speaks HTTP SQL, write a profile. No pull request to core required.</P>
+
+    <P>Transforms between UNLIKE backends, like schema bridging or PII filtering, live in smugglr+. The OSS tool syncs any number of LIKE sources from a single config. That is the moat.</P>
 </Section>
 
-<Section id="install" title="Three Ways to Install." tint>
-    <P>Smuggler ships as a native CLI, a Rust crate, and a WASM npm package. Pick the one that matches how you want to call it.</P>
+<Section id="shapes" title="Shapes." tint>
+    <P>One engine, five shapes. The base case is direct sync. The rest are variants for when the network, the schedule, or the recovery story is different.</P>
 
-    <Grid columns={3} gap="4">
-        <Card>
-            <CardHeader>
-                <CardTitle>CLI.</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P>Install once, run anywhere. Pre-built binaries for macOS, Linux, and Windows; cargo for everyone else.</P>
-                <Codeblock>{`cargo install smugglr`}</Codeblock>
-                <P>Or the one-line installer:</P>
-                <Codeblock>{`curl -sSL smugglr.dev/install.sh | sh`}</Codeblock>
-            </CardContent>
-        </Card>
+    | Shape | Commands | When |
+    |-------|----------|------|
+    | **Direct sync** | `push`, `pull`, `sync`, `diff` | Everyday case. Source and target are both reachable from where smugglr is running. |
+    | **Watch daemon** | `watch` | Continuous background sync on a fixed interval. JSONL per tick. |
+    | **S3 relay** | `stash`, `retrieve` | Machines that cannot see each other. Upload the diff to S3, another machine pulls it. |
+    | **LAN broadcast** | `broadcast` | Same subnet. Encrypted UDP peer discovery, no coordinator, no server. |
+    | **Snapshot and restore** | `snapshot`, `snapshots`, `restore` | Point-in-time backup to the relay. Portable across backends. Snapshot from D1, restore to Turso. |
 
-        <Card>
-            <CardHeader>
-                <CardTitle>Crate.</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P>Embed the sync engine in a Rust service. Same algorithm, same adapters, programmatic API.</P>
-                <Codeblock>{`cargo add smugglr-core`}</Codeblock>
-            </CardContent>
-        </Card>
-
-        <Card>
-            <CardHeader>
-                <CardTitle>npm (WASM).</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <P>A WASM build for JavaScript and TypeScript projects. Node, Bun, and modern browsers supported.</P>
-                <Codeblock>{`npm install smugglr`}</Codeblock>
-            </CardContent>
-        </Card>
-    </Grid>
+    <P>Every command takes <code>--output json</code>. Every command has a typed exit code. Details in the <a href="/docs/cli-reference/">CLI reference</a>.</P>
 </Section>
 
-<Section id="docs" title="Go Deeper.">
+<Section id="ship" title="How it ships.">
+    <P>Smuggler ships three ways. <code>cargo install smugglr</code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <code>cargo add smugglr-core</code> to embed the engine in a Rust service. <code>npm install smugglr</code> for the WASM build in Node, Bun, or a modern browser. Same algorithm, same adapters, same verbs.</P>
+</Section>
+
+<Section id="learn" title="Learn." tint>
     <Grid columns={4} gap="4">
         <FeatureBlock title="Get Started.">
             <P>Five minutes to your first push.</P>
@@ -191,8 +134,6 @@ smugglr restore 2026-04-03T09:15:44Z`}</Codeblock>
     </Grid>
 </Section>
 
-<Section id="open-source" title="Open Source.">
-    <P>MIT licensed. The CLI, the core crate, the WASM package, the http-sql plugin, the relay adapters. No hosted service, no plan tier, no feature gate.</P>
-
-    <P><a href="https://github.com/rafters-studio/smugglr">GitHub</a></P>
+<Section id="open-source" title="Open source.">
+    <P>MIT licensed. The CLI, the core engine, the plugin system. All of it on <a href="https://github.com/rafters-studio/smugglr">GitHub</a>.</P>
 </Section>
