@@ -5,30 +5,34 @@
  *
  * Mirrors handoff Hero.jsx VoiceHero. Topology renders inside (step 4).
  */
+import Container from "@/components/ui/container.astro";
+import H1 from "@/components/ui/typography-h1.astro";
+import P from "@/components/ui/typography-p.astro";
+import Small from "@/components/ui/typography-small.astro";
 import InkBlock from "@/components/InkBlock.astro";
 import HeroInstallCTA from "@/components/HeroInstallCTA.astro";
 import HeroTopology from "@/components/HeroTopology.astro";
 ---
 
 <section class="border-b border-border">
-    <div class="@container max-w-5xl mx-auto px-10 py-20 flex flex-col items-center text-center gap-10">
-        <p class="font-heading font-medium text-xs uppercase tracking-widest text-muted-foreground">
+    <Container size="5xl" padding="20" gap="10" align="center">
+        <Small color="muted-foreground" transform="uppercase" tracking="widest">
             sqlite sync engine &middot; one rust binary &middot; mit
-        </p>
+        </Small>
 
-        <h1 class="font-heading font-medium leading-tight tracking-tight text-5xl @lg:text-8xl max-w-[18ch] text-foreground">
+        <H1 align="center">
             If you're moving SQLite, <InkBlock>smuggl</InkBlock> it.
-        </h1>
+        </H1>
 
-        <p class="font-sans font-light text-xl leading-snug max-w-[52ch] text-foreground">
+        <P align="center" size="display-small" class="max-w-prose">
             LAN UDP fan-out. S3 relay. Host-to-host. D1, Turso, rqlite, Datasette, StarbaseDB, SQLite Cloud. One binary.
-        </p>
+        </P>
 
         <HeroTopology />
 
-        <p class="font-sans font-light text-base leading-relaxed max-w-[62ch] text-muted-foreground">
+        <P align="center" color="muted-foreground" class="max-w-prose">
             Nothing else combines these shapes in a single tool. Litestream does S3 backup. rqlite does Raft. ElectricSQL needs a server. smugglr does host, LAN, relay, and hosted backend: content-hashed delta sync, no coordinator, no service to run.
-        </p>
+        </P>
 
         <div class="w-full max-w-xl">
             <HeroInstallCTA
@@ -36,5 +40,5 @@ import HeroTopology from "@/components/HeroTopology.astro";
                 subline="Installs the latest signed binary. macOS 14 or later. Linux and Windows supported."
             />
         </div>
-    </div>
+    </Container>
 </section>

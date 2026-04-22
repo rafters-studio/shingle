@@ -6,17 +6,26 @@
  *
  * Mirrors handoff Narrative.jsx.
  */
+import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import Card from "@/components/ui/card.astro";
+import CardHeader from "@/components/ui/card-header.astro";
+import CardTitle from "@/components/ui/card-title.astro";
+import CardDescription from "@/components/ui/card-description.astro";
+import H2 from "@/components/ui/typography-h2.astro";
+import P from "@/components/ui/typography-p.astro";
+import Code from "@/components/ui/typography-code.astro";
 import Codeblock from "@/components/ui/typography-codeblock.astro";
 import InkBlock from "@/components/InkBlock.astro";
 ---
 
 <div class="bg-background">
-    <div class="max-w-3xl mx-auto px-10 pt-20 pb-8 font-sans font-light">
+    <Container size="3xl" padding="20" gap="20">
 
-        <section class="mb-20">
+        <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; show it running</div>
-            <h2 class="font-heading font-medium text-4xl leading-tight tracking-tight mb-6">A TOML file, a dry-run, a push.</h2>
-            <p class="text-lg leading-relaxed mb-2 text-foreground">The whole product in thirty seconds. Real CLI output, no mockups.</p>
+            <H2>A TOML file, a dry-run, a push.</H2>
+            <P size="display-small">The whole product in thirty seconds. Real CLI output, no mockups.</P>
 
             <Codeblock>{`[source]
 path = "./local.db"
@@ -40,13 +49,13 @@ Comparing source and target...
   characters        no change
 51 rows written in 2.3s. exit 0.`}</Codeblock>
 
-            <p class="text-lg leading-relaxed text-muted-foreground">The dry-run writes nothing. The push writes exactly what the dry-run described. Same output, same counts. No surprises.</p>
+            <P size="display-small" color="muted-foreground">The dry-run writes nothing. The push writes exactly what the dry-run described. Same output, same counts. No surprises.</P>
         </section>
 
-        <section id="targets" class="mb-20">
+        <section id="targets">
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; one plugin, any LIKE backend</div>
-            <h2 class="font-heading font-medium text-4xl leading-tight tracking-tight mb-6">Six profiles ship today. Adding a seventh is TOML, not a fork.</h2>
-            <p class="text-lg leading-relaxed mb-4 text-foreground">Every remote target smugglr reaches over HTTP goes through one plugin, <code class="font-mono text-[0.9em] bg-muted px-1.5 py-0.5 rounded-sm">smugglr-http-sql</code>. Each backend is a profile, defined in TOML. Swapping targets is a config change, not a recompile.</p>
+            <H2>Six profiles ship today. Adding a seventh is TOML, not a fork.</H2>
+            <P size="display-small">Every remote target smugglr reaches over HTTP goes through one plugin, <Code>smugglr-http-sql</Code>. Each backend is a profile, defined in TOML. Swapping targets is a config change, not a recompile.</P>
 
             <Codeblock>{`d1            # Cloudflare D1
 turso         # Turso / libSQL
@@ -55,58 +64,74 @@ datasette     # Datasette
 starbasedb    # StarbaseDB
 sqlite-cloud  # SQLite Cloud`}</Codeblock>
 
-            <p class="text-lg leading-relaxed mb-4 text-foreground">This target points at D1:</p>
+            <P size="display-small">This target points at D1:</P>
             <Codeblock>{`[target]
 type = "d1"
 database = "my-db"
 account_id = "abc123"
 api_token = "..."`}</Codeblock>
 
-            <p class="text-lg leading-relaxed mb-4 text-foreground">This one at Turso:</p>
+            <P size="display-small">This one at Turso:</P>
             <Codeblock>{`[target]
 type = "turso"
 url = "https://my-db.turso.io"
 auth_token = "..."`}</Codeblock>
 
-            <p class="text-lg leading-relaxed mb-4 text-muted-foreground">Same config file, same commands, same diff engine, different profile. If you have a new LIKE backend that speaks HTTP SQL, write a profile. No pull request to core required.</p>
+            <P size="display-small" color="muted-foreground">Same config file, same commands, same diff engine, different profile. If you have a new LIKE backend that speaks HTTP SQL, write a profile. No pull request to core required.</P>
 
-            <p class="text-lg leading-relaxed text-foreground">The OSS tool syncs any number of LIKE sources from <InkBlock>a single config</InkBlock>.</p>
+            <P size="display-small">The OSS tool syncs any number of LIKE sources from <InkBlock>a single config</InkBlock>.</P>
         </section>
 
-        <section class="mb-20">
+        <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; how it ships</div>
-            <h2 class="font-heading font-medium text-4xl leading-tight tracking-tight mb-6">Same algorithm, same adapters, same verbs.</h2>
-            <p class="text-lg leading-relaxed text-foreground"><code class="font-mono text-[0.9em] bg-muted px-1.5 py-0.5 rounded-sm">cargo install smugglr</code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <code class="font-mono text-[0.9em] bg-muted px-1.5 py-0.5 rounded-sm">cargo add smugglr-core</code> to embed the engine in a Rust service. <code class="font-mono text-[0.9em] bg-muted px-1.5 py-0.5 rounded-sm">npm install smugglr</code> for the WASM build in Node, Bun, or a modern browser.</p>
+            <H2>Same algorithm, same adapters, same verbs.</H2>
+            <P size="display-small"><Code>cargo install smugglr</Code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>npm install smugglr</Code> for the WASM build in Node, Bun, or a modern browser.</P>
         </section>
 
-        <section class="mb-20">
+        <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">04 &middot; learn</div>
-            <h2 class="font-heading font-medium text-4xl leading-tight tracking-tight mb-6">Four entry points for the 10% reading this as a human.</h2>
-            <div class="grid grid-cols-2 border border-border">
-                <a href="/get-started/" class="block px-5 py-5 border-r border-b border-border hover:bg-muted transition-colors">
-                    <div class="font-heading font-medium text-lg tracking-tight mb-1">Get Started <span class="text-muted-foreground">&#8599;</span></div>
-                    <div class="text-sm text-muted-foreground leading-snug">Five minutes to your first push.</div>
+            <H2>Four entry points for the 10% reading this as a human.</H2>
+            <Grid columns={2} gap="0">
+                <a href="/get-started/" class="group hover:bg-muted transition-colors">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Get Started <span class="text-muted-foreground">&#8599;</span></CardTitle>
+                            <CardDescription>Five minutes to your first push.</CardDescription>
+                        </CardHeader>
+                    </Card>
                 </a>
-                <a href="/docs/cli-reference/" class="block px-5 py-5 border-b border-border hover:bg-muted transition-colors">
-                    <div class="font-heading font-medium text-lg tracking-tight mb-1">CLI Reference <span class="text-muted-foreground">&#8599;</span></div>
-                    <div class="text-sm text-muted-foreground leading-snug">Every command, every flag, every exit code.</div>
+                <a href="/docs/cli-reference/" class="group hover:bg-muted transition-colors">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>CLI Reference <span class="text-muted-foreground">&#8599;</span></CardTitle>
+                            <CardDescription>Every command, every flag, every exit code.</CardDescription>
+                        </CardHeader>
+                    </Card>
                 </a>
-                <a href="/docs/configuration/" class="block px-5 py-5 border-r border-border hover:bg-muted transition-colors">
-                    <div class="font-heading font-medium text-lg tracking-tight mb-1">Configuration <span class="text-muted-foreground">&#8599;</span></div>
-                    <div class="text-sm text-muted-foreground leading-snug">The complete config.toml.</div>
+                <a href="/docs/configuration/" class="group hover:bg-muted transition-colors">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Configuration <span class="text-muted-foreground">&#8599;</span></CardTitle>
+                            <CardDescription>The complete config.toml.</CardDescription>
+                        </CardHeader>
+                    </Card>
                 </a>
-                <a href="/docs/how-it-works/" class="block px-5 py-5 hover:bg-muted transition-colors">
-                    <div class="font-heading font-medium text-lg tracking-tight mb-1">How It Works <span class="text-muted-foreground">&#8599;</span></div>
-                    <div class="text-sm text-muted-foreground leading-snug">Content hashing, the sync algorithm, the relay.</div>
+                <a href="/docs/how-it-works/" class="group hover:bg-muted transition-colors">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>How It Works <span class="text-muted-foreground">&#8599;</span></CardTitle>
+                            <CardDescription>Content hashing, the sync algorithm, the relay.</CardDescription>
+                        </CardHeader>
+                    </Card>
                 </a>
-            </div>
+            </Grid>
         </section>
 
-        <section class="mb-8">
+        <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">05 &middot; open source</div>
-            <h2 class="font-heading font-medium text-4xl leading-tight tracking-tight mb-4">MIT licensed. All of it.</h2>
-            <p class="text-lg leading-relaxed text-foreground">The CLI, the core engine, the plugin system. On <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>.</p>
+            <H2>MIT licensed. All of it.</H2>
+            <P size="display-small">The CLI, the core engine, the plugin system. On <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>.</P>
         </section>
 
-    </div>
+    </Container>
 </div>

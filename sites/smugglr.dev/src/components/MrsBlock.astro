@@ -6,6 +6,8 @@
  * Data is inline (matches handoff MRSData.jsx constants).
  */
 import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import P from "@/components/ui/typography-p.astro";
 import InkBlock from "@/components/InkBlock.astro";
 import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
 import MrsTable from "@/components/MrsTable.astro";
@@ -109,7 +111,7 @@ const MRS_VS: [string, string, string][] = [
 
     <section>
         <MrsSectionHeader hash="## 01" label="scope" syn="one paragraph" />
-        <p class="font-sans font-light text-base leading-relaxed max-w-[76ch]">{MRS_SCOPE}</p>
+        <P class="max-w-prose">{MRS_SCOPE}</P>
     </section>
 
     <section>
@@ -130,14 +132,14 @@ const MRS_VS: [string, string, string][] = [
             <header class="mb-4">
                 <span class="font-heading font-medium text-xs uppercase tracking-wider">LAN broadcast semantics</span>
             </header>
-            <p class="font-sans text-base leading-relaxed mb-5 max-w-[76ch]">
+            <P class="mb-5 max-w-prose">
                 LAN broadcast is a <InkBlock>masterless, controllerless mesh</InkBlock>. No coordinator. No leader. No central node. Every peer broadcasts and listens on equal footing. Key possession is the membership check. Nothing else in this space works this way.
-            </p>
+            </P>
             <dl class="grid gap-3">
                 {LAN_SEMANTICS.map(([term, body]) => (
                     <div class="flex flex-col gap-0.5 md:flex-row md:gap-3">
                         <dt class="font-mono font-medium text-sm md:w-64 md:shrink-0">{term}</dt>
-                        <dd class="font-sans font-light text-sm leading-relaxed text-muted-foreground max-w-[72ch]">{body}</dd>
+                        <dd class="font-sans font-light text-sm leading-relaxed text-muted-foreground max-w-prose">{body}</dd>
                     </div>
                 ))}
             </dl>
@@ -149,7 +151,7 @@ const MRS_VS: [string, string, string][] = [
         <MrsTable cols={["Command", "Purpose", "Output", "Exit"]} rows={MRS_COMMANDS} monoCols={[2, 3]} />
     </section>
 
-    <div class="grid grid-cols-2 gap-14">
+    <Grid columns={2} gap="14">
         <section>
             <MrsSectionHeader hash="## 06" label="exit codes" />
             <MrsTable cols={["Code", "Meaning"]} rows={MRS_EXIT} />
@@ -159,18 +161,18 @@ const MRS_VS: [string, string, string][] = [
             <MrsSectionHeader hash="## 07" label="output contract" />
             <MrsTable cols={["Flag", "Behaviour"]} rows={MRS_OUTPUT} />
         </section>
-    </div>
+    </Grid>
 
     <section>
         <MrsSectionHeader hash="## 08" label="constraints" syn="what smugglr refuses to do" />
-        <div class="grid grid-cols-2 gap-x-10 gap-y-0">
+        <Grid columns={2} gap="0">
             {MRS_CONSTRAINTS.map(([rule, detail]) => (
-                <div class="py-3.5 border-b border-border/40">
+                <div class="py-3.5 px-5 border-b border-border/40">
                     <div class="font-heading font-medium text-sm uppercase tracking-wide mb-1">&times; {rule}</div>
                     <div class="font-sans font-light text-sm leading-relaxed text-muted-foreground">{detail}</div>
                 </div>
             ))}
-        </div>
+        </Grid>
     </section>
 
     <section>

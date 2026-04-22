@@ -39,7 +39,7 @@ const SHAPES = [
                 width="100%"
                 height="100%"
                 preserveAspectRatio="xMidYMid meet"
-                class={`absolute inset-0 transition-all duration-500 ${i === 0 ? "opacity-100 scale-100" : "opacity-0 scale-[0.985] pointer-events-none"}`}
+                class={`absolute inset-0 transition-all duration-500 ${i === 0 ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
             >
                 {s.id === "direct" && (
                     <g>
@@ -198,7 +198,7 @@ const SHAPES = [
                 f.classList.toggle("opacity-100", on);
                 f.classList.toggle("scale-100", on);
                 f.classList.toggle("opacity-0", !on);
-                f.classList.toggle("scale-[0.985]", !on);
+                f.classList.toggle("scale-95", !on);
                 f.classList.toggle("pointer-events-none", !on);
             });
             ticks.forEach((t, i) => {
