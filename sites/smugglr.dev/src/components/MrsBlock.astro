@@ -7,6 +7,8 @@
  */
 import Container from "@/components/ui/container.astro";
 import InkBlock from "@/components/InkBlock.astro";
+import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
+import MrsTable from "@/components/MrsTable.astro";
 
 const MRS_SCOPE = "smugglr is a SQLite sync engine. Single Rust binary. Moves rows between local files, hosted SQLite backends (D1, Turso, rqlite, Datasette, StarbaseDB, SQLite Cloud), peers on the same LAN via encrypted UDP multicast, peers across the network via direct host-to-host, and peers across the internet via S3 relay. Content-hashed delta sync. No coordinator service. --output json on every command. Typed exit codes on every command.";
 
@@ -105,101 +107,24 @@ const MRS_VS: [string, string, string][] = [
         <a href="/llms.txt" class="font-mono text-xs text-muted-foreground hover:opacity-80 transition-opacity">GET /llms.txt &#8599;</a>
     </div>
 
-    {/* 01 Scope */}
     <section>
-        <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-            <span class="font-mono text-sm font-medium text-primary">## 01</span>
-            <h2 class="font-heading font-medium text-lg uppercase tracking-wide">scope</h2>
-            <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># one paragraph</span>
-        </header>
+        <MrsSectionHeader hash="## 01" label="scope" syn="one paragraph" />
         <p class="font-sans font-light text-base leading-relaxed max-w-[76ch]">{MRS_SCOPE}</p>
     </section>
 
-    {/* 02 Install */}
     <section>
-        <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-            <span class="font-mono text-sm font-medium text-primary">## 02</span>
-            <h2 class="font-heading font-medium text-lg uppercase tracking-wide">install</h2>
-            <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># same algorithm · same adapters · same verbs</span>
-        </header>
-        <table class="w-full border-collapse font-mono text-sm">
-            <thead>
-                <tr>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Channel</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Command</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Artifact</th>
-                </tr>
-            </thead>
-            <tbody>
-                {MRS_INSTALL.map(([channel, command, artifact]) => (
-                    <tr>
-                        <td class="py-2.5 pr-4 font-mono font-medium">{channel}</td>
-                        <td class="py-2.5 pr-4 font-mono text-muted-foreground">{command}</td>
-                        <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{artifact}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <MrsSectionHeader hash="## 02" label="install" syn="same algorithm · same adapters · same verbs" />
+        <MrsTable cols={["Channel", "Command", "Artifact"]} rows={MRS_INSTALL} monoCols={[1]} />
     </section>
 
-    {/* 03 Targets */}
     <section>
-        <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-            <span class="font-mono text-sm font-medium text-primary">## 03</span>
-            <h2 class="font-heading font-medium text-lg uppercase tracking-wide">targets</h2>
-            <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># one HTTP SQL plugin · per-target profiles</span>
-        </header>
-        <table class="w-full border-collapse font-mono text-sm">
-            <thead>
-                <tr>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Target</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Profile</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Protocol</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Auth</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {MRS_TARGETS.map(([target, profile, protocol, auth, notes]) => (
-                    <tr>
-                        <td class="py-2.5 pr-4 font-mono font-medium">{target}</td>
-                        <td class="py-2.5 pr-4 font-mono text-muted-foreground">{profile}</td>
-                        <td class="py-2.5 pr-4 font-mono text-muted-foreground">{protocol}</td>
-                        <td class="py-2.5 pr-4 font-mono text-muted-foreground">{auth}</td>
-                        <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{notes}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <MrsSectionHeader hash="## 03" label="targets" syn="one HTTP SQL plugin · per-target profiles" />
+        <MrsTable cols={["Target", "Profile", "Protocol", "Auth", "Notes"]} rows={MRS_TARGETS} monoCols={[1, 2, 3]} />
     </section>
 
-    {/* 04 Shapes */}
     <section id="shapes">
-        <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-            <span class="font-mono text-sm font-medium text-primary">## 04</span>
-            <h2 class="font-heading font-medium text-lg uppercase tracking-wide">shapes</h2>
-            <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># one engine · five topologies</span>
-        </header>
-        <table class="w-full border-collapse font-mono text-sm">
-            <thead>
-                <tr>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Shape</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Commands</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Topology</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">When to use</th>
-                </tr>
-            </thead>
-            <tbody>
-                {MRS_SHAPES.map(([shape, commands, topology, when]) => (
-                    <tr>
-                        <td class="py-2.5 pr-4 font-mono font-medium">{shape}</td>
-                        <td class="py-2.5 pr-4 font-mono text-muted-foreground">{commands}</td>
-                        <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{topology}</td>
-                        <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{when}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <MrsSectionHeader hash="## 04" label="shapes" syn="one engine · five topologies" />
+        <MrsTable cols={["Shape", "Commands", "Topology", "When to use"]} rows={MRS_SHAPES} monoCols={[1]} />
 
         <div class="mt-8 border-l-2 border-primary pl-5">
             <header class="mb-4">
@@ -219,91 +144,25 @@ const MRS_VS: [string, string, string][] = [
         </div>
     </section>
 
-    {/* 05 Commands */}
     <section>
-        <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-            <span class="font-mono text-sm font-medium text-primary">## 05</span>
-            <h2 class="font-heading font-medium text-lg uppercase tracking-wide">commands</h2>
-            <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># typed exit codes on every command</span>
-        </header>
-        <table class="w-full border-collapse font-mono text-sm">
-            <thead>
-                <tr>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Command</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Purpose</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Output</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Exit</th>
-                </tr>
-            </thead>
-            <tbody>
-                {MRS_COMMANDS.map(([cmd, purpose, output, exit]) => (
-                    <tr>
-                        <td class="py-2.5 pr-4 font-mono font-medium">{cmd}</td>
-                        <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{purpose}</td>
-                        <td class="py-2.5 pr-4 font-mono text-muted-foreground">{output}</td>
-                        <td class="py-2.5 pr-4 font-mono text-muted-foreground">{exit}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <MrsSectionHeader hash="## 05" label="commands" syn="typed exit codes on every command" />
+        <MrsTable cols={["Command", "Purpose", "Output", "Exit"]} rows={MRS_COMMANDS} monoCols={[2, 3]} />
     </section>
 
-    {/* 06 + 07 Exit codes + Output contract */}
     <div class="grid grid-cols-2 gap-14">
         <section>
-            <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-                <span class="font-mono text-sm font-medium text-primary">## 06</span>
-                <h2 class="font-heading font-medium text-lg uppercase tracking-wide">exit codes</h2>
-            </header>
-            <table class="w-full border-collapse font-mono text-sm">
-                <thead>
-                    <tr>
-                        <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Code</th>
-                        <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Meaning</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {MRS_EXIT.map(([code, meaning]) => (
-                        <tr>
-                            <td class="py-2.5 pr-4 font-mono font-medium">{code}</td>
-                            <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{meaning}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <MrsSectionHeader hash="## 06" label="exit codes" />
+            <MrsTable cols={["Code", "Meaning"]} rows={MRS_EXIT} />
         </section>
 
         <section>
-            <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-                <span class="font-mono text-sm font-medium text-primary">## 07</span>
-                <h2 class="font-heading font-medium text-lg uppercase tracking-wide">output contract</h2>
-            </header>
-            <table class="w-full border-collapse font-mono text-sm">
-                <thead>
-                    <tr>
-                        <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Flag</th>
-                        <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Behaviour</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {MRS_OUTPUT.map(([flag, behaviour]) => (
-                        <tr>
-                            <td class="py-2.5 pr-4 font-mono font-medium">{flag}</td>
-                            <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{behaviour}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <MrsSectionHeader hash="## 07" label="output contract" />
+            <MrsTable cols={["Flag", "Behaviour"]} rows={MRS_OUTPUT} />
         </section>
     </div>
 
-    {/* 08 Constraints */}
     <section>
-        <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-            <span class="font-mono text-sm font-medium text-primary">## 08</span>
-            <h2 class="font-heading font-medium text-lg uppercase tracking-wide">constraints</h2>
-            <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># what smugglr refuses to do</span>
-        </header>
+        <MrsSectionHeader hash="## 08" label="constraints" syn="what smugglr refuses to do" />
         <div class="grid grid-cols-2 gap-x-10 gap-y-0">
             {MRS_CONSTRAINTS.map(([rule, detail]) => (
                 <div class="py-3.5 border-b border-border/40">
@@ -314,31 +173,9 @@ const MRS_VS: [string, string, string][] = [
         </div>
     </section>
 
-    {/* 09 vs Alternatives */}
     <section>
-        <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
-            <span class="font-mono text-sm font-medium text-primary">## 09</span>
-            <h2 class="font-heading font-medium text-lg uppercase tracking-wide">vs alternatives</h2>
-            <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># specific, falsifiable comparisons</span>
-        </header>
-        <table class="w-full border-collapse font-mono text-sm">
-            <thead>
-                <tr>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Tool</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Covers</th>
-                    <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">Does not cover</th>
-                </tr>
-            </thead>
-            <tbody>
-                {MRS_VS.map(([tool, covers, missing]) => (
-                    <tr>
-                        <td class="py-2.5 pr-4 font-mono font-medium">{tool}</td>
-                        <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{covers}</td>
-                        <td class="py-2.5 pr-4 font-sans font-light text-muted-foreground">{missing}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <MrsSectionHeader hash="## 09" label="vs alternatives" syn="specific, falsifiable comparisons" />
+        <MrsTable cols={["Tool", "Covers", "Does not cover"]} rows={MRS_VS} />
     </section>
 </Container>
 </section>

@@ -1,0 +1,19 @@
+---
+/**
+ * MrsSectionHeader - Numbered section header for MRS subsections.
+ * Renders "## NN" hash in primary, uppercase label, and optional
+ * right-aligned synopsis. Sibling to MrsTable.
+ */
+interface Props {
+    hash: string;
+    label: string;
+    syn?: string;
+}
+const { hash, label, syn } = Astro.props;
+---
+
+<header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
+    <span class="font-mono text-sm font-medium text-primary">{hash}</span>
+    <h2 class="font-heading font-medium text-lg uppercase tracking-wide">{label}</h2>
+    {syn && <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># {syn}</span>}
+</header>

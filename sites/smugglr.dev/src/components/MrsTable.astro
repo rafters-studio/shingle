@@ -1,0 +1,42 @@
+---
+/**
+ * MrsTable - Dense terminal-style table for the MRS block. Mono-typed
+ * first column, sans for non-mono columns, uppercase labeled heads.
+ *
+ * monoCols takes zero-based column indices that should render mono
+ * (code-ish). The first column is always mono + bright, matching the
+ * handoff MRSTerminal.jsx TermTable pattern.
+ */
+interface Props {
+    cols: string[];
+    rows: string[][];
+    monoCols?: number[];
+}
+const { cols, rows, monoCols = [] } = Astro.props;
+const isMono = (i: number) => i === 0 || monoCols.includes(i);
+---
+
+<table class="w-full border-collapse font-mono text-sm">
+    <thead>
+        <tr>
+            {cols.map((c) => (
+                <th class="text-left pb-2.5 pr-4 font-heading font-medium text-xs uppercase tracking-wider text-muted-foreground border-b border-border/50">{c}</th>
+            ))}
+        </tr>
+    </thead>
+    <tbody>
+        {rows.map((row) => (
+            <tr>
+                {row.map((cell, i) => (
+                    <td
+                        class:list={[
+                            "py-2.5 pr-4",
+                            isMono(i) ? "font-mono" : "font-sans font-light",
+                            i === 0 ? "font-medium" : "text-muted-foreground",
+                        ]}
+                    >{cell}</td>
+                ))}
+            </tr>
+        ))}
+    </tbody>
+</table>
