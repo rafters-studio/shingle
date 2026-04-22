@@ -1,0 +1,24 @@
+---
+import classy from '@/lib/primitives/classy';
+
+interface Props {
+  dot?: boolean;
+  tag?: string;
+  class?: string;
+}
+
+const { dot = false, tag, class: className } = Astro.props;
+
+const cls = classy(
+  'inline-flex items-center gap-2 font-mono text-label-small uppercase tracking-wide text-muted-foreground',
+  className,
+);
+---
+
+<div class={cls}>
+  {dot && <span class="inline-block h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden="true" />}
+  <slot />
+  {tag && (
+    <span class="border border-border rounded-sm px-1.5 py-0.5 text-foreground">{tag}</span>
+  )}
+</div>

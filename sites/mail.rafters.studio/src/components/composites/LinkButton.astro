@@ -1,0 +1,27 @@
+---
+import classy from '@/lib/primitives/classy';
+import { buttonBaseClasses, buttonSizeClasses, buttonVariantClasses } from '@/components/ui/button.classes';
+
+interface Props {
+  href: string;
+  variant?: 'default' | 'outline' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg';
+  external?: boolean;
+  class?: string;
+}
+
+const { href, variant = 'default', size = 'default', external = false, class: className } = Astro.props;
+
+const cls = classy(
+  buttonBaseClasses,
+  buttonVariantClasses[variant],
+  buttonSizeClasses[size],
+  'no-underline',
+  className,
+);
+
+const rel = external ? 'noopener noreferrer' : undefined;
+const target = external ? '_blank' : undefined;
+---
+
+<a href={href} class={cls} rel={rel} target={target}><slot /></a>

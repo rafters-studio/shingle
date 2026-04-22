@@ -1,0 +1,223 @@
+---
+// Custom one-off illustration. Scoped <style> with semantic tokens is acceptable
+// here per mapping doc — diagrams are illustration, not design-system primitives.
+---
+
+<div class="border border-border bg-background overflow-hidden rounded-md">
+  <div class="flex items-center justify-between border-b border-border px-4 py-2 font-mono text-label-small text-muted-foreground">
+    <span>rafters-mail · runtime topology</span>
+    <span class="flex gap-1.5" aria-hidden="true">
+      <span class="h-2 w-2 rounded-full bg-border"></span>
+      <span class="h-2 w-2 rounded-full bg-border"></span>
+      <span class="h-2 w-2 rounded-full bg-border"></span>
+    </span>
+  </div>
+
+  <svg
+    class="arch-svg block w-full"
+    viewBox="0 0 1200 520"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Architecture diagram: runtime topology of @rafters/mail across the internet, the edge worker, and BYO backends."
+  >
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+      </marker>
+    </defs>
+
+    <text class="dg-rail" x="40" y="34">the internet</text>
+    <text class="dg-rail" x="40" y="238">the edge · your worker</text>
+    <text class="dg-rail" x="40" y="462">byo backends</text>
+    <line x1="40" y1="42" x2="1160" y2="42" class="dg-divider" />
+    <line x1="40" y1="246" x2="1160" y2="246" class="dg-divider dashed" />
+    <line x1="40" y1="470" x2="1160" y2="470" class="dg-divider dashed" />
+
+    <g>
+      <rect class="dg-box ext" x="80" y="70" width="190" height="64" rx="6" />
+      <text class="dg-lbl" x="175" y="100" text-anchor="middle">Senders</text>
+      <text class="dg-sub" x="175" y="118" text-anchor="middle">SMTP · inbound</text>
+    </g>
+    <g>
+      <rect class="dg-box ext" x="505" y="70" width="190" height="64" rx="6" />
+      <text class="dg-lbl" x="600" y="100" text-anchor="middle">Recipients</text>
+      <text class="dg-sub" x="600" y="118" text-anchor="middle">SMTP · outbound</text>
+    </g>
+    <g>
+      <rect class="dg-box ext" x="930" y="70" width="190" height="64" rx="6" />
+      <text class="dg-lbl" x="1025" y="100" text-anchor="middle">IMAP clients</text>
+      <text class="dg-sub" x="1025" y="118" text-anchor="middle">Apple · Thunderbird</text>
+    </g>
+
+    <g>
+      <rect class="dg-box" x="80" y="270" width="190" height="80" rx="6" />
+      <text class="dg-lbl" x="175" y="300" text-anchor="middle">Email Routing</text>
+      <text class="dg-sub" x="175" y="318" text-anchor="middle">cloudflare</text>
+      <text class="dg-sub" x="175" y="335" text-anchor="middle">mx · spf · dkim</text>
+    </g>
+
+    <g>
+      <rect class="dg-box edge" x="340" y="270" width="320" height="160" rx="8" />
+      <text class="dg-lbl edge" x="500" y="302" text-anchor="middle">@rafters/mail</text>
+      <text class="dg-sub edge" x="500" y="320" text-anchor="middle">your cloudflare worker</text>
+      <line x1="360" y1="336" x2="640" y2="336" class="dg-edge-divider" />
+      <text class="dg-sub edge edge-section" x="360" y="358" text-anchor="start">CORE</text>
+      <text class="dg-lbl edge edge-detail" x="360" y="376" text-anchor="start">inbound · outbound · threading</text>
+      <text class="dg-lbl edge edge-detail" x="360" y="392" text-anchor="start">parse · classify · webhooks</text>
+      <text class="dg-lbl edge edge-detail" x="360" y="408" text-anchor="start">AuthAdapter · InboundAdapter</text>
+    </g>
+
+    <g>
+      <rect class="dg-box" x="730" y="270" width="190" height="80" rx="6" />
+      <text class="dg-lbl" x="825" y="300" text-anchor="middle">EmailProvider</text>
+      <text class="dg-sub" x="825" y="318" text-anchor="middle">resend · postmark · ses</text>
+      <text class="dg-sub" x="825" y="335" text-anchor="middle">outbound send</text>
+    </g>
+
+    <g>
+      <rect class="dg-box edge" x="930" y="270" width="190" height="160" rx="8" />
+      <text class="dg-lbl edge" x="1025" y="302" text-anchor="middle">IMAP DO</text>
+      <text class="dg-sub edge" x="1025" y="320" text-anchor="middle">durable object</text>
+      <text class="dg-sub edge" x="1025" y="355" text-anchor="middle">session state</text>
+      <text class="dg-sub edge" x="1025" y="373" text-anchor="middle">idle · uid · flags</text>
+      <text class="dg-sub edge" x="1025" y="391" text-anchor="middle">rfc 9051</text>
+    </g>
+
+    <g>
+      <rect class="dg-box byo" x="240" y="484" width="160" height="20" rx="4" />
+      <text class="dg-lbl byo-detail" x="320" y="498" text-anchor="middle">D1 · inbox schema</text>
+    </g>
+    <g>
+      <rect class="dg-box byo" x="450" y="484" width="160" height="20" rx="4" />
+      <text class="dg-lbl byo-detail" x="530" y="498" text-anchor="middle">R2 · BlobStorage</text>
+    </g>
+    <g>
+      <rect class="dg-box byo" x="660" y="484" width="180" height="20" rx="4" />
+      <text class="dg-lbl byo-detail" x="750" y="498" text-anchor="middle">Workers AI · DeBERTa-v3</text>
+    </g>
+
+    <path class="dg-flow" d="M 175 134 L 175 270" marker-end="url(#arr)" />
+    <text class="dg-flow-lbl" x="182" y="210">smtp in</text>
+
+    <path class="dg-flow" d="M 270 310 L 340 310" marker-end="url(#arr)" />
+    <text class="dg-flow-lbl" x="275" y="302">routed</text>
+
+    <path class="dg-flow" d="M 660 310 L 730 310" marker-end="url(#arr)" />
+    <text class="dg-flow-lbl" x="665" y="302">send()</text>
+    <path class="dg-flow" d="M 825 270 L 825 134 L 695 134" marker-end="url(#arr)" />
+    <text class="dg-flow-lbl" x="835" y="210">smtp out</text>
+
+    <path class="dg-flow" d="M 1025 134 L 1025 270" marker-end="url(#arr)" />
+    <text class="dg-flow-lbl" x="1035" y="210">imap · tls</text>
+
+    <path class="dg-flow" d="M 930 345 L 660 345" />
+    <path class="dg-flow" d="M 660 368 L 930 368" marker-end="url(#arr)" />
+    <text class="dg-flow-lbl" x="760" y="340">fetch · uids</text>
+    <text class="dg-flow-lbl" x="760" y="382">patch · flags</text>
+
+    <path class="dg-flow" d="M 420 430 L 320 484" marker-end="url(#arr)" />
+    <path class="dg-flow" d="M 500 430 L 530 484" marker-end="url(#arr)" />
+    <path class="dg-flow" d="M 580 430 L 750 484" marker-end="url(#arr)" />
+  </svg>
+
+  <div class="flex flex-wrap gap-6 border-t border-border px-4 py-3 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
+    <span class="inline-flex items-center gap-2">
+      <span class="h-2 w-3 bg-foreground" aria-hidden="true"></span>
+      runs on the edge
+    </span>
+    <span class="inline-flex items-center gap-2">
+      <span class="h-2 w-3 bg-muted border border-border" aria-hidden="true"></span>
+      bring your own
+    </span>
+    <span class="inline-flex items-center gap-2">
+      <span class="h-2 w-3 bg-background border border-dashed border-border" aria-hidden="true"></span>
+      external / wire protocol
+    </span>
+  </div>
+</div>
+
+<style>
+  .arch-svg {
+    color: var(--color-foreground);
+  }
+  .arch-svg .dg-box {
+    fill: var(--color-card);
+    stroke: var(--color-foreground);
+    stroke-width: 1.25;
+  }
+  .arch-svg .dg-box.edge {
+    fill: var(--color-foreground);
+    stroke: var(--color-foreground);
+  }
+  .arch-svg .dg-box.ext {
+    fill: var(--color-background);
+    stroke: var(--color-foreground);
+    stroke-dasharray: 4 4;
+  }
+  .arch-svg .dg-box.byo {
+    fill: var(--color-muted);
+    stroke: var(--color-foreground);
+    stroke-width: 1;
+  }
+  .arch-svg .dg-divider {
+    stroke: var(--color-border);
+    stroke-width: 1;
+  }
+  .arch-svg .dg-divider.dashed {
+    stroke-dasharray: 2 4;
+  }
+  .arch-svg .dg-edge-divider {
+    stroke: var(--color-background);
+    stroke-opacity: 0.25;
+  }
+  .arch-svg .dg-lbl {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    fill: var(--color-foreground);
+    letter-spacing: -0.01em;
+  }
+  .arch-svg .dg-lbl.edge {
+    fill: var(--color-background);
+  }
+  .arch-svg .dg-lbl.edge-detail {
+    font-size: 11.5px;
+    font-weight: 400;
+  }
+  .arch-svg .dg-lbl.byo-detail {
+    font-size: 11.5px;
+  }
+  .arch-svg .dg-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: var(--color-muted-foreground);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .arch-svg .dg-sub.edge {
+    fill: var(--color-background);
+    opacity: 0.7;
+  }
+  .arch-svg .dg-sub.edge-section {
+    letter-spacing: 0.08em;
+  }
+  .arch-svg .dg-flow {
+    fill: none;
+    stroke: var(--color-foreground);
+    stroke-width: 1.25;
+  }
+  .arch-svg .dg-flow-lbl {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--color-muted-foreground);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .arch-svg .dg-rail {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--color-muted-foreground);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+</style>
