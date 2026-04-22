@@ -1,0 +1,35 @@
+---
+import H3 from '@/components/ui/typography-h3.astro';
+
+interface Props {
+  pathHead: string;
+  pathTail: string;
+  title: string;
+  span?: '4' | '6' | '8' | '12';
+}
+
+const { pathHead, pathTail, title, span = '4' } = Astro.props;
+
+const spanClass = {
+  '4': 'lg:col-span-4 sm:col-span-6 col-span-12',
+  '6': 'lg:col-span-6 sm:col-span-6 col-span-12',
+  '8': 'lg:col-span-8 sm:col-span-12 col-span-12',
+  '12': 'col-span-12',
+}[span];
+---
+
+<div
+  class={`flex flex-col gap-4 border border-border bg-background p-6 min-h-56 ${spanClass}`}
+>
+  <div class="font-mono text-label-small uppercase tracking-wide text-muted-foreground">
+    <span class="text-foreground">{pathHead}</span>
+    <span> / {pathTail}</span>
+  </div>
+  <H3 size="title-medium" tracking="tight" class="m-0">{title}</H3>
+  <div class="text-body-small text-muted-foreground">
+    <slot name="description" />
+  </div>
+  <div class="flex flex-wrap gap-2 mt-auto">
+    <slot name="intel" />
+  </div>
+</div>

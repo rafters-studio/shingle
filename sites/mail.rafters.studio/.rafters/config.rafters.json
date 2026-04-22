@@ -14,16 +14,22 @@
   },
   "installed": {
     "components": [
+      "accordion",
       "badge",
+      "button",
       "card",
       "container",
       "grid",
+      "kbd",
+      "label",
       "separator",
       "typography"
     ],
     "primitives": [
       "classy",
-      "fill-resolver"
+      "fill-resolver",
+      "rafters-element",
+      "slot"
     ],
     "composites": []
   }

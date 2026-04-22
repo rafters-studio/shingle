@@ -1,0 +1,50 @@
+---
+import Container from '@/components/ui/container.astro';
+import LinkButton from '@/components/composites/LinkButton.astro';
+
+const githubUrl = 'https://github.com/rafters-studio/mail';
+
+const navLinks = [
+  { href: '#architecture', label: 'Architecture' },
+  { href: '#modules', label: 'Modules' },
+  { href: '#why', label: 'Why edge' },
+  { href: '#faq', label: 'FAQ' },
+];
+---
+
+<header class="sticky top-0 z-50 border-b border-border bg-background">
+  <Container size="6xl" padding="4">
+    <div class="flex items-center justify-between gap-6">
+      <a href="#" class="flex items-center gap-3 text-foreground no-underline">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 374 227"
+          class="h-6 w-auto"
+          aria-hidden="true"
+        >
+          <path
+            d="m373.584 101.144-5.244 12.98L209.155 49.81l.07.17-203.98 82.414L0 119.413l190.715-77.055L118 12.981 123.244 0l250.34 101.144Z"
+          />
+        </svg>
+        <span class="font-mono text-label-medium font-medium">
+          <span class="text-muted-foreground">@rafters/</span>mail
+        </span>
+      </a>
+
+      <nav class="flex items-center gap-6">
+        {navLinks.map(({ href, label }) => (
+          <a
+            href={href}
+            class="hidden text-label-medium text-muted-foreground hover:text-foreground transition-colors no-underline md:inline"
+          >
+            {label}
+          </a>
+        ))}
+        <LinkButton href={githubUrl} size="sm" external>
+          GitHub <span aria-hidden="true">↗</span>
+        </LinkButton>
+      </nav>
+    </div>
+  </Container>
+</header>

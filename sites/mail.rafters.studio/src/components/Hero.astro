@@ -1,0 +1,67 @@
+---
+import Container from '@/components/ui/container.astro';
+import H1 from '@/components/ui/typography-h1.astro';
+import P from '@/components/ui/typography-p.astro';
+import EyebrowLabel from '@/components/composites/EyebrowLabel.astro';
+import InstallCard from '@/components/composites/InstallCard.astro';
+
+const installPrimary = [
+  { pkg: 'npm' as const, cmd: 'npm i @rafters/mail' },
+  { pkg: 'pnpm' as const, cmd: 'pnpm add @rafters/mail' },
+  { pkg: 'bun' as const, cmd: 'bun add @rafters/mail' },
+  { pkg: 'deno' as const, cmd: 'deno add jsr:@rafters/mail' },
+];
+
+const installFollowUps = [
+  'npx @rafters/mail init --adapter=d1',
+  'wrangler email route <your-worker> *@example.com',
+];
+
+const footline = [
+  { label: 'bundle', value: '27 kb gz' },
+  { label: 'cold start', value: '< 12 ms' },
+  { label: 'cov', value: 'AAA' },
+];
+
+const meta = [
+  { label: 'license', value: 'MIT' },
+  { label: 'runtime', value: 'Workers · Node · Bun · Deno' },
+  { label: 'deps', value: '0 required' },
+  { label: 'status', value: 'alpha' },
+];
+---
+
+<section class="border-b border-border">
+  <Container size="6xl" padding="16" gap="10">
+    <EyebrowLabel dot tag="@rafters/mail">v0.1 · pre-release</EyebrowLabel>
+
+    <H1 size="display-large" tracking="tight" class="leading-tight">
+      <span class="bg-foreground text-background px-2">Email</span>
+      on the edge.
+      <span class="text-muted-foreground">Sure.</span>
+    </H1>
+
+    <P size="body-large" color="muted-foreground" class="max-w-prose m-0">
+      A full-stack email framework for Cloudflare Workers. Inbound, outbound,
+      threading, blob storage, classification, and a native IMAP server — all
+      without a third-party inbox.
+    </P>
+
+    <P size="body-medium" color="muted-foreground" class="max-w-prose m-0">
+      No edge SMTP. That would be a nightmare. But edge IMAP on Durable Objects?
+      Absolutely. Bring your own auth, your own storage, your own routing.
+      We ship the protocol layer and the data model.
+    </P>
+
+    <InstallCard primary={installPrimary} followUps={installFollowUps} footline={footline} />
+
+    <div class="grid grid-cols-2 gap-6 border-t border-border border-dashed pt-6 lg:grid-cols-4">
+      {meta.map(({ label, value }) => (
+        <div class="flex flex-col gap-1 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
+          <span>{label}</span>
+          <span class="text-foreground">{value}</span>
+        </div>
+      ))}
+    </div>
+  </Container>
+</section>

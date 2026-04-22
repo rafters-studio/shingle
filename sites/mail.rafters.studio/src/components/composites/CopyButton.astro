@@ -1,0 +1,39 @@
+---
+import classy from '@/lib/primitives/classy';
+
+interface Props {
+  target: string;
+  class?: string;
+}
+
+const { target, class: className } = Astro.props;
+
+const cls = classy(
+  'inline-flex items-center font-mono text-label-small uppercase tracking-wide',
+  'border border-border rounded-sm px-2 py-1',
+  'bg-card text-muted-foreground hover:text-foreground hover:bg-muted',
+  'transition-colors cursor-pointer',
+  className,
+);
+---
+
+<button type="button" class={cls} data-copy-target={target}>COPY</button>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll('[data-copy-target]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var sel = btn.getAttribute('data-copy-target');
+        var el = sel ? document.querySelector(sel) : null;
+        if (!el || !navigator.clipboard) return;
+        navigator.clipboard.writeText(el.textContent || '').then(function () {
+          var prev = btn.textContent;
+          btn.textContent = 'COPIED';
+          setTimeout(function () {
+            btn.textContent = prev;
+          }, 1200);
+        });
+      });
+    });
+  })();
+</script>

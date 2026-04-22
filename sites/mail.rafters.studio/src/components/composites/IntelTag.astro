@@ -1,0 +1,23 @@
+---
+import classy from '@/lib/primitives/classy';
+
+interface Props {
+  variant?: 'default' | 'accent';
+  class?: string;
+}
+
+const { variant = 'default', class: className } = Astro.props;
+
+const variantCls =
+  variant === 'accent'
+    ? 'border-foreground text-foreground'
+    : 'border-border text-muted-foreground';
+
+const cls = classy(
+  'inline-flex items-center gap-1 border rounded-sm px-2 py-1 font-mono text-label-small uppercase tracking-wide',
+  variantCls,
+  className,
+);
+---
+
+<span class={cls}><slot /></span>

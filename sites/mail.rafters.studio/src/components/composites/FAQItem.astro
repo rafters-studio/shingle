@@ -1,0 +1,29 @@
+---
+interface Props {
+  question: string;
+  open?: boolean;
+}
+
+const { question, open = false } = Astro.props;
+---
+
+<details
+  class="group border-b border-border py-6 [&_summary::-webkit-details-marker]:hidden"
+  open={open}
+>
+  <summary
+    class="flex items-center justify-between gap-4 cursor-pointer list-none font-semibold text-title-medium tracking-tight text-foreground"
+  >
+    <span>{question}</span>
+    <span
+      class="font-mono text-label-large text-muted-foreground group-open:text-foreground transition-colors"
+      aria-hidden="true"
+    >
+      <span class="group-open:hidden">+</span>
+      <span class="hidden group-open:inline">−</span>
+    </span>
+  </summary>
+  <div class="mt-4 max-w-prose text-body-medium text-muted-foreground leading-relaxed">
+    <slot />
+  </div>
+</details>

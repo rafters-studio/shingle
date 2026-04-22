@@ -1,0 +1,21 @@
+---
+import H2 from '@/components/ui/typography-h2.astro';
+import P from '@/components/ui/typography-p.astro';
+
+interface Props {
+  no: string;
+  title: string;
+}
+
+const { no, title } = Astro.props;
+---
+
+<div class="flex flex-col gap-6 border-b border-border pb-8 mb-12 lg:flex-row lg:justify-between lg:items-end lg:gap-12">
+  <div class="flex flex-col gap-3">
+    <span class="font-mono text-label-small uppercase tracking-wide text-muted-foreground">{no}</span>
+    <H2 size="title-large" tracking="tight" class="m-0">{title}</H2>
+  </div>
+  <div class="lg:max-w-md lg:text-right">
+    <P size="body-medium" color="muted-foreground" class="m-0"><slot /></P>
+  </div>
+</div>

@@ -1,0 +1,83 @@
+---
+import Container from '@/components/ui/container.astro';
+import P from '@/components/ui/typography-p.astro';
+import SectionHead from '@/components/composites/SectionHead.astro';
+
+const rows = [
+  {
+    concern: 'Inbound MX',
+    self: 'Run <code class="font-mono">smtpd</code>. Tune greylisting. Apply CVEs.',
+    you: 'Cloudflare Email Routing handles MX, SPF, DKIM, and spam.',
+  },
+  {
+    concern: 'Outbound SMTP',
+    self: 'Your IP gets on a blocklist by Tuesday.',
+    you: 'Hand off to Resend / Postmark / SES. Deliverability is their problem.',
+  },
+  {
+    concern: 'IMAP server',
+    self: 'Dovecot on a long-lived VM. State in maildir.',
+    you: 'Durable Object per user. State is a database row.',
+  },
+  {
+    concern: 'Storage',
+    self: 'Disk fills up. Someone has to rotate it.',
+    you: 'R2 for blobs, D1 for metadata. Infinite, indexed.',
+  },
+  {
+    concern: 'Scaling',
+    self: 'Resize the VM. Pray the fsync survives.',
+    you: 'Per-user isolate. Scales to zero when no one\'s checking mail.',
+  },
+  {
+    concern: 'Threading, classification, webhooks',
+    self: 'You wire up Sieve, SpamAssassin, and a cron job.',
+    you: 'Built in. One <code class="font-mono">InboundAdapter</code> hook.',
+  },
+  {
+    concern: 'Your 2AM pager',
+    self: '"disk 97% full on mail-01"',
+    you: 'Silent.',
+  },
+];
+---
+
+<section id="compare" class="border-b border-border">
+  <Container size="6xl" padding="20">
+    <SectionHead no="04 / honestly" title="vs. self-hosted.">
+      Postfix and Dovecot work. They have worked for twenty-five years. But if you
+      haven't babysat a mail server through a PTR-record outage, you will.
+    </SectionHead>
+
+    <div class="border border-border bg-background overflow-hidden rounded-md">
+      <table class="w-full border-collapse text-left">
+        <thead>
+          <tr>
+            <th class="border-b border-border bg-muted px-4 py-3 font-mono text-label-small uppercase tracking-wide text-muted-foreground">Concern</th>
+            <th class="border-b border-border bg-muted px-4 py-3 font-mono text-label-small uppercase tracking-wide text-muted-foreground">Postfix + Dovecot on a VPS</th>
+            <th class="border-b border-border bg-muted px-4 py-3 font-mono text-label-small uppercase tracking-wide text-foreground">@rafters/mail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr class="border-b border-border last:border-b-0">
+              <td class="px-4 py-4 font-mono text-label-small font-medium text-muted-foreground align-top">{row.concern}</td>
+              <td class="px-4 py-4 text-body-small text-muted-foreground align-top">
+                <span class="text-destructive mr-2" aria-hidden="true">×</span>
+                <Fragment set:html={row.self} />
+              </td>
+              <td class="px-4 py-4 text-body-small text-foreground align-top">
+                <span class="mr-2" aria-hidden="true">✓</span>
+                <Fragment set:html={row.you} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <P size="body-medium" color="muted-foreground" class="max-w-prose mt-6">
+      <strong class="text-foreground">To be clear:</strong> we don't do edge SMTP. That would be a nightmare. Outbound goes through a real transactional provider. What we <em>do</em> is everything after the TCP handshake.
+    </P>
+  </Container>
+</section>
