@@ -2,11 +2,13 @@
 import classy from '@/lib/primitives/classy';
 
 interface Props {
+  label: string;
+  value?: string;
   variant?: 'default' | 'accent';
   class?: string;
 }
 
-const { variant = 'default', class: className } = Astro.props;
+const { label, value, variant = 'default', class: className } = Astro.props;
 
 const variantCls =
   variant === 'accent'
@@ -20,4 +22,6 @@ const cls = classy(
 );
 ---
 
-<span class={cls}><slot /></span>
+<span class={cls}>
+  {label}{value && <span class="text-foreground">{value}</span>}
+</span>
