@@ -1,0 +1,44 @@
+---
+/**
+ * VoiceHero - Main homepage hero. Eyebrow, H1 with ink-block highlight,
+ * tagline, description, install CTA. Centered.
+ *
+ * Mirrors handoff Hero.jsx VoiceHero. Topology renders inside (step 4).
+ */
+import Container from "@/components/ui/container.astro";
+import H1 from "@/components/ui/typography-h1.astro";
+import P from "@/components/ui/typography-p.astro";
+import Small from "@/components/ui/typography-small.astro";
+import InkBlock from "@/components/InkBlock.astro";
+import HeroInstallCTA from "@/components/HeroInstallCTA.astro";
+import HeroTopology from "@/components/HeroTopology.astro";
+---
+
+<section class="border-b border-border">
+    <Container size="5xl" padding="20" gap="10" class="items-center text-center">
+        <Small color="muted-foreground" transform="uppercase" tracking="widest">
+            sqlite sync engine &middot; one rust binary &middot; mit
+        </Small>
+
+        <H1 align="center">
+            If you're moving SQLite, <InkBlock>smuggl</InkBlock> it.
+        </H1>
+
+        <P align="center" size="display-small" class="max-w-prose">
+            LAN UDP fan-out. S3 relay. Host-to-host. D1, Turso, rqlite, Datasette, StarbaseDB, SQLite Cloud. One binary.
+        </P>
+
+        <HeroTopology />
+
+        <P align="center" color="muted-foreground" class="max-w-prose">
+            Nothing else combines these shapes in a single tool. Litestream does S3 backup. rqlite does Raft. ElectricSQL needs a server. smugglr does host, LAN, relay, and hosted backend: content-hashed delta sync, no coordinator, no service to run.
+        </P>
+
+        <div class="w-full max-w-xl">
+            <HeroInstallCTA
+                command="curl -fsSL https://smugglr.dev/install | bash"
+                subline="Installs the latest signed binary. macOS 14 or later. Linux and Windows supported."
+            />
+        </div>
+    </Container>
+</section>

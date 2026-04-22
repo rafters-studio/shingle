@@ -2,7 +2,7 @@
   "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "semantic",
   "version": "1.0.0",
-  "generatedAt": "2026-04-17T19:57:12.914Z",
+  "generatedAt": "2026-04-22T00:22:45.270Z",
   "tokens": [
     {
       "name": "background",
@@ -17,15 +17,6 @@
         "page-bg",
         "app-background"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Primary page background color. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for main page background"
@@ -34,6 +25,15 @@
           "Use for interactive elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Primary page background color. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -50,15 +50,6 @@
         "headings",
         "primary-content"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "scale:950",
-      "description": "Primary text color. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for main text content",
@@ -68,6 +59,15 @@
           "Use on dark backgrounds without checking contrast"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "scale:950",
+      "containerQueryAware": true,
+      "description": "Primary text color. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -85,15 +85,6 @@
         "dialogs",
         "panels"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Card and contained surface background. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for elevated surfaces"
@@ -102,6 +93,15 @@
           "Use for page-level backgrounds"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Card and contained surface background. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -117,15 +117,6 @@
         "card-text",
         "modal-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on card surfaces. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text within cards"
@@ -134,6 +125,15 @@
           "Use without card background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on card surfaces. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -148,15 +148,6 @@
       "usageContext": [
         "card-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "state:hover",
-      "description": "Card hover state background. Light: neutral-100, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for card hover states"
@@ -165,6 +156,15 @@
           "Use as default card background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Card hover state background. Light: neutral-100, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -179,15 +179,6 @@
       "usageContext": [
         "card-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Card border color. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for card borders"
@@ -196,6 +187,15 @@
           "Use for dividers within cards"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Card border color. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -212,15 +212,6 @@
         "tooltips",
         "menus"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Popover and dropdown background. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for floating elements"
@@ -229,6 +220,15 @@
           "Use for static content"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Popover and dropdown background. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -244,15 +244,6 @@
         "dropdown-text",
         "menu-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text in popovers. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for popover content"
@@ -261,6 +252,15 @@
           "Use outside floating elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text in popovers. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -275,15 +275,6 @@
       "usageContext": [
         "popover-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Popover border color. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for popover borders"
@@ -292,6 +283,15 @@
           "Use for content borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Popover border color. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -306,15 +306,6 @@
       "usageContext": [
         "elevated-elements"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "scale:50",
-      "description": "Elevated surface background. Light: neutral-50, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for elevated surfaces"
@@ -323,6 +314,15 @@
           "Use for page background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Elevated surface background. Light: neutral-50, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -337,15 +337,6 @@
       "usageContext": [
         "surface-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on surface backgrounds. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on surfaces"
@@ -354,6 +345,15 @@
           "Use without surface background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on surface backgrounds. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -368,15 +368,6 @@
       "usageContext": [
         "surface-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "state:hover",
-      "description": "Surface hover state. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for surface hover states"
@@ -385,6 +376,15 @@
           "Use as default surface"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Surface hover state. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -399,15 +399,6 @@
       "usageContext": [
         "surface-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "state:active",
-      "description": "Surface active/pressed state. Light: neutral-200, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for active surface states"
@@ -416,6 +407,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Surface active/pressed state. Light: neutral-200, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -430,15 +430,6 @@
       "usageContext": [
         "surface-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Surface border color. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for surface borders"
@@ -447,13 +438,22 @@
           "Use for content dividers"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Surface border color. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
       "name": "primary",
       "value": {
-        "family": "neutral",
-        "position": "900"
+        "family": "silver-true-honey",
+        "position": "500"
       },
       "category": "color",
       "namespace": "semantic",
@@ -465,15 +465,6 @@
       ],
       "trustLevel": "high",
       "consequence": "reversible",
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "scale:900",
-      "description": "Primary interactive elements - buttons, links, focus states. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for main CTA buttons",
@@ -484,6 +475,21 @@
           "Use for destructive actions"
         ]
       },
+      "userOverride": {
+        "previousValue": {
+          "family": "neutral",
+          "position": "900"
+        },
+        "reason": "Smugglr amber accent per Sean direction 2026-04-21"
+      },
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "scale:900",
+      "containerQueryAware": true,
+      "description": "Primary interactive elements - buttons, links, focus states. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -499,15 +505,6 @@
         "button-text",
         "primary-action-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on primary color backgrounds. Light: neutral-50, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on primary buttons"
@@ -516,6 +513,15 @@
           "Use without primary background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on primary color backgrounds. Light: neutral-50, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -530,15 +536,6 @@
       "usageContext": [
         "primary-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-200"
-      ],
-      "generationRule": "state:hover",
-      "description": "Primary hover state. Light: neutral-800, Dark: neutral-200.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for primary button hover"
@@ -547,6 +544,15 @@
           "Use as default primary"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-200"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Primary hover state. Light: neutral-800, Dark: neutral-200.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -561,15 +567,6 @@
       "usageContext": [
         "primary-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on primary hover. Light: neutral-50, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on primary hover"
@@ -578,6 +575,15 @@
           "Use without primary-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on primary hover. Light: neutral-50, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -592,15 +598,6 @@
       "usageContext": [
         "primary-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-300"
-      ],
-      "generationRule": "state:active",
-      "description": "Primary active/pressed state. Light: neutral-700, Dark: neutral-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for primary button active state"
@@ -609,6 +606,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-300"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Primary active/pressed state. Light: neutral-700, Dark: neutral-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -623,15 +629,6 @@
       "usageContext": [
         "primary-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on primary active. Light: neutral-50, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on primary active"
@@ -640,6 +637,15 @@
           "Use without primary-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on primary active. Light: neutral-50, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -654,15 +660,6 @@
       "usageContext": [
         "primary-focus"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "state:focus",
-      "description": "Primary focus state. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for primary focus states"
@@ -671,6 +668,15 @@
           "Use for non-focused elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Primary focus state. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -685,15 +691,6 @@
       "usageContext": [
         "primary-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "scale:900",
-      "description": "Primary border color. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for primary element borders"
@@ -702,6 +699,15 @@
           "Use for neutral borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "scale:900",
+      "containerQueryAware": true,
+      "description": "Primary border color. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -716,15 +722,6 @@
       "usageContext": [
         "primary-focus-ring"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "scale:900",
-      "description": "Primary focus ring color. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for primary element focus rings"
@@ -733,6 +730,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "scale:900",
+      "containerQueryAware": true,
+      "description": "Primary focus ring color. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -748,15 +754,6 @@
         "primary-badges",
         "primary-alerts"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "scale:100",
-      "description": "Subtle primary background for badges/alerts. Light: neutral-100, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for subtle primary backgrounds"
@@ -765,6 +762,15 @@
           "Use for primary buttons"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Subtle primary background for badges/alerts. Light: neutral-100, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -779,15 +785,6 @@
       "usageContext": [
         "primary-subtle-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-100"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on subtle primary backgrounds. Light: neutral-900, Dark: neutral-100.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on subtle primary"
@@ -796,6 +793,15 @@
           "Use without primary-subtle background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-100"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on subtle primary backgrounds. Light: neutral-900, Dark: neutral-100.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -813,15 +819,6 @@
       ],
       "trustLevel": "medium",
       "consequence": "reversible",
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:100",
-      "description": "Secondary interactive elements - less prominent actions. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary actions",
@@ -831,6 +828,15 @@
           "Use for primary CTAs"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Secondary interactive elements - less prominent actions. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -845,15 +851,6 @@
       "usageContext": [
         "secondary-button-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on secondary color backgrounds. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on secondary buttons"
@@ -862,6 +859,15 @@
           "Use without secondary background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on secondary color backgrounds. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -876,15 +882,6 @@
       "usageContext": [
         "secondary-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "state:hover",
-      "description": "Secondary hover state. Light: neutral-200, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary hover"
@@ -893,6 +890,15 @@
           "Use as default secondary"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Secondary hover state. Light: neutral-200, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -907,15 +913,6 @@
       "usageContext": [
         "secondary-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on secondary hover. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on secondary hover"
@@ -924,6 +921,15 @@
           "Use without secondary-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on secondary hover. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -938,15 +944,6 @@
       "usageContext": [
         "secondary-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "state:active",
-      "description": "Secondary active/pressed state. Light: neutral-300, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary active state"
@@ -955,6 +952,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Secondary active/pressed state. Light: neutral-300, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -969,15 +975,6 @@
       "usageContext": [
         "secondary-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on secondary active. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on secondary active"
@@ -986,6 +983,15 @@
           "Use without secondary-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on secondary active. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1000,15 +1006,6 @@
       "usageContext": [
         "secondary-focus"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "state:focus",
-      "description": "Secondary focus state. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary focus states"
@@ -1017,6 +1014,15 @@
           "Use for non-focused elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Secondary focus state. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1031,15 +1037,6 @@
       "usageContext": [
         "secondary-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "scale:300",
-      "description": "Secondary border color. Light: neutral-300, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary element borders"
@@ -1048,6 +1045,15 @@
           "Use for primary borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "scale:300",
+      "containerQueryAware": true,
+      "description": "Secondary border color. Light: neutral-300, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1062,15 +1068,6 @@
       "usageContext": [
         "secondary-focus-ring"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-500"
-      ],
-      "generationRule": "scale:400",
-      "description": "Secondary focus ring color. Light: neutral-400, Dark: neutral-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary element focus rings"
@@ -1079,6 +1076,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-500"
+      ],
+      "generationRule": "scale:400",
+      "containerQueryAware": true,
+      "description": "Secondary focus ring color. Light: neutral-400, Dark: neutral-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1095,15 +1101,6 @@
         "inactive-tabs",
         "disabled-areas"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:100",
-      "description": "Muted backgrounds for subtle emphasis. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for subtle background differentiation"
@@ -1112,6 +1109,15 @@
           "Use for interactive elements needing visibility"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Muted backgrounds for subtle emphasis. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1128,15 +1134,6 @@
         "placeholders",
         "metadata"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-400"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Muted text for secondary information. Light: neutral-500, Dark: neutral-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary text",
@@ -1147,6 +1144,15 @@
           "Use for important information"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-400"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Muted text for secondary information. Light: neutral-500, Dark: neutral-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1161,15 +1167,6 @@
       "usageContext": [
         "muted-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "state:hover",
-      "description": "Muted hover state. Light: neutral-200, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for muted hover states"
@@ -1178,6 +1175,15 @@
           "Use as default muted"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Muted hover state. Light: neutral-200, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1192,15 +1198,6 @@
       "usageContext": [
         "muted-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on muted hover. Light: neutral-600, Dark: neutral-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on muted hover"
@@ -1209,6 +1206,15 @@
           "Use without muted-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on muted hover. Light: neutral-600, Dark: neutral-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1223,15 +1229,6 @@
       "usageContext": [
         "muted-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "state:active",
-      "description": "Muted active state. Light: neutral-300, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for muted active states"
@@ -1240,6 +1237,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Muted active state. Light: neutral-300, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1254,15 +1260,6 @@
       "usageContext": [
         "muted-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "scale:200",
-      "description": "Muted border color. Light: neutral-200, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for muted element borders"
@@ -1271,6 +1268,15 @@
           "Use for emphasized borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Muted border color. Light: neutral-200, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1287,15 +1293,6 @@
         "selected-items",
         "focus-backgrounds"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:100",
-      "description": "Accent for hover states and highlights. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for hover backgrounds",
@@ -1305,6 +1302,15 @@
           "Use for primary actions"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Accent for hover states and highlights. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1320,15 +1326,6 @@
         "hover-text",
         "selected-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on accent backgrounds. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on accent backgrounds"
@@ -1337,6 +1334,15 @@
           "Use without accent background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on accent backgrounds. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1351,15 +1357,6 @@
       "usageContext": [
         "accent-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "state:hover",
-      "description": "Accent hover state. Light: neutral-200, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for accent hover states"
@@ -1368,6 +1365,15 @@
           "Use as default accent"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Accent hover state. Light: neutral-200, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1382,15 +1388,6 @@
       "usageContext": [
         "accent-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on accent hover. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on accent hover"
@@ -1399,6 +1396,15 @@
           "Use without accent-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on accent hover. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1413,15 +1419,6 @@
       "usageContext": [
         "accent-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "state:active",
-      "description": "Accent active state. Light: neutral-300, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for accent active states"
@@ -1430,6 +1427,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Accent active state. Light: neutral-300, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1444,15 +1450,6 @@
       "usageContext": [
         "accent-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on accent active. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on accent active"
@@ -1461,6 +1458,15 @@
           "Use without accent-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on accent active. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1475,15 +1481,6 @@
       "usageContext": [
         "accent-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "scale:300",
-      "description": "Accent border color. Light: neutral-300, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for accent element borders"
@@ -1492,6 +1489,15 @@
           "Use for neutral borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "scale:300",
+      "containerQueryAware": true,
+      "description": "Accent border color. Light: neutral-300, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1506,15 +1512,6 @@
       "usageContext": [
         "accent-focus-ring"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-500"
-      ],
-      "generationRule": "scale:400",
-      "description": "Accent focus ring color. Light: neutral-400, Dark: neutral-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for accent element focus rings"
@@ -1523,6 +1520,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-500"
+      ],
+      "generationRule": "scale:400",
+      "containerQueryAware": true,
+      "description": "Accent focus ring color. Light: neutral-400, Dark: neutral-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1541,15 +1547,6 @@
       ],
       "trustLevel": "critical",
       "consequence": "destructive",
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-500"
-      ],
-      "generationRule": "scale:600",
-      "description": "Destructive actions - delete, remove, critical warnings. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for irreversible actions",
@@ -1560,6 +1557,15 @@
           "Use without clear consequence communication"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-500"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Destructive actions - delete, remove, critical warnings. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": true
     },
     {
@@ -1575,15 +1581,6 @@
         "delete-button-text",
         "error-message-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on destructive backgrounds. Light: neutral-50, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on destructive buttons"
@@ -1592,6 +1589,15 @@
           "Use without destructive background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on destructive backgrounds. Light: neutral-50, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1606,15 +1612,6 @@
       "usageContext": [
         "destructive-hover"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-400"
-      ],
-      "generationRule": "state:hover",
-      "description": "Destructive hover state. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for destructive hover states"
@@ -1623,6 +1620,15 @@
           "Use as default destructive"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-400"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Destructive hover state. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1637,15 +1643,6 @@
       "usageContext": [
         "destructive-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on destructive hover. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on destructive hover"
@@ -1654,6 +1651,15 @@
           "Use without destructive-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on destructive hover. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1668,15 +1674,6 @@
       "usageContext": [
         "destructive-active"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-300"
-      ],
-      "generationRule": "state:active",
-      "description": "Destructive active/pressed state. Light: silver-bold-fire-truck-800, Dark: silver-bold-fire-truck-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for destructive active state"
@@ -1685,6 +1682,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-300"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Destructive active/pressed state. Light: silver-bold-fire-truck-800, Dark: silver-bold-fire-truck-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1699,15 +1705,6 @@
       "usageContext": [
         "destructive-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on destructive active. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on destructive active"
@@ -1716,6 +1713,15 @@
           "Use without destructive-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on destructive active. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1730,15 +1736,6 @@
       "usageContext": [
         "destructive-focus"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-500"
-      ],
-      "generationRule": "state:focus",
-      "description": "Destructive focus state. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for destructive focus states"
@@ -1747,6 +1744,15 @@
           "Use for non-focused elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-500"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Destructive focus state. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1761,15 +1767,6 @@
       "usageContext": [
         "destructive-borders"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-500"
-      ],
-      "generationRule": "scale:600",
-      "description": "Destructive border color. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for destructive element borders"
@@ -1778,6 +1775,15 @@
           "Use for neutral borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-500"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Destructive border color. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1792,15 +1798,6 @@
       "usageContext": [
         "destructive-focus-ring"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Destructive focus ring color. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for destructive element focus rings"
@@ -1809,6 +1806,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Destructive focus ring color. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1824,15 +1830,6 @@
         "error-alerts",
         "validation-messages"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Subtle destructive background for error alerts. Light: silver-bold-fire-truck-50, Dark: silver-bold-fire-truck-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for subtle error backgrounds"
@@ -1841,6 +1838,15 @@
           "Use for destructive buttons"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Subtle destructive background for error alerts. Light: silver-bold-fire-truck-50, Dark: silver-bold-fire-truck-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1855,15 +1861,6 @@
       "usageContext": [
         "error-alert-text"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on subtle destructive backgrounds. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on subtle destructive"
@@ -1872,6 +1869,15 @@
           "Use without destructive-subtle background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on subtle destructive backgrounds. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1890,15 +1896,6 @@
       ],
       "trustLevel": "high",
       "consequence": "reversible",
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-500"
-      ],
-      "generationRule": "scale:600",
-      "description": "Success states - confirmations, completions, positive feedback. Light: silver-true-citrine-600, Dark: silver-true-citrine-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for positive feedback",
@@ -1909,6 +1906,15 @@
           "Use for warnings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-500"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Success states - confirmations, completions, positive feedback. Light: silver-true-citrine-600, Dark: silver-true-citrine-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1923,15 +1929,6 @@
       "usageContext": [
         "success-message-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on success backgrounds. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on success backgrounds"
@@ -1940,6 +1937,15 @@
           "Use without success background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on success backgrounds. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1954,15 +1960,6 @@
       "usageContext": [
         "success-hover"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-400"
-      ],
-      "generationRule": "state:hover",
-      "description": "Success hover state. Light: silver-true-citrine-700, Dark: silver-true-citrine-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for success hover states"
@@ -1971,6 +1968,15 @@
           "Use as default success"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-400"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Success hover state. Light: silver-true-citrine-700, Dark: silver-true-citrine-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -1985,15 +1991,6 @@
       "usageContext": [
         "success-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on success hover. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on success hover"
@@ -2002,6 +1999,15 @@
           "Use without success-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on success hover. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2016,15 +2022,6 @@
       "usageContext": [
         "success-active"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-300"
-      ],
-      "generationRule": "state:active",
-      "description": "Success active/pressed state. Light: silver-true-citrine-800, Dark: silver-true-citrine-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for success active state"
@@ -2033,6 +2030,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-300"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Success active/pressed state. Light: silver-true-citrine-800, Dark: silver-true-citrine-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2047,15 +2053,6 @@
       "usageContext": [
         "success-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on success active. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on success active"
@@ -2064,6 +2061,15 @@
           "Use without success-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on success active. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2078,15 +2084,6 @@
       "usageContext": [
         "success-focus"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-500"
-      ],
-      "generationRule": "state:focus",
-      "description": "Success focus state. Light: silver-true-citrine-600, Dark: silver-true-citrine-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for success focus states"
@@ -2095,6 +2092,15 @@
           "Use for non-focused elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-500"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Success focus state. Light: silver-true-citrine-600, Dark: silver-true-citrine-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2109,15 +2115,6 @@
       "usageContext": [
         "success-borders"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-500"
-      ],
-      "generationRule": "scale:600",
-      "description": "Success border color. Light: silver-true-citrine-600, Dark: silver-true-citrine-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for success element borders"
@@ -2126,6 +2123,15 @@
           "Use for neutral borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-500"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Success border color. Light: silver-true-citrine-600, Dark: silver-true-citrine-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2140,15 +2146,6 @@
       "usageContext": [
         "success-focus-ring"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Success focus ring color. Light: silver-true-citrine-600, Dark: silver-true-citrine-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for success element focus rings"
@@ -2157,6 +2154,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Success focus ring color. Light: silver-true-citrine-600, Dark: silver-true-citrine-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2172,15 +2178,6 @@
         "success-alerts",
         "validation-success"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Subtle success background for success alerts. Light: silver-true-citrine-50, Dark: silver-true-citrine-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for subtle success backgrounds"
@@ -2189,6 +2186,15 @@
           "Use for success buttons"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Subtle success background for success alerts. Light: silver-true-citrine-50, Dark: silver-true-citrine-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2203,15 +2209,6 @@
       "usageContext": [
         "success-alert-text"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on subtle success backgrounds. Light: silver-true-citrine-700, Dark: silver-true-citrine-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on subtle success"
@@ -2220,6 +2217,15 @@
           "Use without success-subtle background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on subtle success backgrounds. Light: silver-true-citrine-700, Dark: silver-true-citrine-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2238,15 +2244,6 @@
       ],
       "trustLevel": "medium",
       "consequence": "significant",
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-500"
-      ],
-      "generationRule": "scale:500",
-      "description": "Warning states - caution, potential issues, important notices. Light: silver-true-honey-500, Dark: silver-true-honey-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for cautionary information",
@@ -2257,6 +2254,15 @@
           "Use for success states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-500"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Warning states - caution, potential issues, important notices. Light: silver-true-honey-500, Dark: silver-true-honey-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2271,15 +2277,6 @@
       "usageContext": [
         "warning-message-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on warning backgrounds. Light: neutral-950, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on warning backgrounds"
@@ -2288,6 +2285,15 @@
           "Use without warning background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on warning backgrounds. Light: neutral-950, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2302,15 +2308,6 @@
       "usageContext": [
         "warning-hover"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-400"
-      ],
-      "generationRule": "state:hover",
-      "description": "Warning hover state. Light: silver-true-honey-600, Dark: silver-true-honey-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for warning hover states"
@@ -2319,6 +2316,15 @@
           "Use as default warning"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-400"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Warning hover state. Light: silver-true-honey-600, Dark: silver-true-honey-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2333,15 +2339,6 @@
       "usageContext": [
         "warning-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on warning hover. Light: neutral-950, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on warning hover"
@@ -2350,6 +2347,15 @@
           "Use without warning-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on warning hover. Light: neutral-950, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2364,15 +2370,6 @@
       "usageContext": [
         "warning-active"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-300"
-      ],
-      "generationRule": "state:active",
-      "description": "Warning active/pressed state. Light: silver-true-honey-700, Dark: silver-true-honey-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for warning active state"
@@ -2381,6 +2378,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-300"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Warning active/pressed state. Light: silver-true-honey-700, Dark: silver-true-honey-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2395,15 +2401,6 @@
       "usageContext": [
         "warning-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on warning active. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on warning active"
@@ -2412,6 +2409,15 @@
           "Use without warning-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on warning active. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2426,15 +2432,6 @@
       "usageContext": [
         "warning-focus"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-500"
-      ],
-      "generationRule": "state:focus",
-      "description": "Warning focus state. Light: silver-true-honey-500, Dark: silver-true-honey-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for warning focus states"
@@ -2443,6 +2440,15 @@
           "Use for non-focused elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-500"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Warning focus state. Light: silver-true-honey-500, Dark: silver-true-honey-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2457,15 +2463,6 @@
       "usageContext": [
         "warning-borders"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-500"
-      ],
-      "generationRule": "scale:500",
-      "description": "Warning border color. Light: silver-true-honey-500, Dark: silver-true-honey-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for warning element borders"
@@ -2474,6 +2471,15 @@
           "Use for neutral borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-500"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Warning border color. Light: silver-true-honey-500, Dark: silver-true-honey-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2488,15 +2494,6 @@
       "usageContext": [
         "warning-focus-ring"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Warning focus ring color. Light: silver-true-honey-600, Dark: silver-true-honey-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for warning element focus rings"
@@ -2505,6 +2502,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Warning focus ring color. Light: silver-true-honey-600, Dark: silver-true-honey-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2519,15 +2525,6 @@
       "usageContext": [
         "warning-alerts"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Subtle warning background for warning alerts. Light: silver-true-honey-50, Dark: silver-true-honey-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for subtle warning backgrounds"
@@ -2536,6 +2533,15 @@
           "Use for warning buttons"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Subtle warning background for warning alerts. Light: silver-true-honey-50, Dark: silver-true-honey-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2550,15 +2556,6 @@
       "usageContext": [
         "warning-alert-text"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-200"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on subtle warning backgrounds. Light: silver-true-honey-800, Dark: silver-true-honey-200.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on subtle warning"
@@ -2567,6 +2564,15 @@
           "Use without warning-subtle background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-200"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on subtle warning backgrounds. Light: silver-true-honey-800, Dark: silver-true-honey-200.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2585,15 +2591,6 @@
       ],
       "trustLevel": "low",
       "consequence": "reversible",
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-500"
-      ],
-      "generationRule": "scale:600",
-      "description": "Informational states - tips, help, neutral information. Light: silver-true-sky-600, Dark: silver-true-sky-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for helpful information",
@@ -2603,6 +2600,15 @@
           "Use for warnings or errors"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-500"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Informational states - tips, help, neutral information. Light: silver-true-sky-600, Dark: silver-true-sky-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2617,15 +2623,6 @@
       "usageContext": [
         "info-message-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on info backgrounds. Light: neutral-50, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on info backgrounds"
@@ -2634,6 +2631,15 @@
           "Use without info background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on info backgrounds. Light: neutral-50, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2648,15 +2654,6 @@
       "usageContext": [
         "info-hover"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-400"
-      ],
-      "generationRule": "state:hover",
-      "description": "Info hover state. Light: silver-true-sky-700, Dark: silver-true-sky-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for info hover states"
@@ -2665,6 +2662,15 @@
           "Use as default info"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-400"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Info hover state. Light: silver-true-sky-700, Dark: silver-true-sky-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2679,15 +2685,6 @@
       "usageContext": [
         "info-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on info hover. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on info hover"
@@ -2696,6 +2693,15 @@
           "Use without info-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on info hover. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2710,15 +2716,6 @@
       "usageContext": [
         "info-active"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-300"
-      ],
-      "generationRule": "state:active",
-      "description": "Info active/pressed state. Light: silver-true-sky-800, Dark: silver-true-sky-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for info active state"
@@ -2727,6 +2724,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-300"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Info active/pressed state. Light: silver-true-sky-800, Dark: silver-true-sky-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2741,15 +2747,6 @@
       "usageContext": [
         "info-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on info active. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on info active"
@@ -2758,6 +2755,15 @@
           "Use without info-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on info active. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2772,15 +2778,6 @@
       "usageContext": [
         "info-focus"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-500"
-      ],
-      "generationRule": "state:focus",
-      "description": "Info focus state. Light: silver-true-sky-600, Dark: silver-true-sky-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for info focus states"
@@ -2789,6 +2786,15 @@
           "Use for non-focused elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-500"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Info focus state. Light: silver-true-sky-600, Dark: silver-true-sky-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2803,15 +2809,6 @@
       "usageContext": [
         "info-borders"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-500"
-      ],
-      "generationRule": "scale:600",
-      "description": "Info border color. Light: silver-true-sky-600, Dark: silver-true-sky-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for info element borders"
@@ -2820,6 +2817,15 @@
           "Use for neutral borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-500"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Info border color. Light: silver-true-sky-600, Dark: silver-true-sky-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2834,15 +2840,6 @@
       "usageContext": [
         "info-focus-ring"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Info focus ring color. Light: silver-true-sky-600, Dark: silver-true-sky-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for info element focus rings"
@@ -2851,6 +2848,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Info focus ring color. Light: silver-true-sky-600, Dark: silver-true-sky-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2865,15 +2871,6 @@
       "usageContext": [
         "info-alerts"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Subtle info background for info alerts. Light: silver-true-sky-50, Dark: silver-true-sky-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for subtle info backgrounds"
@@ -2882,6 +2879,15 @@
           "Use for info buttons"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Subtle info background for info alerts. Light: silver-true-sky-50, Dark: silver-true-sky-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2896,15 +2902,6 @@
       "usageContext": [
         "info-alert-text"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on subtle info backgrounds. Light: silver-true-sky-700, Dark: silver-true-sky-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on subtle info"
@@ -2913,6 +2910,15 @@
           "Use without info-subtle background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on subtle info backgrounds. Light: silver-true-sky-700, Dark: silver-true-sky-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2930,15 +2936,6 @@
       ],
       "trustLevel": "critical",
       "consequence": "significant",
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-500"
-      ],
-      "generationRule": "scale:600",
-      "description": "Critical alert states. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for critical system alerts"
@@ -2947,6 +2944,15 @@
           "Use for non-critical information"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-500"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Critical alert states. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2961,15 +2967,6 @@
       "usageContext": [
         "alert-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on alert backgrounds. Light: neutral-50, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on alert backgrounds"
@@ -2978,6 +2975,15 @@
           "Use without alert background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on alert backgrounds. Light: neutral-50, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -2992,15 +2998,6 @@
       "usageContext": [
         "alert-hover"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-400"
-      ],
-      "generationRule": "state:hover",
-      "description": "Alert hover state. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for alert hover states"
@@ -3009,6 +3006,15 @@
           "Use as default alert"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-400"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Alert hover state. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3023,15 +3029,6 @@
       "usageContext": [
         "alert-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on alert hover. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on alert hover"
@@ -3040,6 +3037,15 @@
           "Use without alert-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on alert hover. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3054,15 +3060,6 @@
       "usageContext": [
         "alert-active"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-300"
-      ],
-      "generationRule": "state:active",
-      "description": "Alert active state. Light: silver-bold-fire-truck-800, Dark: silver-bold-fire-truck-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for alert active states"
@@ -3071,6 +3068,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-300"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Alert active state. Light: silver-bold-fire-truck-800, Dark: silver-bold-fire-truck-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3085,15 +3091,6 @@
       "usageContext": [
         "alert-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on alert active. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on alert active"
@@ -3102,6 +3099,15 @@
           "Use without alert-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on alert active. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3116,15 +3122,6 @@
       "usageContext": [
         "alert-borders"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-500"
-      ],
-      "generationRule": "scale:600",
-      "description": "Alert border color. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for alert element borders"
@@ -3133,6 +3130,15 @@
           "Use for neutral borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-500"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Alert border color. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3147,15 +3153,6 @@
       "usageContext": [
         "alert-focus-ring"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Alert focus ring color. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for alert element focus rings"
@@ -3164,6 +3161,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Alert focus ring color. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3178,15 +3184,6 @@
       "usageContext": [
         "subtle-alerts"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Subtle alert background. Light: silver-bold-fire-truck-50, Dark: silver-bold-fire-truck-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for subtle alert backgrounds"
@@ -3195,6 +3192,15 @@
           "Use for primary alerts"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Subtle alert background. Light: silver-bold-fire-truck-50, Dark: silver-bold-fire-truck-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3209,15 +3215,6 @@
       "usageContext": [
         "subtle-alert-text"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on subtle alert backgrounds. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on subtle alert"
@@ -3226,6 +3223,15 @@
           "Use without alert-subtle background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on subtle alert backgrounds. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3242,15 +3248,6 @@
         "text-selection",
         "emphasis"
       ],
-      "dependsOn": [
-        "silver-true-violet",
-        "silver-true-violet-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Highlight for search results, selected text, emphasis. Light: silver-true-violet-200, Dark: silver-true-violet-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for temporary highlights",
@@ -3261,6 +3258,15 @@
           "Use for interactive elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-violet",
+        "silver-true-violet-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Highlight for search results, selected text, emphasis. Light: silver-true-violet-200, Dark: silver-true-violet-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3275,15 +3281,6 @@
       "usageContext": [
         "highlighted-text"
       ],
-      "dependsOn": [
-        "silver-true-violet",
-        "silver-true-violet-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on highlight backgrounds. Light: silver-true-violet-900, Dark: silver-true-violet-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text that is highlighted"
@@ -3292,6 +3289,15 @@
           "Use without highlight background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-violet",
+        "silver-true-violet-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on highlight backgrounds. Light: silver-true-violet-900, Dark: silver-true-violet-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3306,15 +3312,6 @@
       "usageContext": [
         "highlight-hover"
       ],
-      "dependsOn": [
-        "silver-true-violet",
-        "silver-true-violet-700"
-      ],
-      "generationRule": "state:hover",
-      "description": "Highlight hover state. Light: silver-true-violet-300, Dark: silver-true-violet-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for highlight hover states"
@@ -3323,6 +3320,15 @@
           "Use as default highlight"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-violet",
+        "silver-true-violet-700"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Highlight hover state. Light: silver-true-violet-300, Dark: silver-true-violet-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3337,15 +3343,6 @@
       "usageContext": [
         "highlight-hover-text"
       ],
-      "dependsOn": [
-        "silver-true-violet",
-        "silver-true-violet-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on highlight hover. Light: silver-true-violet-900, Dark: silver-true-violet-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on highlight hover"
@@ -3354,6 +3351,15 @@
           "Use without highlight-hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-violet",
+        "silver-true-violet-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on highlight hover. Light: silver-true-violet-900, Dark: silver-true-violet-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3368,15 +3374,6 @@
       "usageContext": [
         "highlight-active"
       ],
-      "dependsOn": [
-        "silver-true-violet",
-        "silver-true-violet-600"
-      ],
-      "generationRule": "state:active",
-      "description": "Highlight active state. Light: silver-true-violet-400, Dark: silver-true-violet-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for highlight active states"
@@ -3385,6 +3382,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-violet",
+        "silver-true-violet-600"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Highlight active state. Light: silver-true-violet-400, Dark: silver-true-violet-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3399,15 +3405,6 @@
       "usageContext": [
         "highlight-active-text"
       ],
-      "dependsOn": [
-        "silver-true-violet",
-        "silver-true-violet-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on highlight active. Light: silver-true-violet-950, Dark: silver-true-violet-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on highlight active"
@@ -3416,6 +3413,15 @@
           "Use without highlight-active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-violet",
+        "silver-true-violet-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on highlight active. Light: silver-true-violet-950, Dark: silver-true-violet-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3432,15 +3438,6 @@
         "separators",
         "input-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Default border color. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for subtle borders",
@@ -3450,6 +3447,15 @@
           "Use for emphasized borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Default border color. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3464,15 +3470,6 @@
       "usageContext": [
         "border-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "state:hover",
-      "description": "Border hover state. Light: neutral-300, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for border hover states"
@@ -3481,6 +3478,15 @@
           "Use as default border"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Border hover state. Light: neutral-300, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3495,15 +3501,6 @@
       "usageContext": [
         "border-focus"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "state:focus",
-      "description": "Border focus state. Light: neutral-400, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for focused element borders"
@@ -3512,6 +3509,15 @@
           "Use for non-focused elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Border focus state. Light: neutral-400, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3526,15 +3532,6 @@
       "usageContext": [
         "border-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-500"
-      ],
-      "generationRule": "state:active",
-      "description": "Border active state. Light: neutral-500, Dark: neutral-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for active element borders"
@@ -3543,6 +3540,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-500"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Border active state. Light: neutral-500, Dark: neutral-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3559,15 +3565,6 @@
         "text-fields",
         "selects"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Input field border color. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for form field borders"
@@ -3576,6 +3573,15 @@
           "Use for buttons"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Input field border color. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3590,15 +3596,6 @@
       "usageContext": [
         "input-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Input text color. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for input text"
@@ -3607,6 +3604,15 @@
           "Use for placeholders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Input text color. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3621,15 +3627,6 @@
       "usageContext": [
         "input-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "state:hover",
-      "description": "Input hover state. Light: neutral-300, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for input hover states"
@@ -3638,6 +3635,15 @@
           "Use as default input"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Input hover state. Light: neutral-300, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3652,15 +3658,6 @@
       "usageContext": [
         "input-focus"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "state:focus",
-      "description": "Input focus state. Light: neutral-400, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for input focus states"
@@ -3669,6 +3666,15 @@
           "Use for non-focused inputs"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Input focus state. Light: neutral-400, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3683,15 +3689,6 @@
       "usageContext": [
         "disabled-inputs"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "state:disabled",
-      "description": "Disabled input background. Light: neutral-100, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for disabled input backgrounds"
@@ -3700,6 +3697,15 @@
           "Use for enabled inputs"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "state:disabled",
+      "containerQueryAware": true,
+      "description": "Disabled input background. Light: neutral-100, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3714,15 +3720,6 @@
       "usageContext": [
         "disabled-input-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Disabled input text color. Light: neutral-400, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for disabled input text"
@@ -3731,6 +3728,15 @@
           "Use for enabled input text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Disabled input text color. Light: neutral-400, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3745,15 +3751,6 @@
       "usageContext": [
         "placeholders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-400"
-      ],
-      "generationRule": "scale:500",
-      "description": "Placeholder text color. Light: neutral-500, Dark: neutral-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for placeholder text"
@@ -3762,6 +3759,15 @@
           "Use for entered text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-400"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Placeholder text color. Light: neutral-500, Dark: neutral-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3777,15 +3783,6 @@
         "invalid-inputs",
         "validation-errors"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-500"
-      ],
-      "generationRule": "scale:500",
-      "description": "Invalid input border. Light: silver-bold-fire-truck-500, Dark: silver-bold-fire-truck-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for invalid input borders"
@@ -3794,6 +3791,15 @@
           "Use for valid inputs"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-500"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Invalid input border. Light: silver-bold-fire-truck-500, Dark: silver-bold-fire-truck-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3808,15 +3814,6 @@
       "usageContext": [
         "validation-error-text"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Invalid input error text. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for validation error messages"
@@ -3825,6 +3822,15 @@
           "Use for success messages"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Invalid input error text. Light: silver-bold-fire-truck-700, Dark: silver-bold-fire-truck-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3840,15 +3846,6 @@
         "valid-inputs",
         "validation-success"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-500"
-      ],
-      "generationRule": "scale:500",
-      "description": "Valid input border. Light: silver-true-citrine-500, Dark: silver-true-citrine-500.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for valid input borders"
@@ -3857,6 +3854,15 @@
           "Use for invalid inputs"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-500"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Valid input border. Light: silver-true-citrine-500, Dark: silver-true-citrine-500.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3871,15 +3877,6 @@
       "usageContext": [
         "validation-success-text"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Valid input success text. Light: silver-true-citrine-700, Dark: silver-true-citrine-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for validation success messages"
@@ -3888,6 +3885,15 @@
           "Use for error messages"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Valid input success text. Light: silver-true-citrine-700, Dark: silver-true-citrine-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3903,15 +3909,6 @@
         "focus-states",
         "keyboard-navigation"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-300"
-      ],
-      "generationRule": "scale:950",
-      "description": "Focus ring color. Light: neutral-950, Dark: neutral-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for focus indicators",
@@ -3921,6 +3918,15 @@
           "Use for decorative elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-300"
+      ],
+      "generationRule": "scale:950",
+      "containerQueryAware": true,
+      "description": "Focus ring color. Light: neutral-950, Dark: neutral-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3935,15 +3941,6 @@
       "usageContext": [
         "focus-ring-offset"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Focus ring offset color. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for focus ring offset"
@@ -3952,6 +3949,15 @@
           "Use as primary color"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Focus ring offset color. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3966,15 +3972,6 @@
       "usageContext": [
         "primary-focus-ring"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "scale:900",
-      "description": "Primary focus ring. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for primary element focus rings"
@@ -3983,6 +3980,15 @@
           "Use for decorative rings"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "scale:900",
+      "containerQueryAware": true,
+      "description": "Primary focus ring. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -3997,15 +4003,6 @@
       "usageContext": [
         "destructive-focus-ring"
       ],
-      "dependsOn": [
-        "silver-bold-fire-truck",
-        "silver-bold-fire-truck-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Destructive focus ring. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for destructive element focus rings"
@@ -4014,6 +4011,15 @@
           "Use for non-destructive elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-bold-fire-truck",
+        "silver-bold-fire-truck-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Destructive focus ring. Light: silver-bold-fire-truck-600, Dark: silver-bold-fire-truck-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4028,15 +4034,6 @@
       "usageContext": [
         "success-focus-ring"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Success focus ring. Light: silver-true-citrine-600, Dark: silver-true-citrine-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for success element focus rings"
@@ -4045,6 +4042,15 @@
           "Use for non-success elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Success focus ring. Light: silver-true-citrine-600, Dark: silver-true-citrine-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4059,15 +4065,6 @@
       "usageContext": [
         "warning-focus-ring"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Warning focus ring. Light: silver-true-honey-600, Dark: silver-true-honey-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for warning element focus rings"
@@ -4076,6 +4073,15 @@
           "Use for non-warning elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Warning focus ring. Light: silver-true-honey-600, Dark: silver-true-honey-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4090,15 +4096,6 @@
       "usageContext": [
         "info-focus-ring"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-400"
-      ],
-      "generationRule": "scale:600",
-      "description": "Info focus ring. Light: silver-true-sky-600, Dark: silver-true-sky-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for info element focus rings"
@@ -4107,6 +4104,15 @@
           "Use for non-info elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-400"
+      ],
+      "generationRule": "scale:600",
+      "containerQueryAware": true,
+      "description": "Info focus ring. Light: silver-true-sky-600, Dark: silver-true-sky-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4122,15 +4128,6 @@
         "links",
         "anchors"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-400"
-      ],
-      "generationRule": "scale:700",
-      "description": "Link color. Light: silver-true-sky-700, Dark: silver-true-sky-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for link text"
@@ -4139,6 +4136,15 @@
           "Use for non-link text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-400"
+      ],
+      "generationRule": "scale:700",
+      "containerQueryAware": true,
+      "description": "Link color. Light: silver-true-sky-700, Dark: silver-true-sky-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4153,15 +4159,6 @@
       "usageContext": [
         "link-hover"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-300"
-      ],
-      "generationRule": "state:hover",
-      "description": "Link hover color. Light: silver-true-sky-800, Dark: silver-true-sky-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for link hover states"
@@ -4170,6 +4167,15 @@
           "Use as default link color"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-300"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Link hover color. Light: silver-true-sky-800, Dark: silver-true-sky-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4184,15 +4190,6 @@
       "usageContext": [
         "link-active"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-200"
-      ],
-      "generationRule": "state:active",
-      "description": "Link active/pressed color. Light: silver-true-sky-900, Dark: silver-true-sky-200.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for link active states"
@@ -4201,6 +4198,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-200"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Link active/pressed color. Light: silver-true-sky-900, Dark: silver-true-sky-200.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4215,15 +4221,6 @@
       "usageContext": [
         "visited-links"
       ],
-      "dependsOn": [
-        "silver-true-violet",
-        "silver-true-violet-400"
-      ],
-      "generationRule": "scale:700",
-      "description": "Visited link color. Light: silver-true-violet-700, Dark: silver-true-violet-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for visited links"
@@ -4232,6 +4229,15 @@
           "Use for unvisited links"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-violet",
+        "silver-true-violet-400"
+      ],
+      "generationRule": "scale:700",
+      "containerQueryAware": true,
+      "description": "Visited link color. Light: silver-true-violet-700, Dark: silver-true-violet-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4246,15 +4252,6 @@
       "usageContext": [
         "link-focus"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-400"
-      ],
-      "generationRule": "state:focus",
-      "description": "Link focus color. Light: silver-true-sky-700, Dark: silver-true-sky-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for link focus states"
@@ -4263,6 +4260,15 @@
           "Use for non-focused links"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-400"
+      ],
+      "generationRule": "state:focus",
+      "containerQueryAware": true,
+      "description": "Link focus color. Light: silver-true-sky-700, Dark: silver-true-sky-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4277,15 +4283,6 @@
       "usageContext": [
         "text-selection"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Text selection background. Light: silver-true-sky-200, Dark: silver-true-sky-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for ::selection background"
@@ -4294,6 +4291,15 @@
           "Use for other highlights"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Text selection background. Light: silver-true-sky-200, Dark: silver-true-sky-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4308,15 +4314,6 @@
       "usageContext": [
         "text-selection-foreground"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text selection foreground. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for ::selection text color"
@@ -4325,6 +4322,15 @@
           "Use without selection background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text selection foreground. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4340,15 +4346,6 @@
         "navigation-sidebar",
         "side-panels"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Sidebar background. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar backgrounds"
@@ -4357,6 +4354,15 @@
           "Use for main content areas"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Sidebar background. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4372,15 +4378,6 @@
         "sidebar-text",
         "nav-items"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Sidebar text color. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar content"
@@ -4389,6 +4386,15 @@
           "Use outside sidebar context"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Sidebar text color. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4403,15 +4409,6 @@
       "usageContext": [
         "sidebar-secondary-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-400"
-      ],
-      "generationRule": "scale:500",
-      "description": "Sidebar muted text. Light: neutral-500, Dark: neutral-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary sidebar text"
@@ -4420,6 +4417,15 @@
           "Use for primary sidebar text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-400"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Sidebar muted text. Light: neutral-500, Dark: neutral-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4435,15 +4441,6 @@
         "active-nav-item",
         "selected-sidebar-item"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "scale:900",
-      "description": "Sidebar primary accent. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for active sidebar items"
@@ -4452,6 +4449,15 @@
           "Use for inactive items"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "scale:900",
+      "containerQueryAware": true,
+      "description": "Sidebar primary accent. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4466,15 +4472,6 @@
       "usageContext": [
         "active-nav-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on sidebar primary. Light: neutral-50, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for active nav item text"
@@ -4483,6 +4480,15 @@
           "Use without sidebar-primary background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on sidebar primary. Light: neutral-50, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4497,15 +4503,6 @@
       "usageContext": [
         "sidebar-primary-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-200"
-      ],
-      "generationRule": "state:hover",
-      "description": "Sidebar primary hover. Light: neutral-800, Dark: neutral-200.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar primary hover"
@@ -4514,6 +4511,15 @@
           "Use as default sidebar primary"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-200"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Sidebar primary hover. Light: neutral-800, Dark: neutral-200.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4528,15 +4534,6 @@
       "usageContext": [
         "sidebar-primary-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-300"
-      ],
-      "generationRule": "state:active",
-      "description": "Sidebar primary active. Light: neutral-700, Dark: neutral-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar primary active state"
@@ -4545,6 +4542,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-300"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Sidebar primary active. Light: neutral-700, Dark: neutral-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4560,15 +4566,6 @@
         "sidebar-hover",
         "sidebar-selected"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:100",
-      "description": "Sidebar hover/accent state. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar hover states"
@@ -4577,6 +4574,15 @@
           "Use for active state"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Sidebar hover/accent state. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4591,15 +4597,6 @@
       "usageContext": [
         "sidebar-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Text on sidebar accent. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for hovered sidebar text"
@@ -4608,6 +4605,15 @@
           "Use without sidebar-accent background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Text on sidebar accent. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4622,15 +4628,6 @@
       "usageContext": [
         "sidebar-accent-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "state:hover",
-      "description": "Sidebar accent hover. Light: neutral-200, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar accent hover"
@@ -4639,6 +4636,15 @@
           "Use as default sidebar accent"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Sidebar accent hover. Light: neutral-200, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4653,15 +4659,6 @@
       "usageContext": [
         "sidebar-accent-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "state:active",
-      "description": "Sidebar accent active. Light: neutral-300, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar accent active state"
@@ -4670,6 +4667,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Sidebar accent active. Light: neutral-300, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4684,15 +4690,6 @@
       "usageContext": [
         "sidebar-items"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Sidebar item background. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar item backgrounds"
@@ -4701,6 +4698,15 @@
           "Use for active items"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Sidebar item background. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4715,15 +4721,6 @@
       "usageContext": [
         "sidebar-item-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Sidebar item text. Light: neutral-700, Dark: neutral-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar item text"
@@ -4732,6 +4729,15 @@
           "Use for active item text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Sidebar item text. Light: neutral-700, Dark: neutral-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4746,15 +4752,6 @@
       "usageContext": [
         "sidebar-item-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "state:hover",
-      "description": "Sidebar item hover. Light: neutral-100, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar item hover"
@@ -4763,6 +4760,15 @@
           "Use as default item background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Sidebar item hover. Light: neutral-100, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4777,15 +4783,6 @@
       "usageContext": [
         "sidebar-item-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Sidebar item hover text. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar item hover text"
@@ -4794,6 +4791,15 @@
           "Use without hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Sidebar item hover text. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4808,15 +4814,6 @@
       "usageContext": [
         "sidebar-item-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "state:active",
-      "description": "Sidebar item active. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar item active state"
@@ -4825,6 +4822,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Sidebar item active. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4839,15 +4845,6 @@
       "usageContext": [
         "sidebar-item-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Sidebar item active text. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar item active text"
@@ -4856,6 +4853,15 @@
           "Use without active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Sidebar item active text. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4870,15 +4876,6 @@
       "usageContext": [
         "sidebar-selected-item"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:100",
-      "description": "Sidebar selected item. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for selected sidebar items"
@@ -4887,6 +4884,15 @@
           "Use for unselected items"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Sidebar selected item. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4901,15 +4907,6 @@
       "usageContext": [
         "sidebar-selected-item-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Sidebar selected item text. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for selected item text"
@@ -4918,6 +4915,15 @@
           "Use without selected background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Sidebar selected item text. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4933,15 +4939,6 @@
         "sidebar-dividers",
         "nav-section-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Sidebar border/divider color. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar dividers"
@@ -4950,6 +4947,15 @@
           "Use for main content borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Sidebar border/divider color. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4964,15 +4970,6 @@
       "usageContext": [
         "sidebar-focus-states"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-300"
-      ],
-      "generationRule": "scale:950",
-      "description": "Sidebar focus ring. Light: neutral-950, Dark: neutral-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for sidebar focus indicators"
@@ -4981,6 +4978,15 @@
           "Use outside sidebar"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-300"
+      ],
+      "generationRule": "scale:950",
+      "containerQueryAware": true,
+      "description": "Sidebar focus ring. Light: neutral-950, Dark: neutral-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -4997,15 +5003,6 @@
         "breadcrumbs",
         "tabs"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Navigation background. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for navigation backgrounds"
@@ -5014,6 +5011,15 @@
           "Use for content areas"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Navigation background. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5029,15 +5035,6 @@
         "nav-links",
         "nav-items"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-300"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Navigation text. Light: neutral-700, Dark: neutral-300.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for navigation text"
@@ -5046,6 +5043,15 @@
           "Use for active nav text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-300"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Navigation text. Light: neutral-700, Dark: neutral-300.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5060,15 +5066,6 @@
       "usageContext": [
         "nav-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "state:hover",
-      "description": "Navigation hover. Light: neutral-100, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for nav hover states"
@@ -5077,6 +5074,15 @@
           "Use as default nav background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Navigation hover. Light: neutral-100, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5091,15 +5097,6 @@
       "usageContext": [
         "nav-hover-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Navigation hover text. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for nav hover text"
@@ -5108,6 +5105,15 @@
           "Use without hover background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Navigation hover text. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5122,15 +5128,6 @@
       "usageContext": [
         "nav-active"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "state:active",
-      "description": "Navigation active. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for nav active states"
@@ -5139,6 +5136,15 @@
           "Use for hover states"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "state:active",
+      "containerQueryAware": true,
+      "description": "Navigation active. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5153,15 +5159,6 @@
       "usageContext": [
         "nav-active-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Navigation active text. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for nav active text"
@@ -5170,6 +5167,15 @@
           "Use without active background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Navigation active text. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5184,15 +5190,6 @@
       "usageContext": [
         "nav-selected"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "scale:900",
-      "description": "Navigation selected. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for selected nav items"
@@ -5201,6 +5198,15 @@
           "Use for unselected items"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "scale:900",
+      "containerQueryAware": true,
+      "description": "Navigation selected. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5215,15 +5221,6 @@
       "usageContext": [
         "nav-selected-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Navigation selected text. Light: neutral-50, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for selected nav text"
@@ -5232,6 +5229,15 @@
           "Use without selected background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Navigation selected text. Light: neutral-50, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5246,15 +5252,6 @@
       "usageContext": [
         "nav-disabled"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "state:disabled",
-      "description": "Navigation disabled. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for disabled nav items"
@@ -5263,6 +5260,15 @@
           "Use for enabled items"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "state:disabled",
+      "containerQueryAware": true,
+      "description": "Navigation disabled. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5277,15 +5283,6 @@
       "usageContext": [
         "nav-disabled-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Navigation disabled text. Light: neutral-400, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for disabled nav text"
@@ -5294,6 +5291,15 @@
           "Use for enabled nav text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Navigation disabled text. Light: neutral-400, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5308,15 +5314,6 @@
       "usageContext": [
         "data-tables"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:50",
-      "description": "Table background. Light: neutral-50, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for table backgrounds"
@@ -5325,6 +5322,15 @@
           "Use for content areas"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:50",
+      "containerQueryAware": true,
+      "description": "Table background. Light: neutral-50, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5339,15 +5345,6 @@
       "usageContext": [
         "table-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Table text. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for table text"
@@ -5356,6 +5353,15 @@
           "Use without table background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Table text. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5370,15 +5376,6 @@
       "usageContext": [
         "table-headers"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "scale:100",
-      "description": "Table header background. Light: neutral-100, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for table header backgrounds"
@@ -5387,6 +5384,15 @@
           "Use for table body"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Table header background. Light: neutral-100, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5401,15 +5407,6 @@
       "usageContext": [
         "table-header-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Table header text. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for table header text"
@@ -5418,6 +5415,15 @@
           "Use for body text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Table header text. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5432,15 +5438,6 @@
       "usageContext": [
         "table-row-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "state:hover",
-      "description": "Table row hover. Light: neutral-50, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for table row hover"
@@ -5449,6 +5446,15 @@
           "Use as default row background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Table row hover. Light: neutral-50, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5463,15 +5469,6 @@
       "usageContext": [
         "table-row-selected"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:100",
-      "description": "Table row selected. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for selected table rows"
@@ -5480,6 +5477,15 @@
           "Use for unselected rows"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Table row selected. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5494,15 +5500,6 @@
       "usageContext": [
         "table-row-selected-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Table row selected text. Light: neutral-950, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for selected row text"
@@ -5511,6 +5508,15 @@
           "Use without selected background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Table row selected text. Light: neutral-950, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5525,15 +5531,6 @@
       "usageContext": [
         "table-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Table border. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for table borders"
@@ -5542,6 +5539,15 @@
           "Use for content borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Table border. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5556,15 +5562,6 @@
       "usageContext": [
         "tooltips"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "scale:900",
-      "description": "Tooltip background. Light: neutral-900, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for tooltip backgrounds"
@@ -5573,6 +5570,15 @@
           "Use for content areas"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "scale:900",
+      "containerQueryAware": true,
+      "description": "Tooltip background. Light: neutral-900, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5587,15 +5593,6 @@
       "usageContext": [
         "tooltip-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Tooltip text. Light: neutral-50, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for tooltip text"
@@ -5604,6 +5601,15 @@
           "Use without tooltip background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Tooltip text. Light: neutral-50, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5620,15 +5626,6 @@
         "dialogs",
         "sheets"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-950"
-      ],
-      "generationRule": "scale:950",
-      "description": "Overlay background. Light: neutral-950, Dark: neutral-950.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for modal backdrops"
@@ -5637,6 +5634,15 @@
           "Use for content backgrounds"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-950"
+      ],
+      "generationRule": "scale:950",
+      "containerQueryAware": true,
+      "description": "Overlay background. Light: neutral-950, Dark: neutral-950.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5651,15 +5657,6 @@
       "usageContext": [
         "overlay-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-50"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Overlay text. Light: neutral-50, Dark: neutral-50.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for text on overlays"
@@ -5668,6 +5665,15 @@
           "Use without overlay background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-50"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Overlay text. Light: neutral-50, Dark: neutral-50.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5683,15 +5689,6 @@
         "loading-states",
         "skeletons"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Skeleton loader background. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for skeleton backgrounds"
@@ -5700,6 +5697,15 @@
           "Use for content backgrounds"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Skeleton loader background. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5714,15 +5720,6 @@
       "usageContext": [
         "skeleton-animation"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "scale:300",
-      "description": "Skeleton loader highlight. Light: neutral-300, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for skeleton animation highlight"
@@ -5731,6 +5728,15 @@
           "Use as static background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "scale:300",
+      "containerQueryAware": true,
+      "description": "Skeleton loader highlight. Light: neutral-300, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5747,15 +5753,6 @@
         "data-viz",
         "primary-series"
       ],
-      "dependsOn": [
-        "silver-true-glacier",
-        "silver-true-glacier-400"
-      ],
-      "generationRule": "scale:500",
-      "description": "Primary chart color. Light: silver-true-glacier-500, Dark: silver-true-glacier-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for primary data series"
@@ -5764,6 +5761,15 @@
           "Use more than 5 chart colors"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-glacier",
+        "silver-true-glacier-400"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Primary chart color. Light: silver-true-glacier-500, Dark: silver-true-glacier-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5780,15 +5786,6 @@
         "data-viz",
         "secondary-series"
       ],
-      "dependsOn": [
-        "silver-true-sky",
-        "silver-true-sky-400"
-      ],
-      "generationRule": "scale:500",
-      "description": "Secondary chart color. Light: silver-true-sky-500, Dark: silver-true-sky-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for secondary data series"
@@ -5797,6 +5794,15 @@
           "Use without chart-1"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-sky",
+        "silver-true-sky-400"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Secondary chart color. Light: silver-true-sky-500, Dark: silver-true-sky-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5813,15 +5819,6 @@
         "data-viz",
         "tertiary-series"
       ],
-      "dependsOn": [
-        "silver-true-citrine",
-        "silver-true-citrine-400"
-      ],
-      "generationRule": "scale:500",
-      "description": "Tertiary chart color. Light: silver-true-citrine-500, Dark: silver-true-citrine-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for tertiary data series"
@@ -5830,6 +5827,15 @@
           "Use as primary color"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-citrine",
+        "silver-true-citrine-400"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Tertiary chart color. Light: silver-true-citrine-500, Dark: silver-true-citrine-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5846,15 +5852,6 @@
         "data-viz",
         "quaternary-series"
       ],
-      "dependsOn": [
-        "silver-true-honey",
-        "silver-true-honey-400"
-      ],
-      "generationRule": "scale:500",
-      "description": "Quaternary chart color. Light: silver-true-honey-500, Dark: silver-true-honey-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for quaternary data series"
@@ -5863,6 +5860,15 @@
           "Use without considering accessibility"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-honey",
+        "silver-true-honey-400"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Quaternary chart color. Light: silver-true-honey-500, Dark: silver-true-honey-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5879,15 +5885,6 @@
         "data-viz",
         "quinary-series"
       ],
-      "dependsOn": [
-        "silver-true-violet",
-        "silver-true-violet-400"
-      ],
-      "generationRule": "scale:500",
-      "description": "Quinary chart color. Light: silver-true-violet-500, Dark: silver-true-violet-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for fifth data series"
@@ -5896,6 +5893,15 @@
           "Add more series without redesigning palette"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "silver-true-violet",
+        "silver-true-violet-400"
+      ],
+      "generationRule": "scale:500",
+      "containerQueryAware": true,
+      "description": "Quinary chart color. Light: silver-true-violet-500, Dark: silver-true-violet-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5910,15 +5916,6 @@
       "usageContext": [
         "scrollbars"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "scale:300",
-      "description": "Scrollbar thumb color. Light: neutral-300, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for scrollbar thumbs"
@@ -5927,6 +5924,15 @@
           "Use for content elements"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "scale:300",
+      "containerQueryAware": true,
+      "description": "Scrollbar thumb color. Light: neutral-300, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5941,15 +5947,6 @@
       "usageContext": [
         "scrollbar-hover"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-600"
-      ],
-      "generationRule": "state:hover",
-      "description": "Scrollbar thumb hover. Light: neutral-400, Dark: neutral-600.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for scrollbar thumb hover"
@@ -5958,6 +5955,15 @@
           "Use as default scrollbar color"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-600"
+      ],
+      "generationRule": "state:hover",
+      "containerQueryAware": true,
+      "description": "Scrollbar thumb hover. Light: neutral-400, Dark: neutral-600.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -5972,15 +5978,6 @@
       "usageContext": [
         "scrollbar-tracks"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "scale:100",
-      "description": "Scrollbar track background. Light: neutral-100, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for scrollbar track backgrounds"
@@ -5989,6 +5986,15 @@
           "Use for content backgrounds"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Scrollbar track background. Light: neutral-100, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -6004,15 +6010,6 @@
         "code-blocks",
         "inline-code"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-900"
-      ],
-      "generationRule": "scale:100",
-      "description": "Code block background. Light: neutral-100, Dark: neutral-900.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for code backgrounds"
@@ -6021,6 +6018,15 @@
           "Use for regular text"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-900"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Code block background. Light: neutral-100, Dark: neutral-900.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -6035,15 +6041,6 @@
       "usageContext": [
         "code-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-100"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Code text color. Light: neutral-900, Dark: neutral-100.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for code text"
@@ -6052,6 +6049,15 @@
           "Use without code background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-100"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Code text color. Light: neutral-900, Dark: neutral-100.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -6066,15 +6072,6 @@
       "usageContext": [
         "code-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Code block border. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for code block borders"
@@ -6083,6 +6080,15 @@
           "Use for content borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Code block border. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -6098,15 +6104,6 @@
         "badges",
         "labels"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:100",
-      "description": "Badge background. Light: neutral-100, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for badge backgrounds"
@@ -6115,6 +6112,15 @@
           "Use for buttons"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:100",
+      "containerQueryAware": true,
+      "description": "Badge background. Light: neutral-100, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -6129,15 +6135,6 @@
       "usageContext": [
         "badge-text"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-100"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Badge text color. Light: neutral-900, Dark: neutral-100.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for badge text"
@@ -6146,6 +6143,15 @@
           "Use without badge background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-100"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Badge text color. Light: neutral-900, Dark: neutral-100.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -6160,15 +6166,6 @@
       "usageContext": [
         "badge-borders"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-700"
-      ],
-      "generationRule": "scale:200",
-      "description": "Badge border. Light: neutral-200, Dark: neutral-700.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for badge borders"
@@ -6177,6 +6174,15 @@
           "Use for content borders"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-700"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Badge border. Light: neutral-200, Dark: neutral-700.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -6192,15 +6198,6 @@
         "avatars",
         "fallback-images"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-800"
-      ],
-      "generationRule": "scale:200",
-      "description": "Avatar fallback background. Light: neutral-200, Dark: neutral-800.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for avatar fallback backgrounds"
@@ -6209,6 +6206,15 @@
           "Use for content backgrounds"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-800"
+      ],
+      "generationRule": "scale:200",
+      "containerQueryAware": true,
+      "description": "Avatar fallback background. Light: neutral-200, Dark: neutral-800.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     },
     {
@@ -6224,15 +6230,6 @@
         "avatar-initials",
         "avatar-icons"
       ],
-      "dependsOn": [
-        "neutral",
-        "neutral-400"
-      ],
-      "generationRule": "contrast:auto",
-      "description": "Avatar fallback text/icon color. Light: neutral-600, Dark: neutral-400.",
-      "generatedAt": "2026-04-17T19:57:12.883Z",
-      "containerQueryAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Use for avatar initials or icons"
@@ -6241,6 +6238,15 @@
           "Use without avatar background"
         ]
       },
+      "userOverride": null,
+      "dependsOn": [
+        "neutral",
+        "neutral-400"
+      ],
+      "generationRule": "contrast:auto",
+      "containerQueryAware": true,
+      "description": "Avatar fallback text/icon color. Light: neutral-600, Dark: neutral-400.",
+      "generatedAt": "2026-04-17T19:57:12.883Z",
       "requiresConfirmation": false
     }
   ]

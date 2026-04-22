@@ -66,11 +66,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Build sites sequentially (Cloudflare workerd port conflict)
         run: pnpm -r --if-present --workspace-concurrency=1 build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: sites/*/dist
-          retention-days: 1
 
   e2e:
     name: E2E Tests
@@ -92,13 +87,9 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright (browsers + system deps)
         working-directory: sites/sean.silvius.me
-        run: pnpm exec playwright install chromium --with-deps
-      - name: Install Playwright system deps
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
       - name: Run E2E tests
         working-directory: sites/sean.silvius.me
         run: pnpm test:e2e

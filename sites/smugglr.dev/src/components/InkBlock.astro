@@ -1,0 +1,19 @@
+---
+/**
+ * InkBlock - Inline inverted highlight. Dark bg, light fg, condensed heading
+ * family, nowrap. Used for brand-as-verb callouts (smuggl) and inline emphasis
+ * (That is the moat.).
+ *
+ * Candidate for upstream rafters composite.
+ */
+interface Props {
+    class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<span
+    class:list={[
+        "inline-block bg-foreground text-background font-heading font-medium whitespace-nowrap px-2",
+        className,
+    ]}><slot /></span>

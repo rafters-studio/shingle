@@ -1,0 +1,183 @@
+---
+/**
+ * MrsBlock - Machine-readable summary. Dark slab, nine sections,
+ * terminal-reference-card aesthetic. Mirrors handoff MRSTerminal.jsx.
+ *
+ * Data is inline (matches handoff MRSData.jsx constants).
+ */
+import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import P from "@/components/ui/typography-p.astro";
+import InkBlock from "@/components/InkBlock.astro";
+import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
+import MrsTable from "@/components/MrsTable.astro";
+
+const MRS_SCOPE = "smugglr is a SQLite sync engine. Single Rust binary. Moves rows between local files, hosted SQLite backends (D1, Turso, rqlite, Datasette, StarbaseDB, SQLite Cloud), peers on the same LAN via encrypted UDP multicast, peers across the network via direct host-to-host, and peers across the internet via S3 relay. Content-hashed delta sync. No coordinator service. --output json on every command. Typed exit codes on every command.";
+
+const MRS_INSTALL: [string, string, string][] = [
+    ["Native CLI", "cargo install smugglr", "Rust binary, also pre-built for macOS/Linux/Windows"],
+    ["Rust crate", "cargo add smugglr-core", "Embeddable engine, no CLI deps"],
+    ["npm (WASM)", "npm install smugglr", "Browser + Node + Bun WASM build"],
+    ["Script", "curl -fsSL https://smugglr.dev/install | bash", "Signed binary installer"],
+];
+
+const MRS_TARGETS: [string, string, string, string, string][] = [
+    ["Local SQLite",   "local",        "Filesystem",          "n/a",              "rusqlite direct access"],
+    ["Cloudflare D1",  "d1",           "HTTP REST",           "Bearer token",     "account_id + database"],
+    ["Turso / libSQL", "turso",        "Hrana (HTTP + WS)",   "JWT",              "sqld-compatible"],
+    ["rqlite",         "rqlite",       "HTTP REST",           "Basic / mTLS",     "Self-hosted Raft cluster"],
+    ["Datasette",      "datasette",    "HTTP JSON",           "Plugin-based",     "Read-only by default"],
+    ["StarbaseDB",     "starbasedb",   "HTTPS + WebSocket",   "API key",          "Edge (CF Workers + DO)"],
+    ["SQLite Cloud",   "sqlite-cloud", "HTTP REST (Weblite)", "API key",          "Managed cluster"],
+];
+
+const MRS_SHAPES: [string, string, string, string][] = [
+    ["Direct sync",       "push · pull · sync · diff",        "Host sees target directly",     "Default case, everyday use"],
+    ["Watch daemon",      "watch",                            "Continuous direct sync",        "Background sync, JSONL per tick"],
+    ["S3 relay",          "stash · retrieve",                 "Host → S3 → Host",              "Machines cannot see each other"],
+    ["LAN broadcast",     "broadcast",                        "Masterless UDP multicast on LAN",     "Same subnet. Every node broadcasts and listens. Key possession = membership. Content-hash idempotent. Heartbeat reconciles late joiners."],
+    ["Snapshot/restore",  "snapshot · snapshots · restore",   "Point-in-time dump to relay",   "Portable across targets"],
+];
+
+const LAN_SEMANTICS: [string, string][] = [
+    ["Masterless.",                      "No primary, no secondary, no coordinator, no leader election. Every node is equal."],
+    ["Peer-symmetric.",                  "Every node is both a broadcaster and a listener. No client/server distinction."],
+    ["Membership = key possession.",     "The shared encryption key IS the access control. No auth handshake, no identity management, no certificates. Have the key, you are on the network. Key rotation is how a machine leaves."],
+    ["Idempotent apply.",                "Incoming row compared against local content hash: new or different → upsert, identical → skip. Applying the same row twice is a no-op, so lost packets are safe."],
+    ["Last-received-wins on divergence.", "If two peers hold the same primary key with different contents, the receiver replaces local with incoming. UUIDv7 primary keys make concurrent divergent writes on the same logical entity rare in practice: time-ordered IDs mean two nodes creating \"the same thing\" at the same instant produce different rows, not a merge conflict. No vector clocks, no CRDTs."],
+    ["Heartbeat reconciliation.",        "Every node periodically broadcasts a primary_key → content_hash map for all rows it holds. Peers compare against local state and pull any missing or differing rows. Covers late joiners, missed packets, and rejoining after a partition."],
+];
+
+const MRS_COMMANDS: [string, string, string, string][] = [
+    ["push",       "Send local rows to target",         "text / json",      "0 1 2 3 4"],
+    ["pull",       "Fetch target rows to local",        "text / json",      "0 1 2 3 4"],
+    ["sync",       "Bidirectional push + pull",         "text / json",      "0 1 2 3 4"],
+    ["diff",       "Report differences, write nothing", "text / json",      "0 1 2"],
+    ["watch",      "Continuous sync on interval",       "JSONL per tick",   "0 1 2 3"],
+    ["stash",      "Upload diff to S3 relay",           "text / json",      "0 1 2 3"],
+    ["retrieve",   "Pull stashed diff from S3",         "text / json",      "0 1 2 3 5"],
+    ["broadcast",  "Encrypted UDP sync on LAN",         "text / json",      "0 1 2 3"],
+    ["snapshot",   "Point-in-time dump to relay",       "text / json",      "0 1 2 3"],
+    ["snapshots",  "List available snapshots",          "text / json",      "0 1 2 3"],
+    ["restore",    "Restore from snapshot",             "text / json",      "0 1 2 3 5"],
+    ["status",     "Report current config + state",     "text / json",      "0 2"],
+];
+
+const MRS_EXIT: [string, string][] = [
+    ["0", "Success"],
+    ["1", "General error"],
+    ["2", "Config error"],
+    ["3", "Network / transient, retry suggested"],
+    ["4", "Conflict, resolution required"],
+    ["5", "Not found (snapshot, retrieve key, etc.)"],
+];
+
+const MRS_OUTPUT: [string, string][] = [
+    ["--output text",  "Human-readable, columnar (default)"],
+    ["--output json",  "Structured, stable schema, agent-parseable"],
+    ["--verbose, -v",  "Detailed progress to stderr"],
+    ["--dry-run",      "push / pull / sync: reads, diffs, reports, writes nothing"],
+    ["exit codes",     "Typed. Agents can branch without parsing output."],
+];
+
+const MRS_CONSTRAINTS: [string, string][] = [
+    ["No WAL",                   "smugglr does not set journal_mode. Safe for sole-writer; unsafe as a default."],
+    ["No state in user database", "Cursors, config, PID live in smugglr's own config space."],
+    ["No server",                "smugglr does not run a daemon you connect to. Watch is a local process on an interval."],
+];
+
+const MRS_VS: [string, string, string][] = [
+    ["Litestream",            "SQLite → S3 continuous backup",          "Peer-to-peer sync, LAN, hosted backends, pull"],
+    ["rqlite",                "Raft-clustered SQLite (its own cluster)", "Sync to external targets, cross-vendor portability"],
+    ["ElectricSQL",           "Postgres ↔ SQLite with CRDT sync",        "Needs sync service"],
+    ["PowerSync",             "Backend-DB ↔ SQLite managed sync",        "OSS, self-hosted simplicity, LAN"],
+    ["Turso embedded",        "Turso-to-local replicas",                 "Any non-Turso target"],
+    ["syncthing / rsync",     "Filesystem sync",                         "Row awareness, content-hashed delta, SQL writes"],
+    ["smugglr",               "Host-to-host, LAN UDP, S3 relay, hosted SQLite backends, one binary", "Transforms (paid), non-SQLite databases"],
+];
+---
+
+<section class="bg-foreground text-background">
+<Container size="5xl" padding="20" gap="12">
+    <div class="flex items-center justify-between gap-4 pb-3 border-b border-border/50">
+        <div class="flex items-center gap-3">
+            <span class="font-mono text-sm text-primary">»</span>
+            <span class="font-heading font-medium text-sm uppercase tracking-widest">Machine-readable summary</span>
+            <span class="text-muted-foreground">&middot;</span>
+            <span class="font-heading font-light text-sm text-muted-foreground">for the 90%. dense &middot; structured &middot; decision-useful.</span>
+        </div>
+        <a href="/llms.txt" class="font-mono text-xs text-muted-foreground hover:opacity-80 transition-opacity">GET /llms.txt &#8599;</a>
+    </div>
+
+    <section>
+        <MrsSectionHeader hash="## 01" label="scope" syn="one paragraph" />
+        <P class="max-w-prose">{MRS_SCOPE}</P>
+    </section>
+
+    <section>
+        <MrsSectionHeader hash="## 02" label="install" syn="same algorithm · same adapters · same verbs" />
+        <MrsTable cols={["Channel", "Command", "Artifact"]} rows={MRS_INSTALL} monoCols={[1]} />
+    </section>
+
+    <section>
+        <MrsSectionHeader hash="## 03" label="targets" syn="one HTTP SQL plugin · per-target profiles" />
+        <MrsTable cols={["Target", "Profile", "Protocol", "Auth", "Notes"]} rows={MRS_TARGETS} monoCols={[1, 2, 3]} />
+    </section>
+
+    <section id="shapes">
+        <MrsSectionHeader hash="## 04" label="shapes" syn="one engine · five topologies" />
+        <MrsTable cols={["Shape", "Commands", "Topology", "When to use"]} rows={MRS_SHAPES} monoCols={[1]} />
+
+        <div class="mt-8 border-l-2 border-primary pl-5">
+            <header class="mb-4">
+                <span class="font-heading font-medium text-xs uppercase tracking-wider">LAN broadcast semantics</span>
+            </header>
+            <P class="mb-5 max-w-prose">
+                LAN broadcast is a <InkBlock>masterless, controllerless mesh</InkBlock>. No coordinator. No leader. No central node. Every peer broadcasts and listens on equal footing. Key possession is the membership check. Nothing else in this space works this way.
+            </P>
+            <dl class="grid gap-3">
+                {LAN_SEMANTICS.map(([term, body]) => (
+                    <div class="flex flex-col gap-0.5 md:flex-row md:gap-3">
+                        <dt class="font-mono font-medium text-sm md:w-64 md:shrink-0">{term}</dt>
+                        <dd class="font-sans font-light text-sm leading-relaxed text-muted-foreground max-w-prose">{body}</dd>
+                    </div>
+                ))}
+            </dl>
+        </div>
+    </section>
+
+    <section>
+        <MrsSectionHeader hash="## 05" label="commands" syn="typed exit codes on every command" />
+        <MrsTable cols={["Command", "Purpose", "Output", "Exit"]} rows={MRS_COMMANDS} monoCols={[2, 3]} />
+    </section>
+
+    <Grid columns={2} gap="12">
+        <section>
+            <MrsSectionHeader hash="## 06" label="exit codes" />
+            <MrsTable cols={["Code", "Meaning"]} rows={MRS_EXIT} />
+        </section>
+
+        <section>
+            <MrsSectionHeader hash="## 07" label="output contract" />
+            <MrsTable cols={["Flag", "Behaviour"]} rows={MRS_OUTPUT} />
+        </section>
+    </Grid>
+
+    <section>
+        <MrsSectionHeader hash="## 08" label="constraints" syn="what smugglr refuses to do" />
+        <Grid columns={2} gap="0">
+            {MRS_CONSTRAINTS.map(([rule, detail]) => (
+                <div class="py-3.5 px-5 border-b border-border/40">
+                    <div class="font-heading font-medium text-sm uppercase tracking-wide mb-1">&times; {rule}</div>
+                    <div class="font-sans font-light text-sm leading-relaxed text-muted-foreground">{detail}</div>
+                </div>
+            ))}
+        </Grid>
+    </section>
+
+    <section>
+        <MrsSectionHeader hash="## 09" label="vs alternatives" syn="specific, falsifiable comparisons" />
+        <MrsTable cols={["Tool", "Covers", "Does not cover"]} rows={MRS_VS} />
+    </section>
+</Container>
+</section>
