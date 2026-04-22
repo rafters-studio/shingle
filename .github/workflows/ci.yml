@@ -87,13 +87,9 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright (browsers + system deps)
         working-directory: sites/sean.silvius.me
-        run: pnpm exec playwright install chromium --with-deps
-      - name: Install Playwright system deps
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
       - name: Run E2E tests
         working-directory: sites/sean.silvius.me
         run: pnpm test:e2e
