@@ -8,6 +8,10 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
 
+  markdown: {
+    smartypants: false,
+  },
+
   integrations: [
     mdx(),
     sitemap({
