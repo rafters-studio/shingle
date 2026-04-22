@@ -1,0 +1,68 @@
+---
+/**
+ * HeroInstallCTA - Single-row install command with copy-on-click and subline.
+ * Mirrors handoff Hero.jsx HeroInstallCTA: dark pill, mono command, citrine
+ * confirmation state on copy.
+ *
+ * Blocked on rafters copy-button composite (#1399). Uses clipboard primitive
+ * inline until that lands.
+ */
+interface Props {
+    command: string;
+    subline: string;
+}
+const { command, subline } = Astro.props;
+---
+
+<div class="flex flex-col items-center gap-2.5 w-full">
+    <button
+        type="button"
+        data-install-copy={command}
+        class="flex items-center gap-3.5 bg-foreground text-background rounded-md px-4 py-3 font-mono text-sm cursor-pointer border border-border max-w-full overflow-hidden hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-opacity"
+    >
+        <span class="select-none text-muted-foreground" aria-hidden="true">$</span>
+        <span class="whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-left">{command}</span>
+        <span
+            data-install-copy-label
+            class="font-heading text-xs font-medium uppercase tracking-wider px-2 py-0.5 rounded-sm bg-muted text-muted-foreground"
+        >copy</span>
+    </button>
+    <p class="font-sans font-light text-sm text-muted-foreground text-center">{subline}</p>
+    <span data-install-copy-live class="sr-only" aria-live="polite"></span>
+</div>
+
+<script>
+    function wireInstallCopy() {
+        const btns = document.querySelectorAll<HTMLButtonElement>("button[data-install-copy]");
+        btns.forEach((btn) => {
+            if (btn.dataset.installWired === "true") return;
+            btn.dataset.installWired = "true";
+            btn.addEventListener("click", async () => {
+                const text = btn.dataset.installCopy;
+                if (!text) return;
+                const label = btn.querySelector<HTMLElement>("[data-install-copy-label]");
+                const live = btn.parentElement?.querySelector<HTMLElement>("[data-install-copy-live]");
+                try {
+                    await navigator.clipboard.writeText(text);
+                    if (label) {
+                        label.textContent = "✓ copied";
+                        label.classList.remove("bg-muted", "text-muted-foreground");
+                        label.classList.add("bg-primary", "text-primary-foreground");
+                    }
+                    if (live) live.textContent = "Copied";
+                    window.setTimeout(() => {
+                        if (label) {
+                            label.textContent = "copy";
+                            label.classList.add("bg-muted", "text-muted-foreground");
+                            label.classList.remove("bg-primary", "text-primary-foreground");
+                        }
+                        if (live) live.textContent = "";
+                    }, 1400);
+                } catch {}
+            });
+        });
+    }
+
+    wireInstallCopy();
+    document.addEventListener("astro:page-load", wireInstallCopy);
+</script>

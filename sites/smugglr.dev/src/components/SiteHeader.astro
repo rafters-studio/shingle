@@ -1,0 +1,21 @@
+---
+/**
+ * SiteHeader - Top-of-page header, always visible.
+ * Mirrors handoff Hero.jsx SiteHeader: wordmark + version pill (left),
+ * nav links (right). Candidate for upstream rafters composite.
+ */
+---
+
+<header class="flex items-center justify-between border-b border-border px-10 py-5 font-heading">
+    <div class="flex items-baseline gap-3">
+        <span class="font-heading font-semibold text-xl tracking-tight text-foreground">smugglr</span>
+        <span class="border border-border rounded-sm px-1.5 py-0.5 font-heading text-xs uppercase tracking-wider text-muted-foreground">v0.3.0 &middot; beta</span>
+    </div>
+    <nav class="flex items-center gap-7 font-sans text-sm text-muted-foreground">
+        <a href="/docs/" class="hover:text-foreground transition-colors">docs</a>
+        <a href="/docs/cli-reference/" class="hover:text-foreground transition-colors">cli</a>
+        <a href="#targets" class="hover:text-foreground transition-colors">targets</a>
+        <a href="#shapes" class="hover:text-foreground transition-colors">shapes</a>
+        <a href="https://github.com/rafters-studio/smugglr" class="hover:text-foreground transition-colors">github</a>
+    </nav>
+</header>
