@@ -23,7 +23,7 @@
   "routes": [
     {
       "pattern": "smugglr.dev",
-      "zone_id": "TODO_SMUGGLR_ZONE_ID",
+      "zone_id": "f63315125530bcc83df2de296d1d8fed",
       "custom_domain": true,
     },
   ],
