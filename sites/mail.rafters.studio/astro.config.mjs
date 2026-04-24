@@ -14,6 +14,10 @@ const prettyCodeOptions = {
 export default defineConfig({
   site: "https://rafters.studio",
 
+  build: {
+    assets: "mail/_astro",
+  },
+
   integrations: [
     mdx({
       rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
