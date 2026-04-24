@@ -1,5 +1,10 @@
 ---
-import CopyButton from '@/components/composites/CopyButton.astro';
+import Card from '@/components/ui/card.astro';
+import Tabs from '@/components/ui/tabs.astro';
+import TabsContent from '@/components/ui/tabs-content.astro';
+import TabsList from '@/components/ui/tabs-list.astro';
+import TabsTrigger from '@/components/ui/tabs-trigger.astro';
+import Button from '@/components/ui/button.astro';
 
 interface Cmd {
   pkg: 'npm' | 'pnpm' | 'bun' | 'deno';
@@ -13,46 +18,54 @@ interface Props {
 }
 
 const { primary, followUps, footline = [] } = Astro.props;
-const tabs = primary.map((c) => c.pkg);
-const commandMapJson = JSON.stringify(Object.fromEntries(primary.map((c) => [c.pkg, c.cmd])));
+const tabsId = 'install';
+const defaultPkg = primary[0]?.pkg ?? 'pnpm';
 ---
 
-<div class="border border-border bg-background overflow-hidden rounded-md">
-  <div role="tablist" class="flex border-b border-border bg-card">
-    {tabs.map((pkg, i) => (
-      <button
-        type="button"
-        role="tab"
-        data-install-tab={pkg}
-        aria-selected={i === 0 ? 'true' : 'false'}
-        class="px-4 py-3 font-mono text-label-small uppercase tracking-wide text-muted-foreground border-r border-border last:border-r-0 cursor-pointer hover:text-foreground aria-selected:bg-background aria-selected:text-foreground transition-colors"
-      >
-        {pkg}
-      </button>
-    ))}
-  </div>
+<Card class="overflow-hidden">
+  <Tabs id={tabsId} defaultValue={defaultPkg}>
+    <TabsList class="border-b border-border bg-card">
+      {primary.map((c) => (
+        <TabsTrigger tabsId={tabsId} value={c.pkg} defaultChecked={c.pkg === defaultPkg}>
+          {c.pkg}
+        </TabsTrigger>
+      ))}
+    </TabsList>
 
-  <div class="relative bg-neutral-950 text-neutral-100 p-6 font-mono text-body-small leading-loose">
-    <CopyButton target="#install-cmd-active" class="absolute top-4 right-4" />
+    {primary.map((c) => {
+      const targetId = `install-cmd-${c.pkg}`;
+      return (
+        <TabsContent
+          tabsId={tabsId}
+          value={c.pkg}
+          defaultActive={c.pkg === defaultPkg}
+          class="relative bg-neutral-950 text-neutral-100 p-6 font-mono text-body-small leading-loose"
+        >
+          <Button variant="outline" size="sm" class="absolute top-4 right-4" data-copy-target={`#${targetId}`}>
+            COPY
+          </Button>
 
-    <div class="text-neutral-500"># one package, drop into any Workers project</div>
-    <div>
-      <span class="text-foreground mr-2">$</span>
-      <span id="install-cmd-active" data-install-active>{primary[0].cmd}</span>
-    </div>
+          <div class="text-neutral-500"># one package, drop into any Workers project</div>
+          <div>
+            <span class="text-foreground mr-2">$</span>
+            <span id={targetId}>{c.cmd}</span>
+          </div>
 
-    {followUps.map((cmd, i) => (
-      <div class="mt-4">
-        <div class="text-neutral-500">
-          {i === 0 ? '# wire it up' : '# receive your first email'}
-        </div>
-        <div>
-          <span class="text-foreground mr-2">$</span>
-          <span>{cmd}</span>
-        </div>
-      </div>
-    ))}
-  </div>
+          {followUps.map((cmd, i) => (
+            <div class="mt-4">
+              <div class="text-neutral-500">
+                {i === 0 ? '# wire it up' : '# receive your first email'}
+              </div>
+              <div>
+                <span class="text-foreground mr-2">$</span>
+                <span>{cmd}</span>
+              </div>
+            </div>
+          ))}
+        </TabsContent>
+      );
+    })}
+  </Tabs>
 
   {footline.length > 0 && (
     <div class="flex flex-wrap gap-6 border-t border-border bg-card px-6 py-3 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
@@ -61,26 +74,21 @@ const commandMapJson = JSON.stringify(Object.fromEntries(primary.map((c) => [c.p
       ))}
     </div>
   )}
-</div>
+</Card>
 
-<script is:inline type="application/json" data-install-commands set:html={commandMapJson} />
 <script is:inline>
-  (function () {
-    var tabs = document.querySelectorAll('[data-install-tab]');
-    var active = document.querySelector('[data-install-active]');
-    var dataEl = document.querySelector('[data-install-commands]');
-    if (!tabs.length || !active || !dataEl) return;
-    var commandMap = JSON.parse(dataEl.textContent || '{}');
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        var pkg = tab.getAttribute('data-install-tab');
-        tabs.forEach(function (t) {
-          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
-        });
-        if (pkg && commandMap[pkg]) {
-          active.textContent = commandMap[pkg];
-        }
+  document.querySelectorAll('[data-copy-target]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var sel = btn.getAttribute('data-copy-target');
+      var el = sel ? document.querySelector(sel) : null;
+      if (!el || !navigator.clipboard) return;
+      navigator.clipboard.writeText(el.textContent || '').then(function () {
+        var prev = btn.textContent;
+        btn.textContent = 'COPIED';
+        setTimeout(function () {
+          btn.textContent = prev;
+        }, 1200);
       });
     });
-  })();
+  });
 </script>

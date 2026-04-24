@@ -1,8 +1,11 @@
 ---
 import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import GridItem from '@/components/ui/grid-item.astro';
+import Badge from '@/components/ui/badge.astro';
+import Code from '@/components/ui/typography-code.astro';
 import SectionHead from '@/components/composites/SectionHead.astro';
 import ModuleCell from '@/components/composites/ModuleCell.astro';
-import IntelTag from '@/components/composites/IntelTag.astro';
 ---
 
 <section id="modules" class="border-b border-border">
@@ -11,88 +14,104 @@ import IntelTag from '@/components/composites/IntelTag.astro';
       One package. Eight composable surfaces. All documented, all adapters, no magic globals.
     </SectionHead>
 
-    <div class="grid grid-cols-12 gap-px bg-border">
-      <ModuleCell pathHead="core" pathTail="inbound" title="Inbound" span="4">
-        <Fragment slot="description">
-          Parse MIME, run through your <code class="font-mono text-code-small">InboundAdapter</code>, hand off to a handler. Attachments stream to blob storage. Returns a threaded message row.
-        </Fragment>
-        <Fragment slot="intel">
-          <IntelTag label="load" value="3/10" />
-          <IntelTag label="rfc" value="5322" variant="accent" />
-        </Fragment>
-      </ModuleCell>
+    <Grid columns={3} gap="4">
+      <GridItem>
+        <ModuleCell pathHead="core" pathTail="inbound" title="Inbound">
+          <Fragment slot="description">
+            Parse MIME, run through your <Code>InboundAdapter</Code>, hand off to a handler. Attachments stream to blob storage. Returns a threaded message row.
+          </Fragment>
+          <Fragment slot="intel">
+            <Badge variant="outline">load 3/10</Badge>
+            <Badge variant="accent">rfc 5322</Badge>
+          </Fragment>
+        </ModuleCell>
+      </GridItem>
 
-      <ModuleCell pathHead="core" pathTail="outbound" title="Outbound" span="4">
-        <Fragment slot="description">
-          Compose, reply, forward. Threading headers handled. <code class="font-mono text-code-small">EmailProvider</code> interface swaps Resend, Postmark, or SES without touching caller code.
-        </Fragment>
-        <Fragment slot="intel">
-          <IntelTag label="providers" value="3" />
-          <IntelTag label="webhooks" value="yes" />
-        </Fragment>
-      </ModuleCell>
+      <GridItem>
+        <ModuleCell pathHead="core" pathTail="outbound" title="Outbound">
+          <Fragment slot="description">
+            Compose, reply, forward. Threading headers handled. <Code>EmailProvider</Code> interface swaps Resend, Postmark, or SES without touching caller code.
+          </Fragment>
+          <Fragment slot="intel">
+            <Badge variant="outline">providers 3</Badge>
+            <Badge variant="outline">webhooks yes</Badge>
+          </Fragment>
+        </ModuleCell>
+      </GridItem>
 
-      <ModuleCell pathHead="core" pathTail="threading" title="Threading" span="4">
-        <Fragment slot="description">
-          Conversation grouping that actually matches what Apple Mail and Gmail do. <code class="font-mono text-code-small">References</code>, <code class="font-mono text-code-small">In-Reply-To</code>, <code class="font-mono text-code-small">Message-ID</code>. No heuristic fuzz.
-        </Fragment>
-        <Fragment slot="intel">
-          <IntelTag label="rfc" value="5322 §3.6.4" variant="accent" />
-        </Fragment>
-      </ModuleCell>
+      <GridItem>
+        <ModuleCell pathHead="core" pathTail="threading" title="Threading">
+          <Fragment slot="description">
+            Conversation grouping that actually matches what Apple Mail and Gmail do. <Code>References</Code>, <Code>In-Reply-To</Code>, <Code>Message-ID</Code>. No heuristic fuzz.
+          </Fragment>
+          <Fragment slot="intel">
+            <Badge variant="accent">rfc 5322 §3.6.4</Badge>
+          </Fragment>
+        </ModuleCell>
+      </GridItem>
 
-      <ModuleCell pathHead="core" pathTail="storage" title="Blob storage" span="4">
-        <Fragment slot="description">
-          Attachments and raw MIME land in <code class="font-mono text-code-small">BlobStorage</code>. R2 implementation ships; the interface is eight methods. Swap for S3 or whatever.
-        </Fragment>
-        <Fragment slot="intel">
-          <IntelTag label="methods" value="8" />
-          <IntelTag label="backend" value="R2 · S3" />
-        </Fragment>
-      </ModuleCell>
+      <GridItem>
+        <ModuleCell pathHead="core" pathTail="storage" title="Blob storage">
+          <Fragment slot="description">
+            Attachments and raw MIME land in <Code>BlobStorage</Code>. R2 implementation ships; the interface is eight methods. Swap for S3 or whatever.
+          </Fragment>
+          <Fragment slot="intel">
+            <Badge variant="outline">methods 8</Badge>
+            <Badge variant="outline">backend R2 · S3</Badge>
+          </Fragment>
+        </ModuleCell>
+      </GridItem>
 
-      <ModuleCell pathHead="core" pathTail="classify" title="Classification" span="4">
-        <Fragment slot="description">
-          Route incoming mail through Workers AI (DeBERTa-v3). Tag, filter, fan out. Or disable it entirely and write your own rules — the hook is one function.
-        </Fragment>
-        <Fragment slot="intel">
-          <IntelTag label="model" value="deberta-v3" />
-          <IntelTag label="opt-in" />
-        </Fragment>
-      </ModuleCell>
+      <GridItem>
+        <ModuleCell pathHead="core" pathTail="classify" title="Classification">
+          <Fragment slot="description">
+            Route incoming mail through Workers AI (DeBERTa-v3). Tag, filter, fan out. Or disable it entirely and write your own rules — the hook is one function.
+          </Fragment>
+          <Fragment slot="intel">
+            <Badge variant="outline">model deberta-v3</Badge>
+            <Badge variant="outline">opt-in</Badge>
+          </Fragment>
+        </ModuleCell>
+      </GridItem>
 
-      <ModuleCell pathHead="core" pathTail="newsletters" title="Newsletters" span="4">
-        <Fragment slot="description">
-          Mailing lists and broadcasts on top of the same schema. Mirrors into platform tables so you can query subscribers with the rest of your app.
-        </Fragment>
-        <Fragment slot="intel">
-          <IntelTag label="mirror" value="yes" />
-        </Fragment>
-      </ModuleCell>
+      <GridItem>
+        <ModuleCell pathHead="core" pathTail="newsletters" title="Newsletters">
+          <Fragment slot="description">
+            Mailing lists and broadcasts on top of the same schema. Mirrors into platform tables so you can query subscribers with the rest of your app.
+          </Fragment>
+          <Fragment slot="intel">
+            <Badge variant="outline">mirror yes</Badge>
+          </Fragment>
+        </ModuleCell>
+      </GridItem>
 
-      <ModuleCell pathHead="imap" pathTail="server" title="Native IMAP — on Durable Objects." span="8">
-        <Fragment slot="description">
-          The reason this project exists. A full IMAP server that pins session state to a Durable Object per user. Handles <code class="font-mono text-code-small">LOGIN</code>, <code class="font-mono text-code-small">SELECT</code>, <code class="font-mono text-code-small">FETCH</code>, <code class="font-mono text-code-small">UID</code>, <code class="font-mono text-code-small">IDLE</code>, <code class="font-mono text-code-small">APPEND</code>, <code class="font-mono text-code-small">SEARCH</code>, flags, and the 23 other commands your client actually sends. Apple Mail and Thunderbird connect on TLS:993 without knowing the backend is a Worker.
-        </Fragment>
-        <Fragment slot="intel">
-          <IntelTag label="rfc" value="9051" variant="accent" />
-          <IntelTag label="commands" value="31" />
-          <IntelTag label="auth" value="APP-PASS · OAUTH2" />
-          <IntelTag label="tls" value="1.3" />
-        </Fragment>
-      </ModuleCell>
+      <GridItem colSpan={2}>
+        <ModuleCell pathHead="imap" pathTail="server" title="Native IMAP — on Durable Objects.">
+          <Fragment slot="description">
+            The reason this project exists. A full IMAP server that pins session state to a Durable Object per user. Handles <Code>LOGIN</Code>, <Code>SELECT</Code>, <Code>FETCH</Code>, <Code>UID</Code>, <Code>IDLE</Code>, <Code>APPEND</Code>, <Code>SEARCH</Code>, flags, and the 23 other commands your client actually sends. Apple Mail and Thunderbird connect on TLS:993 without knowing the backend is a Worker.
+          </Fragment>
+          <Fragment slot="intel">
+            <Badge variant="accent">rfc 9051</Badge>
+            <Badge variant="outline">commands 31</Badge>
+            <Badge variant="outline">auth APP-PASS · OAUTH2</Badge>
+            <Badge variant="outline">tls 1.3</Badge>
+          </Fragment>
+        </ModuleCell>
+      </GridItem>
 
-      <ModuleCell pathHead="imap" pathTail="deploy" title="Where it runs." span="4">
-        <Fragment slot="description">
-          Fly, Railway, Fargate, any Docker host, or a bare VPS. The Worker is the source of truth; the IMAP process is a thin port-993 translator.
-        </Fragment>
-        <Fragment slot="intel">
-          <IntelTag label="fly" />
-          <IntelTag label="railway" />
-          <IntelTag label="docker" />
-          <IntelTag label="vps" />
-        </Fragment>
-      </ModuleCell>
-    </div>
+      <GridItem>
+        <ModuleCell pathHead="imap" pathTail="deploy" title="Where it runs.">
+          <Fragment slot="description">
+            Fly, Railway, Fargate, any Docker host, or a bare VPS. The Worker is the source of truth; the IMAP process is a thin port-993 translator.
+          </Fragment>
+          <Fragment slot="intel">
+            <Badge variant="outline">fly</Badge>
+            <Badge variant="outline">railway</Badge>
+            <Badge variant="outline">docker</Badge>
+            <Badge variant="outline">vps</Badge>
+          </Fragment>
+        </ModuleCell>
+      </GridItem>
+    </Grid>
   </Container>
 </section>

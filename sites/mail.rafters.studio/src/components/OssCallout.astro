@@ -1,7 +1,11 @@
 ---
 import Container from '@/components/ui/container.astro';
+import Card from '@/components/ui/card.astro';
+import Grid from '@/components/ui/grid.astro';
+import GridItem from '@/components/ui/grid-item.astro';
 import H3 from '@/components/ui/typography-h3.astro';
 import P from '@/components/ui/typography-p.astro';
+import Code from '@/components/ui/typography-code.astro';
 import LinkButton from '@/components/composites/LinkButton.astro';
 
 const repo = 'https://github.com/rafters-studio/mail';
@@ -9,31 +13,32 @@ const repo = 'https://github.com/rafters-studio/mail';
 
 <section id="oss" class="border-b border-border">
   <Container size="6xl" padding="20">
-    <div class="border border-border bg-background rounded-md p-8">
-      <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center">
-        <div class="flex flex-col gap-3">
-          <H3 size="title-large" tracking="tight" class="m-0">
-            Open source.
-            <span class="font-mono border-b-2 border-foreground pb-0.5">MIT</span>.
-          </H3>
-          <P size="body-medium" color="muted-foreground" class="max-w-prose m-0">
-            The whole thing lives at <code class="font-mono">rafters-studio/mail</code>. Issues welcome.
-            RFC nitpicks especially welcome.
-          </P>
-        </div>
+    <Card class="p-8">
+      <Grid columns={2} gap="8" class="lg:items-center">
+        <GridItem>
+          <div class="flex flex-col gap-3">
+            <H3 size="title-large" tracking="tight" class="m-0">
+              Open source.
+              <span class="font-mono border-b-2 border-foreground pb-0.5">MIT</span>.
+            </H3>
+            <P size="body-medium" color="muted-foreground" class="max-w-prose m-0">
+              The whole thing lives at <Code>rafters-studio/mail</Code>. Issues welcome.
+              RFC nitpicks especially welcome.
+            </P>
+          </div>
+        </GridItem>
 
-        <div class="flex flex-col items-start gap-3 lg:items-end">
-          <a
-            href={repo}
-            class="inline-flex items-center gap-2 border border-border rounded-sm px-3 py-2 font-mono text-label-small text-muted-foreground hover:text-foreground hover:border-foreground no-underline transition-colors"
-          >
-            <span aria-hidden="true">★</span>
-            <strong class="text-foreground">rafters-studio / mail</strong>
-            <span aria-hidden="true">↗</span>
-          </a>
-          <LinkButton href={repo} variant="outline" external>View on GitHub</LinkButton>
-        </div>
-      </div>
-    </div>
+        <GridItem>
+          <div class="flex flex-col items-start gap-3 lg:items-end">
+            <LinkButton href={repo} variant="outline" external>
+              <span aria-hidden="true">★</span>
+              <strong class="mx-2">rafters-studio / mail</strong>
+              <span aria-hidden="true">↗</span>
+            </LinkButton>
+            <LinkButton href={repo} variant="outline" external>View on GitHub</LinkButton>
+          </div>
+        </GridItem>
+      </Grid>
+    </Card>
   </Container>
 </section>
