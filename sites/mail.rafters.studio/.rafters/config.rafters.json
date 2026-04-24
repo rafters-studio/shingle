@@ -23,6 +23,8 @@
       "kbd",
       "label",
       "separator",
+      "table",
+      "tabs",
       "typography"
     ],
     "primitives": [

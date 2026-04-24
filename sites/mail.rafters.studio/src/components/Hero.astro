@@ -1,8 +1,9 @@
 ---
 import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import GridItem from '@/components/ui/grid-item.astro';
 import H1 from '@/components/ui/typography-h1.astro';
 import P from '@/components/ui/typography-p.astro';
-import EyebrowLabel from '@/components/composites/EyebrowLabel.astro';
 import InstallCard from '@/components/composites/InstallCard.astro';
 
 const installPrimary = [
@@ -20,7 +21,6 @@ const installFollowUps = [
 const footline = [
   { label: 'bundle', value: '27 kb gz' },
   { label: 'cold start', value: '< 12 ms' },
-  { label: 'cov', value: 'AAA' },
 ];
 
 const meta = [
@@ -33,8 +33,6 @@ const meta = [
 
 <section class="border-b border-border">
   <Container size="6xl" padding="16" gap="10">
-    <EyebrowLabel dot tag="@rafters/mail">v0.1 · pre-release</EyebrowLabel>
-
     <H1 size="display-large" tracking="tight" class="leading-tight">
       <span class="bg-foreground text-background px-2">Email</span>
       on the edge.
@@ -42,7 +40,7 @@ const meta = [
     </H1>
 
     <P size="body-large" color="muted-foreground" class="max-w-prose m-0">
-      A full-stack email framework for Cloudflare Workers. Inbound, outbound,
+      A full-stack email framework for the edge. Inbound, outbound,
       threading, blob storage, classification, and a native IMAP server — all
       without a third-party inbox.
     </P>
@@ -55,13 +53,15 @@ const meta = [
 
     <InstallCard primary={installPrimary} followUps={installFollowUps} footline={footline} />
 
-    <div class="grid grid-cols-2 gap-6 border-t border-border border-dashed pt-6 lg:grid-cols-4">
+    <Grid columns={4} gap="6">
       {meta.map(({ label, value }) => (
-        <div class="flex flex-col gap-1 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
-          <span>{label}</span>
-          <span class="text-foreground">{value}</span>
-        </div>
+        <GridItem>
+          <div class="flex flex-col gap-1 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
+            <span>{label}</span>
+            <span class="text-foreground">{value}</span>
+          </div>
+        </GridItem>
       ))}
-    </div>
+    </Grid>
   </Container>
 </section>

@@ -1,50 +1,55 @@
 ---
 import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import GridItem from '@/components/ui/grid-item.astro';
 import P from '@/components/ui/typography-p.astro';
 import Brand from '@/components/composites/Brand.astro';
 import FooterColumn from '@/components/composites/FooterColumn.astro';
 
+const repo = 'https://github.com/rafters-studio/mail';
+
 const docs = [
-  { href: '#', label: 'Getting started' },
-  { href: '#', label: 'Architecture' },
-  { href: '#', label: 'Core reference' },
-  { href: '#', label: 'Migrations' },
+  { href: '/mail/docs/getting-started', label: 'Getting started' },
+  { href: '/mail/docs/architecture', label: 'Architecture' },
+  { href: '/mail/docs/core-reference', label: 'Core reference' },
+  { href: '/mail/docs/migrations', label: 'Migrations' },
 ];
 
 const imap = [
-  { href: '#', label: 'Quickstart' },
-  { href: '#', label: 'Command reference' },
-  { href: '#', label: 'App passwords' },
-  { href: '#', label: 'Deployment' },
+  { href: '/mail/docs/imap-quickstart', label: 'Quickstart' },
+  { href: '/mail/docs/imap-commands', label: 'Command reference' },
+  { href: '/mail/docs/app-passwords', label: 'App passwords' },
+  { href: '/mail/docs/imap-deployment', label: 'Deployment' },
 ];
 
 const project = [
-  { href: 'https://github.com/rafters-studio/mail', label: 'GitHub ↗' },
-  { href: '#', label: 'Changelog' },
-  { href: '#', label: 'Roadmap' },
-  { href: '#', label: 'License (MIT)' },
+  { href: repo, label: 'GitHub' },
+  { href: `${repo}/blob/main/CHANGELOG.md`, label: 'Changelog' },
+  { href: `${repo}/blob/main/LICENSE`, label: 'License (MIT)' },
 ];
 ---
 
 <footer class="border-t border-border bg-background">
   <Container size="6xl" padding="16">
-    <div class="grid grid-cols-2 gap-12 md:grid-cols-4">
-      <div class="col-span-2 flex flex-col gap-4 md:col-span-1">
-        <Brand href="#" />
-        <P size="body-small" color="muted-foreground" class="max-w-prose m-0">
-          A full-stack email framework for Cloudflare Workers. By
-          <a href="https://rafters.studio" class="text-foreground hover:underline">Real Handy</a>.
-        </P>
-      </div>
+    <Grid columns={4} gap="12">
+      <GridItem>
+        <div class="flex flex-col gap-4">
+          <Brand href="#" />
+          <P size="body-small" color="muted-foreground" class="max-w-prose m-0">
+            A full-stack email framework for the edge. A
+            <a href="https://rafters.studio" class="text-foreground hover:underline">Rafters Studio</a>
+            project.
+          </P>
+        </div>
+      </GridItem>
 
-      <FooterColumn heading="Docs" links={docs} />
-      <FooterColumn heading="IMAP" links={imap} />
-      <FooterColumn heading="Project" links={project} />
-    </div>
+      <GridItem><FooterColumn heading="Docs" links={docs} /></GridItem>
+      <GridItem><FooterColumn heading="IMAP" links={imap} /></GridItem>
+      <GridItem><FooterColumn heading="Project" links={project} /></GridItem>
+    </Grid>
 
-    <div class="flex flex-col gap-2 border-t border-border pt-6 mt-12 font-mono text-label-small uppercase tracking-wide text-muted-foreground md:flex-row md:justify-between">
-      <span>© 2026 Real Handy · built on Rafters</span>
-      <span>v0.1.0-alpha · commit a3f91c2</span>
+    <div class="border-t border-border pt-6 mt-12 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
+      © 2026 Rafters Studio
     </div>
   </Container>
 </footer>
