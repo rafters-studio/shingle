@@ -22,7 +22,6 @@ const installFollowUps = [
 const footline = [
   { label: 'bundle', value: '27 kb gz' },
   { label: 'cold start', value: '< 12 ms' },
-  { label: 'cov', value: 'AAA' },
 ];
 
 const meta = [
@@ -44,7 +43,7 @@ const meta = [
     </H1>
 
     <P size="body-large" color="muted-foreground" class="max-w-prose m-0">
-      A full-stack email framework for Cloudflare Workers. Inbound, outbound,
+      A full-stack email framework for the edge. Inbound, outbound,
       threading, blob storage, classification, and a native IMAP server — all
       without a third-party inbox.
     </P>
@@ -57,7 +56,7 @@ const meta = [
 
     <InstallCard primary={installPrimary} followUps={installFollowUps} footline={footline} />
 
-    <Grid columns={4} gap="6" class="border-t border-border border-dashed pt-6">
+    <Grid columns={4} gap="6">
       {meta.map(({ label, value }) => (
         <GridItem>
           <div class="flex flex-col gap-1 font-mono text-label-small uppercase tracking-wide text-muted-foreground">

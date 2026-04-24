@@ -11,7 +11,7 @@ interface Props {
 const { label, value, unit } = Astro.props;
 ---
 
-<Card class="flex flex-col gap-4 p-6 h-full">
+<Card class="flex flex-col gap-4 p-6">
   <span class="font-mono text-label-small uppercase tracking-wide text-muted-foreground">{label}</span>
   <div class="font-mono text-display-medium tracking-tight text-foreground leading-none">
     {value}{unit && <span class="text-body-large text-muted-foreground ml-1">{unit}</span>}

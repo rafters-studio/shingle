@@ -22,15 +22,17 @@ const tabsId = 'install';
 const defaultPkg = primary[0]?.pkg ?? 'pnpm';
 ---
 
-<Card class="overflow-hidden">
+<Card class="overflow-hidden p-0">
   <Tabs id={tabsId} defaultValue={defaultPkg}>
-    <TabsList class="border-b border-border bg-card">
-      {primary.map((c) => (
-        <TabsTrigger tabsId={tabsId} value={c.pkg} defaultChecked={c.pkg === defaultPkg}>
-          {c.pkg}
-        </TabsTrigger>
-      ))}
-    </TabsList>
+    <div class="flex items-center border-b border-border bg-card px-3 py-2">
+      <TabsList>
+        {primary.map((c) => (
+          <TabsTrigger tabsId={tabsId} value={c.pkg} defaultChecked={c.pkg === defaultPkg}>
+            {c.pkg}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </div>
 
     {primary.map((c) => {
       const targetId = `install-cmd-${c.pkg}`;
