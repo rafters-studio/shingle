@@ -343,6 +343,9 @@ importers:
       nanostores:
         specifier: ^1.2.0
         version: 1.2.0
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.7
@@ -353,6 +356,12 @@ importers:
       '@types/node':
         specifier: ^25.5.0
         version: 25.5.0
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
       oxfmt:
         specifier: ^0.36.0
         version: 0.36.0
