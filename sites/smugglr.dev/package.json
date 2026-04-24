@@ -21,12 +21,15 @@
     "@astrojs/sitemap": "^3.7.1",
     "@shingle/install": "workspace:*",
     "astro": "^6.0.3",
-    "nanostores": "^1.2.0"
+    "nanostores": "^1.2.0",
+    "react": "19.2.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.7",
     "@tailwindcss/vite": "^4.2.1",
     "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
     "tailwindcss": "^4.2.1",

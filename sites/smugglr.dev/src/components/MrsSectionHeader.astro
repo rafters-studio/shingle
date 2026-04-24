@@ -15,6 +15,6 @@ const { hash, label, syn } = Astro.props;
 
 <header class="flex items-baseline gap-4 pb-2.5 mb-4 border-b border-border/50">
     <span class="font-mono text-sm font-medium text-primary">{hash}</span>
-    <H2 size="body-large" transform="uppercase" tracking="wide">{label}</H2>
+    <H2 size="body-large" color="background" transform="uppercase" tracking="wide">{label}</H2>
     {syn && <span class="font-heading font-light text-sm text-muted-foreground ml-auto"># {syn}</span>}
 </header>
