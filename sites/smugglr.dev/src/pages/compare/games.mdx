@@ -1,0 +1,293 @@
+---
+layout: '@/src/layouts/Base.astro'
+title: compare games
+description: "smugglr for game developers. Photon, Colyseus, Mirror, Nakama, PlayFab, Firebase. Where smugglr fits as the persistent tier behind a netcode framework, and the whole backend for games without a tick rate."
+stickyTopbar: true
+---
+import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import H1 from "@/components/ui/typography-h1.astro";
+import H2 from "@/components/ui/typography-h2.astro";
+import P from "@/components/ui/typography-p.astro";
+import Small from "@/components/ui/typography-small.astro";
+import Code from "@/components/ui/typography-code.astro";
+import Codeblock from "@/components/ui/typography-codeblock.astro";
+import InkBlock from "@/components/InkBlock.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
+import MrsTable from "@/components/MrsTable.astro";
+import Card from "@/components/ui/card.astro";
+import CardHeader from "@/components/ui/card-header.astro";
+import CardTitle from "@/components/ui/card-title.astro";
+import CardDescription from "@/components/ui/card-description.astro";
+import CardContent from "@/components/ui/card-content.astro";
+
+export const MATRIX_HEAD = ["Tool", "Lane", "Tick rate", "Persistent storage", "Cost floor"];
+
+export const MATRIX_ROWS = [
+    ["smugglr",                 "Persistent tier + sync",     "None (event / poll)",   "SQLite, you own",        "Your hosting bill"],
+    ["Photon Fusion",           "Authoritative netcode",      "30 to 60 Hz",           "None, BYO backend",      "Free 100 CCU, $125 / mo at 500"],
+    ["Photon Quantum",          "Deterministic netcode",      "30 to 60 Hz",           "None, BYO backend",      "Free 100 CCU, $125 / mo at 500"],
+    ["Colyseus",                "Room-based netcode",         "Configurable",          "None, BYO backend",      "Free OSS, $15 / mo cloud"],
+    ["Mirror Networking",       "Unity netcode",              "Configurable",          "None, BYO backend",      "Free MIT, BYO host"],
+    ["Nakama (Heroic Labs)",    "Full game backend",          "Custom (Lua / Go)",     "CockroachDB, theirs",    "Self-host free, cloud quote"],
+    ["PlayFab",                 "Full game backend (REST)",   "None (REST)",           "PlayFab cloud, theirs",  "Free MAU tier, per-MAU"],
+    ["AWS GameLift",            "Game-server orchestration",  "Engine-defined",        "None, BYO backend",      "Per-instance hourly"],
+    ["Edgegap",                 "Per-session game hosting",   "Engine-defined",        "None, BYO backend",      "Per-minute container billing"],
+    ["Firebase Realtime DB",    "Leaderboard / state tier",   "Pub-sub",               "Google's JSON tree",     "Free Spark, then per-op"],
+    ["Firestore",               "Leaderboard / state tier",   "Pub-sub",               "Google's document store","Free Spark, then per-read / per-write"],
+    ["Supabase Realtime",       "Postgres pub-sub",           "Websocket",             "Postgres, theirs",       "Free tier, then per-message"],
+];
+
+export const NOT_SMUGGLR_ROWS = [
+    ["Authoritative tick-rate netcode (FPS, racing, MOBA, fighting)", "Photon Fusion, Mirror, Fish-Net. UDP, prediction, lag compensation."],
+    ["Per-session game-server hosting",                                "Edgegap, GameLift, Hathora successors. Container orchestration per match."],
+    ["Anti-cheat at the netcode layer",                                "PlayFab, Easy Anti-Cheat. smugglr trusts the writer."],
+    ["Matchmaking / lobby coordination",                               "Photon, Nakama, PlayFab. Pairing players is not row sync."],
+    ["Voice / video chat",                                             "Vivox, Agora, Photon Voice. Different transport entirely."],
+];
+
+<SiteHeader />
+
+<Container as="section" size="full" class="border-b border-border">
+    <Container size="5xl" padding="20" gap="10" class="items-center text-center">
+        <Small color="muted-foreground" transform="uppercase" tracking="widest">
+            compare &middot; games &middot; honest, falsifiable, no marketing
+        </Small>
+
+        <H1 align="center" size="7xl" weight="bold">
+            Photon ships the frames. smugglr ships the <InkBlock>rows</InkBlock>.
+        </H1>
+
+        <P align="center" size="display-small" class="max-w-prose">
+            Half of multiplayer is turn-based, async, or once-a-second. smugglr is the whole backend for that half, and the persistent tier behind a netcode framework for the other half. CLI, Rust crate, npm package. There is no service you have to operate, it is free*.
+        </P>
+    </Container>
+</Container>
+
+<div class="bg-background">
+<Container size="5xl" padding="20" gap="20">
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; the shape of a game backend</div>
+<H2>Multiplayer is twenty percent netcode and eighty percent persistent state.</H2>
+
+<P size="display-small">Photon ships the twenty percent. The other eighty is accounts, inventory, quests, currencies, leaderboards, mail, friends, deck-builds, save slots, settings, telemetry. Every Photon shop builds and runs that tier. Every Mirror shop builds and runs that tier. Every Colyseus shop builds and runs that tier. The default answer is Firebase or a custom Express service in front of Postgres, and both eat engineering hours that have nothing to do with the game.</P>
+
+<P size="display-small">smugglr is the eighty percent. SQLite on the client, SQLite on the server, content-hash diff between them. The schema is yours. The rows are yours. There is no managed plan to outgrow.</P>
+
+<P size="display-small" color="muted-foreground">If you are not building a game, the <a href="/compare/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">general comparison</a> is the better landing page. The matrix below is the games-shaped read.</P>
+</Container>
+
+</Container>
+</div>
+
+<Container as="section" size="full" class="bg-foreground text-background">
+<Container size="5xl" padding="20" gap="12">
+    <div class="flex items-center justify-between gap-4 pb-3 border-b border-border/50">
+        <div class="flex items-center gap-3">
+            <span class="font-mono text-sm text-primary">»</span>
+            <span class="font-heading font-medium text-sm uppercase tracking-widest">games matrix</span>
+            <span class="text-muted-foreground">&middot;</span>
+            <span class="font-heading font-light text-sm text-muted-foreground">specific, falsifiable, dated 2026-04</span>
+        </div>
+    </div>
+
+    <Container as="section">
+        <MrsSectionHeader hash="## 01" label="matrix" syn="every layer of a game backend, where each tool sits" />
+        <MrsTable cols={MATRIX_HEAD} rows={MATRIX_ROWS} monoCols={[1, 2]} />
+
+        <P color="background" class="mt-6 max-w-prose">
+            "Lane" names what the tool actually does. Photon's lane is netcode; PlayFab's lane is the full backend; smugglr's lane is the persistent tier. A studio can stack lanes (Photon for the frames, smugglr for the rows) or pick a single tool that covers more than one. Cost floors are the entry tier as advertised; the gap between free-tier usage and a real workload is where most billing surprises happen, and that gap is steepest on per-op pricing models like Firebase and Supabase Realtime.
+        </P>
+    </Container>
+</Container>
+</Container>
+
+<div class="bg-background">
+<Container size="5xl" padding="20" gap="20">
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; the netcode shelf</div>
+<H2>Tools that ship the tick rate. smugglr does not compete here.</H2>
+
+<P size="display-small">If your game has frames and hitboxes, one of these is the right answer. Read this section to confirm smugglr is not on that shelf, then move on.</P>
+
+<Grid columns={2} gap="6">
+    <Card>
+        <CardHeader>
+            <CardTitle>Photon (Fusion, Quantum, PUN)</CardTitle>
+            <CardDescription>Authoritative netcode. UDP. 30 to 60 Hz. Lag compensation, prediction, snapshot interpolation.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Photon Cloud handles room creation, matchmaking, transport, and authoritative simulation. State is ECS objects, not rows. Free 100 CCU; $125 / mo at 500 CCU on Growth; $0.50 / CCU above 2,000 on Premium. Photon ships the netcode and stops there: accounts, leaderboards, inventory, mail, friends are the studio's problem to solve. That is where smugglr fits, alongside Photon, not in place of it.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>Colyseus</CardTitle>
+            <CardDescription>Room-based authoritative server in Node. MIT. Cloud at $15 / mo.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Colyseus models multiplayer as rooms with a server-side state schema and delta sync to clients. Configurable tick rate. Persistent storage is not its problem; you bring a database. The OSS framework is free and self-hostable; managed Colyseus Cloud starts at $15 / mo. Same persistent-tier gap as Photon.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>Mirror Networking</CardTitle>
+            <CardDescription>Unity high-level netcode, MIT. You bring the host.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Mirror is the de facto OSS Unity netcode after the UNet sunset. Free, MIT, no licensing. Hosting is the studio's problem (Edgegap, dedicated boxes, peer-to-peer with relay). Persistent state is the studio's problem. Mirror is the cheapest entry into authoritative netcode and offloads the most onto the studio. smugglr fills the persistent gap without adding another vendor.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>Edgegap, GameLift</CardTitle>
+            <CardDescription>Per-session game-server orchestration. Per-minute or per-instance billing.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Hosting concern only. They orchestrate a container or instance for the duration of a match and charge by minute or hour. They do not ship netcode and they do not ship persistence. Studios pair them with Mirror, Photon Bolt, or Fish-Net for the netcode, and with Firebase, PlayFab, or a custom backend for persistence. smugglr replaces the persistence half.</P>
+        </CardContent>
+    </Card>
+</Grid>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; the persistent tier shelf</div>
+<H2>Where the eighty percent lives. This is smugglr's shelf.</H2>
+
+<P size="display-small">Every game has accounts, inventory, currencies, leaderboards, quests, mail, settings, telemetry. The four tools below are what studios reach for. None of them are SQLite end to end. smugglr is.</P>
+
+<Grid columns={2} gap="6">
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Firebase Realtime DB, Firestore</CardTitle>
+            <CardDescription>The default leaderboard tier. The most-cited reason to migrate off.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Firebase is what most indie and mid-size studios reach for first because it is fast to integrate and the free tier covers a prototype. The Blaze tier prices reads, writes, and storage individually; for a leaderboard with hot rows, costs scale non-linearly with concurrent players. Lock-in is real: data lives in Google's schema, security rules are theirs, exports are work. smugglr does not host data. SQLite is the data, the schema is yours, exports are a file copy.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>PlayFab</CardTitle>
+            <CardDescription>Microsoft's full game backend. Accounts, inventory, leaderboards, CloudScript.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>PlayFab covers everything in the persistent tier with a REST API and a generous free MAU bucket. The cost is total platform lock-in: data, identity, server logic, anti-cheat all live inside PlayFab. Migration cost is rebuilding the entire player layer. PlayFab is the right call if you want one vendor for the whole eighty percent and you accept the lock-in. smugglr is the right call if you want SQLite end to end and the freedom to host the rest of the platform yourself.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Nakama (Heroic Labs)</CardTitle>
+            <CardDescription>Open-source game backend. Self-host free; managed cloud is custom-quote.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Nakama is the closest peer to "the whole eighty percent in one tool" that is also OSS. Built in Go, backed by CockroachDB, scriptable in Lua or TypeScript. Self-hosting is real work; Heroic Cloud is custom enterprise pricing. smugglr is smaller scope on purpose: it does not ship matchmaking, it does not run user accounts, it does not bundle CloudScript. It ships row sync. Studios that need full game-server features pick Nakama; studios that want SQLite as the source of truth pick smugglr.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Custom backend (Express + Postgres)</CardTitle>
+            <CardDescription>The honest fourth option. Most studios over 50 employees end up here.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>The pattern: a Node or Go service in front of Postgres or MySQL, with REST or gRPC for the client, and a sync mechanism the team writes themselves. Total control, total maintenance, every hour spent on the backend is an hour not spent on the game. smugglr collapses the sync layer of that stack into a CLI, a Rust crate, or an npm package, with SQLite as the storage. The custom service stays where business logic lives; the row movement stops being homework.</P>
+        </CardContent>
+    </Card>
+</Grid>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">04 &middot; two stacks</div>
+<H2>Where smugglr lives, depending on whether your game has a tick rate.</H2>
+
+<Grid columns={2} gap="6">
+    <Card>
+        <CardHeader>
+            <CardTitle>Tickrate game</CardTitle>
+            <CardDescription>FPS, MOBA, racing, fighting, action multiplayer. 30 to 60 Hz.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Photon (or Mirror, Fish-Net, Colyseus) ships the netcode. smugglr ships the persistent tier behind it: accounts, inventory, currencies, leaderboards, quests, mail, settings, telemetry. The two layers do not talk to each other directly. The netcode handles the match; smugglr handles the data that survives the match. Costs: Photon's $125 / mo at 500 CCU plus your hosting bill for smugglr. The hosting bill is fixed; only Photon scales with players.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>Non-tickrate game</CardTitle>
+            <CardDescription>Turn-based, async, idle, deckbuilder, autobattler, MMO social hub, 4X.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>smugglr is the whole backend. SQLite on the client, SQLite on the server, content-hash diff every few seconds via the <Code>watch</Code> daemon, or LAN broadcast for same-network co-op. No netcode framework. No Photon CCU bill. Costs: your hosting bill, fixed. This is the half of multiplayer that does not need a server-shaped tool, and the half where smugglr replaces the entire backend stack instead of one layer of it.</P>
+        </CardContent>
+    </Card>
+</Grid>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">05 &middot; what smugglr is not</div>
+<H2>Honest about the lanes it does not cover.</H2>
+
+<MrsTable cols={["If you need", "The right tool"]} rows={NOT_SMUGGLR_ROWS} />
+
+<P size="display-small" color="muted-foreground">smugglr ships the persistent tier. The other lanes have mature tools and known costs. The honest position is: pair smugglr with a netcode framework when you need frames, or use smugglr alone when you do not.</P>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">06 &middot; install</div>
+<H2>Three ways to use it. Same algorithm, same adapters, same verbs.</H2>
+
+<Grid columns={3} gap="6">
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>CLI</CardTitle>
+            <CardDescription>Run smugglr as a command-line tool.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Codeblock>{`curl -fsSL https://smugglr.dev/install | bash`}</Codeblock>
+            <P>Or <Code>cargo install smugglr</Code>. macOS 14 or later, Linux, and Windows.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Rust crate</CardTitle>
+            <CardDescription>Embed the engine in a Rust service.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Codeblock>{`cargo add smugglr-core`}</Codeblock>
+            <P>No CLI dependencies. Same diff, same targets, same verbs, called from your code.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>npm package</CardTitle>
+            <CardDescription>Use it from the browser, Node, Bun, or a Worker.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Codeblock>{`npm install smugglr`}</Codeblock>
+            <P>Pairs with <Code>@smugglr/zustand</Code> and <Code>@smugglr/nanostores</Code> when you want a sync layer behind your existing client store.</P>
+        </CardContent>
+    </Card>
+</Grid>
+
+<P size="display-small" class="mt-8">Source on <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>. MIT licensed.</P>
+</Container>
+
+<Container as="section" gap="6">
+    <Small color="muted-foreground">
+        * Free as in OSS, not free as in beer, even though we do ship under MIT.
+    </Small>
+</Container>
+
+</Container>
+</div>
