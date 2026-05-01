@@ -1,0 +1,387 @@
+---
+layout: '@/src/layouts/Base.astro'
+title: compare
+description: "smugglr versus every comparable sync engine, hosted service, and client-cache layer. Litestream, rqlite, ElectricSQL, PowerSync, Turso embedded, CR-SQLite, Replicache, Zero, Yjs, Firebase, Supabase, Convex, MongoDB Atlas. Honest, falsifiable."
+stickyTopbar: true
+---
+import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import H1 from "@/components/ui/typography-h1.astro";
+import H2 from "@/components/ui/typography-h2.astro";
+import P from "@/components/ui/typography-p.astro";
+import Small from "@/components/ui/typography-small.astro";
+import Code from "@/components/ui/typography-code.astro";
+import Codeblock from "@/components/ui/typography-codeblock.astro";
+import InkBlock from "@/components/InkBlock.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
+import MrsTable from "@/components/MrsTable.astro";
+import Card from "@/components/ui/card.astro";
+import CardHeader from "@/components/ui/card-header.astro";
+import CardTitle from "@/components/ui/card-title.astro";
+import CardDescription from "@/components/ui/card-description.astro";
+import CardContent from "@/components/ui/card-content.astro";
+
+export const MATRIX_HEAD = ["Tool", "Lane", "Server required", "Conflict model", "Cost floor"];
+
+export const MATRIX_ROWS = [
+    ["smugglr",                 "SQLite to SQLite sync",          "No",                          "Last-received-wins, UUIDv7",  "Free, MIT"],
+    ["Litestream",              "SQLite to S3 backup",            "No",                          "Single writer assumed",       "Free, Apache"],
+    ["rqlite, dqlite",          "Raft-clustered SQLite",          "Yes, the cluster itself",     "Linearizable via Raft",       "Free, MIT / LGPL"],
+    ["CR-SQLite",               "CRDT extension to SQLite",       "No (per-node), yes (relay)",  "CRDT merge by construction",  "Free, MIT"],
+    ["Syncthing on .sqlite",    "File-level sync of SQLite",      "No",                          "File replace, corruption risk", "Free, MPL"],
+    ["Turso embedded replicas", "Hosted libSQL with replicas",    "Yes, Turso",                  "Authoritative server",        "$0 to ~$29 / mo per scale"],
+    ["ElectricSQL",             "Postgres to SQLite read sync",   "Yes, sync service",           "Server is source of truth",   "Free OSS, paid cloud"],
+    ["PowerSync",               "Backend DB to SQLite sync",      "Yes, PowerSync service",      "Last-write-wins via service", "Free tier, then per-MAU"],
+    ["Replicache, Zero",        "Client cache + sync to backend", "Yes, your push / pull / poke","Library reconciles",          "Free OSS lib, paid cloud"],
+    ["Yjs, Automerge",          "CRDT for collaborative docs",    "No (peer), often relay",      "CRDT merge",                  "Free, MIT"],
+    ["RxDB, WatermelonDB",      "Local-first reactive DB",        "Often, for sync",             "Library-defined",             "Free OSS, premium plugins"],
+    ["Firebase Realtime DB",    "Hosted JSON tree",               "Yes, Google",                 "Last-write-wins, theirs",     "Free Spark, then per-op"],
+    ["Firestore",               "Hosted document DB",             "Yes, Google",                 "Last-write-wins, theirs",     "Free Spark, then per-read / per-write"],
+    ["Supabase Realtime",       "Postgres change broadcast",      "Yes, Supabase or self-host",  "Postgres is the truth",       "Free tier, then per-message"],
+    ["Convex",                  "Hosted reactive backend",        "Yes, Convex",                 "Convex transactions",         "Free tier, then per-op"],
+    ["MongoDB Atlas Device Sync","Hosted Realm with sync",        "Yes, Atlas",                  "Realm conflict resolution",   "Free tier, then per-MAU"],
+];
+
+export const NOT_SMUGGLR_ROWS = [
+    ["Sub-100 ms collaborative text",   "Yjs, Automerge, Liveblocks. CRDT primitives, not row diffs."],
+    ["Tick-rate game netcode",          "Photon, Mirror, Colyseus. See /compare/games/."],
+    ["Postgres logical replication",    "Native Postgres, ElectricSQL. smugglr is SQLite to SQLite."],
+    ["Hosted document database",        "Firestore, MongoDB Atlas. smugglr does not store data; it moves it."],
+    ["Reactive cache with mutators",    "Replicache, Zero, Convex. smugglr does not own client state."],
+    ["Pub-sub at the row level",        "Supabase Realtime, Liveblocks broadcast. smugglr pulls; it does not push events."],
+];
+
+<SiteHeader />
+
+<Container as="section" size="full" class="border-b border-border">
+    <Container size="5xl" padding="20" gap="10" class="items-center text-center">
+        <Small color="muted-foreground" transform="uppercase" tracking="widest">
+            compare &middot; honest, falsifiable, no marketing
+        </Small>
+
+        <H1 align="center" size="7xl" weight="bold">
+            Two SQLites. <InkBlock>One wire.</InkBlock> No server.
+        </H1>
+
+        <P align="center" size="display-small" class="max-w-prose">
+            smugglr is a sync engine. CLI, Rust crate, npm package. It pushes, pulls, syncs, and broadcasts. There is no service you have to operate, it is free*.
+        </P>
+    </Container>
+</Container>
+
+<div class="bg-background">
+<Container size="5xl" padding="20" gap="20">
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; the lay of the land</div>
+<H2>You are not building a database. You are moving rows between places that already have one.</H2>
+
+<P size="display-small">SQLite is everywhere already. The phone has it. The laptop has it. Cloudflare D1 is it. Turso is it. Datasette and rqlite and StarbaseDB run on it. The hard part of "local-first" or "multi-device" or "edge-distributed" is not picking a database; it is keeping every node holding the same rows.</P>
+
+<P size="display-small">smugglr is one tool that does that one job. SQLite on every node. Content-hash diff between them. Run it as a CLI, embed it as a Rust crate, install the npm package in the browser, Node, Bun, or a Worker. No central server. No managed cloud. No per-row pricing.</P>
+
+<P size="display-small" color="muted-foreground">The matrix below names every comparable tool and what it actually solves. Building a multiplayer game? <a href="/compare/games/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">/compare/games/</a> is the games-shaped read.</P>
+</Container>
+
+</Container>
+</div>
+
+<Container as="section" size="full" class="bg-foreground text-background">
+<Container size="5xl" padding="20" gap="12">
+    <div class="flex items-center justify-between gap-4 pb-3 border-b border-border/50">
+        <div class="flex items-center gap-3">
+            <span class="font-mono text-sm text-primary">»</span>
+            <span class="font-heading font-medium text-sm uppercase tracking-widest">matrix</span>
+            <span class="text-muted-foreground">&middot;</span>
+            <span class="font-heading font-light text-sm text-muted-foreground">specific, falsifiable, dated 2026-04</span>
+        </div>
+    </div>
+
+    <Container as="section">
+        <MrsSectionHeader hash="## 01" label="matrix" syn="every comparable tool, scored on the same axes" />
+        <MrsTable cols={MATRIX_HEAD} rows={MATRIX_ROWS} monoCols={[1, 2]} />
+
+        <P color="background" class="mt-6 max-w-prose">
+            Three columns are load-bearing. "Server required" answers whether you operate something other than your own app. "Conflict model" tells you what happens when two peers write the same row. "Cost floor" is the entry tier as advertised; the gap between free-tier usage and a real workload is where most billing surprises happen on per-op pricing models. smugglr's cost floor is your existing hosting bill.
+        </P>
+    </Container>
+</Container>
+</Container>
+
+<div class="bg-background">
+<Container size="5xl" padding="20" gap="20">
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; sync engine peers</div>
+<H2>The closest neighbors. SQLite-shaped, row-shaped, on the same shelf.</H2>
+
+<P size="display-small">Six tools sit nearest smugglr. None do exactly what it does. The differences are operational, not philosophical.</P>
+
+<Grid columns={2} gap="6">
+    <Card>
+        <CardHeader>
+            <CardTitle>Litestream</CardTitle>
+            <CardDescription>SQLite to S3. One way. Backup-shaped.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Litestream streams a SQLite WAL to S3. One source, many readers. It does not move rows between two live SQLite databases on different machines. smugglr does. Litestream answers "back this up to S3 continuously." smugglr answers "keep all my SQLite copies the same."</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>rqlite, dqlite</CardTitle>
+            <CardDescription>Raft-clustered SQLite. The cluster is the database.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Every node is a peer in a coordinated quorum. You operate a cluster. smugglr does not run a cluster; it moves rows between SQLite files that already exist. Pick rqlite if you want linearizable writes across nodes; pick smugglr if you want each node to own its own SQLite file and reconcile on a schedule.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>ElectricSQL, PowerSync</CardTitle>
+            <CardDescription>Postgres on the server, SQLite on the client, sync service in the middle.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Both assume an authoritative Postgres backend and a sync service that runs in front of it. The model is one server, many local replicas. Conflict resolution is the service's job. smugglr does not assume an authoritative server. Every node is peer-symmetric. If you already run Postgres and want SQLite on your clients, ElectricSQL or PowerSync are the right tools. If you want SQLite end to end, smugglr is the right tool.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>Turso embedded replicas</CardTitle>
+            <CardDescription>Hosted libSQL with read replicas pulled to the client.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Turso runs the authoritative database. Replicas are read-only on the client; writes go back to Turso. smugglr ships a Turso target, so smugglr writes into Turso the same way it writes into a local file. Turso embedded replicas tie you to Turso. smugglr ties you to SQLite. Both are fine choices; the question is whether you want a vendor or a file format.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>CR-SQLite</CardTitle>
+            <CardDescription>CRDT extension to SQLite. Concurrent writes merge by construction.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>The cost is the table model: every column gets versioned metadata, schema migrations are heavier, the merge semantics are the ones CRDTs offer. smugglr is the opposite trade. Plain SQLite tables. Last-received-wins on divergence. UUIDv7 primary keys to avoid collisions in the first place. CR-SQLite is the right call when divergent concurrent writes on the same row are common; smugglr is the right call when they are rare.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>Syncthing on a .sqlite file</CardTitle>
+            <CardDescription>Filesystem sync. Works until two nodes write at once.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Filesystem sync of a SQLite file works until two nodes write at once. Then the file is corrupt, not merged. smugglr operates at the row level using content hashes, so concurrent writes on different tables or different rows reconcile cleanly. If you tried Syncthing for SQLite and got a corrupted database, that is the reason.</P>
+        </CardContent>
+    </Card>
+</Grid>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; hosted services that solve part of the same problem</div>
+<H2>The shortcut option. Pay per operation, accept the lock-in, ship faster.</H2>
+
+<P size="display-small">These services are real shortcuts to "users see fresh data on every device." They cost money per row and they own the schema. smugglr is the slower-to-set-up, cheaper-at-scale, lock-in-free alternative.</P>
+
+<Grid columns={2} gap="6">
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Firebase Realtime DB, Firestore</CardTitle>
+            <CardDescription>Hosted JSON tree or document store with realtime fan-out.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>The fastest way to ship a multi-device app, until the bill arrives. Free Spark tier is generous; Blaze prices reads, writes, and storage individually. Costs scale non-linearly with a real workload. Lock-in is real: data lives in Google's schema, security rules are theirs, exports are work. smugglr does not host data. SQLite is the data. Migration cost off smugglr is choosing a different SQLite client; migration off Firebase is rewriting the data layer.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Supabase Realtime</CardTitle>
+            <CardDescription>Postgres logical replication, broadcast over a websocket.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>The closest tool to "realtime that does not need C++." Real value when you already run Supabase Postgres. The cost is operational complexity: websockets behind a CDN, message-rate limits, connection ceiling. Teams hit those ceilings and drop it when the loop does not actually require sub-second push. If your loop is per-action rather than per-frame, smugglr's <Code>watch</Code> daemon and LAN broadcast cover the same shape without a websocket layer or a Supabase project.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Convex</CardTitle>
+            <CardDescription>Hosted reactive backend. Functions, queries, and live data in one platform.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Convex bundles a database, a function runtime, and a reactive client into one product. Lock-in is total: data, schema, query language, and runtime are theirs. The free tier is enough to evaluate; paid usage is per-operation. Convex is the right call if you want one vendor for the whole reactive backend and you accept the lock-in. smugglr is the right call if you want SQLite on every node and the freedom to host the rest of the stack yourself.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>MongoDB Atlas Device Sync</CardTitle>
+            <CardDescription>Realm on the client, MongoDB Atlas on the server, sync between them.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>The mobile-first incumbent. Realm is a real local database with reactive queries; Atlas is the cloud counterpart. Sync is bidirectional with Realm-defined conflict resolution. The cost is the document model and the per-MAU pricing on Atlas. smugglr is relational and free-as-in-MIT, with SQLite as the local store and your hosting as the server. If you need Realm's mobile reactivity primitives, Atlas Device Sync is the fit; if you want SQLite, smugglr is the fit.</P>
+        </CardContent>
+    </Card>
+</Grid>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">04 &middot; the client-cache layer</div>
+<H2>Reactive caches with mutators. Different shape from sync engines, often confused.</H2>
+
+<P size="display-small">These libraries solve the front-end half of local-first: optimistic UI, reactive queries, mutator functions. They sync against a backend you operate. smugglr does not ship a reactive cache, but the npm adapters bridge to the most common ones.</P>
+
+<Grid columns={2} gap="6">
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Replicache, Zero</CardTitle>
+            <CardDescription>Client-side reactive cache plus push, pull, and poke against your backend.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>You implement push and pull endpoints; the library handles the cache, the optimistic UI, and the reconciliation. The model is client to server, not peer to peer. smugglr does not ship a reactive cache. If you already use Zustand or Nanostores, the <Code>@smugglr/zustand</Code> and <Code>@smugglr/nanostores</Code> adapters persist your existing store to a local SQLite table and rehydrate it on every sync. Pick Replicache or Zero for their cache and mutator model; pick smugglr if you have a state store and want sync without rewriting the cache layer.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Yjs, Automerge</CardTitle>
+            <CardDescription>CRDT primitives for collaborative documents. Peer-to-peer or relay.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>If your data is a document with concurrent edits at the character level, these are the right tools. Yjs powers Liveblocks, TipTap collab, and most production collaborative editors. Automerge ships JSON-CRDT primitives. smugglr is row-shaped, not character-shaped; concurrent writes on the same row resolve by last-received-wins, not by merge. Pick Yjs or Automerge for documents; pick smugglr for relational state.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>RxDB, WatermelonDB</CardTitle>
+            <CardDescription>Local-first reactive databases for the browser and React Native.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Both ship a local store with reactive queries and pluggable sync backends. RxDB is JSON, WatermelonDB is SQLite-backed and React Native-shaped. They overlap with smugglr on the local-first claim and differ on the sync layer: RxDB and WatermelonDB ask you to bring or build a sync server; smugglr is the sync, and you bring the client. The npm package + state-store adapters cover the same use case in a thinner stack.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Liveblocks, Yjs providers</CardTitle>
+            <CardDescription>Hosted CRDT relays with presence, history, and webhooks.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Liveblocks is the managed-Yjs option: hosted relay, presence channels, comments, version history, webhooks. Per-MAU pricing. The right call when you are shipping collaborative document UX and do not want to operate the relay. smugglr is not in that lane; pair Liveblocks with smugglr if your app has collaborative documents (Liveblocks) and relational app state (smugglr) as separate concerns.</P>
+        </CardContent>
+    </Card>
+</Grid>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">05 &middot; four shapes that fit smugglr</div>
+<H2>Concrete jobs, named so you can recognize yours.</H2>
+
+<Grid columns={2} gap="6">
+    <Card>
+        <CardHeader>
+            <CardTitle>Dev, staging, prod, CI hold the same rows</CardTitle>
+            <CardDescription>The original use case. The reason this binary exists.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>Your local dev box, your CI runner, your staging environment, and prod all want the same SQLite file kept in sync, sometimes one-way, sometimes bidirectional. smugglr handles the diff and the write with typed exit codes for the agents and pipelines that orchestrate it.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>One app on phone, web, and desktop</CardTitle>
+            <CardDescription>Local-first SaaS. Notes, knowledge bases, task managers, journals.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>The user expects every device to show the same data. The default answer is Firestore or Supabase; both meter you per row and own the schema. smugglr is the alternative: SQLite on every device, sync over the network you already have, no per-MAU bill, no vendor lock.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>Edge replicas next to your users</CardTitle>
+            <CardDescription>Read-fast deployments without the data tier becoming the bottleneck.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>You run Cloudflare Workers, Fly Machines, or regional VMs and want a local SQLite next to the application. smugglr ships into D1, Turso, rqlite, Datasette, StarbaseDB, and SQLite Cloud, so the same engine that syncs your laptop to staging syncs your origin to every region.</P>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader>
+            <CardTitle>Agent memory that survives sessions</CardTitle>
+            <CardDescription>Coordinated state across machines, processes, and agent invocations.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <P>An AI agent running on multiple boxes wants a shared SQLite for memory, decisions, and audit trail. smugglr ships JSON output, typed exit codes, and a watch daemon, so an agent can sync its own memory without parsing prose. Same engine, agent-shaped invocation.</P>
+        </CardContent>
+    </Card>
+</Grid>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">06 &middot; what smugglr is not</div>
+<H2>Honest about the rows it does not cover.</H2>
+
+<MrsTable cols={["If you need", "The right tool"]} rows={NOT_SMUGGLR_ROWS} />
+
+<P size="display-small" color="muted-foreground">smugglr moves SQLite rows between SQLite databases. Run as a CLI, embed as a Rust crate, install the npm package. The shape of the problem stays the same: a config, a diff, a write.</P>
+</Container>
+
+<Container as="section" gap="6">
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">07 &middot; install</div>
+<H2>Three ways to use it. Same algorithm, same adapters, same verbs.</H2>
+
+<Grid columns={3} gap="6">
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>CLI</CardTitle>
+            <CardDescription>Run smugglr as a command-line tool.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Codeblock>{`curl -fsSL https://smugglr.dev/install | bash`}</Codeblock>
+            <P>Or <Code>cargo install smugglr</Code>. macOS 14 or later, Linux, and Windows.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>Rust crate</CardTitle>
+            <CardDescription>Embed the engine in a Rust service.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Codeblock>{`cargo add smugglr-core`}</Codeblock>
+            <P>No CLI dependencies. Same diff, same targets, same verbs, called from your code.</P>
+        </CardContent>
+    </Card>
+
+    <Card background="muted">
+        <CardHeader>
+            <CardTitle>npm package</CardTitle>
+            <CardDescription>Use it from the browser, Node, Bun, or a Worker.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Codeblock>{`npm install smugglr`}</Codeblock>
+            <P>Pairs with <Code>@smugglr/zustand</Code> and <Code>@smugglr/nanostores</Code> when you want a sync layer behind your existing client store.</P>
+        </CardContent>
+    </Card>
+</Grid>
+
+<P size="display-small" class="mt-8">Source on <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>. MIT licensed.</P>
+</Container>
+
+<Container as="section" gap="6">
+    <Small color="muted-foreground">
+        * Free as in OSS, not free as in beer, even though we do ship under MIT.
+    </Small>
+</Container>
+
+</Container>
+</div>
