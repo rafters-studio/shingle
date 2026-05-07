@@ -26,10 +26,10 @@ Your domain's MX records must point to Cloudflare Email Routing for inbound emai
 ## 1. Install packages
 
 ```bash
-pnpm add @rafters/mail @rafters/mail-resend @rafters/mail-cloudflare
+pnpm add @rafters/mail @rafters/mail-drizzle @rafters/mail-resend @rafters/mail-cloudflare
 ```
 
-`@rafters/mail` is the core: schema, types, service interfaces, threading logic. Zero vendor dependencies. The other two are adapters for Resend (outbound) and Cloudflare (inbound + blob storage).
+`@rafters/mail` is the core: Zod row schemas, validators, service interfaces, threading logic, raw migration SQL. Zero vendor dependencies. `@rafters/mail-drizzle` is the ORM adapter that ships the Drizzle table definitions and service implementations. The other two are adapters for Resend (outbound) and Cloudflare (inbound + blob storage).
 
 ---
 
@@ -98,7 +98,7 @@ wrangler d1 migrations apply mail-db --local   # local dev
 wrangler d1 migrations apply mail-db --remote  # production
 ```
 
-This creates all 10 inbox tables (mailbox, inbox_folder, inbox_label, inbox_thread, inbox_message, inbox_message_label, inbox_thread_label, inbox_attachment, thread_assignment, thread_note). The 3 newsletter tables (platform_audience, platform_subscriber, broadcast_audit) are defined in the Drizzle schema but are NOT part of `migrationSQL`. Include them in your own migrations only if you want platform-side mailing list tracking. The `EmailProvider` mailing list methods talk to the provider's API (Resend), not to these tables.
+This creates all 10 inbox tables (mailbox, inbox_folder, inbox_label, inbox_thread, inbox_message, inbox_message_label, inbox_thread_label, inbox_attachment, thread_assignment, thread_note). The 3 newsletter tables (platform_audience, platform_subscriber, broadcast_audit) are defined as Zod row schemas in `@rafters/mail` and as Drizzle table definitions in `@rafters/mail-drizzle`, but are NOT part of `migrationSQL`. Include them in your own migrations only if you want platform-side mailing list tracking. The `EmailProvider` mailing list methods talk to the provider's API (Resend), not to these tables.
 
 ---
 
@@ -163,7 +163,7 @@ All user ID columns in the mail schema (`ownerId`, `assigneeId`, `assignedBy`, `
 import { createR2Storage } from "@rafters/mail-cloudflare/storage";
 import { parseEmailHeaders, hashContent } from "@rafters/mail-cloudflare/parsing";
 import { drizzle } from "drizzle-orm/d1";
-import * as schema from "@rafters/mail/schema";
+import * as schema from "@rafters/mail-drizzle";
 import { createAuthAdapter } from "./auth-adapter";
 
 interface Env {
@@ -196,7 +196,7 @@ export default {
     //    (your code; see the threading.md and inbound.md docs for
     //    the expected matching strategy).
     const db = drizzle(env.DB, { schema });
-    // ... your Drizzle queries against inbox_message, inbox_thread, etc.
+    // ... your queries via @rafters/mail-drizzle (or any ORM adapter) against inbox_message, inbox_thread, etc.
   },
 } satisfies ExportedHandler<Env>;
 ```
@@ -255,11 +255,11 @@ Wire up Resend for outbound email, then use `InboxEmailService` to reply to a th
 
 ```typescript
 // src/mail-service.ts
-import { createInboxEmailService } from "@rafters/mail/services";
+import { createInboxEmailService } from "@rafters/mail-drizzle";
 import { createResendProvider } from "@rafters/mail-resend";
 import { createR2Storage } from "@rafters/mail-cloudflare/storage";
 import { drizzle } from "drizzle-orm/d1";
-import * as schema from "@rafters/mail/schema";
+import * as schema from "@rafters/mail-drizzle";
 
 export function createMailService(env: {
   DB: D1Database;
