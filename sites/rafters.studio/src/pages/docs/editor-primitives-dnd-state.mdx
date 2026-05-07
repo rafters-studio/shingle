@@ -1,0 +1,130 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Editor Drag, Drop, and State
+description: Accessible drag-and-drop. Position-aware drop zones. Clipboard with custom MIME. Undo/redo with batch mode.
+---
+
+# Editor Drag, Drop, and State.
+
+Four leaf primitives handle everything that moves or remembers. Two deal with spatial interaction: `drag-drop` and `canvas-drop-zone`. Two deal with state: `clipboard` and `history`. None of them import nanostores. They do one thing, expose a cleanup function, and get out. The composition primitive `block-handler` wires them together for the full editor context.
+
+---
+
+## Drag and Drop.
+
+`drag-drop.ts` handles mouse, keyboard, and touch drag across the entire primitive surface. The MIME type is `application/x-rafters-drag-data` with a `text/plain` fallback for cross-origin drops. Touch initiates via a 300ms long-press timer; scrolling more than 10px before the timer fires cancels it cleanly.
+
+Keyboard drag is the part that requires attention. State for keyboard mode lives at module level, shared across every `createDraggable` instance on the page. Space picks up and drops. Arrow keys navigate between registered drop zones sorted by vertical then horizontal position. Escape cancels. Screen reader announcements fire through a single visually-hidden `aria-live="assertive"` region.
+
+```typescript
+const item = createDraggable({
+  element: blockEl,
+  data: { id: 'block-1', type: 'paragraph' },
+  onDragStart: (data) => setDragging(data.data),
+  onDragEnd: (_data, effect) => clearDragging(effect),
+});
+
+// Programmatic keyboard drag
+item.startKeyboardDrag();
+item.moveDown();
+item.commitKeyboardDrag();
+
+item.cleanup();
+```
+
+Because keyboard state is module-level, two things follow. First, only one drag can be active at a time. Second, if your test suite leaves drag state behind, the next test inherits it. Call `resetDragDropState()` in `afterEach`. That function removes the announcer element and reinitializes the state object; see `drag-drop.ts:905`.
+
+`createDropZone` answers "was something dropped here?" It does not answer "where exactly within the zone?" For that second question, use `canvas-drop-zone`.
+
+---
+
+## Canvas Drop Zone.
+
+`canvas-drop-zone.ts` is for block editors where the drop position matters. Not a general-purpose drop zone. A positional insert target.
+
+The algorithm reads every `[data-block-id]` child of the container, caches their `DOMRect` values, then compares the cursor's Y coordinate against each block's midpoint. If the cursor is above a block's midpoint, the insertion index is before that block. If below all midpoints, insertion goes at the end. The `dragover` handler is rAF-throttled: each frame consumes the most recent `clientY` and skips calculation if nothing changed. See `canvas-drop-zone.ts:132`.
+
+```typescript
+const dropZone = createCanvasDropZone({
+  container: editorEl,
+  accept: (data) => (data as { type: string }).type === 'block',
+  onDrop: (data, index) => insertBlock(data, index),
+  onInsertIndicatorChange: (index, rect) => {
+    if (index === null) hideIndicator();
+    else showIndicator(rect);
+  },
+});
+
+// After any DOM mutation that adds, removes, or reorders blocks:
+dropZone.recalculate();
+
+dropZone.destroy();
+```
+
+Call `recalculate()` after every DOM mutation that changes block positions. Block positions are cached on `dragenter`, not on every frame. If a block animates into position after a drop, the cached rects will be stale until the next `recalculate()` call.
+
+See [Editor Data Model](/docs/editor-data-model/) for the `BlockNode` types that flow through `onDrop`.
+
+---
+
+## Clipboard.
+
+`clipboard.ts` wraps the Clipboard API with custom MIME type support and a `text/plain` fallback for environments where custom types are blocked. Permission denial is caught and swallowed; the `write` function does not throw, and `read` returns an empty `ClipboardData` object rather than rejecting.
+
+```typescript
+const clipboard = createClipboard({
+  container: editorEl,
+  customMimeType: 'application/x-rafters-blocks',
+  onPaste: (data) => {
+    if (data.custom) applyBlocks(data.custom);
+    else if (data.text) insertText(data.text);
+  },
+  onCopy: (data) => console.log('copied', data),
+});
+
+await clipboard.write({
+  text: 'Fallback text for plain paste targets',
+  custom: { blocks: selectedBlocks },
+});
+
+clipboard.cleanup();
+```
+
+The `ClipboardData` type carries three optional fields: `text`, `html`, and `custom`. When writing, all three are written simultaneously as separate MIME blobs inside a single `ClipboardItem`. If `ClipboardItem` rejects the custom type, the implementation falls back to `writeText` with the plain text value. See `clipboard.ts:165`.
+
+---
+
+## History.
+
+`history.ts` is a typed undo/redo stack with configurable depth and an optional equality function for deduplication. The default limit is 100 entries. When that limit is exceeded, the oldest entry is dropped: FIFO, not LRU.
+
+Batch mode is the thing to know. Inside a `batch()` call, every `push()` updates the current state without recording a history entry. When the batch closes, only the before and after states are recorded as a single undo step.
+
+```typescript
+const history = createHistory({
+  initialState: blocks,
+  limit: 50,
+  isEqual: (a, b) => a === b,
+});
+
+// Multiple typed characters collapse into one undo step
+history.batch(() => {
+  history.push(applyChar(state, 'h'));
+  history.push(applyChar(state, 'e'));
+  history.push(applyChar(state, 'l'));
+});
+// history.undo() jumps back to the state before all three pushes
+
+history.canUndo(); // true
+history.undo();
+history.redo();
+history.clear();
+```
+
+Nested `batch()` calls run the inner function immediately without opening a second batch frame. See `history.ts:291`.
+
+---
+
+## All Leaf, No Nanostores.
+
+None of these primitives import nanostores. Leaf primitives stay zero-dependency by rule: no shared reactive state, no composition logic, callback injection for everything. See [Editor Data Model](/docs/editor-data-model/) for the types that cross these primitive boundaries. The composition primitive `block-handler` is what wires `clipboard` and `history` through nanostores atoms so they share state across the editor surface.

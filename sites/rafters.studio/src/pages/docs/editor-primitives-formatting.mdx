@@ -1,0 +1,53 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Editor Formatting Primitives
+description: Inline marks, the floating toolbar, the slash-command palette. Where text becomes bold and where the slash menu lives.
+---
+
+# Editor Formatting Primitives.
+
+Three leaf primitives handle the formatting layer of the editor: `inline-formatter` applies and removes marks on text ranges, `inline-toolbar` positions the floating button strip above selections, and `command-palette` runs the slash-command menu. None of them import nanostores. None of them depend on each other. Composition happens in the React component that wires them together.
+
+For the data types these primitives operate on (`InlineContent`, `InlineMark`, `Command`, `FormatDefinition`) see [Editor Data Model](/docs/editor-data-model/).
+
+## inline-formatter.
+
+Not a rich-text abstraction. A DOM manipulation layer that creates and unwraps format elements within a content region.
+
+`createInlineFormatter(options)` returns an `InlineFormatterController`. The controller exposes six methods: `getActiveFormats()`, `isFormatActive(mark)`, `toggleFormat(mark, value?)`, `applyFormat(mark, value?)`, `removeFormat(mark)`, and two serialization methods covered below. Five format presets ship with the primitive: `BOLD`, `ITALIC`, `CODE`, `STRIKETHROUGH`, and `LINK`.
+
+Toggle and apply handle partial range splits. If a selection covers text that is partly bold and partly not, `toggleFormat(BOLD)` determines the dominant state and applies or removes accordingly. Range splitting for partial removal is complex; see `inline-formatter.ts` lines 400-580 for the implementation.
+
+The primitive is SSR-safe: every DOM operation is gated on `typeof window === 'undefined'` and no-ops on the server.
+
+### The write-path gap.
+
+`serializeSelection()` (line 619) walks the DOM inside the formatted region and returns `InlineContent[]`. `deserializeToDOM(content: InlineContent[])` (line 674) takes `InlineContent[]` and returns a `DocumentFragment` for mounting. Both directions work.
+
+The wiring does not exist. `editor.tsx` never calls `serializeSelection()` after a user formats text. Bold, italic, code, strikethrough, and link are visible in the DOM immediately after the user applies them. They are never written back to `block.content`. On save, the block's content array still holds whatever was there before the user typed a mark. Formatting is lost.
+
+Content imported from MDX renders correctly because `deserializeToDOM` is called on load. The read path works. The write path is currently dangling.
+
+The bridge functions exist at lines 619 and 674. The call site in `editor.tsx` does not. Track this at [Known Gaps](/docs/editor-known-gaps/).
+
+## inline-toolbar.
+
+Not a component. A positioning and configuration utility that a React component calls to know where to render and what buttons to show.
+
+`getFormatButtons()` returns `FormatButtonConfig[]`, one entry per supported mark. `adjustToolbarPosition(position, dimensions, ...)` takes a raw selection rectangle and toolbar dimensions and returns an `AdjustedToolbarPosition`. The algorithm prefers above the selection; it flips below if the toolbar would collide with the viewport edge. Eight pixels of viewport padding on all sides.
+
+`getModifierKey()` returns `"Cmd"` on Mac and `"Ctrl"` elsewhere, so keyboard shortcut labels in the toolbar UI match the platform without branching in the component. `isValidUrl(string)` and `normalizeUrl(string)` support the link format button: validate before applying, normalize before storing.
+
+Exported types: `ToolbarPosition`, `ToolbarDimensions`, `FormatButtonConfig`.
+
+## command-palette.
+
+The slash-command layer. `createCommandPalette(options)` returns a `CommandPaletteController` backed by a `CommandPaletteState` object the host component can read.
+
+The trigger fires at start-of-line or after whitespace. Typing `/` elsewhere does nothing. Once triggered, the palette filters against the registered `Command` list using `fuzzyMatch(text, query)`, which returns a `FuzzyMatchResult` with a numeric score. Scoring: one point per matched character, two bonus points for consecutive characters, three bonus points for matches at word boundaries. The sort is stable; two commands with equal scores keep their registration order.
+
+`CommandPaletteOptions` controls the registered command list and the callback that fires when the user confirms a selection. The controller exposes methods for opening, closing, navigating, and confirming, so a React component can bind keyboard events without importing any keyboard-handling logic directly into the palette primitive.
+
+## Composition note.
+
+All three primitives are leaves. They manipulate DOM, compute positions, and score strings. They do not hold reactive state, do not subscribe to stores, and do not render anything. A React component that imports all three and owns a content region is the composition layer; that is where `serializeSelection()` will eventually be called on every format change, closing the write-path gap described above.

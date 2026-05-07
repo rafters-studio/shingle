@@ -1,0 +1,77 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Editor Rules
+description: How blocks declare what they need and what they produce. Nominal name matching today. Runtime validation is a gap.
+---
+
+# Editor Rules.
+
+Rules describe what a block needs and what it produces. A block that consumes an authenticated session declares that as an input requirement. A block that produces a validated email address declares that as an output. Composites declare rules at the file level; blocks attach them at the block level. The wiring between them is checked by name. That is where the current implementation stops.
+
+## AppliedRule.
+
+The type is a union. Defined as a Zod schema in `packages/composites/src/manifest.ts:17` and mirrored as a TypeScript alias in `packages/ui/src/components/ui/editor.tsx:35`:
+
+```ts
+export type AppliedRule = string | { name: string; config: Record<string, unknown> };
+```
+
+The bare string form is the rule name. Use it when the rule carries no parameters: `"email"`, `"credentials"`, `"required"`. The object form lets a rule carry configuration alongside the name; it is for rules that need to behave differently depending on context, such as a length constraint that varies by field.
+
+Both forms are stored on `CompositeBlock.rules?` (manifest.ts) and `EditorBlock.rules?` (editor.tsx). Both fields are optional arrays. A block with no `rules` entry makes no compatibility claims.
+
+## Matching.
+
+`matchRules` in `packages/composites/src/rules.ts:24` checks whether a producer's output satisfies a consumer's input:
+
+```ts
+matchRules(producer: CompositeFile, consumer: CompositeFile): RuleMatch
+```
+
+The return shape:
+
+```ts
+interface RuleMatch {
+  matched: string[];   // rules present in both output and input
+  missing: string[];   // rules required by input but absent from output
+  extra: string[];     // rules produced by output but not required by input
+  compatible: boolean; // true when missing is empty
+}
+```
+
+The matching logic is exact string comparison. `producer.output` and `consumer.input` are both arrays of strings. A rule named `credentials` matches another named `credentials`. Nothing else is checked. Two unrelated projects that happen to use the same rule name will appear compatible. There is no structural comparison, no type inference, no schema lookup.
+
+Two filter helpers sit on top of this at `rules.ts:52` and `rules.ts:62`:
+
+```ts
+findCompatibleConsumers(producer: CompositeFile, candidates: CompositeFile[]): CompositeFile[]
+findCompatibleProducers(consumer: CompositeFile, candidates: CompositeFile[]): CompositeFile[]
+```
+
+Both filter by `matchRules(...).compatible === true`. They are useful for building composite browsers and connection UIs. They carry the same nominal-only limitation as `matchRules` itself.
+
+## Built-In Rules.
+
+The `packages/composites/src/built-in-rules/` directory contains plain Zod schemas, one per rule. The current set: `credentials`, `email`, `password`, `required`, `url`. Each file exports a named constant:
+
+```ts
+// email.ts
+import { z } from 'zod';
+export const email = z.string().email();
+```
+
+All five are re-exported from `built-in-rules/index.ts`. The naming convention is deliberate: the export name matches the rule name string used in `AppliedRule`. `"email"` in a block's `rules` array corresponds to the `email` export.
+
+The schemas exist and are correct. The problem is what happens next.
+
+## The Runtime Gap.
+
+There is no engine that connects a block's `rules` array to these Zod schemas at runtime. Nothing walks the block tree, resolves each rule name to its schema, and validates `block.content` or `block.meta` against it. `matchRules` only answers whether names align. It does not answer whether the data is valid.
+
+This means compatibility checking and data validation are two separate things today. A producer and consumer can be `compatible: true` and still pass malformed data between them. The schemas in `built-in-rules/` are not invoked automatically anywhere in the current pipeline.
+
+Consumers who need real validation must wire it themselves. Import the schema, call `parse()` or `safeParse()` on the block content, handle the result. There is no shared engine to call and no lifecycle hook that triggers it automatically.
+
+Not structural validation. Nominal compatibility checking.
+
+This gap is tracked in [/docs/editor-known-gaps/](/docs/editor-known-gaps/). The data model context for `CompositeBlock` and `EditorBlock` is in [/docs/editor-data-model/](/docs/editor-data-model/). For how composites declare their input and output arrays, see [/docs/editor-composites/](/docs/editor-composites/).

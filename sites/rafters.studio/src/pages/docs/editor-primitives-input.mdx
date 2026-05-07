@@ -1,0 +1,91 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Editor Input Primitives
+description: Keyboard routing, focus trapping, roving tabindex, cursor tracking. The foundation layer everything else stands on.
+---
+
+# Editor Input Primitives.
+
+Not event listeners bolted onto components. Isolated, composable functions that return a cleanup reference and nothing else. Every interactive primitive in the editor composes these. They carry no state. They inject no dependencies. They are the substrate.
+
+Types referenced here (`KeyboardKey`, `KeyboardModifiers`, `Direction`) live in [the data model docs](/docs/editor-data-model/). The leaf/composition rule that governs why these are stateless is in [the architecture docs](/docs/editor-architecture/).
+
+## keyboard-handler.
+
+Source: `packages/ui/src/primitives/keyboard-handler.ts`
+
+The general-purpose keyboard routing layer. `createKeyboardHandler(element, options)` attaches a `keydown` listener and returns a `CleanupFunction`. It normalizes the `Space` key to `' '` via `KEY_MAP` (line 71) so callers work with the `KeyboardKey` union type rather than raw `event.key` strings.
+
+```typescript
+const cleanup = createKeyboardHandler(button, {
+  key: ['Enter', 'Space'],
+  handler: () => button.click(),
+  preventDefault: true,
+});
+```
+
+Options that matter: `modifiers` narrows the handler to a specific modifier combination; `capture` moves the listener to the capture phase, which the editor uses to intercept keys before they reach nested components. Both default to off.
+
+Three convenience constructors sit on top: `createActivationHandler` wires Enter and Space with `preventDefault`; `createDismissalHandler` wires Escape without `preventDefault` so nested dismissables still see the event bubble; `createNavigationHandler` routes arrow keys by orientation with optional `Home`/`End` support. For complex surfaces, `createKeyBindings` accepts an array of `KeyboardHandlerOptions` and returns a single cleanup that tears down all of them.
+
+## escape-keydown.
+
+Source: `packages/ui/src/primitives/escape-keydown.ts`
+
+Document-level Escape listener with a single call signature: `onEscapeKeyDown(handler): CleanupFunction`. It attaches to `document`, not to the element, which is the right choice for modal and dismissable surfaces where the triggering element may not have focus.
+
+```typescript
+const cleanup = onEscapeKeyDown((event) => closeModal());
+```
+
+Use this for dialogs, sheets, popovers, and any surface that owns a layer of the stack. For element-scoped Escape handling, prefer `createDismissalHandler` from `keyboard-handler`.
+
+## focus-trap.
+
+Source: `packages/ui/src/primitives/focus-trap.ts`
+
+`createFocusTrap(element): CleanupFunction` constrains Tab and Shift+Tab within the container. On mount it queries tabbable descendants using:
+
+```
+a[href], button:not([disabled]), input:not([disabled]),
+select:not([disabled]), textarea:not([disabled]),
+[tabindex]:not([tabindex="-1"])
+```
+
+It captures `document.activeElement` before mounting and restores focus to that element on cleanup. The list is re-queried on each keydown so dynamically added focusable nodes are picked up without a manual refresh.
+
+`preventBodyScroll(): CleanupFunction` is exported separately. It stores and restores `overflow`, `paddingRight`, and scroll position. On iOS Safari it sets `position: fixed` on the body to suppress elastic bounce (lines 113-119), then restores the original scroll position on cleanup.
+
+## roving-focus.
+
+Source: `packages/ui/src/primitives/roving-focus.ts`
+
+Implements the ARIA roving tabindex pattern. At any moment exactly one item in the container has `tabindex="0"`; the rest have `tabindex="-1"`. Tab moves between the container and the rest of the page. Arrow keys navigate within it.
+
+```typescript
+const cleanup = createRovingFocus(menuElement, {
+  orientation: 'vertical',
+  loop: true,
+  onNavigate: (element, index) => setActiveIndex(index),
+});
+```
+
+Items are discovered via `[data-roving-item]` and standard ARIA roles (`menuitem`, `option`, `radio`, `tab`). Disabled items are skipped: the filter checks `disabled`, `data-disabled`, and `aria-disabled="true"` (lines 76-83). Hidden and `display:none` items are also excluded.
+
+RTL support comes through the `dir` option on `RovingFocusOptions`. When `dir` is `'rtl'`, `ArrowRight` and `ArrowLeft` invert (line 142-148). `Home` and `End` jump to the first and last items regardless of orientation.
+
+Three utility exports round out the API: `focusItem(container, index)` for programmatic focus; `getCurrentIndex(container)` to read the active index without touching tabindex state; `refreshRovingFocus(container, index)` to re-synchronize tabindex after a DOM change, such as when a block is added or removed from the editor canvas.
+
+## cursor-tracker.
+
+Source: `packages/ui/src/primitives/cursor-tracker.ts`
+
+Pure functions for cursor position within `contentEditable` surfaces. Every block element must carry a `data-block-id` attribute. The tracker finds it via `findBlockElement(node)`, which walks up the DOM to the nearest `[data-block-id]` ancestor (line 37-41).
+
+`getCursorPosition()` returns a `CursorPosition` object: `blockId`, `offset` as character count within the block's text content, and `blockLength`. The offset is computed by creating a range from the block start to the anchor node (line 44-49), which handles nested inline elements correctly.
+
+The editor subscribes via a `selectionchange` listener and calls `findBlockElement` on the selection's anchor node to derive `focusedBlockId`. `isCursorAtBlockStart()` and `isCursorAtBlockEnd()` are derived checks built on `getCursorPosition()`. `setCursorInBlock(container, blockId, offset)` walks text nodes to place the caret at the exact character offset, clamping to the end of content if the offset exceeds block length.
+
+## The Leaf Rule.
+
+All five primitives are leaf primitives. None import nanostores. None carry reactive state. They receive a DOM element and callbacks; they return a cleanup function. State belongs to the caller. This is not a constraint imposed from outside. It is what makes them safe to compose into anything without pulling in unintended reactive dependencies. See [the architecture docs](/docs/editor-architecture/) for the full leaf/composition distinction.

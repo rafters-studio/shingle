@@ -1,0 +1,92 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Editor Architecture
+description: Leaf primitives. Composition primitives. The self-contained rule. Why composites must not import from ui. The package boundary that keeps six products from stepping on each other.
+---
+
+# Editor Architecture
+
+The editor is one React component on top of a constellation of vanilla-TypeScript primitives. The primitives are framework-agnostic. They run in any host. The component layer adapts them to React.
+
+This split is the load-bearing decision. Six products consume the editor. None of them should fork it to add a feature. The primitives layer is where capabilities live. The component layer is where consumption happens.
+
+## Two Kinds Of Primitives
+
+**Leaf primitives.** Zero workspace dependencies. Callback injection for state. They do one thing and emit events. Examples: `keyboard-handler`, `focus-trap`, `outside-click`, `clipboard`, `history`, `block-canvas`, `inline-formatter`, `drag-drop`. The vast majority of primitives are leaves.
+
+**Composition primitives.** Orchestrate multiple leaves with shared reactive state via nanostores atoms. Two exist today: `block-handler` (`packages/ui/src/primitives/block-handler.ts`) and `document-editor` (`packages/ui/src/primitives/document-editor.ts`). These are the only primitives allowed to import nanostores.
+
+The rule is asymmetric on purpose. A leaf cannot reach for nanostores. A composition primitive can. Leaves stay portable. Composition stays cohesive. If a leaf needs reactive state, it accepts callbacks and lets the host wire them.
+
+## Self-Contained Component Rule
+
+Every component in `@rafters/ui` is self-contained. It imports React, primitives from `../../primitives/`, and other components from the same package. Nothing else.
+
+No imports from `@rafters/shared`. No imports from `@rafters/composites`. No imports from `@rafters/design-tokens`. The editor is the lynchpin. If it depends on the rest of the monorepo, every consumer drags the rest of the monorepo with them.
+
+The rule has been violated exactly once and was rolled back. When you see a tempting import path that crosses packages, the answer is to either inline the helper or invert the dependency.
+
+## Package Boundaries
+
+```
+@rafters/ui
+  ├── components/ui/editor.tsx        React surface
+  ├── primitives/                     Vanilla TS, framework-agnostic
+  │   ├── block-canvas, block-handler, block-wrapper, ...
+  │   ├── inline-formatter, inline-toolbar, command-palette
+  │   ├── serializer.ts               EditorSerializer interface
+  │   └── serializer-mdx.ts           Full bidirectional MDX adapter
+  └── deps: react, nanostores
+
+@rafters/composites
+  ├── manifest.ts                     Zod schemas
+  ├── bridge.ts                       toBridgeItem, instantiateBlocks, serializeToComposite
+  ├── registry.ts                     register, get, search
+  ├── rules.ts                        matchRules, findCompatibleConsumers/Producers
+  ├── serializer.ts                   Legacy toMdx — do not use for new work
+  └── deps: zod
+```
+
+The intent is clear. `@rafters/composites` ships only Zod schemas, JSON validation, and pure functions. It depends on zod and nothing else.
+
+## Architecture Violations
+
+The intent is not the current state. Two known violations live in `@rafters/composites`:
+
+`packages/composites/src/registry.ts:8` imports `fuzzyScore` from `@rafters/ui/primitives/typeahead`. `fuzzyScore` is a small pure helper. Inlining it removes the dependency.
+
+`packages/composites/src/bridge.ts:10` imports `BlockPaletteItem` as a type from `@rafters/ui/primitives/block-palette`. Type-only, but still couples the package boundary. The shape is small. Defining it locally in `bridge.ts` removes the coupling.
+
+Both are tracked in [Known Gaps](/docs/editor-known-gaps/). Documentation flags them. Fixes are out of scope for this audit.
+
+## Six Product Reuse Model
+
+The editor is the lynchpin for six products. Each provides its own block types, composites, and rules. The editor is the shared authoring core.
+
+**Gitpress.** MDX page editor for content sites. Uses `mdxSerializer` from `@rafters/ui`. Folder-scoped file picking and frontmatter form sit on top.
+
+**Kelex.** Zod-to-form codegen. Outputs editor blocks. Form generation is a serialization adapter.
+
+**Ezmode guilds.** In-game page builder. Uses block-palette and composites with a gaming-specific palette.
+
+**Courses.** Lesson authoring. Block types extended for course-specific content (quizzes, video timestamps).
+
+**Ctrl.** Operations dashboard authoring. Block types for charts, queries, alerts.
+
+**Veneer.** Documentation rendering. Reads composite blocks, generates static HTML and PDF.
+
+The editor doesn't know about any of them. Each consumer extends with the surface points the editor exposes: serializer adapters, block types via `meta`, composites via the registry, palette items, slash commands, rules.
+
+## Why The Editor Defines Its Own Contracts
+
+The editor is the source of truth for block shape. `BaseBlock` lives in `@rafters/ui` because the editor renders it. `CompositeBlock` lives in `@rafters/composites` because that package owns serialization. Both share the same fields by hand, validated independently.
+
+The temptation is to extract a shared types package. It has been considered. The conclusion: a shared package becomes a synchronization burden the moment one side needs to evolve faster than the other. Hand-keeping two structurally identical types is cheaper than the version coupling.
+
+When the editor grows a field, composites grows the same field. When composites grows a Zod refinement, the editor doesn't have to care. The duplication is the contract.
+
+## When To Add A New Primitive
+
+A new primitive earns its keep when it is reusable across at least two products and has a contract that doesn't lean on any one consumer. If the capability is one consumer's specifics, it belongs in that consumer.
+
+Leaf vs composition is decided by state. If the new primitive needs to emit events but holds no state of its own, it's a leaf. If it needs to coordinate other primitives with shared reactive state, it's composition. Composition is rare. Two exist today and that's appropriate.
