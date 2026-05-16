@@ -1,0 +1,86 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Editor Serialization
+description: The block tree is the universal IR. Serializers adapt external formats to and from blocks. MDX is the one most consumers want. There are two MDX serializers and only one of them works.
+---
+
+# Editor Serialization
+
+The editor's block tree is the universal intermediate representation. Everything that enters the editor becomes blocks. Everything that leaves becomes whatever format the adapter produces. Serializers are the adapters: one interface, multiple formats. The format you choose depends on where the data is going. The block tree stays the same.
+
+## The Interface.
+
+Every serializer in `@rafters/ui` conforms to a single contract. Defined at `packages/ui/src/primitives/serializer.ts:65`:
+
+```ts
+interface EditorSerializer {
+  readonly id: string;
+  readonly extensions: readonly string[];
+  deserialize(input: string): DeserializeResult;
+  serialize(blocks: SerializerBlock[], frontmatter?: Record<string, unknown>): string;
+}
+
+interface DeserializeResult {
+  blocks: SerializerBlock[];
+  frontmatter?: Record<string, unknown>;
+}
+```
+
+`id` is the format name. `extensions` is the file extension list the serializer handles. `deserialize` takes a raw string and returns blocks plus optional frontmatter. `serialize` takes blocks and optional frontmatter and returns a string. Implementations must be SSR-safe (no DOM), pure (deterministic), and framework-agnostic.
+
+The interface is not a draft. It shipped. Adapters conform to this contract or they do not compile.
+
+## MDX (Use This One).
+
+`mdxSerializer` from `@rafters/ui` is the adapter for MDX and Markdown content. It is bidirectional: full round-trip fidelity from string to blocks and back. This is the one consumers should use.
+
+```ts
+import { mdxSerializer } from '@rafters/ui';
+
+const { blocks, frontmatter } = mdxSerializer.deserialize(mdxString);
+const output = mdxSerializer.serialize(blocks, frontmatter);
+```
+
+The factory is `createMdxSerializer()` at `packages/ui/src/primitives/serializer-mdx.ts:822`. It returns `{ id: 'mdx', extensions: ['.mdx', '.md'] }`. The package exports `mdxSerializer` as a pre-constructed instance at line 34 of `packages/ui/src/index.ts`. Import the instance; do not construct your own unless you need isolation.
+
+The deserialize pipeline extracts frontmatter first (line 830): a simple YAML parse that handles booleans, numbers, and arrays. Then `fromMarkdown()` with MDX extensions builds an mdast tree (line 834). Then `mdastToBlocks()` (line 297) walks the tree.
+
+Supported block-level nodes: heading, paragraph, code, blockquote, list, thematicBreak, image, mdxjsEsm, mdxFlowExpression, mdxJsxFlowElement, html. Inline marks via `phrasingToInlineContent()` (line 156): bold, italic, code, strikethrough, and links with href. JSX elements become `type: 'component'` blocks with `meta.props` populated by `jsxAttributesToProps()` (line 276).
+
+The serialize pipeline reverses this. `blocksToMdast()` (line 584) reconstructs the mdast tree. `inlineContentToMdast()` (line 550) restores inline marks. `toMarkdown()` (line 855) emits the string. Frontmatter is prepended as `---\n...\n---\n\n` at line 864.
+
+Round-trip fidelity is real. Bold text imported from MDX serializes back to `**bold**`. InlineContent marks survive the full cycle. See `/docs/editor-data-model/` for the InlineContent type definition.
+
+The serializer is 873 lines. That length is not incidental: it reflects what bidirectional MDX fidelity actually costs.
+
+## Legacy toMdx in Composites (Don't).
+
+`packages/composites/src/serializer.ts` exports `toMdx(blocks: CompositeBlock[]): string`. This is an older, one-way serializer that predates the `EditorSerializer` interface. It is there for legacy callers. New code does not use it.
+
+What it supports: heading (level from `meta`, clamped 1-6), text (emitted as `<p>`), blockquote, list (`-` or `1.` from `meta.ordered`), divider (`---`), grid (`<Grid columns={N}>`), and composite blocks as PascalCase JSX. That list is the ceiling.
+
+What it drops: quote, input, button, and image all fall through to `<!-- unknown block type: X -->` comments. If your block tree contains any of those, they silently disappear.
+
+What it loses: inline marks. The function treats `content` as a plain string. If your blocks contain `InlineContent[]` with bold or link marks, `toMdx` flattens them to `.text` only. The marks are gone.
+
+What it does not have: a deserializer. There is no `fromMdx()`. The road goes one way.
+
+What it does not accept: a frontmatter parameter. Frontmatter is not part of its signature.
+
+The `MAX_DEPTH = 50` guard and circular reference detection per traversal are the only safety machinery it contains.
+
+If you are maintaining a caller that already uses `toMdx`, leave it alone. If you are writing new code, use `mdxSerializer` from `@rafters/ui`. The interface is documented above. The round-trip works. The marks survive. See `/docs/editor-known-gaps/` for the open gap on this duplicate-serializer situation.
+
+## JSON and Other Adapters.
+
+The JSON path is the simplest: the block tree is already JSON. `JSON.stringify` and `JSON.parse`. No adapter overhead, no mdast conversion. Use JSON for autosave state, clipboard payloads, and undo history.
+
+The composite JSON adapter handles `.composite.json` files and validates against the composite manifest schema. It sits in `@rafters/composites`. Documented at `/docs/editor-composites/`.
+
+Blueprint and journey JSON adapters are service-design serializers that live in veneer, not in the core packages. They handle the block formats for service blueprints and journey maps. If you are working in the vault workspace, those adapters are what you want.
+
+## Picking an Adapter.
+
+The `extensions` field is the selection key. The caller checks `serializer.extensions` against the file path being read or written. `['.mdx', '.md']` points to `mdxSerializer`. `['.json']` points to the JSON adapter. Same interface, different formats. Adapters compose without coupling: the block tree does not know which serializer consumed it.
+
+The one constraint: the adapter must come from `@rafters/ui` or conform to `EditorSerializer`. The legacy `toMdx` in composites does not conform to that interface. It takes `CompositeBlock[]`, not `SerializerBlock[]`, and returns a string with no `DeserializeResult` counterpart. It is not a drop-in. It is a one-way pipe to a deprecated block schema.

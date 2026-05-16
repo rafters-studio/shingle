@@ -1,0 +1,106 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Editor Render Path
+description: How a block becomes JSX. The DocumentBlock switch. Inline content rendering. Mark application order. The data-block-id contract.
+---
+
+# Editor Render Path
+
+The editor renders blocks one at a time. A function called `DocumentBlock` switches on `block.type` and returns semantic HTML. Inline content is rendered separately by `renderInlineContent`. Both functions live at `packages/ui/src/components/ui/editor.tsx`.
+
+This page is the rendering contract. If a block doesn't render the way you expect, the answer is here.
+
+## DocumentBlock
+
+The function at `editor.tsx:153`. Single argument: `{ block: EditorBlock }`. Returns React.ReactNode.
+
+It calls `renderInlineContent(block.content)` once. Then it switches on `block.type` and emits a tag.
+
+```ts
+heading    -> <h{level}>      // level from meta.level, clamped 1–6
+text       -> <p>
+code       -> <pre><code>     // raw string, no inline marks
+quote      -> <blockquote>
+divider    -> <hr>
+image      -> <figure><img>   // src and alt from meta
+list       -> <ol> or <ul>    // ordered from meta.ordered
+list-item  -> <li>
+default    -> <p>             // unknown types fall through to paragraph
+```
+
+Every emitted element carries `data-block-id={block.id}`. This is the selection anchor. The `cursor-tracker` primitive walks up from the selection node looking for the nearest `[data-block-id]`. Without that attribute, focus tracking breaks.
+
+The heading level is read from `block.meta?.level` and clamped via `Math.min(Math.max(level, 1), 6)`. Out-of-range values become h1 or h6, never raw HTML errors. Default is h1 if `meta.level` is absent.
+
+The image block reads `block.meta?.src` and `block.meta?.alt`. Both are strings. The element is wrapped in `<figure>` so consumers can style captions later by adding a `<figcaption>` block as a sibling.
+
+The list block emits `<ol>` if `block.meta?.ordered === true`, otherwise `<ul>`. The list does not render its own children. Child `list-item` blocks are separate entries in the flat blocks array. They render through their own `DocumentBlock` call.
+
+The code block renders the content as a raw string. Inline marks are not applied. Code is monospace and exact.
+
+Default fallthrough is `<p>`. Unknown types are not errors. They render as paragraphs with the inline content. This means a consumer can introduce a custom block type without crashing the editor; only the rendered shape will be wrong until the consumer extends the renderer.
+
+## renderInlineContent
+
+The function at `editor.tsx:129`. Single argument: `string | InlineContent[] | undefined`. Returns React.ReactNode.
+
+The branches:
+
+```ts
+undefined    -> ' '            // NBSP fallback
+'' (empty)   -> ' '            // NBSP fallback
+'…' (string) -> '…'                 // returned as-is
+InlineContent[] -> mapped, marked
+```
+
+The NBSP fallback exists because contentEditable elements collapse if they contain an empty text node. A non-breaking space keeps the line height stable and lets the cursor land on the block. This matters when a user clears a paragraph and the block must remain visible and selectable.
+
+For `InlineContent[]`, each segment is wrapped in nested mark elements. The mark application order is fixed:
+
+```ts
+1. code           -> <code>
+2. link + href    -> <a href>
+3. strikethrough  -> <del>
+4. italic         -> <em>
+5. bold           -> <strong>
+```
+
+Bold is the outermost wrapper. Code is the innermost. A segment with all five marks renders as:
+
+```html
+<strong><em><del><a href="..."><code>text</code></a></del></em></strong>
+```
+
+This order is intentional. Bold is a structural emphasis mark and reads correctly when wrapping more specific marks. Code is a verbatim mark and reads correctly when it is the innermost wrapper. The same order is used by the MDX serializer at `packages/ui/src/primitives/serializer-mdx.ts` for round-trip stability.
+
+A segment with `marks: ['link']` but no `href` does not become an anchor. The link mark is silently dropped. This matches the `InlineContent` type definition where `href` is conditional on `marks.includes('link')`.
+
+## The data-block-id Contract
+
+Every rendered block element exposes `data-block-id={block.id}`. The cursor-tracker uses this attribute to map a DOM `Node` to a block id. Three rules follow:
+
+A custom block type emitted by a consumer must include `data-block-id` on its outermost rendered element. Selection breaks otherwise.
+
+A block element must be a single DOM node, not a React fragment. Fragments do not carry attributes. The cursor walks DOM, not React.
+
+Nested editable surfaces inside a block (an inline input, a contenteditable child) inherit the block id of the nearest ancestor with `data-block-id`. If a block needs sub-region selection tracking, that's a separate primitive concern, not a render-path concern.
+
+## Empty State
+
+`DefaultEmptyState` at `editor.tsx:191` renders a small fallback message when `blocks.length === 0`. The component prop `emptyState?: React.ReactNode` overrides it.
+
+The empty state renders inside the canvas, at the same DOM depth as where blocks would render. This means consumer empty states can reuse canvas styles and do not need to position themselves manually.
+
+## Toolbar
+
+When the `toolbar` prop is true, the component renders `EditorToolbar` (line 238) above the canvas. The toolbar is a small block-type selector plus undo/redo buttons. It reads `focusedBlock` to populate the selector and `canUndo` / `canRedo` from the document-editor state.
+
+The toolbar is internal. It is not a published primitive. Consumers who want a richer toolbar compose their own from the toolbar primitives at [Editor Formatting Primitives](/docs/editor-primitives-formatting/).
+
+## What The Render Path Does Not Do
+
+It does not apply formatting from the DOM back into block content. That's the inline-formatter's job, and the wiring is incomplete. See [Known Gaps](/docs/editor-known-gaps/).
+
+It does not run rules. Rules attached to a block are passive metadata at render time. Validation, if it runs at all, runs at the consumer level. See [Editor Rules](/docs/editor-rules/).
+
+It does not enforce schema on `meta`. Each block type assumes the meta shape it expects. A heading block with `meta.level: 'large'` will produce `<h1>` because the cast to number fails and falls back to default. The render path is forgiving by design, which means consumers must validate `meta` themselves if they need it strict.

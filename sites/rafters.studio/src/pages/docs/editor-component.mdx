@@ -1,0 +1,142 @@
+---
+layout: '@/src/layouts/Docs.astro'
+title: Editor Component
+description: The React surface. Props, controls ref, controlled vs uncontrolled, change vs commit. What's wired, what's typed but not yet wired.
+---
+
+# Editor Component
+
+`<Editor>` is a React component at `packages/ui/src/components/ui/editor.tsx`. It is a thin React adapter over the `document-editor` composition primitive.
+
+It accepts blocks. It emits changes. It exposes an imperative ref for CRUD. The internal state is a nanostores atom synced to `document-editor`.
+
+## Import
+
+```ts
+import { Editor } from '@rafters/ui';
+import type { EditorBlock, EditorControls, EditorProps } from '@rafters/ui';
+```
+
+The component is the default export of `editor.tsx`. Types are named exports.
+
+## EditorProps
+
+The full prop surface. Defined at `packages/ui/src/components/ui/editor.tsx:41`.
+
+```ts
+interface EditorProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange'> {
+  defaultValue?: EditorBlock[];
+  value?: EditorBlock[];
+  onValueChange?: (blocks: EditorBlock[]) => void;
+  onValueCommit?: (blocks: EditorBlock[]) => void;
+  toolbar?: boolean;
+  emptyState?: React.ReactNode;
+  disabled?: boolean;
+  dir?: Direction;
+  className?: string;
+}
+```
+
+`defaultValue` is the uncontrolled initial blocks. Ignored when `value` is set.
+
+`value` is the controlled blocks. When present, the component mirrors it on every render. The internal atom syncs to it (line 457).
+
+`onValueChange` fires on every block mutation. Live. Use it as the live observer or as the controlled-mode setter.
+
+`onValueCommit` fires only on structural changes: `addBlock`, `addBlocks`, `removeBlocks`, `moveBlock`. Not fired on `updateBlock`. Useful for debounced saves.
+
+`toolbar` toggles a small in-component toolbar with a block-type selector and undo/redo. Off by default.
+
+`emptyState` is the fallback rendered when `blocks.length === 0`. Defaults to a built-in `DefaultEmptyState`.
+
+`disabled` sets `aria-disabled="true"`, applies `opacity-50 pointer-events-none` to the canvas, and forces `tabIndex=-1`.
+
+`dir` is `'ltr' | 'rtl' | 'auto'`. Passed to the root Container.
+
+The remaining `HTMLDivAttributes` (`id`, `data-*`, `aria-*`) pass through to the root.
+
+## EditorControls Ref
+
+The imperative surface. Get it via `ref`. Defined at `editor.tsx:54`.
+
+```ts
+interface EditorControls {
+  addBlock: (block: EditorBlock, index?: number) => void;
+  addBlocks: (blocks: EditorBlock[], index?: number) => void;
+  removeBlocks: (ids: Set<string>) => void;
+  moveBlock: (id: string, toIndex: number) => void;
+  updateBlock: (id: string, updates: Partial<EditorBlock>) => void;
+  getBlocks: () => EditorBlock[];
+  focus: () => void;
+  deselect: () => void;
+}
+```
+
+Use it for programmatic insertion (slash commands, palette clicks, paste handlers) and for synchronous reads of current state.
+
+`deselect()` is currently a stub (line 408). It accepts no arguments and returns nothing. The wiring to `documentEditor.deselect()` was not landed. See [Known Gaps](/docs/editor-known-gaps/).
+
+## Controlled vs Uncontrolled
+
+Uncontrolled is the default. Pass `defaultValue`. The component owns the blocks. Read changes via `onValueChange`.
+
+```tsx
+<Editor
+  defaultValue={initialBlocks}
+  onValueChange={blocks => console.log(blocks.length)}
+/>
+```
+
+Controlled requires both `value` and `onValueChange`. The component reflects the prop on every render.
+
+```tsx
+const [blocks, setBlocks] = React.useState<EditorBlock[]>(initial);
+
+<Editor value={blocks} onValueChange={setBlocks} />
+```
+
+Mixing `defaultValue` and `value` is not supported. `value` wins.
+
+## Change vs Commit
+
+`onValueChange` is live. Every keystroke that mutates a block fires it. Use it for live UI (counts, badges, dirty state) and for the controlled-mode setter.
+
+`onValueCommit` is structural-only. It fires when blocks are added, removed, or moved. It does not fire on content edits. Use it for debounced saves, dirty-flag clearing, or anything that should not run on every character.
+
+If you only set `onValueChange`, every keystroke goes to your handler. If you only set `onValueCommit`, content edits never reach you. Most consumers want both: live for UI, commit for persistence.
+
+## Render Path
+
+The component renders a flat list of blocks via `DocumentBlock` (line 153). One block per JSX element. The shape per block type lives at [Render Path](/docs/editor-render-path/).
+
+Inline content is converted by `renderInlineContent` at line 129. Mark application order is code, link, strikethrough, italic, bold (outermost). The order matters when reading the rendered HTML.
+
+## Internal Architecture
+
+The component instantiates `createDocumentEditor` on mount and stores the controls in a ref (line 413). It subscribes to `docEditor.$state` for `[canUndo, canRedo]` updates. It tracks focus via a `selectionchange` listener that calls `findBlockElement(node)` from `cursor-tracker` to derive `focusedBlockId`.
+
+The blocks atom (`blocksAtomRef`) is the source of truth. `onBlocksChange` from `document-editor` writes to it. The React render reads from it. Controlled-mode changes to `value` sync into the atom on a `useEffect` (line 457). Cleanup on unmount calls `docEditor.destroy()`.
+
+## Declared But Not Wired
+
+The file exports several types that are not yet consumed by `Editor` itself. They are visible in `apps/demo/src/components/demos/EditorPlayground.tsx`, which passes props the component does not declare. This is a real gap. Documenting it here so consumers do not assume the API is complete.
+
+The following are exported and used by demo code but not present in `EditorProps`:
+
+- `sidebar?: EditorSidebarConfig` — block palette in the demo, not in EditorProps. Type at `editor.tsx:80`.
+- `rulePalette?: EditorRulePaletteConfig` — rule palette, type at `editor.tsx:92`.
+- `commandPalette?: { commands: SlashCommand[] }` — slash command palette. `SlashCommand` type at `editor.tsx:65`.
+- `inlineToolbar?: boolean | { ... }` — floating format toolbar.
+- `blockContextMenu?: { items: ContextMenuItem[] }` — right-click menu.
+- `onSaveAsComposite?: (data: SaveCompositeData) => void` — composite save handler. Type at `editor.tsx:73`.
+
+The types are intact. The wiring was stripped post-PR #1048 and has not been restored. Consumers building today should compose these surfaces externally and not pass them as props to `<Editor>`. The full sketch and a fix path live at [Known Gaps](/docs/editor-known-gaps/).
+
+## Disabled Mode
+
+Setting `disabled` is non-destructive. Blocks remain rendered. The canvas becomes non-interactive. Programmatic mutation through the ref still works. This is by design: a host can lock the surface during a save without losing state.
+
+## Direction
+
+`dir` accepts `'ltr'`, `'rtl'`, `'auto'`. The roving-focus and inline-toolbar primitives respect direction. Setting `'auto'` defers to the browser's directionality detection on the root container.

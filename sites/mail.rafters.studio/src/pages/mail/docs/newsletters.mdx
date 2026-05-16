@@ -102,7 +102,7 @@ The `@rafters/mail` schema ships three newsletter-related tables in `packages/co
 | `platform_subscriber` | Association between one of your app users (`userId`) and one audience (`audienceId`), plus the `providerSubscriberId` for provider correlation. Use when you need to answer "which of my users is on which list" without round-tripping the provider. |
 | `broadcast_audit`     | Audit log of campaign sends: `providerCampaignId`, `subject`, `contentHash`, `sentBy` (user id), `audienceName`, `recipientCount`, `sentAt`. Use for compliance, "who sent what to whom" queries, and content-hash deduplication across sends.        |
 
-**These tables are not in the exported `migrationSQL` string.** They exist as Drizzle schema definitions you can include in your own migrations if you want platform-side tracking. If you only use the `EmailProvider` interface and trust the provider's own audience/subscriber storage, you do not need these tables at all.
+**These tables are not in the exported `migrationSQL` string.** They exist as Zod row schemas in `@rafters/mail` (`platformAudienceRowSchema`, `platformSubscriberRowSchema`, `broadcastAuditRowSchema`) and as Drizzle table definitions in `@rafters/mail-drizzle` (`platformAudience`, `platformSubscriber`, `broadcastAudit`) that you can include in your own migrations if you want platform-side tracking. If you only use the `EmailProvider` interface and trust the provider's own audience/subscriber storage, you do not need these tables at all.
 
 ---
 

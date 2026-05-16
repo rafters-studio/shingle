@@ -259,7 +259,7 @@ Typical inbound handler using the building blocks:
 3. Call `parseEmailHeaders(Object.fromEntries(message.headers.entries()))` to get structured header data
 4. Call `hashContent(raw)` for a content hash
 5. Use `createR2Storage({ bucket: env.BLOB_STORAGE })` and call `storage.put(key, raw)` to save the raw `.eml`
-6. Insert a row into `inbox_message` via your Drizzle queries
+6. Insert a row into `inbox_message` via your ORM adapter (e.g., Drizzle table definitions from `@rafters/mail-drizzle`)
 7. Match or create a thread (see the `threading.md` doc on core for the expected strategy; implementation is your responsibility)
 8. Dispatch to a classification queue if you run one
 

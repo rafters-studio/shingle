@@ -10,8 +10,8 @@ Version: 0.1.0
 Package: `@rafters/mail`
 Runtime: Edge-native (Cloudflare Workers, Deno Deploy, Vercel Edge, any V8 isolate)
 Database: SQLite (D1, Turso, libSQL)
-ORM: Drizzle
-Dependencies: Zero vendor dependencies. All external concerns are adapters.
+ORM: ORM-neutral. Default adapter `@rafters/mail-drizzle`; Kysely / Prisma adapters can slot in identically.
+Dependencies: `uuidv7` and `zod`. All external concerns -- including the ORM -- are adapter packages.
 
 ---
 
@@ -285,7 +285,7 @@ Internal notes on threads. Markdown content. Not visible to external parties. Us
 
 ## Service Interfaces
 
-All service interfaces are defined in `@rafters/mail`. Implementations receive a Drizzle database instance and any required adapters via constructor or factory function.
+All service interfaces are defined in `@rafters/mail`. Implementations live in ORM adapter packages. The default `@rafters/mail-drizzle` ships factory functions (`createMailServices`, `createInboxEmailService`, etc.) that receive a Drizzle database instance plus any other required adapters and return objects that satisfy the core interfaces.
 
 ---
 
@@ -1386,7 +1386,7 @@ SQLite stores JSON as text. Drizzle's `mode: 'json'` handles serialization/deser
 
 ### Why no barrel files
 
-Edge runtimes have bundle size constraints (Cloudflare Workers: 1MB compressed). Barrel exports (`index.ts` re-exporting everything) pull the entire module graph into every consumer. Subpath exports in `package.json` let consumers import exactly what they need. Example: `import { threadStatusSchema } from '@rafters/mail/schemas'` loads only the schemas, not the Drizzle tables or service interfaces.
+Edge runtimes have bundle size constraints (Cloudflare Workers: 1MB compressed). Barrel exports (`index.ts` re-exporting everything) pull the entire module graph into every consumer. Subpath exports in `package.json` let consumers import exactly what they need. Example: `import { threadStatusSchema } from '@rafters/mail/schema'` loads only the Zod schemas, not the threading helpers or service interfaces. Drizzle table definitions are a separate package (`@rafters/mail-drizzle`) so consumers using a different ORM never pull `drizzle-orm` into their bundle at all.
 
 ### Why Zod is source of truth
 
