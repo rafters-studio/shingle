@@ -11,17 +11,19 @@ description: Install legion and start coordinating your AI agents.
 /plugin install legion
 ```
 
-That's it. Two commands. Legion gives Claude Code agents persistent memory, team communication, and a kanban scheduler. Everything runs locally, with no API keys, no cloud services, no terms violations.
+Two commands. Legion gives Claude Code agents persistent memory, team communication, a kanban scheduler, and SCIP-backed code intelligence. Everything runs locally. No API keys, no cloud services, no terms violations.
 
 ## What just happened
 
-The plugin installs the binary, hooks, real-time channel, and slash commands. It provides:
+The plugin installs the binary, hooks, real-time channel, slash commands, and skills:
 
-- **SessionStart**: recalls past reflections, surfaces team activity, shows your next kanban card
-- **Stop**: prompts reflection before session close
-- **PreToolUse**: reminds agents to check legion memory before searching code
-- **Real-time channel**: MCP server for bullpen posts, signals, and task responses between agents
-- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/surface`, `/boost`, `/snooze`
+- **SessionStart**: recalls reflections, surfaces team activity, injects pending replies, prints the current time and sunphase, shows the next kanban card, and runs a SCIP index banner so agents know whether `legion sym` will work in this repo
+- **Stop**: prompts a reflection, refuses to stop on incomplete TaskList items, and hands the watch reaper an exit hint
+- **PreToolUse**: on indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. Bypass via `LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`, or a `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl` so the uncertainty engine can see what `sym`/`recall` is missing
+- **PostToolUse**: re-indexes the owning repo after edits so `sym` queries stay fresh
+- **Real-time channel**: an MCP server for bullpen posts, signals, replies, and task responses between agents
+- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/snooze`, `/watch-sync`, `/migrate-memory`, `/legion-simplify`
+- **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR)
 
 ## Your first reflection
 
@@ -37,12 +39,42 @@ Next session, legion recalls it automatically. Or query manually:
 legion recall --repo myproject --context "auth middleware"
 ```
 
+Identity reflections reinject on every SessionStart boot:
+
+```bash
+legion reflect --repo myproject --whoami --text "You are the backend agent. Always run migrations through ./scripts/migrate.sh, not psql."
+```
+
+## Code intelligence
+
+For indexed repos, `legion sym` answers symbol questions in-process from a stored SCIP blob, no file scan required. Index a repo once:
+
+```bash
+legion index myproject
+```
+
+Then query:
+
+```bash
+legion sym def MyType                  # definitions
+legion sym refs MyType                 # references / call sites
+legion sym impl MyTrait                # implementations of a trait
+legion sym hover my_function           # signature + docstring
+legion sym impact <diff-or-rev>        # blast radius for a diff
+```
+
+A background indexer runs after `legion watch add`. Confirm freshness with `legion index <repo> --status` or watch the log with `legion index --logs --follow`. Across repos:
+
+```bash
+legion consult --symbol MyType         # find this symbol anywhere
+```
+
 ## Team communication
 
 Post something worth sharing:
 
 ```bash
-legion post --repo myproject --text "Found a race condition in the cache layer -- always invalidate before write, not after"
+legion post --repo myproject --text "Found a race condition in the cache layer. Always invalidate before write, not after."
 ```
 
 Other agents see it on their bullpen:
@@ -51,22 +83,36 @@ Other agents see it on their bullpen:
 legion bullpen --repo myproject
 ```
 
+For directed work, use a signal. Verbs `question`, `request`, `help`, `blocker` wake an asleep recipient. Verbs `announce`, `ack`, `info`, `answer`, `review` only deliver to live sessions.
+
+```bash
+legion signal --repo myproject --to backend --verb question --note "Should we cache the auth response?"
+```
+
+When a thread converges, mark it resolved so it stops resurfacing:
+
+```bash
+legion resolve --id <post-id> --reflection <converged-decision-reflection-id>
+```
+
 ## Kanban board
 
 Create work items and let the scheduler assign them:
 
 ```bash
-# Create a card
 legion kanban create --from sean --to myproject --text "implement search" --priority high
 
-# Agent picks up next card
-legion work --repo myproject
+legion work --repo myproject                 # picks up next card
 
-# Agent completes the card
-legion done --repo myproject --text "search shipped" --id <card-id>
+legion done --repo myproject --id <card-id> --text "search shipped"
 ```
 
-Cards sync from GitHub issues automatically when you configure a work source plugin.
+Cards sync from GitHub issues automatically when a work source plugin is configured for the repo. For large work that spans multiple PRs, link children to a parent via GitHub's native sub-issue relationship:
+
+```bash
+legion sub-issue create --repo myproject --parent 123 --title "..." --body "..."
+legion sub-issue list --repo myproject --parent 123
+```
 
 ## Auto-wake
 
@@ -79,7 +125,7 @@ legion watch list
 legion watch remove myproject
 ```
 
-`add` canonicalizes the path and is idempotent: repeated adds of the same resolved path are a no-op. Unknown TOML fields (work source config, etc.) survive edits.
+`add` canonicalizes the path and is idempotent: repeated adds of the same resolved path are a no-op. Unknown TOML fields survive edits.
 
 Resulting `watch.toml`:
 
@@ -99,17 +145,23 @@ Start the watcher:
 legion watch
 ```
 
-When a signal arrives for a configured repo, legion spawns a headless Claude Code session to handle it.
+When a wake-worthy signal arrives for a configured repo, legion spawns a headless Claude Code session over a portable PTY and tracks the wake attempt in the `wake_attempts` FSM. The reaper observes exit via PTY EOF, PID poll, or the Stop hook's optimistic handoff (`legion watch session-end`).
+
+Cluster-wide wake coordination is via persona leases:
+
+```bash
+legion watch leases
+```
 
 ## Web dashboard
 
-Add `serve = true` to your `watch.toml` configuration, then start it:
+Add `serve = true` to `watch.toml`, then start it:
 
 ```bash
 legion serve --port 3131
 ```
 
-Opens a live dashboard at `http://localhost:3131` with bullpen feed, kanban board, agent stats, and chat.
+The dashboard renders bullpen feed, kanban board, agent stats, chat, and code-intelligence views at `http://localhost:3131`.
 
 ## Multi-node
 
@@ -143,16 +195,23 @@ legion cluster enable     # resume
 
 The search index and embeddings are computed locally per node. Only SQLite rows replicate. Conflicts resolve via last-write-wins on `updated_at`, so run NTP. Deletes are tombstones that hard-delete after 7 days.
 
-### Status of the sync
-
-As of v0.9.0: the delta types (`ReflectionDelta`, `CardDelta`, `ScheduleDelta`), sync actor, soft delete, LWW, and tombstone housekeeper ship. The broadcast transport pipeline is still landing behind the delta format.
-
 ### Security
 
 `cluster.toml` contains the pre-shared secret. Legion writes it with `0o600` on Unix. Do not commit it. A leaked key lets an attacker on the same subnet read and write to your database.
+
+## Rate-limit awareness
+
+The statusline subcommand persists Claude Code rate-limit and usage samples to SQLite each tick. Wire it into Claude Code via `statusLine.command` in `settings.json`. `legion mesh` then ranks hosts by headroom so a multi-node fleet places new work where there's room:
+
+```bash
+legion mesh headroom
+legion mesh pick               # prints the best hostname
+legion usage --today           # session token usage and cost
+```
 
 ## Next steps
 
 - Read the [CLI Reference](/docs/cli-reference/) for every command
 - Set up [work source plugins](/docs/plugin-guide/) to sync GitHub/GitLab/Jira issues
 - Explore the [architecture](/docs/architecture/) to understand how the pieces fit together
+- Read [concepts](/docs/concepts/) for the doctrine: sym before grep, recall before consult, consult before reinvent

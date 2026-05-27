@@ -6,94 +6,171 @@ description: How Legion stores data, indexes knowledge, schedules work, and sync
 
 # Architecture
 
-Legion is a single Rust binary that stores data in SQLite and indexes it with Tantivy. No runtime dependencies, no background services required (watch and serve are optional).
+Legion is a single Rust binary that stores data in SQLite, indexes prose with Tantivy, indexes code with SCIP, and computes embeddings with model2vec. No runtime dependencies. No background services required (watch, serve, and the daemon are optional).
 
 ## Storage
 
 **SQLite** via rusqlite with WAL mode. Default location: `~/.local/share/legion/` (XDG on Linux, Application Support on macOS). Overridable via `LEGION_DATA_DIR`.
 
-Tables:
-- `reflections`: agent memories with BM25-searchable text, domain tags, learning chains, boost/decay scoring, archive/tombstone/LWW columns
-- `tasks`: kanban cards with 8-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
-- `schedules`: cron-like scheduled posts with tombstone/LWW columns
-- `board_reads`: per-agent read cursors for the bullpen (local, does not replicate)
-- `health_samples`: system telemetry for watch pressure monitoring
-- `watch_handled`: per-repo signal handling tracking
-- `audit_log`: work source actions (issue/pr creation, merge, review) for traceability
-- `quality_gates`: simplify-skill results enforced by `legion pr create`
+Tables (grouped by concern):
 
-All IDs are UUIDv7 (time-ordered). Migrations are idempotent and run on every DB open. The syncable tables (`reflections`, `tasks`, `schedules`) carry `deleted_at` and `updated_at` for soft-delete replication and last-write-wins conflict resolution.
+**Memory and search**
 
-## Search
+- `reflections` agent memories with BM25-searchable text, domain tags, learning chains, boost/decay scoring, archive/tombstone/LWW columns
+- `embeddings` model2vec vectors stored as nullable BLOB on reflections (per-node, not replicated)
 
-**Tantivy** BM25 full-text search with English stemming. The index lives alongside the database. Queries can be filtered by repo or searched across all repos (consult).
+**Code intelligence**
 
-Incremental index sync detects reflections in SQLite that are missing from Tantivy and adds them automatically. No manual reindex needed after sync.
+- `scip_indexes` per `(repo, lang)` SCIP protobuf blobs that `legion sym` reads in-process. Built by `legion index` and refreshed by the PostToolUse hook
+
+**Coordination**
+
+- `tasks` kanban cards with 8-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
+- `schedules` cron-like scheduled posts with tombstone/LWW columns
+- `documents` coordination substrate documents (#455/#456): specs, NFRs, blueprints, personas, journeys, etc. Type-agnostic at the storage layer. Payload is a validated JSON blob
+- `board_reads` per-agent read cursors for the bullpen (local, does not replicate)
+
+**Watch and wake**
+
+- `watch_handled` per-repo signal handling tracking
+- `wake_attempts` (#487) FSM-tracked wake attempts: spawn time, PID, PTY EOF time, exit_observed_at, terminal status. The reaper is the only writer for terminal transitions
+
+**Observability**
+
+- `health_samples` system telemetry for watch pressure monitoring
+- `rate_limit_samples` Claude Code rate-limit chips ingested by `legion statusline`
+- `usage_samples` Claude Code session token usage ingested alongside the rate-limit chip
+- `audit_log` work source actions (issue/PR creation, merge, review) for traceability
+- `quality_gates` simplify-skill results enforced by `legion pr create`
+
+**Uncertainty (Pillar 2)**
+
+- `predictions` claims with confidence, surface, cohort, orphan window (#355/#356)
+- `calibration_snapshot` reliability buckets: claimed vs actual, count, Brier score (#357/#358)
+
+All IDs are UUIDv7 (time-ordered). Migrations are idempotent and run on every DB open. Syncable tables (`reflections`, `tasks`, `schedules`, `documents`) carry `deleted_at` and `updated_at` for soft-delete replication and last-write-wins conflict resolution.
+
+## Prose search
+
+**Tantivy** BM25 full-text search with English stemming. Index lives alongside the database. Queries filter by repo or search across all repos (`consult`).
+
+Incremental index sync detects reflections in SQLite missing from Tantivy and adds them automatically. No manual reindex needed after sync.
 
 ## Embeddings
 
-**model2vec-rs** for semantic similarity. Stored as a nullable BLOB column on reflections. Each node computes its own embeddings; they do not replicate.
+**model2vec-rs** for semantic similarity. Stored as a nullable BLOB column on reflections. Each node computes its own embeddings. They do not replicate.
 
-## Kanban Scheduler
+## Code intelligence
+
+**SCIP** (Sourcegraph Code Intelligence Protocol) protobuf blobs in `scip_indexes`, keyed on `(repo, lang)`. `legion index` detects languages from the workdir, runs the corresponding indexer per language (scip-typescript, rust-analyzer's SCIP mode, scip-python, etc.), and writes the blobs.
+
+`legion sym def | refs | impl | hover | impact` reads these blobs in-process. No file scan. No language server runtime.
+
+**Background indexer**: triggered after `legion watch add`, after PostToolUse on indexed repos, and on demand. Logs land under `~/.local/state/legion/index-logs/`.
+
+**Enforcement hooks** (v0.13.1, #438/#439): on indexed repos, raw `Grep` and `Read` are blocked at PreToolUse with a redirect to `sym`/`recall`. Bypass via env var (`LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`) or `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl`.
+
+**The feedback loop**: `bypass.jsonl` is the signal that `sym` or `recall` missed an answer agents expected. The uncertainty engine reads it. The dashboard surfaces top under-served `(tool, repo, pattern)` tuples (#440). Doctrine becomes mechanism: the rule is enforced, the violations are counted, the count drives what gets fixed next.
+
+## Kanban scheduler
 
 The kanban board is a scheduler wearing a human-friendly UI.
 
-**Card statuses:** Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Done, Cancelled.
+**Card statuses**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Done, Cancelled.
 
 **State machine** enforces valid transitions. `force_move` bypasses the state machine for dashboard drag-and-drop.
 
 **Scheduler** (`legion work`): atomically selects the highest-priority unblocked card and accepts it. Priority ordering: critical > high > med > low, then sort_order, then oldest.
 
-**Work sources**: plugins that sync external issue trackers (GitHub, GitLab, Jira) into the kanban board. Cards link back to source issues via `source_url`.
+**Work sources**: plugins that sync external issue trackers (GitHub, GitLab, Jira) into the kanban board. Cards link back to source issues via `source_url`. Reconciliation pulls live state with `legion kanban reconcile`.
+
+**Sub-issues** (#462): create child issues linked to a parent via GitHub's native sub-issue relationship. The plugin looks up the parent node id, errors if missing, then links via the `addSubIssue` mutation.
+
+## Coordination substrate
+
+`documents` (#455/#456) is the type-agnostic storage layer for shared coordination artifacts: specs, NFRs, blueprints, personas, journey maps. Payload is a JSON blob validated against the meta.type's schema (registry lands as a sibling child of #455).
+
+`legion document create | view | list | archive` is the operator surface. Documents replicate across the cluster like reflections and cards.
 
 ## Communication
 
-**Bullpen**: shared message board. Posts are reflections with `audience = 'team'`. Discoverable via consult.
+**Bullpen**: shared message board. Posts are reflections with `audience = 'team'`. Discoverable via `consult`.
 
-**Signals**: structured bullpen posts for coordination. Format: `@recipient verb:status {details}`. Filtered separately from natural language posts.
+**Signals**: structured bullpen posts for coordination. Format: `@recipient verb:status {details}`. Filtered separately from natural-language posts. Wake-worthy verbs (`question`, `request`, `help`, `blocker`) spawn an asleep recipient via watch. Informational verbs (`announce`, `ack`, `info`, `answer`, `review`) deliver to live sessions only.
 
-**Channel**: MCP server providing real-time communication tools. Events arrive as they happen, with no polling required.
+**Resolve** (#362): `legion resolve --id <post-id>` marks a converged thread so it stops resurfacing in the bullpen, channel notifications, and the wake-loop signal feed. Optional `--reflection <id>` links the team's decision so future recall surfaces them together.
+
+**Channel**: MCP server providing real-time communication tools. Events arrive as JSON-RPC notifications with method `notifications/claude/channel`. No polling.
 
 ## Watch
 
-Long-lived daemon that polls SQLite for unhandled signals. When a signal arrives for a configured repo, spawns a headless `claude --print` session in that repo's working directory.
+Long-lived daemon that polls SQLite for unhandled wake-worthy signals. When one arrives for a configured repo, watch spawns a headless Claude Code session in that repo's working directory.
 
-Features:
+**Spawn modes** (#485, env `WATCH_SPAWN_MODE`):
+
+- `print` legacy `claude --print` subprocess
+- `pty` (default since v0.16) portable-pty wrapper with a ring-buffered reader (#486, #498). Provides a real TTY so prompts that require interactive features behave correctly
+
+**Wake tracking** (#487, #499): every wake attempt writes a `wake_attempts` row and transitions through an FSM. The reaper is the only writer for terminal states (exited, panic-stopped, abandoned). The Stop hook can hand off an `exit_observed_at` hint via `legion watch session-end` (#493). PTY EOF + PID poll remain authoritative.
+
+**Persona leases**: cluster-wide wake coordination so two nodes do not wake the same persona at the same time. `legion watch leases` inspects.
+
+**Safeguards**:
+
 - Per-repo cooldown prevents wake storms
 - Stagger between spawns prevents I/O storms
 - System health monitoring pauses spawns under pressure
+- Panic-stop on subscription-quota exhaustion (#484)
 - Auto-unblock: when an agent announces completed work, blocked cards referencing that repo are automatically unblocked
 
-## Multi-Node
+## Uncertainty engine (Pillar 2)
 
-Each machine runs its own legion binary with its own SQLite database. Nodes on the same LAN discover each other via UDP broadcast and exchange encrypted delta packets. No coordinator, no central server, no cloud dependency.
+Agents emit predictions with claimed confidence. Outcomes are witnessed later. Calibration is measured per cohort and surface.
 
-**Transport library**: the broadcast and encryption primitives are provided by [smugglr](https://smugglr.dev), a reusable Rust crate. Legion owns the schema, the `cluster.toml` configuration, the CLI, and the sync actor wiring on top. The split lets Legion stay focused on the memory model while smugglr handles the edge-of-the-network concerns (packet framing, encryption, peer discovery).
+```
+emit  -> prediction row, orphan window starts
+witness -> outcome recorded, calibration_snapshot updated
+orphans -> predictions still unresolved past their window
+calibration -> claimed vs actual per reliability bucket, Brier score
+```
 
-**Encryption**: XChaCha20-Poly1305 with a pre-shared 256-bit key. The key is membership: anyone with the key can read and write to the cluster. `cluster.toml` (which holds the key) is written with `0o600` on Unix.
+`legion uncertainty emit` is non-blocking so a downstream auto-emit hook (#358) can never break the agent. `witness` is idempotent-failure: re-witnessing is an error so the calibration table cannot drift.
+
+Bypass telemetry (`bypass.jsonl`) feeds the same engine. A high bypass rate on a `(repo, pattern)` is a signal that the system claims it can answer the query (`sym`/`recall`) but agents are voting with their feet.
+
+## Rate-limit and mesh placement
+
+`legion statusline` is wired into Claude Code's `statusLine.command`. Each tick reads the rate-limit JSON on stdin, persists a `rate_limit_samples` row (and a `usage_samples` row when the transcript is readable), and prints a one-line chip.
+
+`legion mesh headroom` ranks every host in the cluster by remaining rate-limit headroom and recent burn rate. `legion mesh pick` prints the best host for placing a new task. `legion usage` surfaces session cost analysis for the operator.
+
+## Multi-node
+
+Each machine runs its own legion with its own SQLite database. Nodes on the same LAN discover each other via UDP broadcast and exchange encrypted delta packets. No coordinator, no central server, no cloud dependency.
+
+**Transport library**: the broadcast and encryption primitives come from [smugglr](https://smugglr.dev), a reusable Rust crate. Legion owns the schema, the `cluster.toml` configuration, the CLI, and the sync actor wiring on top. The split lets legion stay focused on the memory model while smugglr handles the edge-of-the-network concerns (packet framing, encryption, peer discovery).
+
+**Encryption**: XChaCha20-Poly1305 with a pre-shared 256-bit key. The key is membership: anyone with the key can read and write to the cluster. `cluster.toml` is written with `0o600` on Unix.
 
 **Discovery**: UDP broadcast on port 31337 (configurable). Each node announces itself and listens for peers.
 
-**Cross-network**: Users bring their own tunnel (Tailscale, WireGuard, ZeroTier). Legion broadcasts to whatever subnet it's on. If your machines can see each other, they sync.
+**Cross-network**: bring your own tunnel (Tailscale, WireGuard, ZeroTier). Legion broadcasts to whatever subnet it's on.
 
-**What replicates**: reflections, kanban cards, schedules. Each row carries `updated_at` (LWW) and `deleted_at` (tombstones), so deletes replicate as rows rather than vanishing from peers that have not yet seen them.
+**What replicates**: reflections, kanban cards, schedules, documents. Each row carries `updated_at` (LWW) and `deleted_at` (tombstones), so deletes replicate as rows rather than vanishing from peers that have not yet seen them.
 
-**What stays local**: Tantivy search index, model2vec embeddings, `board_reads` (per-agent read cursors), `health_samples`, `watch_handled`. Each node computes or tracks its own.
+**What stays local**: Tantivy search index, model2vec embeddings, SCIP indexes, `board_reads`, `health_samples`, `rate_limit_samples`, `usage_samples`, `watch_handled`, `wake_attempts`, `bypass.jsonl`. Each node computes or tracks its own.
 
-**Tombstone housekeeper**: `legion watch` runs a weekly job that hard-deletes rows whose `deleted_at` exceeds the retention window (7 days by default). Late-joining peers still see recent deletes; the database stays bounded.
-
-**Status**: the sync actor, delta types (`ReflectionDelta`, `CardDelta`, `ScheduleDelta`), soft delete, LWW, and tombstone housekeeper ship in v0.9.0. The broadcast transport pipeline is scaffolded and still landing behind the delta format.
+**Tombstone housekeeper**: `legion watch` runs a weekly job that hard-deletes rows whose `deleted_at` exceeds the retention window (7 days by default). Late-joining peers still see recent deletes. The database stays bounded.
 
 ### cluster.toml
 
-Stored in the data directory alongside `legion.db`. Managed by `legion cluster *` commands; hand-editing is supported but unusual.
+Stored in the data directory alongside `legion.db`. Managed by `legion cluster *` commands. Hand-editing is supported but unusual.
 
 ```toml
 enabled = true
 secret = "64-hex-chars"          # 256-bit key, generated by `legion cluster init`
 port = 31337                     # UDP broadcast port
 instance_id = "hostname"         # optional, defaults to system hostname
-last_sync = "2026-04-15T00:00:00Z"
 ```
 
 ### Cluster commands
@@ -109,40 +186,52 @@ legion cluster status              # peers, sync state, last sync time
 
 ## Dashboard
 
-Axum web server with rust-embed for static assets. SSE for live updates. Tabs: Feed, Signals, Board (kanban), Stats, Chat.
+Axum web server with rust-embed for static assets. SSE for live updates. Tabs: Feed, Signals, Board (kanban), Stats, Chat, plus code-intelligence views fed by `scip_indexes` and observability views fed by `rate_limit_samples` and `usage_samples`.
 
 The dashboard is the human control surface. Agents interact via CLI.
 
-## Project Layout
+## Project layout
 
 ```
 src/
-  main.rs       -- CLI entry point (clap)
-  db.rs         -- SQLite init, migrations, CRUD
-  search.rs     -- Tantivy index management
-  kanban.rs     -- Card, CardStatus, state machine, scheduler
-  reflect.rs    -- reflection creation
-  recall.rs     -- query and rank reflections
-  board.rs      -- bullpen posts and filtering
-  signal.rs     -- signal parsing and formatting
-  surface.rs    -- cross-repo highlights
-  status.rs     -- agent work status
-  worksource.rs -- work source plugin discovery and execution
-  watch.rs      -- auto-wake daemon + watch.toml management
-  cluster.rs    -- cluster.toml, key management, `legion cluster`
-  sync_actor.rs -- background thread that drives delta sync
-  serve.rs      -- web dashboard
-  mcp.rs        -- MCP stdio server for the real-time channel
-  health.rs     -- system health sampling
-  embed.rs      -- model2vec embeddings
-  audit.rs      -- audit log for work source actions
-  init.rs       -- hook script generation and settings.json management
-  error.rs      -- error types
+  main.rs              -- CLI entry point (clap)
+  db.rs                -- SQLite init, migrations, CRUD
+  search.rs            -- Tantivy index management
+  scip/                -- SCIP index build, store, query (sym engine)
+  kanban.rs            -- Card, CardStatus, state machine, scheduler
+  reflect.rs           -- reflection creation
+  recall.rs            -- query and rank reflections
+  board.rs             -- bullpen posts and filtering
+  signal.rs            -- signal parsing, formatting, wake-worthy verbs
+  resolve.rs           -- bullpen/signal resolution
+  surface.rs           -- cross-repo highlights
+  status.rs            -- agent work status
+  document.rs          -- coordination substrate documents
+  sub_issue.rs         -- GitHub sub-issue verbs
+  worksource.rs        -- work source plugin discovery and execution
+  watch.rs             -- auto-wake daemon, watch.toml, PTY spawn, reaper
+  wake_attempts.rs     -- FSM-enforced DB methods for wake_attempts
+  cluster.rs           -- cluster.toml, key management, `legion cluster`
+  sync_actor.rs        -- background thread that drives delta sync
+  serve.rs             -- web dashboard
+  mcp.rs               -- MCP stdio server for the real-time channel
+  health.rs            -- system health sampling
+  statusline.rs        -- statusLine ingest + chip render
+  mesh.rs              -- mesh-aware task placement
+  usage.rs             -- session cost analysis
+  uncertainty.rs       -- emit, witness, calibration, orphans
+  telemetry.rs         -- bypass.jsonl writer and readers
+  embed.rs             -- model2vec embeddings
+  audit.rs             -- audit log for work source actions
+  init.rs              -- hook script generation and settings.json management
+  error.rs             -- error types
 plugin/
-  hooks/        -- Claude Code hooks
-  commands/     -- slash commands
-  agents/       -- agent definitions (legion-prime, dungeon-master)
-  skills/       -- skill definitions (legion-memory, legion-simplify)
-  channel/      -- MCP client bridge
-  worksources/  -- work source plugins
+  .claude-plugin/      -- plugin manifest
+  bin/legion           -- wrapper script
+  hooks/               -- Claude Code hooks
+  commands/            -- slash commands
+  agents/              -- agent definitions (legion-prime, dungeon-master)
+  skills/              -- skill definitions (legion-memory, legion-simplify)
+  channel/             -- MCP client bridge
+  worksources/         -- work source plugins
 ```
