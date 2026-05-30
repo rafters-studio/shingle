@@ -349,27 +349,50 @@ No flags beyond the global ones.
 
 ```
 $ smugglr status
-smugglr v0.3.0
+--- Configuration ---
+  Config file: loaded
+  Local DB: ./local.db
+  Target: Plugin (http-sql)
+  Plugin path: /Users/you/.smugglr/plugins/smuggler-http-sql
+  Timestamp column: updated_at
+  Conflict resolution: LocalWins
 
-  config:  ./config.toml
-  source:  ./local.db (SQLite 3.45.1, 3 tables, 633 rows)
-  target:  d1://my-database (Cloudflare D1, reachable)
-  relay:   s3://smugglr-relay/default (configured, reachable)
-  strategy: local_wins
+--- Local Database ---
+  Connection: OK
+  Tables: 3
+    users: 142 rows
+    posts: 488 rows
+    settings: 3 rows
+
+--- Target Plugin (http-sql) ---
+  Connection: OK
+  Tables: 3
+    users: 142 rows
+    posts: 488 rows
+    settings: 3 rows
 ```
 
-If something is wrong, status tells you what and exits with the appropriate code.
+There is no `relay:` line and no top-level `strategy:` line: the relay is not part of status, and the conflict strategy is reported as `Conflict resolution`. If the target cannot be reached, that section reports the failure (the process still exits non-zero):
 
 ```
 $ smugglr status
-smugglr v0.3.0
+--- Configuration ---
+  Config file: loaded
+  Local DB: ./local.db
+  Target: Plugin (http-sql)
+  Plugin path: /Users/you/.smugglr/plugins/smuggler-http-sql
+  Timestamp column: updated_at
+  Conflict resolution: LocalWins
 
-  config:  ./config.toml
-  source:  ./local.db (SQLite 3.45.1, 3 tables, 633 rows)
-  target:  d1://my-database (Cloudflare D1, unreachable)
-           error: 401 Unauthorized. Check your API token.
+--- Local Database ---
+  Connection: OK
+  Tables: 3
+    users: 142 rows
+    posts: 488 rows
+    settings: 3 rows
 
-Exit code: 3
+--- Target Plugin (http-sql) ---
+  Connection: FAILED - 401 Unauthorized. Check your API token.
 ```
 
 ---
@@ -417,14 +440,13 @@ Pass `--output json` to any command. Output follows a consistent `CommandOutput`
   "tables": [
     {
       "name": "users",
-      "rows_pushed": 3,
-      "rows_pulled": 0
+      "rows_pushed": 3
     }
   ]
 }
 ```
 
-Fields with zero values are omitted. A push that touches no pulled rows will not include `rows_pulled` in the table entry.
+In a table entry, `rows_pushed` and `rows_pulled` are omitted when zero. A push that touches no pulled rows will not include `rows_pulled`. Only tables with changes appear in `tables`.
 
 ### Error output
 
@@ -432,39 +454,50 @@ Fields with zero values are omitted. A push that touches no pulled rows will not
 {
   "command": "push",
   "status": "error",
-  "error": "network timeout connecting to d1://my-database"
+  "error": "network timeout connecting to d1://my-database",
+  "exit_code": 3
 }
 ```
 
+Error output always includes `exit_code`, matching the process exit status. See [Exit Codes](#exit-codes).
+
 ### Dry-run output
 
-Dry-run adds summary fields to the top level and per-table breakdowns.
+Dry-run emits a distinct shape with `status: "dry_run"`, top-level totals, and a per-table diff breakdown. There is no `dry_run` field. `total_rows_to_push` and `total_rows_to_pull` are both always present (they are zero when a direction has no work), as is `exit_code`.
 
 ```json
 {
   "command": "push",
-  "status": "ok",
-  "dry_run": true,
-  "total_rows_to_push": 3,
+  "status": "dry_run",
   "tables": [
     {
       "name": "users",
-      "rows_to_push": 3
+      "local_only": 2,
+      "remote_only": 0,
+      "local_newer": 1,
+      "remote_newer": 0,
+      "content_differs": 0,
+      "identical": 139,
+      "rows_to_push": 3,
+      "rows_to_pull": 0
     }
-  ]
+  ],
+  "total_rows_to_push": 3,
+  "total_rows_to_pull": 0,
+  "exit_code": 0
 }
 ```
 
-For pull dry-runs, the fields are `total_rows_to_pull` and `rows_to_pull`. For sync, both directions are present.
+Every table entry carries all six diff counts (`local_only`, `remote_only`, `local_newer`, `remote_newer`, `content_differs`, `identical`) plus `rows_to_push` and `rows_to_pull`. For a pull, the push counts are zero and the pull counts carry the work; for sync, both directions are populated.
 
 ### Watch output (JSONL)
 
-When running `smugglr watch --output json`, each sync cycle emits one JSON line to stdout:
+When running `smugglr watch --output json`, each tick emits one JSON line to stdout:
 
 ```jsonl
-{"command":"watch","status":"ok","tables":[{"name":"users","rows_pushed":0,"rows_pulled":2}]}
-{"command":"watch","status":"ok","tables":[]}
-{"command":"watch","status":"ok","tables":[{"name":"users","rows_pushed":1}]}
+{"command":"watch","tick":1,"status":"ok","tables":[{"name":"users","rows_pulled":2}]}
+{"command":"watch","tick":2,"status":"ok","tables":[]}
+{"command":"watch","tick":3,"status":"ok","tables":[{"name":"users","rows_pushed":1}]}
 ```
 
-Each line is a complete `CommandOutput` object. Parse line by line.
+Each line is a `WatchTickOutput` object with a mandatory `tick` counter. The `tables` entries omit `rows_pushed`/`rows_pulled` when they are zero. Parse line by line.
