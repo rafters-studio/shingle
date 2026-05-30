@@ -33,6 +33,13 @@ Every field, every default. Copy this and delete what you do not need.
 
 ```toml
 # ──────────────────────────────────────────────
+# LOCAL DATABASE: the SQLite file smugglr reads/writes
+# ──────────────────────────────────────────────
+
+local_db = "./app.db"                    # Path to the local SQLite database.
+                                         # Optional - auto-detected from wrangler if omitted.
+
+# ──────────────────────────────────────────────
 # TARGET: where data goes (or comes from)
 # ──────────────────────────────────────────────
 
@@ -42,8 +49,9 @@ account_id = "abc123"                    # Cloudflare account ID (d1 only)
 database_id = "def456"                   # D1 database ID (d1 only)
 api_token = "sk-xxx"                     # Cloudflare API token (d1 only)
 url = ""                                 # Optional. Override endpoint for DO bridge (d1 only)
-path = "./local.db"                      # Database file path (sqlite only)
-name = "turso"                           # Plugin name or path (plugin only)
+database = "./local.db"                  # Database file path (sqlite only)
+name = "turso"                           # Plugin name, looked up on $PATH (plugin only)
+path = "./plugins/my-adapter"            # Explicit plugin binary path (plugin only)
 
 [target.config]                          # Plugin-specific config (plugin only)
 # Keys here are passed to the plugin. See plugin docs.
@@ -54,7 +62,7 @@ name = "turso"                           # Plugin name or path (plugin only)
 
 [sync]
 tables = []                              # Tables to sync. Empty = all tables.
-exclude_tables = []                      # Tables to skip. Glob patterns.
+exclude_tables = ["sqlite_sequence", "_cf_KV", "__drizzle_migrations"]  # Default. Tables to skip.
 exclude_columns = []                     # Columns to skip. Glob patterns.
 timestamp_column = "updated_at"          # Column used for newer_wins resolution
 conflict_resolution = "local_wins"       # "local_wins", "remote_wins", "newer_wins", "uuid_v7_wins"
@@ -114,7 +122,7 @@ A second SQLite file on the local filesystem.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `type` | string | -- | Must be `"sqlite"` |
-| `path` | string | -- | Path to the .db file. Relative paths resolve from the config file location. |
+| `database` | string | -- | Path to the .db file. Relative paths resolve from the config file location. |
 
 #### Target type: `plugin`
 
@@ -123,7 +131,8 @@ Delegates to a runtime plugin for the connection. Used for Turso, rqlite, Starba
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `type` | string | -- | Must be `"plugin"` |
-| `name` | string | -- | Plugin name (e.g., `"turso"`) or filesystem path to a plugin binary |
+| `name` | string | -- | Plugin name for lookup (e.g., `"turso"`). Resolved from `~/.smugglr/plugins/smuggler-{name}` or `$PATH`. Not a filesystem path. |
+| `path` | string | -- | Explicit path to a plugin binary. Use this instead of `name` to load a plugin from a specific location. |
 | `[target.config]` | table | `{}` | Arbitrary key-value pairs passed to the plugin. Contents depend on the plugin. |
 
 #### Legacy flat fields
@@ -223,7 +232,7 @@ Example for a custom plugin loaded from disk:
 ```toml
 [target]
 type = "plugin"
-name = "./plugins/my-adapter"
+path = "./plugins/my-adapter"
 
 [target.config]
 endpoint = "https://my-service.example.com/sql"
@@ -234,22 +243,22 @@ api_key = "sk-xxx"
 
 ## Environment Variables
 
-Any string field in `config.toml` supports environment variable substitution using the `$VAR` or `${VAR}` syntax:
+Any string field in `config.toml` supports environment variable substitution using the `${VAR}` syntax. A fallback is available with `${VAR:-default}`, and `$$` is a literal `$`. Referencing an unset variable with no default is a hard error (exit code 2) that names the variable, so a blank credential is never sent silently.
 
 ```toml
 [target]
 type = "d1"
-account_id = "$CF_ACCOUNT_ID"
-database_id = "$CF_DATABASE_ID"
-api_token = "$CF_API_TOKEN"
+account_id = "${CF_ACCOUNT_ID}"
+database_id = "${CF_DATABASE_ID}"
+api_token = "${CF_API_TOKEN}"
 
 [stash]
 url = "s3://my-bucket/smugglr/"
-access_key_id = "$AWS_ACCESS_KEY_ID"
-secret_access_key = "$AWS_SECRET_ACCESS_KEY"
+access_key_id = "${AWS_ACCESS_KEY_ID}"
+secret_access_key = "${AWS_SECRET_ACCESS_KEY}"
 
 [broadcast]
-secret = "$SMUGGLR_BROADCAST_SECRET"
+secret = "${SMUGGLR_BROADCAST_SECRET}"
 ```
 
 This keeps secrets out of config files. Recommended for CI/CD pipelines and shared team configs where the TOML is committed but credentials are injected at runtime.
@@ -265,9 +274,9 @@ The most common setup. Push a local SQLite database to Cloudflare D1.
 ```toml
 [target]
 type = "d1"
-account_id = "$CF_ACCOUNT_ID"
-database_id = "$CF_DATABASE_ID"
-api_token = "$CF_API_TOKEN"
+account_id = "${CF_ACCOUNT_ID}"
+database_id = "${CF_DATABASE_ID}"
+api_token = "${CF_API_TOKEN}"
 
 [sync]
 conflict_resolution = "local_wins"
@@ -285,7 +294,7 @@ name = "turso"
 
 [target.config]
 url = "libsql://my-db-myorg.turso.io"
-auth_token = "$TURSO_AUTH_TOKEN"
+auth_token = "${TURSO_AUTH_TOKEN}"
 
 [sync]
 exclude_tables = ["_litestream_*"]
@@ -298,9 +307,9 @@ Two-way sync between local and remote. Uses `uuid_v7_wins` so the newest row win
 ```toml
 [target]
 type = "d1"
-account_id = "$CF_ACCOUNT_ID"
-database_id = "$CF_DATABASE_ID"
-api_token = "$CF_API_TOKEN"
+account_id = "${CF_ACCOUNT_ID}"
+database_id = "${CF_DATABASE_ID}"
+api_token = "${CF_API_TOKEN}"
 
 [sync]
 conflict_resolution = "uuid_v7_wins"
@@ -320,9 +329,9 @@ Run a background watch daemon that syncs to D1 on change, with stash configured 
 ```toml
 [target]
 type = "d1"
-account_id = "$CF_ACCOUNT_ID"
-database_id = "$CF_DATABASE_ID"
-api_token = "$CF_API_TOKEN"
+account_id = "${CF_ACCOUNT_ID}"
+database_id = "${CF_DATABASE_ID}"
+api_token = "${CF_API_TOKEN}"
 
 [sync]
 conflict_resolution = "local_wins"
@@ -330,8 +339,8 @@ batch_size = 100
 
 [stash]
 url = "s3://my-relay-bucket/smugglr/"
-access_key_id = "$AWS_ACCESS_KEY_ID"
-secret_access_key = "$AWS_SECRET_ACCESS_KEY"
+access_key_id = "${AWS_ACCESS_KEY_ID}"
+secret_access_key = "${AWS_SECRET_ACCESS_KEY}"
 region = "auto"
 endpoint = "https://abc123.r2.cloudflarestorage.com"
 ```
@@ -360,7 +369,7 @@ openssl rand -hex 32
 [broadcast]
 port = 31337
 interval_secs = 30
-secret = "$SMUGGLR_BROADCAST_SECRET"
+secret = "${SMUGGLR_BROADCAST_SECRET}"
 ```
 
 **Step 3.** Start the daemon on each machine:
@@ -381,9 +390,9 @@ Route D1 traffic through a Durable Objects HTTP bridge instead of the public API
 ```toml
 [target]
 type = "d1"
-account_id = "$CF_ACCOUNT_ID"
-database_id = "$CF_DATABASE_ID"
-api_token = "$CF_API_TOKEN"
+account_id = "${CF_ACCOUNT_ID}"
+database_id = "${CF_DATABASE_ID}"
+api_token = "${CF_API_TOKEN}"
 url = "https://my-do-bridge.my-worker.workers.dev"
 
 [sync]
