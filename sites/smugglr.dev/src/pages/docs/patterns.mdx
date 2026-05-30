@@ -573,7 +573,7 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
           smugglr push --dry-run --output json > dryrun.json
-          echo "operations=$(jq '.total_operations' dryrun.json)" >> $GITHUB_OUTPUT
+          echo "operations=$(jq '.total_rows_to_push + .total_rows_to_pull' dryrun.json)" >> $GITHUB_OUTPUT
 
       - name: Push to D1
         if: steps.dryrun.outputs.operations != '0'
@@ -588,7 +588,7 @@ jobs:
             cat result.json
             exit $EXIT_CODE
           fi
-          echo "Synced $(jq '.total_operations' result.json) operations"
+          echo "Synced $(jq '[.tables[] | (.rows_pushed // 0) + (.rows_pulled // 0)] | add // 0' result.json) operations"
 ```
 
 ### Exit codes in CI
@@ -679,27 +679,38 @@ $ smugglr push --dry-run --output json
 ```json
 {
   "command": "push",
-  "dry_run": true,
-  "source": "./agent-workspace.db",
-  "target": "d1:production-d1-id",
-  "tables": {
-    "analysis_results": {
-      "insert": 23,
-      "update": 5,
-      "delete": 0,
-      "conflicts": 0
+  "status": "dry_run",
+  "tables": [
+    {
+      "name": "analysis_results",
+      "local_only": 23,
+      "remote_only": 0,
+      "local_newer": 5,
+      "remote_newer": 0,
+      "content_differs": 0,
+      "identical": 312,
+      "rows_to_push": 28,
+      "rows_to_pull": 0
     },
-    "generated_reports": {
-      "insert": 3,
-      "update": 0,
-      "delete": 0,
-      "conflicts": 0
+    {
+      "name": "generated_reports",
+      "local_only": 3,
+      "remote_only": 0,
+      "local_newer": 0,
+      "remote_newer": 0,
+      "content_differs": 0,
+      "identical": 40,
+      "rows_to_push": 3,
+      "rows_to_pull": 0
     }
-  },
-  "total_operations": 31,
-  "duration_ms": 0
+  ],
+  "total_rows_to_push": 31,
+  "total_rows_to_pull": 0,
+  "exit_code": 0
 }
 ```
+
+`tables` is an array, not an object map. There are no `insert`/`update`/`delete`, `total_operations`, or `duration_ms` fields. Each table carries the six diff counts plus `rows_to_push`/`rows_to_pull`; the top level carries `total_rows_to_push` and `total_rows_to_pull` (both always present) and `exit_code`.
 
 After execution:
 
@@ -725,7 +736,8 @@ Error output:
 {
   "command": "push",
   "status": "error",
-  "error": "D1 API returned 503: service temporarily unavailable"
+  "error": "D1 API returned 503: service temporarily unavailable",
+  "exit_code": 3
 }
 ```
 
@@ -737,7 +749,7 @@ Here is how a Claude Code agent (or similar) would call smugglr and handle the r
 
 ```
 1. Run dry-run with --output json
-2. Parse JSON. Check total_operations.
+2. Parse JSON. Check total_rows_to_push + total_rows_to_pull.
    - If 0: nothing to do. Skip.
    - If > 0: proceed to push.
 3. Run push with --output json
@@ -774,7 +786,8 @@ def smugglr_push(config_path="config.toml", max_retries=3):
         return {"action": "abort", "reason": reason, "exit_code": dry.returncode}
 
     preview = json.loads(dry.stdout)
-    total = sum(t.get("rows_pushed", 0) + t.get("rows_pulled", 0) for t in preview.get("tables", []))
+    # Dry-run output uses top-level totals and per-table rows_to_push / rows_to_pull.
+    total = preview.get("total_rows_to_push", 0) + preview.get("total_rows_to_pull", 0)
     if total == 0:
         return {"action": "skip", "reason": "no changes detected"}
 
