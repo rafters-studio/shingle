@@ -41,15 +41,15 @@ And a row:
 |----|------|-------|-------------|------------|
 | `prod_01` | `Widget` | `29.99` | `NULL` | `2026-04-01T12:00:00Z` |
 
-The hash input after exclusions (drop `id` as PK, drop `updated_at`):
+The hash input after exclusions (drop `updated_at`; the primary key `id` stays in, per step 2 above):
 
 ```
-Widget|29.99|
+prod_01|Widget|29.99|
 ```
 
 Note: `description` is NULL, so it contributes an empty string. The trailing pipe is from the join.
 
-SHA256 of `Widget|29.99|` = `a3b1c9...` (64-char hex).
+SHA256 of `prod_01|Widget|29.99|` = `a3b1c9...` (64-char hex).
 
 ### Why content hashing
 
@@ -102,17 +102,18 @@ Rows in `local_only` and `remote_only` are not conflicts. On a `push`, local-onl
 
 ### Step 5: Batch
 
-Group resolved writes into batches that respect the target's limits. Cloudflare D1 accepts a maximum of 100 rows per API call. Other backends have their own limits. The `batch_size` config controls this.
+Group resolved writes into batches that respect the target's limits. Cloudflare D1 caps a query at 100 bind parameters, which is rows multiplied by columns, not 100 rows. smugglr divides 100 by the column count to size each batch, so a 5-column table batches at 20 rows while a 2-column table batches at 50. Other backends have their own limits. The `batch_size` config caps batch size further but never raises it past the bind-parameter ceiling.
 
-If a batch fails due to rate limiting, smugglr retries with exponential backoff:
+If a write fails with a transient error (HTTP 429 or 5xx, timeouts), smugglr retries it with exponential backoff:
 
 | Parameter | Default |
 |-----------|---------|
 | `max_retries` | 5 |
 | `initial_retry_delay_ms` | 100 |
 | `backoff_multiplier` | 2.0 |
+| `max_retry_delay_ms` | 30000 |
 
-Retry sequence: 100ms, 200ms, 400ms, 800ms, 1600ms, then fail.
+Retry sequence with the defaults: 100ms, 200ms, 400ms, 800ms, 1600ms, then give up. If the server sends a `Retry-After`, smugglr honors it, capped by `max_retry_delay_ms` so a misbehaving server cannot make the client sleep unboundedly. Permanent errors fast-fail without retrying. When the retries are exhausted, the write fails with `RetryExhausted` (exit code 3).
 
 ### Step 6: Write
 
@@ -154,7 +155,7 @@ When to use: both sides are actively written and you want last-write-wins semant
 
 Example: local row has `updated_at = 2026-04-01T12:00:00Z`, remote has `updated_at = 2026-04-01T14:00:00Z`. Remote wins. After sync, both have the remote's data.
 
-Edge case: if timestamps are identical but content differs, the row is flagged as an unresolved conflict and smugglr exits with code 4. Identical timestamps with different content means your clocks are lying or two writes landed in the same clock tick. smugglr will not guess.
+Edge case: if timestamps are identical (or absent) but content differs, smugglr cannot pick a winner under `newer_wins`. It logs a warning naming how many rows were affected and skips them, leaving both sides as they are. Identical timestamps with different content means your clocks are lying or two writes landed in the same clock tick. smugglr will not guess; switch to `local_wins` or `remote_wins` to force a direction.
 
 ### `uuid_v7_wins`
 
@@ -266,20 +267,23 @@ This means a corrupted download or a tampered snapshot on the relay will never r
 
 ## LAN Broadcast
 
-Broadcast mode syncs SQLite databases between machines on the same network using encrypted UDP. No relay, no server, no coordinator. Every node is equal.
+Broadcast mode syncs SQLite databases between machines on the same network using encrypted UDP multicast. No relay, no server, no coordinator. Every node runs the identical loop; there is no client/server distinction.
 
-### Discovery
+### Gossip reconciliation
 
-Each smugglr daemon broadcasts a discovery beacon on startup and at regular intervals. The beacon contains:
+There is no separate discovery handshake. Each node periodically multicasts a `Digest`: a `primary_key -> content_hash` advertisement for every syncable table. A peer that hears a digest covering rows it lacks (or hashes differently) multicasts a `Want` listing the primary keys it needs. Any node that holds those rows answers with a `Delta` over multicast, so every listener converges from a single answer. Late joiners and partition rejoins converge through the same path with no special case.
 
-| Field | Purpose |
-|-------|---------|
-| `instance_id` | Unique identifier for this smugglr instance. |
-| `db_path_hash` | Hash of the database path. Only peers syncing the same database respond. |
+| Message | Purpose |
+|---------|---------|
+| `Digest` | A `primary_key -> content_hash` map per table. Large tables are chunked across parts, each processed independently. |
+| `Want` | The primary keys a node is missing or holds a differing hash for. |
+| `Delta` | The actual rows (and live deletes), sent in answer to a `Want`. |
 
-Broadcast address: `255.255.255.255` on the configured port. Peers that share the encryption key and the same `db_path_hash` recognize each other as members of the same sync group.
+Multicast group: `239.255.43.21` on the configured port. This is in the IPv4 administratively-scoped block (RFC 2365): routed within an organization, never onto the public internet.
 
-Peers expire after 3x the broadcast interval. If a peer has not sent a beacon in that window, it is removed from the peer list. No tombstones, no protocol negotiation, no goodbye messages.
+### Membership is key possession
+
+There is no path-, filename-, or database-identity scoping. Two replicas of one logical database sync regardless of where each stores its file, as long as they share the encryption key. To isolate separate clusters on one LAN, give them distinct keys: a foreign key's datagrams simply fail to decrypt and are dropped.
 
 ### Encryption
 
@@ -293,9 +297,11 @@ Key distribution is the user's responsibility. Config file, environment variable
 
 UDP provides no delivery guarantee. Packets get dropped. On a busy network, this is expected, not exceptional.
 
-smugglr's content hashing makes this harmless. Every row has a deterministic hash. Applying the same row twice is a no-op (hash matches, skip). Missing a broadcast means one peer is temporarily behind, but the next broadcast cycle covers it. The watch daemon rebroadcasts current state on every tick. There is no sequence to maintain, no gap to detect, no retransmission to request.
+smugglr's content hashing makes this harmless. Every row is applied with `INSERT OR REPLACE`, so applying the same row twice is a no-op and on same-PK divergence the received row wins (last-received-wins). A lost `Digest`, `Want`, or `Delta` only delays the rows it covered: the next heartbeat re-advertises the digest, the missing rows show up as a hash gap, and another `Want`/`Delta` exchange fills them. Convergence is driven by the periodic digest, not by detecting and retransmitting individual lost packets.
 
-This is the IoT pattern: fire-and-forget encrypted broadcasts, application-layer idempotency. Delivery guarantees are pushed up to the content layer where they are trivially cheap (hash comparison) rather than down to the transport layer where they are expensive (TCP, ACKs, retransmission buffers).
+This is the gossip pattern: periodic encrypted digests over multicast, application-layer idempotency. Delivery guarantees are pushed up to the content layer where they are trivially cheap (hash comparison) rather than down to the transport layer where they are expensive (TCP, ACKs, retransmission buffers).
+
+This is a v0.1 boundary worth naming: concurrent same-PK divergence resolves silently as last-received-wins (no vector clocks or CRDTs), and deletes propagate only on the live `Delta` (the digest advertises presence, so tombstone propagation is a later version).
 
 ### Cross-network
 

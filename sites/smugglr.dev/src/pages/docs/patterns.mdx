@@ -72,10 +72,10 @@ Done. 15 operations in 0.4s.
 
 ### Watch for
 
-- D1 has a 100KB max row size. Rows exceeding this fail the batch. You will see exit code 1 and the failing row's primary key in the error output.
-- `batch_size` controls how many rows per D1 API call. D1's limit is 1000 rows per request. Stay at 500 unless you have reason to push it.
+- D1 has a 100KB max statement size. Rows exceeding this are rejected by the D1 API as a bad request, which smugglr surfaces as exit code 5 (target error) with the failing row's primary key in the error output.
+- `batch_size` controls how many rows per D1 API call. smugglr also caps each query at D1's 100 bind-parameter limit (rows multiplied by columns). Stay at the default unless you have reason to change it.
 - If `tables` is omitted, smugglr syncs every table found in both source and target. Be explicit.
-- The API token needs D1 edit permissions. Read-only tokens fail with exit code 2.
+- The API token needs D1 edit permissions. A read-only token is rejected by the D1 API and surfaces as exit code 5 (target error); a transport-level auth failure surfaces as exit code 3 (connection error).
 
 ---
 
@@ -339,7 +339,7 @@ broadcast: legion.db on port 31337
   [14:23:05] received 3 rows from 192.168.1.42 (reflections: 2, tasks: 1)
   [14:23:05] applied 3 rows (0 duplicates)
   [14:23:18] local change detected: 1 row (tasks)
-  [14:23:18] broadcast: 1 row to 255.255.255.255:31337
+  [14:23:18] delta: 1 row to 239.255.43.21:31337
   [14:24:01] heartbeat: broadcasting 847 hashes
   [14:24:02] peer 192.168.1.42 requests 2 rows (missed broadcast)
   [14:24:02] sent 2 rows to 192.168.1.42
@@ -352,7 +352,7 @@ broadcast: legion.db on port 31337
 - The key file must be identical on every machine. A single byte difference means decryption fails silently. The receiver drops the datagram with no error logged (by design: you cannot distinguish "wrong key" from "not a smugglr packet").
 - Broadcast does not cross subnets without a tunnel. If your machines are on different networks, use Tailscale, WireGuard, or ZeroTier to put them on the same virtual subnet. Smugglr broadcasts to whatever subnet it is on.
 - Port 31337 must be open for UDP on all participating machines. Firewalls block this by default on most Linux distros.
-- Embedding BLOBs are excluded from broadcast. Each node computes embeddings locally.
+- Embedding BLOBs are not excluded by default (`exclude_columns` is empty). To keep large embedding columns off the wire and have each node compute them locally, you must configure it explicitly, e.g. `exclude_columns = ["*_embedding", "vector"]` under `[sync]`.
 
 ---
 
@@ -423,7 +423,7 @@ stash: app.db -> file:///mnt/shared/smugglr-relay/app.db
 ### Watch for
 
 - Stash is not sync. It is a snapshot uploaded to object storage. Retrieve applies it as a one-way pull. For bidirectional exchange, both machines stash and retrieve (coordinate who goes first, or use conflict strategies).
-- The ETag provides concurrency protection. If two machines stash to the same key simultaneously, the second write wins and the first is lost. For multi-writer scenarios, use unique stash keys: `smugglr stash --key machine-a/app.db`.
+- For S3-compatible relays, the ETag provides concurrency protection by rejecting the conflicting write. If two machines stash to the same key simultaneously, one succeeds and the other gets a 412 Precondition Failed, surfaced as exit code 4 (conflict) rather than silently clobbering the first write. Only `file://` relays are last-write-wins, since they have no ETag check. For multi-writer S3 scenarios, point each machine at a distinct stash `url` prefix.
 - S3 credentials in the config file are plain text. Use environment variables in CI or shared environments:
   ```toml
   [stash]
@@ -463,43 +463,49 @@ Take a snapshot before a risky operation:
 
 ```
 $ smugglr snapshot
-snapshot: production.db -> s3://smugglr-snapshots/production.db/2026-04-04T14:30:00Z
+snapshot: production.db -> s3://smugglr-snapshots/snapshots/2026-04-04T14:30:00.000Z.sqlite
   8 tables, 12,847 rows, 4.2 MB
 
-Snapshot saved: 2026-04-04T14:30:00Z
+Snapshot saved: 2026-04-04T14:30:00.000Z
 ```
 
 Do the risky thing. It goes wrong. List available snapshots:
 
 ```
 $ smugglr snapshots
-snapshots: production.db in s3://smugglr-snapshots/
+snapshots: s3://smugglr-snapshots/snapshots/
 
-  2026-04-04T14:30:00Z  4.2 MB  8 tables  12,847 rows
-  2026-04-03T09:00:00Z  4.1 MB  8 tables  12,340 rows
-  2026-04-02T09:00:00Z  3.9 MB  8 tables  11,892 rows
+  2026-04-04T14:30:00.000Z  4.2 MB  8 tables  12,847 rows
+  2026-04-03T09:00:00.000Z  4.1 MB  8 tables  12,340 rows
+  2026-04-02T09:00:00.000Z  3.9 MB  8 tables  11,892 rows
 ```
 
 Restore:
 
-```
-$ smugglr restore 2026-04-04T14:30:00Z --dry-run
-[dry-run] restore: s3://smugglr-snapshots/production.db/2026-04-04T14:30:00Z -> production.db
-  users:    0 changes
-  posts:    47 rows to revert
-  settings: 1 row to revert
-
-Total: 48 operations. No data moved.
-```
+A snapshot restore is a whole-file swap, not a row-by-row merge. smugglr downloads the snapshot, verifies it, and renames it over the local database. The report lists each table's total row count in the restored file, not a per-row diff against the current state.
 
 ```
-$ smugglr restore 2026-04-04T14:30:00Z
-restore: s3://smugglr-snapshots/production.db/2026-04-04T14:30:00Z -> production.db
-  users:    0 changes
-  posts:    47 rows reverted
-  settings: 1 row reverted
+$ smugglr restore 2026-04-04T14:30:00.000Z --dry-run
 
-Restored to 2026-04-04T14:30:00Z. 48 operations in 0.6s.
+--- Restore ---
+  Restored snapshot: 2026-04-04T14:30:00.000Z
+  Size: 4404019 bytes
+  users:    8201 rows
+  posts:    4599 rows
+  settings: 47 rows
+
+  (dry run - no changes applied)
+```
+
+```
+$ smugglr restore 2026-04-04T14:30:00.000Z
+
+--- Restore ---
+  Restored snapshot: 2026-04-04T14:30:00.000Z
+  Size: 4404019 bytes
+  users:    8201 rows
+  posts:    4599 rows
+  settings: 47 rows
 ```
 
 ### Watch for
