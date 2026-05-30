@@ -253,7 +253,7 @@ export const NOT_SMUGGLR_ROWS = [
         </CardHeader>
         <CardContent>
             <Codeblock>{`curl -fsSL https://smugglr.dev/install | bash`}</Codeblock>
-            <P>Or <Code>cargo install smugglr</Code>. macOS 14 or later, Linux, and Windows.</P>
+            <P>The curl installer covers macOS and Linux. On Windows, use <Code>cargo install smugglr</Code> or the release binary.</P>
         </CardContent>
     </Card>
 
@@ -271,7 +271,7 @@ export const NOT_SMUGGLR_ROWS = [
     <Card background="muted">
         <CardHeader>
             <CardTitle>npm package</CardTitle>
-            <CardDescription>Use it from the browser, Node, Bun, or a Worker.</CardDescription>
+            <CardDescription>Use it from the browser or Node.</CardDescription>
         </CardHeader>
         <CardContent>
             <Codeblock>{`npm install smugglr`}</Codeblock>

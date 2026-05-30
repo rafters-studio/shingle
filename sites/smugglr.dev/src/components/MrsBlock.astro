@@ -17,8 +17,8 @@ const MRS_SCOPE = "smugglr is a SQLite sync engine. Single Rust binary. Moves ro
 const MRS_INSTALL: [string, string, string][] = [
     ["Native CLI", "cargo install smugglr", "Rust binary, also pre-built for macOS/Linux/Windows"],
     ["Rust crate", "cargo add smugglr-core", "Embeddable engine, no CLI deps"],
-    ["npm (WASM)", "npm install smugglr", "Browser + Node + Bun WASM build"],
-    ["Script", "curl -fsSL https://smugglr.dev/install | bash", "Signed binary installer"],
+    ["npm (WASM)", "npm install smugglr", "Browser + Node WASM build"],
+    ["Script", "curl -fsSL https://smugglr.dev/install | bash", "Checksum-verified binary installer (macOS + Linux)"],
 ];
 
 const MRS_TARGETS: [string, string, string, string, string][] = [

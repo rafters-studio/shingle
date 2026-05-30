@@ -54,15 +54,17 @@ Comparing source and target...
 
         <section id="targets">
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; one plugin, any LIKE backend</div>
-            <H2>Six profiles ship today. Adding a seventh is TOML, not a fork.</H2>
-            <P size="display-small">Every remote target smugglr reaches over HTTP goes through one plugin, <Code>smugglr-http-sql</Code>. Each backend is a profile, defined in TOML. Swapping targets is a config change, not a recompile.</P>
+            <H2>Eight profiles ship today. A backend that fits an existing request shape is config, not a fork.</H2>
+            <P size="display-small">Every remote target smugglr reaches over HTTP goes through one plugin, <Code>smugglr-http-sql</Code>. Pick a built-in profile by name and swapping targets is a config change, not a recompile.</P>
 
             <Codeblock>{`d1            # Cloudflare D1
 turso         # Turso / libSQL
 rqlite        # rqlite
 datasette     # Datasette
 starbasedb    # StarbaseDB
-sqlite-cloud  # SQLite Cloud`}</Codeblock>
+sqlite-cloud  # SQLite Cloud
+http-sql      # http-sql v0.1 wire spec
+generic       # flat {sql, params} JSON`}</Codeblock>
 
             <P size="display-small">This target points at D1:</P>
             <Codeblock>{`[target]
@@ -77,7 +79,7 @@ type = "turso"
 url = "https://my-db.turso.io"
 auth_token = "..."`}</Codeblock>
 
-            <P size="display-small" color="muted-foreground">Same config file, same commands, same diff engine, different profile. If you have a new LIKE backend that speaks HTTP SQL, write a profile. No pull request to core required.</P>
+            <P size="display-small" color="muted-foreground">Same config file, same commands, same diff engine, different profile. A backend whose HTTP requests match the generic or http-sql shape works by pointing at that profile in config. A backend that speaks a genuinely new request or response shape needs a new profile in the core, which is a contribution rather than just a config edit.</P>
 
             <P size="display-small">The OSS tool syncs any number of LIKE sources from <InkBlock>a single config</InkBlock>.</P>
         </section>
@@ -85,7 +87,7 @@ auth_token = "..."`}</Codeblock>
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; how it ships</div>
             <H2>Same algorithm, same adapters, same verbs.</H2>
-            <P size="display-small"><Code>cargo install smugglr</Code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>npm install smugglr</Code> for the WASM build in Node, Bun, or a modern browser.</P>
+            <P size="display-small"><Code>cargo install smugglr</Code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>npm install smugglr</Code> for the WASM build in Node or a modern browser.</P>
         </section>
 
         <section>

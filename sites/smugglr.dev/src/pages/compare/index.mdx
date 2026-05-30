@@ -79,7 +79,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 <P size="display-small">SQLite is everywhere already. The phone has it. The laptop has it. Cloudflare D1 is it. Turso is it. Datasette and rqlite and StarbaseDB run on it. The hard part of "local-first" or "multi-device" or "edge-distributed" is not picking a database; it is keeping every node holding the same rows.</P>
 
-<P size="display-small">smugglr is one tool that does that one job. SQLite on every node. Content-hash diff between them. Run it as a CLI, embed it as a Rust crate, install the npm package in the browser, Node, Bun, or a Worker. No central server. No managed cloud. No per-row pricing.</P>
+<P size="display-small">smugglr is one tool that does that one job. SQLite on every node. Content-hash diff between them. Run it as a CLI, embed it as a Rust crate, install the npm package in the browser or Node. No central server. No managed cloud. No per-row pricing.</P>
 
 <P size="display-small" color="muted-foreground">The matrix below names every comparable tool and what it actually solves. Building a multiplayer game? <a href="/compare/games/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">/compare/games/</a> is the games-shaped read.</P>
 </Container>
@@ -347,7 +347,7 @@ export const NOT_SMUGGLR_ROWS = [
         </CardHeader>
         <CardContent>
             <Codeblock>{`curl -fsSL https://smugglr.dev/install | bash`}</Codeblock>
-            <P>Or <Code>cargo install smugglr</Code>. macOS 14 or later, Linux, and Windows.</P>
+            <P>The curl installer covers macOS and Linux. On Windows, use <Code>cargo install smugglr</Code> or the release binary.</P>
         </CardContent>
     </Card>
 
@@ -365,7 +365,7 @@ export const NOT_SMUGGLR_ROWS = [
     <Card background="muted">
         <CardHeader>
             <CardTitle>npm package</CardTitle>
-            <CardDescription>Use it from the browser, Node, Bun, or a Worker.</CardDescription>
+            <CardDescription>Use it from the browser or Node.</CardDescription>
         </CardHeader>
         <CardContent>
             <Codeblock>{`npm install smugglr`}</Codeblock>
