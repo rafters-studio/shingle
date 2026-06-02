@@ -1,0 +1,34 @@
+---
+import MegaFooter from "@shingle/shared/MegaFooter.astro";
+import type { FooterColumn } from "@shingle/shared/MegaFooter.astro";
+
+const leadingColumns: FooterColumn[] = [
+  {
+    heading: "Docs",
+    links: [
+      { label: "Overview", href: "/docs/" },
+      { label: "Getting Started", href: "/docs/getting-started/" },
+      { label: "CLI Reference", href: "/docs/cli-reference/" },
+    ],
+  },
+  {
+    heading: "Internals",
+    links: [
+      { label: "Architecture", href: "/docs/architecture/" },
+      { label: "Concepts", href: "/docs/concepts/" },
+      { label: "Plugin Guide", href: "/docs/plugin-guide/" },
+    ],
+  },
+];
+
+const siteColumn: FooterColumn = {
+  heading: "Legion",
+  links: [
+    { label: "GitHub", href: "https://github.com/runlegion/legion" },
+    { label: "llms.txt", href: "/llms.txt" },
+    { label: "llms-full.txt", href: "/llms-full.txt" },
+  ],
+};
+---
+
+<MegaFooter current="legion" leadingColumns={leadingColumns} siteColumn={siteColumn} />

@@ -18,6 +18,12 @@ importers:
         specifier: ^6.0.0
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
 
+  packages/shared:
+    dependencies:
+      astro:
+        specifier: ^6.0.0
+        version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
+
   sites/gitpress.app:
     dependencies:
       '@astrojs/cloudflare':
@@ -90,6 +96,9 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.7.1
         version: 3.7.2
+      '@shingle/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       astro:
         specifier: ^6.0.3
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -142,6 +151,9 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.7.1
         version: 3.7.2
+      '@shingle/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       astro:
         specifier: ^6.0.3
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -179,6 +191,9 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.7.1
         version: 3.7.2
+      '@shingle/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       astro:
         specifier: ^6.0.3
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)
@@ -337,6 +352,9 @@ importers:
       '@shingle/install':
         specifier: workspace:*
         version: link:../../packages/install
+      '@shingle/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       astro:
         specifier: ^6.0.3
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.60.0)(typescript@5.9.3)(yaml@2.8.3)

@@ -1,0 +1,66 @@
+{
+  "manifest": {
+    "id": "site-footer",
+    "name": "Site Footer",
+    "category": "chrome",
+    "description": "Site-wide footer with the Rafters Studio brand mark, site-specific link columns, and a self-omitting ecosystem cross-link column.",
+    "keywords": ["footer", "chrome", "navigation", "ecosystem", "site-links"],
+    "cognitiveLoad": 2,
+    "solves": "Consistent footer identity and link taxonomy across a multi-property product family, where each site cross-links its siblings but never itself, without forcing a JS runtime onto chrome.",
+    "appliesWhen": [
+      "marketing or docs sites that belong to a shared product family",
+      "multi-property sites that need one ecosystem footer skinned per site",
+      "sites that want footer chrome themed through their own tokens"
+    ],
+    "usagePatterns": {
+      "do": [
+        "Column headings render through the Small primitive: uppercase, wider tracking, muted-foreground. The heading treatment is the composite's, not the site's.",
+        "The ecosystem (Projects) column is single-source inside the composite. Sites never pass their own Projects column.",
+        "The current site is omitted from the ecosystem column by its project key (the `current` input), not by host, because rafters.studio and mail.rafters.studio share the rafters.studio host.",
+        "Chrome stays zero-JS: assemble from Container + Grid + Small only. Theming flows from the consumer's tokens because the @/ imports resolve against the consumer at build time.",
+        "Per-site content arrives as leadingColumns (e.g. Docs, Internals) and a single siteColumn (the site's own resources: GitHub, llms.txt)."
+      ],
+      "never": [
+        "Hardcode or duplicate the ecosystem list per site. It lives once, in the composite.",
+        "Accept a Projects column through props. That column is owned by the composite.",
+        "Use any heading component other than Small for column labels.",
+        "Island React into the footer, or inline grid/flex utilities. Layout is Container + Grid."
+      ]
+    }
+  },
+  "input": [
+    {
+      "name": "leadingColumns",
+      "rule": "footer-column-list",
+      "description": "Site-specific columns shown before the ecosystem column, in order. Typically Docs and Internals."
+    },
+    {
+      "name": "siteColumn",
+      "rule": "footer-column",
+      "description": "The site's own resources column, shown after the ecosystem column. Heading is the product name; links are the site's GitHub, llms.txt, etc."
+    }
+  ],
+  "output": [],
+  "blocks": [
+    {
+      "id": "brand-block",
+      "type": "brand",
+      "meta": { "mark": "rafters-studio", "href": "https://rafters.studio" }
+    },
+    {
+      "id": "leading-columns",
+      "type": "link-column-group",
+      "input": "leadingColumns"
+    },
+    {
+      "id": "ecosystem-column",
+      "type": "link-column",
+      "meta": { "heading": "Projects", "source": "canonical-ecosystem", "selfOmit": "current project key" }
+    },
+    {
+      "id": "site-column",
+      "type": "link-column",
+      "input": "siteColumn"
+    }
+  ]
+}

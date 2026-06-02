@@ -21,6 +21,7 @@
     "@astrojs/cloudflare": "^13.1.0",
     "@astrojs/mdx": "^5.0.0",
     "@astrojs/sitemap": "^3.7.1",
+    "@shingle/shared": "workspace:*",
     "astro": "^6.0.3",
     "react": "19.2.0",
     "rehype-pretty-code": "^0.14.3"

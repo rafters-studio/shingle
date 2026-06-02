@@ -1,0 +1,27 @@
+---
+import Container from "@/components/ui/container.astro";
+
+interface Props {
+  name: string;
+  logoSrc?: string;
+  href?: string;
+}
+
+const { name, logoSrc, href = "/" } = Astro.props;
+---
+
+<header class="border-b border-border">
+  <Container size="full" padding="4">
+    <a href={href} aria-label={`${name} home`} class="no-underline">
+      {
+        logoSrc ? (
+          <img src={logoSrc} alt={name} height="24" />
+        ) : (
+          <span class="font-heading font-semibold text-xl tracking-tight text-foreground">
+            {name}
+          </span>
+        )
+      }
+    </a>
+  </Container>
+</header>

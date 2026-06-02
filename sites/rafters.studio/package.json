@@ -20,6 +20,7 @@
     "@astrojs/cloudflare": "^13.1.0",
     "@astrojs/mdx": "^5.0.0",
     "@astrojs/sitemap": "^3.7.1",
+    "@shingle/shared": "workspace:*",
     "astro": "^6.0.3"
   },
   "devDependencies": {

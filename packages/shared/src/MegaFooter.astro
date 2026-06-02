@@ -1,0 +1,93 @@
+---
+/**
+ * Site-shared mega footer.
+ *
+ * The shell is identical on every rafters-studio product site: the Rafters
+ * Studio brand mark and the canonical "Projects" ecosystem column. The current
+ * site is omitted from Projects by matching its host against Astro.site, so a
+ * site never links to itself. Everything else (Docs, Internals, and the site's
+ * own resources column) is passed in per site.
+ *
+ * Layout comes entirely from rafters Astro primitives (Container, Grid, Small).
+ * The `@/` imports resolve against the CONSUMER's tsconfig at build time, so
+ * each site themes the footer through its own tokens.
+ */
+import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import Small from "@/components/ui/typography-small.astro";
+
+export interface FooterLink {
+  label: string;
+  href: string;
+}
+
+export interface FooterColumn {
+  heading: string;
+  links: FooterLink[];
+}
+
+/** Stable identifier for each ecosystem entry, used to self-omit the current site. */
+export type ProjectKey = "rafters" | "legion" | "mail" | "gitpress" | "smuggler" | "kelex" | "ledger" | "veneer";
+
+interface Props {
+  /**
+   * The current site's project key. That entry is omitted from the ecosystem
+   * column so a site never links to itself. A key (not a host) is required
+   * because rafters.studio and mail.rafters.studio share the rafters.studio host.
+   */
+  current: ProjectKey;
+  /** Columns shown before the shared Projects column, in order (e.g. Docs, Internals). */
+  leadingColumns: FooterColumn[];
+  /** The site's own resources column, shown after Projects (e.g. GitHub, llms.txt). */
+  siteColumn: FooterColumn;
+}
+
+const { current, leadingColumns, siteColumn } = Astro.props;
+
+/**
+ * Canonical ecosystem list, shared across every product site. Keep this the
+ * single source of truth; sites do not pass their own Projects column.
+ */
+const PROJECTS: { key: ProjectKey; label: string; href: string }[] = [
+  { key: "rafters", label: "Rafters", href: "https://rafters.studio" },
+  { key: "legion", label: "Legion", href: "https://runlegion.dev" },
+  { key: "mail", label: "Mail", href: "https://rafters.studio/mail/" },
+  { key: "gitpress", label: "Gitpress", href: "https://gitpress.app" },
+  { key: "smuggler", label: "Smuggler", href: "https://smugglr.dev" },
+  { key: "kelex", label: "Kelex", href: "https://github.com/rafters-studio/kelex" },
+  { key: "ledger", label: "Ledger", href: "https://github.com/rafters-studio/ledger" },
+  { key: "veneer", label: "Veneer", href: "https://github.com/rafters-studio/veneer" },
+];
+
+const projects: FooterLink[] = PROJECTS.filter((project) => project.key !== current).map(
+  ({ label, href }) => ({ label, href }),
+);
+
+const projectsColumn: FooterColumn = { heading: "Projects", links: projects };
+const columns: FooterColumn[] = [...leadingColumns, projectsColumn, siteColumn];
+---
+
+<footer>
+  <Container fill="surface" size="full" padding="16" gap="12">
+    <Container size="7xl" gap="12">
+      <a href="https://rafters.studio" aria-label="Rafters Studio">
+        <img src="/rafters-logo.svg" alt="Rafters Studio" class="h-8 w-auto brightness-0 invert" />
+      </a>
+
+      <Grid columns={columns.length} gap="10">
+        {
+          columns.map((column) => (
+            <Container gap="3">
+              <Small transform="uppercase" tracking="wider" color="muted-foreground">
+                {column.heading}
+              </Small>
+              {column.links.map((link) => (
+                <a href={link.href}>{link.label}</a>
+              ))}
+            </Container>
+          ))
+        }
+      </Grid>
+    </Container>
+  </Container>
+</footer>

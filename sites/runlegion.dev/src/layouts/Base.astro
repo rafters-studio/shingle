@@ -2,7 +2,7 @@
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
 import Small from "@/components/ui/typography-small.astro";
-import LogoArt from "@/components/LogoArt.astro";
+import MegaFooter from "@/components/MegaFooter.astro";
 
 interface Props {
     title: string;
@@ -220,41 +220,7 @@ const jsonLd = {
             <slot />
         </main>
 
-        <footer class="border-t border-border">
-            <Container size="4xl" padding="12">
-                <Container gap="4">
-                    <LogoArt height="2rem" />
-                    <Small>
-                        Legion &middot; Free and open source &middot; MIT
-                        licensed
-                    </Small>
-                    <Grid preset="linear" columns={2} gap="4">
-                        <a
-                            href="https://github.com/runlegion/legion"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class={linkClass}
-                        >
-                            <Small>GitHub</Small>
-                        </a>
-                        <a
-                            href="https://rafters.studio"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class={linkClass}
-                        >
-                            <Small>A Rafters Studio project</Small>
-                        </a>
-                        <a href="/llms.txt" class={linkClass}>
-                            <Small>llms.txt</Small>
-                        </a>
-                        <a href="/llms-full.txt" class={linkClass}>
-                            <Small>llms-full.txt</Small>
-                        </a>
-                    </Grid>
-                </Container>
-            </Container>
-        </footer>
+        <MegaFooter />
         <script is:inline>
             (function () {
                 var header = document.getElementById("site-header");
