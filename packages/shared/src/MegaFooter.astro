@@ -4,7 +4,7 @@
  *
  * The shell is identical on every rafters-studio product site: the Rafters
  * Studio brand mark and the canonical "Projects" ecosystem column. The current
- * site is omitted from Projects by matching its host against Astro.site, so a
+ * site is omitted from Projects by its project key (the `current` prop), so a
  * site never links to itself. Everything else (Docs, Internals, and the site's
  * own resources column) is passed in per site.
  *
@@ -26,14 +26,34 @@ export interface FooterColumn {
   links: FooterLink[];
 }
 
-/** Stable identifier for each ecosystem entry, used to self-omit the current site. */
-export type ProjectKey = "rafters" | "legion" | "mail" | "gitpress" | "smuggler" | "kelex" | "ledger" | "veneer";
+/**
+ * Canonical ecosystem list, shared across every product site. This is the single
+ * source of truth: ProjectKey is derived from it, so the key union cannot drift
+ * from the data and every ProjectKey is by construction a real row (self-omit can
+ * never silently match nothing). Sites do not pass their own Projects column.
+ */
+const PROJECTS = [
+  { key: "rafters", label: "Rafters", href: "https://rafters.studio" },
+  { key: "legion", label: "Legion", href: "https://runlegion.dev" },
+  { key: "mail", label: "Mail", href: "https://rafters.studio/mail/" },
+  { key: "gitpress", label: "Gitpress", href: "https://gitpress.app" },
+  { key: "smuggler", label: "Smuggler", href: "https://smugglr.dev" },
+  { key: "kelex", label: "Kelex", href: "https://github.com/rafters-studio/kelex" },
+  { key: "ledger", label: "Ledger", href: "https://github.com/rafters-studio/ledger" },
+  { key: "veneer", label: "Veneer", href: "https://github.com/rafters-studio/veneer" },
+] as const satisfies readonly { key: string; label: string; href: string }[];
+
+/**
+ * Stable identifier for each ecosystem entry, derived from PROJECTS so it cannot
+ * drift from the data. Used to self-omit the current site. A key (not a host) is
+ * required because rafters.studio and mail.rafters.studio share the rafters.studio host.
+ */
+export type ProjectKey = (typeof PROJECTS)[number]["key"];
 
 interface Props {
   /**
    * The current site's project key. That entry is omitted from the ecosystem
-   * column so a site never links to itself. A key (not a host) is required
-   * because rafters.studio and mail.rafters.studio share the rafters.studio host.
+   * column so a site never links to itself.
    */
   current: ProjectKey;
   /** Columns shown before the shared Projects column, in order (e.g. Docs, Internals). */
@@ -43,21 +63,6 @@ interface Props {
 }
 
 const { current, leadingColumns, siteColumn } = Astro.props;
-
-/**
- * Canonical ecosystem list, shared across every product site. Keep this the
- * single source of truth; sites do not pass their own Projects column.
- */
-const PROJECTS: { key: ProjectKey; label: string; href: string }[] = [
-  { key: "rafters", label: "Rafters", href: "https://rafters.studio" },
-  { key: "legion", label: "Legion", href: "https://runlegion.dev" },
-  { key: "mail", label: "Mail", href: "https://rafters.studio/mail/" },
-  { key: "gitpress", label: "Gitpress", href: "https://gitpress.app" },
-  { key: "smuggler", label: "Smuggler", href: "https://smugglr.dev" },
-  { key: "kelex", label: "Kelex", href: "https://github.com/rafters-studio/kelex" },
-  { key: "ledger", label: "Ledger", href: "https://github.com/rafters-studio/ledger" },
-  { key: "veneer", label: "Veneer", href: "https://github.com/rafters-studio/veneer" },
-];
 
 const projects: FooterLink[] = PROJECTS.filter((project) => project.key !== current).map(
   ({ label, href }) => ({ label, href }),
