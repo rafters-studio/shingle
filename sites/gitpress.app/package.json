@@ -15,11 +15,11 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.1.0",
-    "@astrojs/react": "^5.0.0",
-    "@astrojs/sitemap": "^3.7.1",
+    "@astrojs/cloudflare": "^13.6.1",
+    "@astrojs/react": "^5.0.7",
+    "@astrojs/sitemap": "^3.7.3",
     "@tailwindcss/typography": "^0.5.19",
-    "astro": "^6.0.3",
+    "astro": "^6.4.4",
     "clsx": "^2.1.1",
     "gsap": "^3.12.7",
     "lucide-react": "^0.577.0",
@@ -28,13 +28,13 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.7",
+    "@astrojs/check": "^0.9.9",
     "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "oxlint": "^1.51.0",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
-    "wrangler": "^4.72.0"
+    "wrangler": "^4.98.0"
   }
 }

@@ -1,14 +1,11 @@
 packages:
   - sites/*
   - packages/*
-
-ignoredBuiltDependencies:
-  - lefthook
-
-onlyBuiltDependencies:
-  - "@tailwindcss/oxide"
-  - bufferutil
-  - esbuild
-  - sharp
-  - unrs-resolver
-  - workerd
+allowBuilds:
+  '@tailwindcss/oxide': true
+  bufferutil: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+  workerd: true
+  lefthook: false
