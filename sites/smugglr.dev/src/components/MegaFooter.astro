@@ -1,5 +1,5 @@
 ---
-import MegaFooter from "@shingle/shared/MegaFooter.astro";
+import SharedMegaFooter from "@shingle/shared/MegaFooter.astro";
 import type { FooterColumn } from "@shingle/shared/MegaFooter.astro";
 
 const leadingColumns: FooterColumn[] = [
@@ -33,4 +33,4 @@ const siteColumn: FooterColumn = {
 };
 ---
 
-<MegaFooter current="smuggler" leadingColumns={leadingColumns} siteColumn={siteColumn} />
+<SharedMegaFooter current="smuggler" leadingColumns={leadingColumns} siteColumn={siteColumn} />
