@@ -1,4 +1,6 @@
 ---
+import SiteFooter from '@/components/SiteFooter.astro';
+
 interface Props {
   title: string;
   description?: string;
@@ -35,6 +37,7 @@ const fullTitle = `${title} | @rafters/mail`;
   </head>
   <body class="bg-background text-foreground">
     <slot />
+    <SiteFooter />
   </body>
 </html>
 

@@ -1,55 +1,38 @@
 ---
-import Container from '@/components/ui/container.astro';
-import Grid from '@/components/ui/grid.astro';
-import GridItem from '@/components/ui/grid-item.astro';
-import P from '@/components/ui/typography-p.astro';
-import Brand from '@/components/composites/Brand.astro';
-import FooterColumn from '@/components/composites/FooterColumn.astro';
+import MegaFooter from "@shingle/shared/MegaFooter.astro";
+import type { FooterColumn } from "@shingle/shared/MegaFooter.astro";
 
-const repo = 'https://github.com/rafters-studio/mail';
+const repo = "https://github.com/rafters-studio/mail";
 
-const docs = [
-  { href: '/mail/docs/getting-started', label: 'Getting started' },
-  { href: '/mail/docs/architecture', label: 'Architecture' },
-  { href: '/mail/docs/core-reference', label: 'Core reference' },
-  { href: '/mail/docs/migrations', label: 'Migrations' },
+const leadingColumns: FooterColumn[] = [
+  {
+    heading: "Docs",
+    links: [
+      { label: "Getting started", href: "/mail/docs/getting-started" },
+      { label: "Architecture", href: "/mail/docs/architecture" },
+      { label: "Core reference", href: "/mail/docs/core-reference" },
+      { label: "Migrations", href: "/mail/docs/migrations" },
+    ],
+  },
+  {
+    heading: "IMAP",
+    links: [
+      { label: "Quickstart", href: "/mail/docs/imap-quickstart" },
+      { label: "Command reference", href: "/mail/docs/imap-commands" },
+      { label: "App passwords", href: "/mail/docs/app-passwords" },
+      { label: "Deployment", href: "/mail/docs/imap-deployment" },
+    ],
+  },
 ];
 
-const imap = [
-  { href: '/mail/docs/imap-quickstart', label: 'Quickstart' },
-  { href: '/mail/docs/imap-commands', label: 'Command reference' },
-  { href: '/mail/docs/app-passwords', label: 'App passwords' },
-  { href: '/mail/docs/imap-deployment', label: 'Deployment' },
-];
-
-const project = [
-  { href: repo, label: 'GitHub' },
-  { href: `${repo}/blob/main/CHANGELOG.md`, label: 'Changelog' },
-  { href: `${repo}/blob/main/LICENSE`, label: 'License (MIT)' },
-];
+const siteColumn: FooterColumn = {
+  heading: "Mail",
+  links: [
+    { label: "GitHub", href: repo },
+    { label: "Changelog", href: `${repo}/blob/main/CHANGELOG.md` },
+    { label: "License (MIT)", href: `${repo}/blob/main/LICENSE` },
+  ],
+};
 ---
 
-<footer class="border-t border-border bg-background">
-  <Container size="6xl" padding="16">
-    <Grid columns={4} gap="12">
-      <GridItem>
-        <div class="flex flex-col gap-4">
-          <Brand href="#" />
-          <P size="body-small" color="muted-foreground" class="max-w-prose m-0">
-            A full-stack email framework for the edge. A
-            <a href="https://rafters.studio" class="text-foreground hover:underline">Rafters Studio</a>
-            project.
-          </P>
-        </div>
-      </GridItem>
-
-      <GridItem><FooterColumn heading="Docs" links={docs} /></GridItem>
-      <GridItem><FooterColumn heading="IMAP" links={imap} /></GridItem>
-      <GridItem><FooterColumn heading="Project" links={project} /></GridItem>
-    </Grid>
-
-    <div class="border-t border-border pt-6 mt-12 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
-      © 2026 Rafters Studio
-    </div>
-  </Container>
-</footer>
+<MegaFooter current="mail" leadingColumns={leadingColumns} siteColumn={siteColumn} />

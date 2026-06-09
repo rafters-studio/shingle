@@ -1,0 +1,16 @@
+{
+  "name": "@shingle/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./TopBar.astro": "./src/TopBar.astro",
+    "./MegaFooter.astro": "./src/MegaFooter.astro"
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "astro": "^6.0.0"
+  }
+}

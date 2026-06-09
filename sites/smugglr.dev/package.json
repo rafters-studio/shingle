@@ -20,6 +20,7 @@
     "@astrojs/mdx": "^5.0.0",
     "@astrojs/sitemap": "^3.7.1",
     "@shingle/install": "workspace:*",
+    "@shingle/shared": "workspace:*",
     "astro": "^6.0.3",
     "nanostores": "^1.2.0",
     "react": "19.2.0"
