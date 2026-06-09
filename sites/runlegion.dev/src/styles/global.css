@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "../../.rafters/output/rafters.css";
 
+/*
+ * Scan the shared workspace package (@shingle/shared) so Tailwind emits the
+ * utility classes used by shared chrome like MegaFooter (the logo's
+ * h-8 w-auto brightness-0 invert, etc.). Tailwind's automatic content
+ * detection only covers this site's own src/ and never reaches the package,
+ * which resolves through node_modules and is ignored by the scanner.
+ */
+@source "../../../../packages/shared/src";
+
 @source "../components/ui/*.classes.ts";
 
 /*
