@@ -17,20 +17,20 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.1.0",
-    "@astrojs/mdx": "^5.0.0",
-    "@astrojs/sitemap": "^3.7.1",
+    "@astrojs/cloudflare": "^13.6.1",
+    "@astrojs/mdx": "^6.0.2",
+    "@astrojs/sitemap": "^3.7.3",
     "@shingle/shared": "workspace:*",
-    "astro": "^6.0.3"
+    "astro": "^6.4.4"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.7",
+    "@astrojs/check": "^0.9.9",
     "@tailwindcss/vite": "^4.2.1",
     "@types/node": "^25.5.0",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
-    "wrangler": "^4.78.0"
+    "wrangler": "^4.98.0"
   }
 }
