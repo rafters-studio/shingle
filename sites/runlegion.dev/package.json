@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^6.0.2",
-    "@astrojs/sitemap": "^3.7.3",
     "@shingle/shared": "workspace:*",
     "astro": "^6.4.4",
     "class-variance-authority": "^0.7.1",
