@@ -318,7 +318,7 @@ When a row is `untested`, the guarantee lives only in code comments and reader m
 |---|---|
 | Guarantees | `instantiateBlocks` regenerates every block id with `crypto.randomUUID()`. `parentId` and `children` references are remapped. Composite expansion supports `maxDepth=10`. `serializeToComposite` derives `input` from root rules, `output` from leaf rules, keywords from block types and rule names. |
 | Does not guarantee | Determinism across runs. Each call produces fresh UUIDs. |
-| Known edge cases | Nested composite without explicit `parentId` inherits the parent's new id. Missing composite resolves to a fallback text block "Unknown composite: {id}". |
+| Known edge cases | Nested composite without explicit `parentId` inherits the parent's new id. Missing composite resolves to a fallback text block "Unknown composite: \{id\}". |
 | Test coverage | tested at `packages/composites/src/bridge.test.ts` |
 
 ### registry
