@@ -5,11 +5,20 @@
   "type": "module",
   "exports": {
     "./TopBar.astro": "./src/TopBar.astro",
-    "./MegaFooter.astro": "./src/MegaFooter.astro"
+    "./MegaFooter.astro": "./src/MegaFooter.astro",
+    "./SiteHead.astro": "./src/SiteHead.astro",
+    "./ecosystem": "./src/ecosystem.ts",
+    "./meta": "./src/meta.ts",
+    "./collect-pages": "./src/collect-pages.ts"
   },
   "files": [
     "src"
   ],
+  "dependencies": {
+    "@rafters/astro-meta": "^0.1.2",
+    "gray-matter": "^4.0.3",
+    "linkedom": "^0.18.0"
+  },
   "peerDependencies": {
     "astro": "^6.0.0"
   }

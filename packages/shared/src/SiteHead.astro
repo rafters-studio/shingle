@@ -1,0 +1,26 @@
+---
+/**
+ * Shared head fragment for every shingle site.
+ *
+ * Composes astro-meta's SiteMeta (canonical, Open Graph core, Twitter card,
+ * description, locale) and SchemaScript (the org + WebSite JSON-LD graph) so the
+ * head is identical across sites. SiteMeta defaults its `site` from the
+ * integration's virtual module and its `route` from Astro.url.pathname; pages
+ * pass only per-page title and description. OG image generation is deferred.
+ */
+import SiteMeta from "@rafters/astro-meta/components/SiteMeta.astro";
+import SchemaScript from "@rafters/astro-meta/components/SchemaScript.astro";
+import { site } from "virtual:astro-meta/site";
+import { buildSiteGraph } from "./meta";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const graph = await buildSiteGraph(site);
+---
+
+<SiteMeta title={title} description={description} />
+<SchemaScript graph={graph} />
