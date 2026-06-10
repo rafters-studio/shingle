@@ -3,24 +3,42 @@
  * Shared head fragment for every shingle site.
  *
  * Composes astro-meta's SiteMeta (canonical, Open Graph core, Twitter card,
- * description, locale) and SchemaScript (the org + WebSite JSON-LD graph) so the
- * head is identical across sites. SiteMeta defaults its `site` from the
- * integration's virtual module and its `route` from Astro.url.pathname; pages
- * pass only per-page title and description. OG image generation is deferred.
+ * description, image, article timestamps, locale) and SchemaScript (the shared
+ * org + WebSite graph plus any per-page nodes) so the head is identical across
+ * sites. SiteMeta defaults its `site` from the integration's virtual module and
+ * its `route` from Astro.url.pathname; pages pass per-page overrides and any
+ * extra Schema.org nodes (a SoftwareApplication, a TechArticle) that reference
+ * the org and website by `@id`. OG image generation is deferred; `image` only
+ * declares the tag.
  */
 import SiteMeta from "@rafters/astro-meta/components/SiteMeta.astro";
 import SchemaScript from "@rafters/astro-meta/components/SchemaScript.astro";
 import { site } from "virtual:astro-meta/site";
 import { buildSiteGraph } from "./meta";
+import type { JsonLdObject } from "./meta";
 
 interface Props {
   title?: string;
   description?: string;
+  ogType?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  image?: string;
+  /** Per-page Schema.org nodes merged into the shared org + WebSite graph. */
+  extraSchema?: readonly JsonLdObject[];
 }
 
-const { title, description } = Astro.props;
-const graph = await buildSiteGraph(site);
+const { title, description, ogType, publishedTime, modifiedTime, image, extraSchema = [] } =
+  Astro.props;
+const graph = await buildSiteGraph(site, extraSchema);
 ---
 
-<SiteMeta title={title} description={description} />
+<SiteMeta
+  title={title}
+  description={description}
+  ogType={ogType}
+  publishedTime={publishedTime}
+  modifiedTime={modifiedTime}
+  image={image}
+/>
 <SchemaScript graph={graph} />

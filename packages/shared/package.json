@@ -15,7 +15,7 @@
     "src"
   ],
   "dependencies": {
-    "@rafters/astro-meta": "^0.1.2",
+    "@rafters/astro-meta": "^0.2.0",
     "gray-matter": "^4.0.3",
     "linkedom": "^0.18.0"
   },

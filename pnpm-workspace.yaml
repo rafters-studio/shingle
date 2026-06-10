@@ -9,3 +9,5 @@ allowBuilds:
   unrs-resolver: true
   workerd: true
   lefthook: false
+minimumReleaseAgeExclude:
+  - '@rafters/astro-meta@0.2.0'

@@ -4,6 +4,8 @@ import Container from '@/components/ui/container.astro';
 import Grid from '@/components/ui/grid.astro';
 import GridItem from '@/components/ui/grid-item.astro';
 import Small from '@/components/ui/typography-small.astro';
+import { article, RAFTERS_STUDIO } from '@shingle/shared/meta';
+import type { JsonLdObject } from '@shingle/shared/meta';
 
 interface Props {
   title: string;
@@ -25,15 +27,17 @@ const currentPath = Astro.url.pathname;
 const siteOrigin = Astro.site?.origin ?? 'https://runlegion.dev';
 const pageUrl = new URL(currentPath, siteOrigin).href;
 
-const techArticle: Record<string, unknown> = {
-  '@type': 'TechArticle',
-  '@id': `${pageUrl}#article`,
-  headline: title,
-  description,
-  url: pageUrl,
+const techArticle: JsonLdObject = {
+  ...article({
+    '@id': `${pageUrl}#article`,
+    type: 'TechArticle',
+    headline: title,
+    description,
+    url: pageUrl,
+    publisher: { '@id': RAFTERS_STUDIO.id },
+  }),
   inLanguage: 'en',
   isPartOf: { '@id': `${siteOrigin}/#website` },
-  publisher: { '@id': `${siteOrigin}/#organization` },
   about: { '@id': `${siteOrigin}/#software` },
 };
 

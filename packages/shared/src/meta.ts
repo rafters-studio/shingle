@@ -14,12 +14,14 @@ import type { AstroMetaOptions } from "@rafters/astro-meta/astro";
 import { defineSite } from "@rafters/astro-meta";
 import type { SiteIdentity } from "@rafters/astro-meta";
 import { defineEntities } from "@rafters/astro-meta/entities";
-import { mergeGraph } from "@rafters/astro-meta/schema";
+import { article, breadcrumbList, mergeGraph, softwareApplication } from "@rafters/astro-meta/schema";
 import type { JsonLdObject } from "@rafters/astro-meta/schema";
 import { ecosystemSameAs } from "./ecosystem";
 import { collectPages } from "./collect-pages";
 
-export { astroMeta, defineSite, collectPages };
+// Re-export the per-page schema builders so sites depend only on @shingle/shared
+// and never name @rafters/astro-meta directly (avoids a pnpm phantom dependency).
+export { astroMeta, defineSite, collectPages, article, breadcrumbList, mergeGraph, softwareApplication };
 export type { SiteIdentity, AstroMetaOptions, JsonLdObject };
 
 /** The studio organization. Identical across every site; only the WebSite node varies. */
@@ -31,11 +33,17 @@ export const RAFTERS_STUDIO = {
 } as const;
 
 /**
- * The org + WebSite JSON-LD graph for a site's head. The organization is the
- * studio (shared, with the ecosystem as `sameAs`); the WebSite node is the
- * current site. Layouts pass the result to `<SchemaScript>`.
+ * The org + WebSite JSON-LD graph for a site's head, plus any per-page nodes the
+ * layout supplies (a SoftwareApplication on a product home, a TechArticle on a
+ * docs page). The organization is the studio (shared, with the ecosystem as
+ * `sameAs`); the WebSite node is the current site. `extra` nodes are merged by
+ * `@id`, so a page references the org and website by id and the graph resolves.
+ * Layouts pass the result to `<SchemaScript>`.
  */
-export async function buildSiteGraph(site: SiteIdentity): Promise<JsonLdObject[]> {
+export async function buildSiteGraph(
+  site: SiteIdentity,
+  extra: readonly JsonLdObject[] = [],
+): Promise<JsonLdObject[]> {
   const orgModule = defineEntities({
     organization: {
       "@id": RAFTERS_STUDIO.id,
@@ -55,7 +63,7 @@ export async function buildSiteGraph(site: SiteIdentity): Promise<JsonLdObject[]
     description: site.description ?? "",
     publisher: { "@id": RAFTERS_STUDIO.id },
   };
-  return mergeGraph([...orgObjects, website]);
+  return mergeGraph([...orgObjects, website, ...extra]);
 }
 
 function sectionForRoute(route: string): string {
