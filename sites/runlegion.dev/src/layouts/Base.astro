@@ -3,6 +3,9 @@ import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
 import Small from "@/components/ui/typography-small.astro";
 import MegaFooter from "@/components/MegaFooter.astro";
+import SiteHead from "@shingle/shared/SiteHead.astro";
+import { softwareApplication, RAFTERS_STUDIO } from "@shingle/shared/meta";
+import type { JsonLdObject } from "@shingle/shared/meta";
 
 interface Props {
     title: string;
@@ -15,8 +18,8 @@ interface Props {
     publishedTime?: string;
     /** ISO 8601 timestamp for article last-modified time (docs pages only). */
     modifiedTime?: string;
-    /** Additional JSON-LD nodes to merge into the sitewide graph. */
-    extraJsonLd?: Record<string, unknown>[];
+    /** Additional per-page JSON-LD nodes merged into the shared graph. */
+    extraJsonLd?: JsonLdObject[];
 }
 
 // MDX pages that set `layout: Base.astro` in frontmatter deliver their props
@@ -38,8 +41,6 @@ const {
 
 const siteOrigin =
     Astro.site?.origin ?? "https://runlegion.dev";
-const canonical = new URL(Astro.url.pathname, siteOrigin).href;
-const absoluteImage = new URL(image, siteOrigin).href;
 const fullTitle = `${title} | Legion`;
 
 const navLinks = [
@@ -52,54 +53,28 @@ const navLinks = [
 
 const linkClass = "no-underline text-muted-foreground hover:text-foreground";
 
-// Sitewide JSON-LD: WebSite + Organization (Rafters Studio) + the home-page
-// SoftwareApplication when on "/". Docs pages add a TechArticle node via the
-// Docs layout so the graph stays per-page.
+// The shared SiteHead emits the WebSite + Rafters Studio Organization graph.
+// This layout adds only the site-specific nodes: the SoftwareApplication on the
+// home page, plus any per-page node a child layout passes (the docs TechArticle).
+// They reference the studio org by its shared @id so the merged graph resolves.
 const isHome = Astro.url.pathname === "/";
-const jsonLdGraph: Record<string, unknown>[] = [
-    {
-        "@type": "WebSite",
-        "@id": `${siteOrigin}/#website`,
-        url: `${siteOrigin}/`,
-        name: "Legion",
-        description:
-            "Self-hosted orchestrator for AI coding agents. Memory, coordination, autonomy.",
-        inLanguage: "en",
-        publisher: { "@id": `${siteOrigin}/#organization` },
-    },
-    {
-        "@type": "Organization",
-        "@id": `${siteOrigin}/#organization`,
-        name: "Rafters Studio",
-        url: "https://rafters.studio",
-        logo: `${siteOrigin}/logo.svg`,
-    },
-];
-if (isHome) {
-    jsonLdGraph.push({
-        "@type": "SoftwareApplication",
+const softwareApp: JsonLdObject = {
+    ...softwareApplication({
         "@id": `${siteOrigin}/#software`,
         name: "Legion",
-        applicationCategory: "DeveloperApplication",
-        operatingSystem: "macOS, Linux, Windows",
+        url: `${siteOrigin}/`,
         description:
             "Self-hosted orchestrator for AI coding agents. Persistent memory, team coordination, multi-node LAN sync, kanban scheduler. Written in Rust. Free forever.",
-        url: `${siteOrigin}/`,
-        codeRepository: "https://github.com/runlegion/legion",
-        programmingLanguage: "Rust",
-        license: "https://opensource.org/licenses/MIT",
-        offers: {
-            "@type": "Offer",
-            price: "0",
-            priceCurrency: "USD",
-        },
-        publisher: { "@id": `${siteOrigin}/#organization` },
-    });
-}
-const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [...jsonLdGraph, ...extraJsonLd],
+        applicationCategory: "DeveloperApplication",
+        operatingSystem: "macOS, Linux, Windows",
+        offers: { price: "0", priceCurrency: "USD" },
+    }),
+    codeRepository: "https://github.com/runlegion/legion",
+    programmingLanguage: "Rust",
+    license: "https://opensource.org/licenses/MIT",
+    publisher: { "@id": RAFTERS_STUDIO.id },
 };
+const extraSchema: JsonLdObject[] = [...(isHome ? [softwareApp] : []), ...extraJsonLd];
 ---
 
 <!doctype html>
@@ -107,33 +82,25 @@ const jsonLd = {
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content={description} />
         <title>{fullTitle}</title>
-        <link rel="canonical" href={canonical} />
         <meta name="theme-color" content="#0a0a0a" />
+
+        <SiteHead
+            title={fullTitle}
+            description={description}
+            ogType={type}
+            image={image}
+            publishedTime={publishedTime}
+            modifiedTime={modifiedTime}
+            extraSchema={extraSchema}
+        />
 
         <link rel="icon" type="image/svg+xml" href="/logo.svg" />
         <link rel="alternate icon" type="image/png" href="/mark.png" />
         <link rel="apple-touch-icon" href="/mark.png" />
 
-        <meta property="og:site_name" content="Legion" />
-        <meta property="og:type" content={type} />
-        <meta property="og:title" content={fullTitle} />
-        <meta property="og:description" content={description} />
-        <meta property="og:url" content={canonical} />
-        <meta property="og:image" content={absoluteImage} />
-        <meta property="og:locale" content="en_US" />
-        {publishedTime && (
-            <meta property="article:published_time" content={publishedTime} />
-        )}
-        {modifiedTime && (
-            <meta property="article:modified_time" content={modifiedTime} />
-        )}
-
-        <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={fullTitle} />
         <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={absoluteImage} />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -154,10 +121,6 @@ const jsonLd = {
             title="Legion docs (full) for LLMs"
         />
 
-        <script
-            type="application/ld+json"
-            set:html={JSON.stringify(jsonLd)}
-        />
     </head>
     <body class="bg-background text-foreground">
         <header

@@ -21,8 +21,8 @@ importers:
   packages/shared:
     dependencies:
       '@rafters/astro-meta':
-        specifier: ^0.1.2
-        version: 0.1.2(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(linkedom@0.18.12)
+        specifier: ^0.2.0
+        version: 0.2.0(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(linkedom@0.18.12)
       astro:
         specifier: ^6.0.0
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0)
@@ -1619,8 +1619,8 @@ packages:
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
 
-  '@rafters/astro-meta@0.1.2':
-    resolution: {integrity: sha512-sagNcua6SmpwCmPjXv1aQhvQkn9hZ0pYmeAZBMEaCSovtP9HSIKa8BC2EaPE6iWFnb+w7nzX/Cp+FHzGRyL3rQ==}
+  '@rafters/astro-meta@0.2.0':
+    resolution: {integrity: sha512-Ddhv26S3rC/ljnvQOTDc6uXlhD6nt2/aF3TcmJLznFwomXUdOBUCwnt9E+hLA9IWLUoNXnvwEyg5kGj/+4rXSQ==}
     engines: {node: '>=22'}
     peerDependencies:
       '@resvg/resvg-js': ^2.6.0
@@ -5558,7 +5558,7 @@ snapshots:
 
   '@poppinss/exception@1.2.3': {}
 
-  '@rafters/astro-meta@0.1.2(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(linkedom@0.18.12)':
+  '@rafters/astro-meta@0.2.0(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(linkedom@0.18.12)':
     dependencies:
       astro: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0)
     optionalDependencies:
