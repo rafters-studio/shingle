@@ -36,9 +36,9 @@ Every project starts with 11 semantic families. These are roles, not colors.
 
 **destructive** is irreversible. Deletions, errors, the things that can't be undone.
 
-**success**, **warning**, **info** are status. They tell the user what happened without requiring them to read.
+**success**, **warning**, **info** are status. They tell the user what happened without requiring them to read. Status hues stay conventional — recognizability is the point — but their chroma derives from your brand seed. A muted brand gets muted status colors. They belong to your palette instead of looking pasted on.
 
-**neutral** is the structure. Backgrounds, borders, text. The chrome that holds everything else.
+**neutral** is the structure. Backgrounds, borders, text. The chrome that holds everything else. It's a role, not a family: zinc sits behind it by default, and like every role it can be repointed at import.
 
 **accent**, **highlight**, **muted**, **tertiary** fill the gaps between the primary roles.
 
@@ -46,9 +46,13 @@ These families are the foundation, not the ceiling. A game adds faction colors. 
 
 ## Dark Mode Is Math
 
-Dark mode inverts the lightness scale. Position 50 becomes 950. Position 100 becomes 900. The hue stays. The chroma stays. The identity stays.
+Dark mode is computed, not redesigned. But computed doesn't mean a naive flip.
 
-This means dark mode is not a second design. It's a transformation of the first one. Change your primary color and both modes update.
+The system finds each color's light-mode pair first — the background plus its WCAG-verified foreground — then inverts the pair as a unit. A mid-tone stays a mid-tone, shifted for a dark surface: a 500 lands near 400, not at 950. The relationship between background and foreground survives the crossing, and the dark foreground re-derives against the dark background, so the pair holds through every cascade.
+
+Every result is verified against the family's contrast matrices. When the inverted pair can't satisfy contrast, the system nudges to the nearest passing pair and reports which strategy fired. Degradation is visible. Never silent.
+
+Change your primary color and both modes update. And when computed dark isn't the dark you want — dark mode is taste, not just inversion — override the dark token directly, with a reason. The override anchors in the graph and survives regeneration.
 
 ## The Dependency Graph
 
