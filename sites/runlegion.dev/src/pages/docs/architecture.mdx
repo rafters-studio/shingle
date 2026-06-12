@@ -88,9 +88,17 @@ The kanban board is a scheduler wearing a human-friendly UI.
 
 ## Coordination substrate
 
-`documents` (#455/#456) is the type-agnostic storage layer for shared coordination artifacts: specs, NFRs, blueprints, personas, journey maps. Payload is a JSON blob validated against the meta.type's schema (registry lands as a sibling child of #455).
+`documents` is the type-agnostic storage layer for shared coordination artifacts: specs, NFRs, blueprints, personas, journey maps, schemas. Payload is a validated JSON blob; meta columns (`type`, `surface`, `status`, `priority`, `owner`) are hoisted into indexed SQL columns.
 
-`legion document create | view | list | archive` is the operator surface. Documents replicate across the cluster like reflections and cards.
+`legion document create | view | list | validate | archive` is the operator surface.
+
+**Schema registry**: schemas are documents with `doc_type=schema`. They are structurally validated at insert (must have `$schema`, `title`, `type:object`, non-empty `properties`). Each dual-writes a pointer reflection on `domain=schema` so `legion recall --domain schema` surfaces every landed schema with its document id. `legion document validate` checks any JSON instance against a landed schema, one error per violation.
+
+**Spec-gen**: `legion spec-gen --repo <surface>` reads non-archived service-design documents (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`), derives one requirement per `moment_of_truth`, validates each against the requirement schema, and inserts new requirement documents plus born-Backlog kanban cards. Idempotent on `(traces_to, surface)` pairs.
+
+**Card-spec binding**: `legion kanban bind --id <card-id> --document <doc-id>` sets `tasks.document_id`. Once bound, `legion verify` reads acceptance criteria from the document's `verification.acceptance` block. Status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the document's `meta.status` transactionally (accepted, implemented, verified, cancelled). A dangling binding (document archived or missing) is a hard error on any transition.
+
+Documents replicate across the cluster like reflections and cards.
 
 ## Communication
 
@@ -194,35 +202,30 @@ The dashboard is the human control surface. Agents interact via CLI.
 
 ```
 src/
-  main.rs              -- CLI entry point (clap)
-  db.rs                -- SQLite init, migrations, CRUD
+  main.rs              -- CLI entry point (clap); the only process::exit site
+  cli/                 -- subcommand handlers (kanban, pr, document, verify, spec_gen, watch, etc.)
+  db/                  -- SQLite init, migrations, domain CRUD modules (reflections, kanban, documents, audit, etc.)
+  kanban/              -- CardStatus state machine and formatting
+  uncertainty/         -- emit, witness, calibration, orphans
+  mcp/                 -- MCP stdio server (notifier, tools, log)
   search.rs            -- Tantivy index management
-  scip/                -- SCIP index build, store, query (sym engine)
-  kanban.rs            -- Card, CardStatus, state machine, scheduler
-  reflect.rs           -- reflection creation
+  scip.rs              -- SCIP index build, store, query (sym engine)
+  sym.rs               -- sym subcommand: def, refs, impl, hover, impact, list
   recall.rs            -- query and rank reflections
   board.rs             -- bullpen posts and filtering
   signal.rs            -- signal parsing, formatting, wake-worthy verbs
-  resolve.rs           -- bullpen/signal resolution
   surface.rs           -- cross-repo highlights
   status.rs            -- agent work status
-  document.rs          -- coordination substrate documents
-  sub_issue.rs         -- GitHub sub-issue verbs
-  worksource.rs        -- work source plugin discovery and execution
-  watch.rs             -- auto-wake daemon, watch.toml, PTY spawn, reaper
-  wake_attempts.rs     -- FSM-enforced DB methods for wake_attempts
+  documents.rs         -- coordination substrate documents, schema registry, validation
+  spec_gen.rs          -- requirement derivation from service-design artifacts
   cluster.rs           -- cluster.toml, key management, `legion cluster`
   sync_actor.rs        -- background thread that drives delta sync
   serve.rs             -- web dashboard
-  mcp.rs               -- MCP stdio server for the real-time channel
   health.rs            -- system health sampling
   statusline.rs        -- statusLine ingest + chip render
   mesh.rs              -- mesh-aware task placement
-  usage.rs             -- session cost analysis
-  uncertainty.rs       -- emit, witness, calibration, orphans
   telemetry.rs         -- bypass.jsonl writer and readers
   embed.rs             -- model2vec embeddings
-  audit.rs             -- audit log for work source actions
   init.rs              -- hook script generation and settings.json management
   error.rs             -- error types
 plugin/
@@ -231,7 +234,7 @@ plugin/
   hooks/               -- Claude Code hooks
   commands/            -- slash commands
   agents/              -- agent definitions (legion-prime, dungeon-master)
-  skills/              -- skill definitions (legion-memory, legion-simplify)
+  skills/              -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify)
   channel/             -- MCP client bridge
   worksources/         -- work source plugins
 ```

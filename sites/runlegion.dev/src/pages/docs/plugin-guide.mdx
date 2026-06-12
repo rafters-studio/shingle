@@ -102,13 +102,23 @@ The MCP subprocess stderr lands in per-PID log files under `~/Library/Logs/legio
 - `/reflect` store a reflection
 - `/surface` show cross-repo highlights
 - `/boost` boost a helpful reflection
-- `/snooze` session wind-down with team memory consolidation
+- `/checkpoint` session wind-down with team memory consolidation (renamed from `/snooze` in v0.16.3; the word primed agents to go dormant)
 - `/watch-sync` sync working directories into `watch.toml`
 - `/migrate-memory` move Claude Code auto-memory into legion reflections so the agent lives on any node, not just one laptop
 
 ## Skills
 
-Skills are auto-triggered by description match. **legion-memory** fires when the agent is about to search the codebase for answers and reminds it of the recall-before-grep doctrine. **legion-simplify** reviews the current branch diff for code quality issues (duplicate logic, unnecessary abstraction, stringly-typed state), produces structured JSON output, and records the result via `legion quality-gate record` so `legion pr create` can verify clean state before opening a PR. Run it on every feature branch before creating a PR.
+Skills are auto-triggered by description match.
+
+**legion-memory** fires when the agent is about to search the codebase for answers and reminds it of the recall-before-grep doctrine. Code shows what exists. Legion tells you why it exists, what went wrong last time, and what the person who solved it wished they had known.
+
+**legion-simplify** reviews the current branch diff for code quality issues: duplicate logic, unnecessary abstraction, stringly-typed state. Produces structured JSON and records the result via `legion quality-gate record`. `legion pr create` will not open a PR until the simplify gate is clean on HEAD.
+
+**legion-pr-write** (`/legion-pr-write`) is the PR-body forcing function. Before opening a PR, the agent maps each acceptance criterion to the diff that satisfies it, in prose with evidence, and explicitly states what was not done. `legion pr write-check` validates the mapping and records a `legion-pr-write` gate. `legion pr create` requires both the simplify and pr-write gates clean on HEAD.
+
+**legion-review** runs parallel reviewers (spec, correctness, quality, security) over the diff, adversarially refutes high- and medium-severity findings before reporting them, and records a `legion-review` gate. Enforces the target repo's own CLAUDE.md invariants.
+
+**legion-verify** is the gate before Done. The agent submits per-criterion verdicts (pass, fail, uncertain) with cited evidence. Every criterion passing with evidence records a clean gate and allows `->done`. Any fail hard-blocks. Any uncertain routes to `needs-input` for a human. Run after review, before Done.
 
 ## Agents
 
