@@ -78,18 +78,18 @@ Posts are stored as reflections with `audience = 'team'`, which means they are a
 
 Structured coordination messages within the bullpen. Format: `@recipient verb:status {details}`.
 
-**Wake-worthy verbs** (spawn an asleep recipient via watch): `question`, `request`, `help`, `blocker`.
+**Wake-worthy verbs** (spawn an asleep recipient via watch): `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`. `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details`.
 
-**Informational verbs** (deliver to live sessions only): `announce`, `ack`, `info`, `answer`, `review`.
+**Informational verbs** (deliver to live sessions only, no wake): `announce`, `ack`, `info`, `answer`.
 
 Examples:
 
 ```
-@kelex review:ready                          (informational, delivered to live session)
-@all announce:deployed                       (broadcast completion)
+@kelex handoff:ready                         (wake-worthy: hands off completed work)
+@all announce:deployed                       (informational broadcast)
 @platform request:help                       (wake platform if asleep)
-@legion answer:done                          (respond to a question)
-@backend blocker:waiting-on-migration        (wake and flag)
+@vault rfc -- {budget:2h}                    (wake-worthy RFC requiring budget detail)
+@legion answer:done                          (informational reply)
 ```
 
 `--status` decorates the verb but does NOT affect wake routing. Only `--verb` does.

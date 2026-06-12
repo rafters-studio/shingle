@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.17.2. Commands are organized by category.
+This reference covers legion 0.18.0. Commands are organized by category.
 
 ---
 
@@ -220,14 +220,18 @@ Send a directed message to one agent.
 ```bash
 # Wake-worthy: spawns an asleep recipient
 legion signal --repo myproject --to backend --verb question --note "Should we cache auth responses?"
-legion signal --repo myproject --to platform --verb request --status help \
-  --details "topic:embeddings,priority:high"
+legion signal --repo myproject --to platform --verb handoff --status ready \
+  --details "topic:auth,pr:42"
+legion signal --repo myproject --to vault --verb rfc --details "budget:2h" \
+  --note "Proposing new schema layout"
 
 # Informational: delivered to live sessions only, does not wake
 legion signal --repo myproject --to all --verb announce --note "Phase 2.1 shipped"
 ```
 
-Wake-worthy verbs (`question`, `request`, `help`, `blocker`) cause the watch daemon to spawn the recipient if asleep. Informational verbs (`announce`, `ack`, `info`, `answer`, `review`) deliver only to live sessions via the channel push.
+Wake-worthy verbs cause the watch daemon to spawn the recipient if asleep: `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`. `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details` (e.g., `--details "budget:2h"`).
+
+Informational verbs deliver to live sessions via the channel push but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Silence is acknowledgment for informational signals; do not send empty acks.
 
 `--status` decorates the verb but does NOT affect wake routing. Only `--verb` gates whether watch spawns.
 
@@ -237,9 +241,9 @@ Key flags:
 
 - `--to` (required) recipient agent name, or `all` for broadcast
 - `--verb` (required) action verb (see above)
-- `--status` qualifier (`approved`, `blocked`, `ready`, `help`)
+- `--status` qualifier (`approved`, `blocked`, `ready`)
 - `--note` free-text note (max 280 chars)
-- `--details` comma-separated `key:value` pairs
+- `--details` comma-separated `key:value` pairs; required to include `budget:<amount>` for `rfc`
 - `--follows` parent reflection ID for threading
 
 ### resolve
@@ -371,7 +375,7 @@ legion document archive <id>
 
 The storage layer is type-agnostic: payload is a validated JSON blob. Meta columns (`type`, `surface`, `status`, `priority`, `owner`) are indexed SQL columns.
 
-Schema documents (`doc_type=schema`) are structurally gated at insert: payload must include `$schema`, `title`, `type:object`, and non-empty `properties`. A pointer reflection is stored automatically on `domain=schema` so `legion recall --domain schema` finds every landed schema.
+Schema documents (`doc_type=schema`) are structurally validated at create: payload must include `$schema`, `title`, `type:object`, and non-empty `properties`. Other document types can be validated against a landed schema via `legion document validate --schema <id>`. A pointer reflection is stored automatically on `domain=schema` so `legion recall --domain schema` finds every landed schema.
 
 `legion document validate` checks a JSON instance against a landed schema. One error per violation, exits non-zero on any failure.
 
@@ -383,7 +387,7 @@ Generate requirement documents from service-design artifacts.
 legion spec-gen --repo myproject
 ```
 
-Reads all non-archived service-design documents on the given surface (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`). Derives one requirement per `moment_of_truth`. Inserts new requirement documents and born-Backlog kanban cards. Re-running on unchanged input is safe: existing `(traces_to, surface)` pairs are skipped.
+Reads all non-archived service-design documents whose `surface` field matches `--repo` (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`). Note: `--repo` here is the functional surface label stored on documents (e.g., `payments`, `onboarding`), not a git repository name. Derives one requirement per `moment_of_truth`. Inserts new requirement documents and born-Backlog kanban cards. Re-running on unchanged input is safe: existing `(traces_to, surface)` pairs are skipped.
 
 ### verify
 
@@ -405,7 +409,7 @@ Decisions:
 - Any `uncertain` or `pass` with empty evidence: routes to `needs-input` for a human
 - Card has no acceptance criteria: blocked outright
 
-When a `document_id` is bound, criteria come from the document's `verification.acceptance` block. A dangling binding is a hard error.
+When a `document_id` is bound, criteria come from the document's `verification.acceptance` block first; a missing or empty block falls back to `tasks.acceptance`. A dangling `document_id` (the document does not exist) is a hard error, not a silent fallback.
 
 ### quality-gate
 
@@ -426,7 +430,7 @@ legion done --repo myproject --text "search endpoint shipped"
 legion done --repo myproject --id <card-id> --text "search endpoint shipped"
 ```
 
-Marks the card complete and posts an `announce` signal. The watch daemon auto-unblocks blocked cards whose block reason mentions the completing repo.
+Marks the card complete and posts an `announce` signal. When `--id` is supplied and the card has acceptance criteria, a clean `legion verify` verdict must exist before Done is accepted; the command exits non-zero otherwise. The watch daemon auto-unblocks blocked cards whose block reason mentions the completing repo.
 
 ### work
 

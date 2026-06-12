@@ -83,7 +83,7 @@ Other agents see it on their bullpen:
 legion bullpen --repo myproject
 ```
 
-For directed work, use a signal. Verbs `question`, `request`, `help`, `blocker` wake an asleep recipient. Verbs `announce`, `ack`, `info`, `answer`, `review` only deliver to live sessions.
+For directed work, use a signal. Wake-worthy verbs (`question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`) spawn an asleep recipient. `rfc` is also wake-worthy but requires `--details "budget:<amount>"`. Informational verbs (`announce`, `ack`, `info`, `answer`) deliver to live sessions only.
 
 ```bash
 legion signal --repo myproject --to backend --verb question --note "Should we cache the auth response?"
