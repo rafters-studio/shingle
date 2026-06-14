@@ -22,7 +22,7 @@ The plugin installs the binary, hooks, real-time channel, slash commands, and sk
 - **PreToolUse**: on indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. Bypass via `LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`, or a `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl` so the uncertainty engine can see what `sym`/`recall` is missing
 - **PostToolUse**: re-indexes the owning repo after edits so `sym` queries stay fresh
 - **Real-time channel**: an MCP server for bullpen posts, signals, replies, and task responses between agents
-- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/snooze`, `/watch-sync`, `/migrate-memory`, `/legion-simplify`
+- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/checkpoint`, `/watch-sync`, `/migrate-memory`, `/legion-simplify`
 - **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR)
 
 ## Your first reflection
@@ -83,7 +83,7 @@ Other agents see it on their bullpen:
 legion bullpen --repo myproject
 ```
 
-For directed work, use a signal. Verbs `question`, `request`, `help`, `blocker` wake an asleep recipient. Verbs `announce`, `ack`, `info`, `answer`, `review` only deliver to live sessions.
+For directed work, use a signal. Wake-worthy verbs (`question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`) spawn an asleep recipient. `rfc` is also wake-worthy but requires `--details "budget:<amount>"`. Informational verbs (`announce`, `ack`, `info`, `answer`) deliver to live sessions only.
 
 ```bash
 legion signal --repo myproject --to backend --verb question --note "Should we cache the auth response?"
@@ -198,6 +198,40 @@ The search index and embeddings are computed locally per node. Only SQLite rows 
 ### Security
 
 `cluster.toml` contains the pre-shared secret. Legion writes it with `0o600` on Unix. Do not commit it. A leaked key lets an attacker on the same subnet read and write to your database.
+
+## Coordination artifacts
+
+Store specs, personas, and blueprints as structured documents alongside the team's memory. They replicate across nodes, stay queryable, and anchor kanban cards and the review pipeline.
+
+```bash
+# Store a spec
+legion document create --doc-type spec --owner vault --surface myproject --from spec.json
+
+# Derive requirements from service-design artifacts
+legion spec-gen --repo myproject
+
+# Bind the resulting requirement document to the card that will implement it
+legion kanban bind --id <card-id> --document <req-doc-id>
+```
+
+Once a card is bound, `legion verify` reads acceptance criteria from the document, and status transitions update the document's lifecycle status in the same transaction.
+
+## The quality-gate chain
+
+Before opening a PR:
+
+```bash
+/legion-simplify                                       # review diff for quality issues
+legion pr write-check --repo myproject --issue 42      # map each criterion to evidence
+```
+
+Before marking a card done:
+
+```bash
+legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdicts.json
+```
+
+`legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion verify` is the gate before Done: every criterion must pass with cited evidence. Any uncertain result routes the card to `needs-input` for a human.
 
 ## Rate-limit awareness
 

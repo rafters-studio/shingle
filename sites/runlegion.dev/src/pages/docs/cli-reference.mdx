@@ -1,14 +1,16 @@
 ---
 layout: ../../layouts/Docs.astro
 title: CLI Reference
-description: Complete reference for every legion command with flags and examples.
+description: Complete reference for every legion command. Organized by category with key flags and real semantics.
 ---
 
 # CLI Reference
 
-All commands support `--verbose` / `-v` for informational messages. Legion is quiet by default. Data goes to stdout, errors to stderr, confirmations only with `--verbose`.
+All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference is generated against legion v0.16.1.
+This reference covers legion 0.18.0. Commands are organized by category.
+
+---
 
 ## Memory
 
@@ -17,62 +19,75 @@ This reference is generated against legion v0.16.1.
 Store a reflection from a completed session.
 
 ```bash
-legion reflect --repo <name> --text "what you learned"
-legion reflect --repo <name> --transcript /path/to/transcript.jsonl
-legion reflect --repo <name> --text "..." --domain auth --tags "debugging,review"
-legion reflect --repo <name> --text "..." --follows <parent-id>
-legion reflect --repo <name> --whoami --text "identity reflection text"
-legion reflect --repo <name> --text "..." --dedupe-mode strict
+legion reflect --repo myproject --text "what you learned"
+legion reflect --repo myproject --transcript /path/to/session.jsonl
+legion reflect --repo myproject --text "..." --domain auth --tags "debugging,review"
+legion reflect --repo myproject --text "..." --follows <parent-id>
+legion reflect --repo myproject --whoami --text "identity reflection text"
+legion reflect --repo myproject --text "..." --dedupe-mode strict
 ```
 
-Outputs the reflection ID to stdout.
+Prints the reflection ID (UUIDv7) to stdout. `--repo` accepts comma-separated names to store the same reflection across multiple repos.
 
-**Flags:**
-- `--repo` (required) repository name, comma-separated for multiple repos
-- `--text` reflection text (mutually exclusive with `--transcript`)
-- `--transcript` path to Claude Code transcript JSONL (uses last assistant message)
-- `--domain` classification tag (e.g., `auth`, `schema`, `ui`)
-- `--whoami` shortcut for `--domain identity`. The SessionStart hook reinjects identity reflections on every boot
+Key flags:
+
+- `--repo` (required) repository name(s)
+- `--text` reflection content (mutually exclusive with `--transcript`)
+- `--transcript` path to a Claude Code transcript JSONL; legion extracts the last assistant message
+- `--domain` classification tag (`auth`, `schema`, `color-tokens`, etc.)
+- `--whoami` shortcut for `--domain identity`. Identity reflections are reinjected by the SessionStart hook on every boot
 - `--tags` comma-separated tags
-- `--follows` parent reflection ID for learning chains
-- `--force` skip near-duplicate detection
-- `--dedupe-mode` `warn` (default, store anyway), `strict` (refuse), or `off`
-
-### forget
-
-Permanently delete a reflection by ID. Destructive. No soft-delete, no undo. Removes the row from SQLite and the Tantivy index.
-
-```bash
-legion forget --id <reflection-id>
-legion forget --id <reflection-id> --repo myproject     # safety check
-```
-
-The optional `--repo` flag refuses the delete unless the reflection's repo matches. Prevents accidentally nuking the wrong reflection when working with a similarly-shaped ID.
+- `--follows` parent reflection ID; creates a learning chain
+- `--dedupe-mode` `warn` (default: store anyway), `strict` (refuse near-duplicates), `off` (skip check)
+- `--force` bypass near-duplicate detection regardless of `--dedupe-mode`
 
 ### recall
 
-Query reflections by relevance.
+Query reflections by relevance to a context string.
 
 ```bash
-legion recall --repo <name> --context "search terms"
-legion recall --repo <name> --latest --limit 5
-legion recall --repo <name> --domain identity            # whoami pattern
-legion recall --repo <name> --context "..." --cosine-only
-legion recall --repo <name> --context "..." --archives    # archives only
-legion recall --repo <name> --context "..." --include-archives
+legion recall --repo myproject --context "vite cache problems"
+legion recall --repo myproject --latest --limit 5
+legion recall --repo myproject --domain identity
+legion recall --repo myproject --context "..." --archives
+legion recall --repo myproject --context "..." --include-archives
 ```
 
-**Flags:**
+Default mode blends BM25 full-text search with cosine similarity when embeddings are available (0.6 BM25 + 0.4 cosine). Results are further adjusted by boost/decay factors.
+
+Key flags:
+
 - `--repo` (required) repository name
-- `--context` search query (BM25 full-text plus optional cosine)
-- `--latest` return most recent instead of most relevant
+- `--context` search query
+- `--latest` return most recent instead of most relevant; used by hooks when no meaningful query exists yet
 - `--limit` maximum results (default 5)
-- `--preview` truncate each result to N characters
-- `--cosine-only` skip BM25, rank by cosine similarity (requires embeddings)
-- `--min-score` filter out results below this score
-- `--domain` return latest reflections matching this domain (bypasses search)
-- `--archives` search only archived reflections (#457)
-- `--include-archives` search both hot and archived reflections
+- `--domain` return latest reflections matching this domain tag (bypasses search)
+- `--cosine-only` skip BM25, rank purely by cosine similarity (requires embeddings)
+- `--min-score` filter out results below this threshold
+- `--preview` truncate each result to N characters (used by hooks to keep injected context compact)
+- `--archives` search only archived reflections (the deep dive; default searches hot only)
+- `--include-archives` search both hot and archived
+
+### forget
+
+Permanently delete a reflection by ID. No soft-delete, no undo. Removes the row from SQLite and the Tantivy index.
+
+```bash
+legion forget --id <reflection-id>
+legion forget --id <reflection-id> --repo myproject
+```
+
+`--repo` is an optional safety check: the delete is refused unless the reflection's repo matches.
+
+### boost
+
+Mark a reflection as useful after recalling and applying it.
+
+```bash
+legion boost --id <reflection-id>
+```
+
+Increments `recall_count`, which multiplies the reflection's future recall score by `1.0 + 0.1 * recall_count`. A reflection boosted five times scores 1.5x its base.
 
 ### similar
 
@@ -84,50 +99,65 @@ legion similar --id <reflection-id> --cross-repo --limit 10
 legion similar --id <reflection-id> --json
 ```
 
-**Flags:**
+Key flags:
+
 - `--id` (required) source reflection
+- `--cross-repo` include reflections from all repos (default: same repo as source)
 - `--limit` neighbors to return (default 5)
-- `--cross-repo` include reflections from all repos
-- `--min-score` filter below this score
+- `--min-score` filter below this threshold
 - `--preview` truncate output text
 - `--json` machine-readable output
 
 ### consult
 
-Search across legion's cross-agent surfaces. Two query modes:
+Search across legion's cross-agent surfaces. Two query modes, mutually exclusive.
 
 ```bash
-legion consult --context "problem description" --limit 3
-legion consult --symbol MyType --json              # SCIP across every indexed repo
+legion consult --context "discriminated unions in composite rules" --limit 3
+legion consult --symbol Database --json
 ```
 
-`--context` searches reflections across every repo. `--symbol` searches SCIP indexes (#285) across every repo and reports `(repo, lang, def_location, refs_count)` per match. Used by the recall-first chain to answer code-intelligence questions without spawning a search agent.
-
-### boost
-
-Increase a reflection's relevance score after recalling and applying it.
-
-```bash
-legion boost --id <reflection-id>
-```
+`--context` searches reflections across every repo and returns results with repo attribution. `--symbol` searches SCIP indexes across every repo and reports `(repo, lang, def_location, refs_count)` per match. Used by the recall-first hook to inject cross-repo code intelligence before an agent spawns Explore.
 
 ### chain
 
-Trace a learning chain from a reflection.
+Trace a learning chain from any reflection in it.
 
 ```bash
 legion chain --id <reflection-id>
-legion chain --id <reflection-id> --full          # full text, not 80-char preview
+legion chain --id <reflection-id> --full
 ```
+
+`--full` emits complete reflection text instead of the 80-character preview. Used by hooks that inject chain content as agent context.
 
 ### whoami
 
 Print identity reflections for a repo. Alias for `recall --domain identity`.
 
 ```bash
-legion whoami --repo <name>
-legion whoami --repo <name> --limit 50
+legion whoami --repo myproject
+legion whoami --repo myproject --limit 50
 ```
+
+### whatami
+
+Print the operating contract for a repo. Alias for `recall --domain workflow`.
+
+```bash
+legion whatami --repo myproject
+```
+
+Distinct from `whoami`: `whoami` is who the agent is; `whatami` is how it operates on this repo.
+
+### surface
+
+Surface cross-repo highlights for a session start.
+
+```bash
+legion surface --repo myproject
+```
+
+Gathers recent bullpen posts, high-value cross-repo reflections, recently extended learning chains, and pending inbound kanban cards. Returns empty when there is nothing to surface.
 
 ### reindex
 
@@ -137,457 +167,368 @@ Rebuild the Tantivy search index from the database.
 legion reindex
 ```
 
-Normally unnecessary. The index stays in sync. Use after manual database edits or corruption recovery.
+Normally unnecessary. Use after manual database edits or corruption recovery.
 
 ### backfill
 
-Compute embeddings for reflections missing them.
+Compute embeddings for all reflections missing them.
 
 ```bash
 legion backfill
 ```
 
-### cleanup
+Requires the model2vec-rs model. Each node computes its own embeddings; they do not replicate across the cluster.
 
-Remove old tombstones (soft-deleted rows) from the database.
+---
 
-```bash
-legion cleanup --retention-days 30
-```
-
-## Communication
+## Team
 
 ### post
 
-Broadcast a message to all agents via the bullpen. Posts have no recipient and never wake an asleep agent. Use `legion signal` for directed asks.
+Broadcast to the shared bullpen. No recipient, no wake. Use it for discoveries, decisions, FYIs.
 
 ```bash
-legion post --repo <name> --text "message for the team"
-legion post --repo <name> --transcript /path/to/transcript.jsonl
+legion post --repo myproject --text "OKLCH handles gamut mapping better than HSL for dark themes"
+legion post --repo myproject --text "..." --domain color-tokens --tags "oklch,gamut"
 ```
+
+Posts are stored as reflections with `audience = 'team'`, making them discoverable via `consult`. Supports the same `--domain`, `--tags`, `--follows`, and `--transcript` flags as `reflect`. `--repo` accepts comma-separated names for multi-repo broadcast.
 
 ### bullpen
 
 Read the bullpen or check for unread posts.
 
 ```bash
-legion bullpen --repo <name>              # all posts, marks as read
-legion bullpen --repo <name> --count      # unread count only
-legion bullpen --repo <name> --signals    # structured signals only
-legion bullpen --repo <name> --musings    # natural language only
-legion bullpen --archive                  # archive posts all readers have seen
-legion bullpen --archived --repo <name>   # view archived posts
+legion bullpen --repo myproject
+legion bullpen --repo myproject --count
+legion bullpen --repo myproject --signals
+legion bullpen --repo myproject --musings
 ```
 
-Aliases: `bp`, `board`.
+Reading marks all posts as seen for your repo. `--signals` and `--musings` are mutually exclusive; without either, everything is shown.
 
-Operator-only flags: `--include-stale` (past-TTL non-evergreen, see #376) and `--include-resolved` (converged threads, see #362). Agents must not pass these.
+Key flags:
+
+- `--count` print unread count only; silent when nothing is unread
+- `--signals` show only structured signals (posts starting with `@`)
+- `--musings` show only natural-language posts
 
 ### signal
 
-Send a directed message to another agent. Watch wakes the recipient when `--verb` is in the wake-worthy set.
+Send a directed message to one agent.
 
 ```bash
-legion signal --repo <name> --to <agent> --verb question --note "..."
-legion signal --repo <name> --to all --verb announce --note "PR merged"
-legion signal --repo <name> --to <agent> --verb review --status approved --details "key:value,key:value"
+# Wake-worthy: spawns an asleep recipient
+legion signal --repo myproject --to backend --verb question --note "Should we cache auth responses?"
+legion signal --repo myproject --to platform --verb handoff --status ready \
+  --details "topic:auth,pr:42"
+legion signal --repo myproject --to vault --verb rfc --details "budget:2h" \
+  --note "Proposing new schema layout"
+
+# Informational: delivered to live sessions only, does not wake
+legion signal --repo myproject --to all --verb announce --note "Phase 2.1 shipped"
 ```
 
-**Wake-worthy verbs** (spawn an asleep recipient): `question`, `request`, `help`, `blocker`.
+Wake-worthy verbs cause the watch daemon to spawn the recipient if asleep: `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`. `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details` (e.g., `--details "budget:2h"`).
 
-**Informational verbs** (deliver to live sessions only): `announce`, `ack`, `info`, `answer`, `review`.
+Informational verbs deliver to live sessions via the channel push but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Silence is acknowledgment for informational signals; do not send empty acks.
 
-**Flags:**
-- `--repo` (required) sender repo
-- `--to` (required) recipient agent name, or `all`
-- `--verb` (required) see set above
-- `--status` optional status decoration (does NOT affect wake routing)
-- `--note` free-text note
-- `--details` comma-separated key:value pairs
-- `--follows` parent reflection ID
-- `--domain`, `--tags` classification
+`--status` decorates the verb but does NOT affect wake routing. Only `--verb` gates whether watch spawns.
+
+`--note` is limited to 280 characters. For larger content, use `legion post` and send a brief signal pointing to the post.
+
+Key flags:
+
+- `--to` (required) recipient agent name, or `all` for broadcast
+- `--verb` (required) action verb (see above)
+- `--status` qualifier (`approved`, `blocked`, `ready`)
+- `--note` free-text note (max 280 chars)
+- `--details` comma-separated `key:value` pairs; required to include `budget:<amount>` for `rfc`
+- `--follows` parent reflection ID for threading
 
 ### resolve
 
-Mark a bullpen post or signal as resolved (#362). Stops a converged thread from re-surfacing in the bullpen, channel notifications, and the wake-loop signal feed.
+Mark a bullpen post or signal thread as resolved.
 
 ```bash
-legion resolve --id <post-or-signal-id>
-legion resolve --id <post-or-signal-id> --reflection <converged-decision-reflection-id>
+legion resolve --id <post-id>
+legion resolve --id <post-id> --reflection <converged-decision-id>
 ```
 
-`--reflection` links the converged decision so future recall surfaces it together with the resolved post.
+Resolved posts stop resurfacing in the bullpen, channel notifications, and the watch wake-loop feed. `--reflection` links the converged decision so future recall surfaces them together.
 
 ### pending-replies
 
-Print a wake-prompt for pending wake-worthy signals targeting this repo.
+Print a wake-prompt for pending wake-worthy signals.
 
 ```bash
-legion pending-replies --repo <name>
+legion pending-replies --repo myproject
 ```
 
-Used by SessionStart to surface directed signals carrying `question`, `request`, `help`, or `blocker` with strong "REQUIRES A REPLY" framing that survives the additionalContext system-reminder wrapper. Prints nothing and exits 0 when no pending asks exist.
+Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when the agent wakes to directed questions or requests.
 
-### surface
+---
 
-Surface cross-repo highlights for a session start.
+## Work
+
+### kanban
+
+Manage the kanban board. Cards have eight states with enforced transitions:
+
+```
+backlog -> pending -> accepted -> in-review -> done
+                         |              |
+                         +-> blocked -> accepted (via unblock)
+                         +-> needs-input -> accepted (via resume)
+                         +-> done
+                         +-> cancelled
+```
 
 ```bash
-legion surface --repo <name>
+# Create
+legion kanban create --from sean --to backend --text "implement search" --priority high
+legion kanban create --from myproject --to backend --text "..." \
+  --source-url "https://github.com/owner/repo/issues/42" --source-type github
+
+# View and list
+legion kanban view --id <card-id>
+legion kanban list --repo backend
+legion kanban list --repo myproject --from
+
+# Transitions
+legion kanban accept --id <card-id>
+legion kanban block --id <card-id>
+legion kanban unblock --id <card-id>
+legion kanban review --id <card-id>
+legion kanban need-input --id <card-id>
+legion kanban resume --id <card-id>
+legion kanban cancel --id <card-id>
+legion kanban reopen --id <card-id>
+
+# Bind a spec document
+legion kanban bind --id <card-id> --document <doc-id>
+
+# Other
+legion kanban assign --id <card-id> --to backend
+legion kanban update --id <card-id> --text "updated description"
+legion kanban delete --id <card-id>
+legion kanban reconcile --repo myproject
 ```
 
-## Code Intelligence
+When a card has a `document_id`, status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the bound document's `meta.status` in the same transaction. A dangling `document_id` (document archived or missing) is a hard error on transition.
 
-SCIP-backed symbol queries. Stored protobuf blobs answer `def`/`refs`/`impl`/`hover`/`impact` in-process. Recall and consult-by-symbol pivot on the same index. The grep/Read enforcement hooks (#438/#439) require this index to be present.
+### issue
 
-### index
-
-Build or refresh the SCIP code-intelligence index for a repo (#278). Detects every recognized language, runs the corresponding SCIP indexer per language as a subprocess, and stores each blob keyed on `(repo, lang)`. Idempotent on content hash.
+Manage issues via the configured work source plugin.
 
 ```bash
-legion index myproject
-legion index --file /path/to/file.rs         # re-index owning repo (PostToolUse uses this)
-legion index myproject --status              # current inventory
-legion index myproject --status --banner     # SessionStart banner
-legion index myproject --status --json       # for hook consumers (#437/#438/#439)
-legion index --logs                          # recent indexer log lines
-legion index --logs --follow --lines 200     # tail-follow
+legion issue create --repo myproject --title "Implement auth" --body "..."
+legion issue view --repo myproject --id 42
+legion issue close --repo myproject --id 42
+legion issue reopen --repo myproject --id 42
+legion issue edit --repo myproject --id 42 --title "new title"
 ```
 
-### sym
+### sub-issue
 
-Query SCIP symbol indexes. Run `legion index <repo>` first to populate.
+Link a child issue to a parent via GitHub's native sub-issue relationship.
 
 ```bash
-legion sym def MyType                  # definitions
-legion sym refs MyType                 # references / call sites
-legion sym impl MyTrait                # types implementing a trait or interface
-legion sym hover my_function           # signature + docstring
-legion sym impact <diff-or-rev>        # for every symbol whose def the diff touches, report refs count
+legion sub-issue create --repo myproject --parent 123 --title "..." --body "..."
+legion sub-issue list --repo myproject --parent 123
 ```
 
-`sym impact` is used by smugglr at PR review time to flag wide-blast-radius PRs.
+### pr
 
-## Kanban
-
-### work
-
-Get the next card from the scheduler.
+Manage pull requests via the work source plugin.
 
 ```bash
-legion work --repo <name>          # picks up and auto-accepts highest priority card
-legion work --repo <name> --peek   # shows next card without accepting
+legion pr create --repo myproject --title "..." --body "..."
+legion pr list --repo myproject
+legion pr view --repo myproject --id 12
+legion pr checks --repo myproject --id 12
+legion pr write-check --repo myproject --issue 42
+legion pr comments --repo myproject --id 12
+legion pr reviews --repo myproject --id 12
+legion pr review --repo myproject --id 12
+legion pr merge --repo myproject --id 12
+legion pr close --repo myproject --id 12
 ```
 
-If a work source plugin is configured, syncs external issues before picking.
+`legion pr create` refuses unless both a clean `legion-simplify` gate and a clean `legion-pr-write` gate exist on the current HEAD commit.
+
+`legion pr write-check` validates a drafted PR body against the issue's acceptance criteria and records a `legion-pr-write` quality gate on success. Body from `--body-file` or stdin.
+
+### document
+
+Store and retrieve coordination artifacts: specs, NFRs, blueprints, personas, journey maps, schemas.
+
+```bash
+legion document create --doc-type spec --owner vault --surface myproject --from spec.json
+legion document create --doc-type schema --owner vault --from schema.json
+legion document view <id>
+legion document list
+legion document list --doc-type requirement --surface myproject
+legion document validate --schema <schema-doc-id> --file instance.json
+legion document archive <id>
+```
+
+The storage layer is type-agnostic: payload is a validated JSON blob. Meta columns (`type`, `surface`, `status`, `priority`, `owner`) are indexed SQL columns.
+
+Schema documents (`doc_type=schema`) are structurally validated at create: payload must include `$schema`, `title`, `type:object`, and non-empty `properties`. Other document types can be validated against a landed schema via `legion document validate --schema <id>`. A pointer reflection is stored automatically on `domain=schema` so `legion recall --domain schema` finds every landed schema.
+
+`legion document validate` checks a JSON instance against a landed schema. One error per violation, exits non-zero on any failure.
+
+### spec-gen
+
+Generate requirement documents from service-design artifacts.
+
+```bash
+legion spec-gen --repo myproject
+```
+
+Reads all non-archived service-design documents whose `surface` field matches `--repo` (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`). Note: `--repo` here is the functional surface label stored on documents (e.g., `payments`, `onboarding`), not a git repository name. Derives one requirement per `moment_of_truth`. Inserts new requirement documents and born-Backlog kanban cards. Re-running on unchanged input is safe: existing `(traces_to, surface)` pairs are skipped.
+
+### verify
+
+Verify a card's acceptance criteria before it can reach Done.
+
+```bash
+echo '[{"criterion":"search returns results","verdict":"pass","evidence":"test_search passes"}]' \
+  | legion verify --repo myproject --card <card-id>
+
+legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdicts.json
+```
+
+Reads per-criterion verdicts as JSON: an array of `{criterion, verdict, evidence}` objects where `verdict` is `pass`, `fail`, or `uncertain`.
+
+Decisions:
+
+- Every criterion `pass` with non-empty evidence: records a clean gate, allows `->done`
+- Any `fail`: hard-blocks the card
+- Any `uncertain` or `pass` with empty evidence: routes to `needs-input` for a human
+- Card has no acceptance criteria: blocked outright
+
+When a `document_id` is bound, criteria come from the document's `verification.acceptance` block first; a missing or empty block falls back to `tasks.acceptance`. A dangling `document_id` (the document does not exist) is a hard error, not a silent fallback.
+
+### quality-gate
+
+Record a quality gate result for a skill run on the current HEAD commit.
+
+```bash
+legion quality-gate record --gate legion-simplify --result pass
+```
+
+`legion pr create` checks for clean `legion-simplify` and `legion-pr-write` gates on HEAD before opening a PR.
 
 ### done
 
 Announce completed work and notify blocked agents.
 
 ```bash
-legion done --repo <name> --text "what was completed"
-legion done --repo <name> --text "what was completed" --id <card-id>
+legion done --repo myproject --text "search endpoint shipped"
+legion done --repo myproject --id <card-id> --text "search endpoint shipped"
 ```
 
-When `--id` is provided, the card transition is validated BEFORE the announcement is posted. If the card cannot transition to done, no announcement goes out.
+Marks the card complete and posts an `announce` signal. When `--id` is supplied and the card has acceptance criteria, a clean `legion verify` verdict must exist before Done is accepted; the command exits non-zero otherwise. The watch daemon auto-unblocks blocked cards whose block reason mentions the completing repo.
 
-### kanban create
+### work
 
-Create a new card on the kanban board.
+Get the next work item from the scheduler.
 
 ```bash
-legion kanban create --from <repo> --to <repo> --text "description" --priority high
-legion kanban create --from <repo> --to <repo> --text "..." --labels "tag1,tag2" --source-url "https://..." --source-type "github"
+legion work --repo myproject
+legion work --repo myproject --peek
 ```
 
-**Flags:**
-- `--from` (required) who created the card
-- `--to` (required) assigned agent
-- `--text` (required) card description
-- `--priority` `low`, `med` (default), `high`, `critical`
-- `--labels` comma-separated labels
-- `--parent` parent card ID for delegation chains
-- `--source-url` link to external issue
-- `--source-type` source type (github, jira, etc.)
-
-### kanban view / update / delete
-
-```bash
-legion kanban view --id <card-id>
-legion kanban update --id <card-id> --text "..." --priority high --labels "..."
-legion kanban delete --id <card-id>          # hard delete
-```
-
-### kanban list
-
-List cards for a repo.
-
-```bash
-legion kanban list --repo <name>          # inbound (assigned to you)
-legion kanban list --repo <name> --from   # outbound (created by you)
-```
-
-### kanban accept / block / unblock / review / need-input / resume / cancel / reopen / assign
-
-State machine transitions. Each refuses invalid transitions.
-
-```bash
-legion kanban accept --id <card-id>                                # pending -> in-progress
-legion kanban block --id <card-id> --reason "waiting on upstream"
-legion kanban unblock --id <card-id>
-legion kanban review --id <card-id>                                # mark for review
-legion kanban need-input --id <card-id> --reason "need design decision"
-legion kanban resume --id <card-id>                                # exit needs-input or in-review
-legion kanban cancel --id <card-id>
-legion kanban reopen --id <card-id>                                # done or cancelled back to in-progress
-legion kanban assign --id <card-id> --to <repo>                    # backlog only
-```
-
-### kanban reconcile
-
-Reconcile kanban cards with the linked GitHub issue state. Pulls remote state and aligns local cards.
-
-```bash
-legion kanban reconcile --repo <name>
-```
-
-## Work Source
-
-Work source plugins integrate external trackers (GitHub, etc.) with legion. These commands are the primary interface for agents to file issues, open PRs, and review code. Direct `gh` usage is blocked in legion-managed environments so the audit log captures every action.
-
-### issue
-
-```bash
-legion issue create --repo <name> --title "..." --body "..."
-legion issue view --repo <name> --number <n>            # local card + live GitHub state
-legion issue close --repo <name> --number <n>
-legion issue reopen --repo <name> --number <n>
-legion issue edit --repo <name> --number <n> --title "..." --body "..."
-```
-
-### sub-issue
-
-Sub-issue verbs over the work source plugin (#462). Creates child issues linked to a parent via GitHub's native sub-issue relationship.
-
-```bash
-legion sub-issue create --repo <name> --parent <n> --title "..." --body "..."
-legion sub-issue list --repo <name> --parent <n>
-```
-
-The plugin looks up the parent node id first, errors if the parent does not exist, then creates the child and links via the `addSubIssue` mutation.
-
-### pr
-
-```bash
-legion pr create --repo <name> --title "..." --body "..."
-legion pr create --repo <name> --title "..." --body "..." --skip-gates
-legion pr list --repo <name>
-legion pr view --repo <name> --number <n>            # body and metadata
-legion pr checks --repo <name> --number <n>          # CI status. Fail-closed on unknown states
-legion pr comments --repo <name> --number <n>        # top-level + inline review comments
-legion pr reviews --repo <name> --number <n>         # submitted reviews
-legion pr review --repo <name> --number <n> --approve --body "LGTM"
-legion pr review --repo <name> --number <n> --request-changes --body "..."
-legion pr merge --repo <name> --number <n>
-legion pr merge --repo <name> --number <n> --task <card-id>   # also transition card to done
-legion pr close --repo <name> --number <n>           # close without merging
-```
-
-`pr create` requires a clean `legion-simplify` gate on HEAD. `--skip-gates` bypasses but writes an audit entry explaining the bypass. Use only for bootstrap or trivial commits (docs, release commits).
-
-`pr checks` exits non-zero if any check is not in a known passing or in-flight state. Fail-closed on unknown states so a future `gh` release with a new failure variant cannot silently render as green to the merge gate.
-
-### comment
-
-Post a comment on an issue or PR.
-
-```bash
-legion comment --repo <name> --number <n> --body "..."
-```
+Atomically selects the highest-priority unblocked card assigned to the repo and accepts it. Priority: critical > high > med > low, then `sort_order`, then oldest. `--peek` shows without accepting.
 
 ### sync
 
-Pull new issues from the configured work source into the kanban board.
+Sync issues from the configured work source into the kanban board.
 
 ```bash
-legion sync --repo <name>
+legion sync --repo myproject
 ```
-
-Also runs automatically from SessionStart unless `LEGION_NO_SYNC=1` is set.
 
 ### audit
 
-View the work source audit log.
+View the audit log of work source actions.
 
 ```bash
-legion audit                          # recent entries, all agents
-legion audit --repo <name>            # filter by agent
-legion audit --action create-pr       # filter by action type
-legion audit --json                   # machine-readable
+legion audit --repo myproject
+legion audit --repo myproject --limit 20
 ```
 
-Known action verbs: `create-issue`, `close-issue`, `reopen-issue`, `edit-issue`, `create-pr`, `close-pr`, `review`, `merge`, `comment`, `delete-card`, `update-card`. Filter is exact string match. Future verbs work automatically.
+---
 
-### quality-gate record
+## Code intelligence
 
-Record a simplify-skill result. Called by `/legion-simplify`, not normally invoked by hand.
+### index
+
+Build or refresh the SCIP code-intelligence index for a repo.
 
 ```bash
-legion quality-gate record --skill legion-simplify --result clean
-legion quality-gate record --skill legion-simplify --result issues --findings-count 3
-legion quality-gate record --skill legion-simplify --result clean --details-json '<json>'
+legion index myproject
+legion index --file /path/to/changed.rs
+legion index --status
+legion index --status --json
+legion index myproject --status --banner
+legion index --logs
+legion index --logs --repo myproject --follow
 ```
 
-`legion pr create` reads the most recent gate result for HEAD and refuses to open a PR unless it is `clean`.
+Detects languages by marker files: `Cargo.toml` (rust), `package.json` (typescript), `pyproject.toml` / `requirements.txt` (python), `go.mod` (go). Background-indexer logs land at `~/.local/state/legion/index-logs/` and survive reboots.
 
-### rename
+### sym
 
-Rename a repo across all tables and `watch.toml` entries.
+Query SCIP symbol indexes in-process. No file scan, no language server runtime.
 
 ```bash
-legion rename --from oldname --to newname
+legion sym def Database
+legion sym refs find_pending
+legion sym impl Iterator
+legion sym hover my_function
+legion sym impact --repo myproject --diff /path/to/changes.diff
+legion sym list --kind fn
 ```
 
-Updates `reflections`, `tasks`, `schedules`, `watch_handled`, `board_reads`, `wake_attempts`, `scip_indexes`, and watch config in a single transaction.
+`sym impact` parses a unified diff and reports SCIP reference counts per touched symbol, sorted descending. Pass `--json` for agent consumption. `LEGION_IMPACT_HIGH_THRESHOLD` (default 50) marks the `HIGH` tag in text output.
 
-## Coordination Substrate
+`sym list` replaces `grep "fn "` on indexed repos: returns names and locations, not source bodies.
 
-### document
+---
 
-Coordination substrate documents (#455/#456). Specs, NFRs, blueprints, personas, journeys. Type-agnostic at the storage layer. Payload is a validated JSON blob.
-
-```bash
-legion document create --repo <name> --type spec --title "..." --from /path/to/spec.json
-echo '{"title":"..."}' | legion document create --repo <name> --type spec --title "..."
-legion document view --id <doc-id>
-legion document list --repo <name> --type spec
-legion document archive --id <doc-id>
-```
-
-Meta fields are passed explicitly to keep the storage layer type-agnostic. The schema registry (sibling child of #455) will validate payloads against the meta.type's schema once it ships.
-
-## Agent Work System
-
-### status
-
-Show your work state, team needs, and recent changes.
-
-```bash
-legion status --repo <name>
-legion status --repo <name> --json          # counts for hooks/scripts
-```
-
-Runs automatically at session start via the plugin hook.
-
-### needs
-
-Show what the team needs help with.
-
-```bash
-legion needs --repo <name>
-```
-
-## Infrastructure
+## Runtime
 
 ### watch
 
-Auto-wake sleeping agents when wake-worthy signals arrive.
+Watch for signals and auto-wake sleeping agents.
 
 ```bash
-legion watch
-```
-
-Long-lived daemon. Polls for unhandled signals and spawns headless Claude Code sessions over a portable PTY. The wake_attempts FSM (#487) records each attempt. The reaper observes exit via PTY EOF, PID poll, or the Stop hook's optimistic handoff. Also runs auto-unblock: when an agent announces completed work, blocked cards referencing that agent are automatically unblocked. When `cluster.toml` is present and `enabled = true`, watch also hosts the sync actor for multi-node replication.
-
-`WATCH_SPAWN_MODE` selects `print` (legacy `claude --print`) or `pty` (portable-pty wrapper). Default is `pty` as of v0.16.
-
-Configuration lives in `~/.local/share/legion/watch.toml`.
-
-#### watch add / remove / list
-
-```bash
-legion watch add <path>
-legion watch add <path> --name <display-name> --agent <signal-recipient>
-legion watch remove <name>
+legion watch                          # start the daemon
+legion watch add /path/to/repo
+legion watch add /path/to/repo --name api --agent backend
+legion watch remove api
 legion watch list
-```
-
-`add` canonicalizes the path and is idempotent. Unknown TOML fields survive edits.
-
-#### watch leases
-
-Inspect or manage persona wake leases. Cluster-wide coordination so two nodes do not wake the same persona at the same time.
-
-```bash
 legion watch leases
-```
-
-#### watch session-end
-
-Optimistic stop-hook handoff for the watch reaper (#493). Writes `exit_observed_at` on the wake_attempts row so the reaper can skip a poll cycle. PTY EOF + PID-poll remain authoritative. Speed-up only. Idempotent. Exits 0 on a missing row so a hook failure cannot block Claude Code's Stop.
-
-```bash
+legion watch status
+legion watch session-start --repo myproject
 legion watch session-end --attempt-id <id>
 ```
 
-### cluster
-
-Multi-node LAN sync via encrypted UDP broadcast. Configuration lives in `cluster.toml` (0o600 on Unix, contains the pre-shared 256-bit key).
-
-```bash
-legion cluster init                            # first node: generate key
-legion cluster init --key <64-hex-chars>       # second node: enroll with existing key
-legion cluster init --port 31337               # override UDP broadcast port
-legion cluster key                             # print current key for sharing
-legion cluster enable
-legion cluster disable
-legion cluster status                          # peers, sync state, last sync time
-```
-
-The generated key prints once on first init. Save it. It is the only way to enroll additional nodes.
-
-### mcp
-
-MCP stdio server for the Claude Code real-time channel. Started by the plugin's channel configuration, not invoked directly.
-
-```bash
-legion mcp
-```
-
-### mcp-health
-
-Probe a fresh MCP subprocess for notifier health (#391). Spawns `legion mcp` over stdio, sends `initialize` + `legion/notifier_health` JSON-RPC requests, prints the health JSON. This spins up a NEW MCP. It does NOT probe the MCP attached to a running Claude Code session (that one is owned by the parent CC process and is not externally addressable). Use as a contract smoke test.
-
-```bash
-legion mcp-health
-legion mcp-health --wait 5
-```
-
-### mcp-logs
-
-Show or tail the most recent MCP process log file (#395). Each MCP subprocess redirects stderr to a per-PID file under `~/Library/Logs/legion/mcp/<pid>.log` (macOS) or the XDG state dir (Linux). Use this to see notifier seed errors, per-poll cursor state, per-post deliver decisions, and write failures that Claude Code's MCP transport would otherwise swallow.
-
-```bash
-legion mcp-logs                # most recent
-legion mcp-logs --pid 12345
-legion mcp-logs --tail         # follow
-```
+The daemon samples health every 5 seconds and checks for wake-worthy signals every 30 seconds. Spawn is gated by pressure, cooldown (default 5 minutes), stagger (default 15 seconds between spawns), and a wake cap (default 4 in-flight).
 
 ### daemon
 
-Start the legion daemon (channel server + watch loop) in the foreground.
+Start the legion daemon (channel server + watch).
 
 ```bash
+legion daemon
 legion daemon --port 3131
-```
-
-### daemon-spawn
-
-Idempotent background spawn used by the plugin's session-start hook. Running it multiple times does not produce duplicate daemons.
-
-```bash
-legion daemon-spawn --port 3131
+legion daemon-spawn
+legion daemon-stop
+legion daemon-restart
 ```
 
 ### serve
@@ -595,131 +536,188 @@ legion daemon-spawn --port 3131
 Start the web dashboard.
 
 ```bash
-legion serve --port 3131
+legion serve
+legion serve --port 8080
 ```
 
-### schedule
+Axum HTTP server with embedded static assets and SSE for live updates. Set `serve = true` in `watch.toml` to start with the watch daemon.
 
-Manage scheduled bullpen posts.
+### goal
+
+Print the active Accepted card's acceptance criteria framed as a completion condition.
 
 ```bash
-legion schedule create --name "night-shift" --cron "06:00" --repo <name> --command "@all Night shift starting."
-legion schedule create --name "poke" --cron "*/10m" --repo <name> --command "..." --active-start "23:00" --active-end "07:00"
-legion schedule list
-legion schedule enable --id <id>
-legion schedule disable --id <id>
-legion schedule delete --id <id>
-legion schedule update --id <id> --cron "..." --active-start "..." --active-end "..."
+legion goal --repo myproject
 ```
 
-### now
+Called by the SessionStart hook each session. Empty when nothing is in progress.
 
-Print the current local time, weekday, and sunphase (#410).
+### autonomy
+
+Weekly autonomy budget: governor on self-directed work.
 
 ```bash
-legion now
-legion now --banner          # SessionStart-friendly one-line banner
-legion now --json            # {date, weekday, time, timezone, sunphase}
+legion autonomy status
+legion autonomy gate --repo myproject --kind self-accept
+legion autonomy gate --repo myproject --kind free-time
+legion autonomy gate --repo myproject --kind free-time --operator
 ```
 
-Used by SessionStart to inject a one-line framing block so agents stop pattern-matching "tonight" / "wind down" when the operator has the rest of the workday ahead.
+`gate` exits 0 and records spend when allowed; exits non-zero (cleanly) when the budget is exhausted. `--operator` bypasses the gate and records no spend.
+
+### mesh
+
+Mesh-aware task placement.
+
+```bash
+legion mesh headroom
+legion mesh pick
+```
+
+Ranks hosts by remaining rate-limit headroom and burn rate. `pick` prints the best hostname for a new task; exits 1 if no host is fresh.
+
+### statusline
+
+Claude Code `statusLine` subcommand.
+
+```bash
+legion statusline
+legion statusline --json
+```
+
+Wire via `statusLine.command` in `settings.json`. Persists rate-limit and usage samples each tick, then prints a one-line chip to stdout.
+
+---
+
+## Misc
+
+### usage
+
+Session token usage and cost analysis.
+
+```bash
+legion usage
+legion usage --today
+legion usage --since 2026-06-01
+legion usage --by-session
+legion usage --by-repo
+legion usage --json
+```
+
+### telemetry
+
+Bypass telemetry: log and inspect when agents escape the grep/Read enforcement hooks.
+
+```bash
+legion telemetry record-bypass --tool Grep --repo myproject --pattern "fn init"
+legion telemetry list-bypasses --repo myproject --since 24h
+legion telemetry summary
+```
+
+`summary` surfaces the top under-served `(tool, repo, pattern)` tuples.
+
+### uncertainty
+
+Emit and witness predictions; read calibration metrics.
+
+```bash
+legion uncertainty emit --surface myproject --model claude-sonnet-4 --confidence 0.85
+legion uncertainty witness --id <prediction-id> --outcome pass
+legion uncertainty calibration --surface myproject
+legion uncertainty orphans
+```
+
+`emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
+
+### health
+
+System health and recent trend.
+
+```bash
+legion health
+legion health --history 1h
+legion health --history 24h
+legion health --all-hosts
+legion health --json
+```
+
+### stats / status / needs / now
+
+```bash
+legion stats                        # reflection statistics (all repos)
+legion stats --repo myproject       # single repo
+legion status --repo myproject      # work state and team needs
+legion needs --repo myproject       # what the team needs help with
+legion now                          # current time, weekday, sunphase
+```
 
 ### init
 
-Configure Claude Code hooks (legacy: use the plugin instead).
+Configure Claude Code hooks for legion (standalone install path).
 
 ```bash
 legion init
 legion init --force
 ```
 
-## Observability
-
-### stats
-
-Show reflection statistics.
+### mcp-health / mcp-logs
 
 ```bash
-legion stats
-legion stats --repo <name>
+legion mcp-health              # probe a fresh MCP subprocess for notifier health
+legion mcp-logs
+legion mcp-logs --tail
 ```
 
-### health
+`mcp-health` spawns a NEW MCP; it does not probe the MCP attached to a running Claude Code session.
 
-Show system health and resource usage.
+### cluster
 
 ```bash
-legion health
-legion health --history 1h
-legion health --all-hosts
-legion health --json
+legion cluster init
+legion cluster init --key <64-hex-chars>
+legion cluster key
+legion cluster enable
+legion cluster disable
+legion cluster status
 ```
 
-### statusline
-
-Claude Code statusLine subcommand: ingest rate-limit + usage, render chip. Reads the Claude Code statusLine JSON on stdin, persists a `rate_limit_samples` row (and a `usage_samples` row when the transcript is readable), then prints a single-line chip on stdout.
-
-Wire via `statusLine.command` in `settings.json`.
+### schedule
 
 ```bash
-legion statusline             # ingest stdin, render chip
-legion statusline --json      # print parsed sample state instead of chip
+legion schedule create --name "daily standup" --cron "09:00" \
+  --command "Good morning." --repo myproject \
+  --active-start "08:00" --active-end "18:00"
+
+legion schedule create --name "health ping" --cron "*/30m" \
+  --command "Health ping" --repo myproject
+
+legion schedule list
+legion schedule enable --id <id>
+legion schedule disable --id <id>
+legion schedule delete --id <id>
 ```
 
-### mesh
+Cron formats: `HH:MM` daily at that UTC time. `*/Nm` every N minutes. Active windows support overnight ranges (e.g., 23:00-07:00).
 
-Mesh-aware task placement. Rank hosts by statusline-sample headroom.
+### rename / cleanup
 
 ```bash
-legion mesh headroom          # per-host ranked table with headroom, burn, staleness
-legion mesh pick              # print the best hostname. Exit 1 if no host is fresh
+legion rename --from oldname --to newname
+legion cleanup
 ```
 
-### usage
+---
 
-Show Claude Code session token usage and cost analysis.
+## Environment variables
 
-```bash
-legion usage --today
-legion usage --since 2026-05-01
-legion usage --by-session
-legion usage --by-repo
-legion usage --session <session-uuid>
-legion usage --json
-```
-
-### telemetry
-
-Bypass telemetry. Logs when an agent escapes a grep/Read enforcement hook (#438/#439), and reads the log back. Append-only JSONL at `${XDG_STATE_HOME:-~/.local/state}/legion/bypass.jsonl`. Feeds the uncertainty engine (#354): bypass volume on a `(repo, pattern)` pair is a signal that `sym` or `recall` is missing an answer agents expected.
-
-```bash
-legion telemetry record-bypass --tool grep --repo myproject --pattern "MyType" --reason "..."
-legion telemetry list-bypasses --since 24h --repo myproject
-legion telemetry summary           # top under-served (tool, repo, pattern) tuples
-```
-
-The enforcement hooks call `record-bypass` automatically. Telemetry errors are surfaced but the hook layer swallows them so telemetry can never break the agent.
-
-### uncertainty
-
-Pillar 2: emit / witness predictions, read calibration and orphan metrics (#354 to #360).
-
-```bash
-legion uncertainty emit --surface <name> --cohort <name> --claim "..." --confidence 0.8
-legion uncertainty witness --id <prediction-id> --outcome correct
-legion uncertainty witness --id <prediction-id> --outcome incorrect --note "..."
-legion uncertainty calibration --cohort <name>      # one row per reliability bucket
-legion uncertainty orphans                           # predictions still in orphan state
-```
-
-`emit` is non-blocking: failures log to stderr and exit 0 so a downstream emit hook can never break the agent. `witness` is idempotent-failure: re-witnessing is an error.
-
-## Migration
-
-### task
-
-Manage delegated tasks between agents. **Deprecated**, use `kanban` instead. Retained for backward compatibility.
-
-```bash
-legion task create / list / accept / done / block / unblock
-```
+| Variable | Description |
+|----------|-------------|
+| `LEGION_DATA_DIR` | Override the default data directory |
+| `LEGION_AUTO_WAKE` | Set to `1` by the watch daemon when spawning agents |
+| `LEGION_SPAWN_SOURCE` | Set to `watch-pty` on PTY-spawned wakes; the Stop hook early-exits when set |
+| `LEGION_REPO` | Override repo name detection in the MCP channel |
+| `LEGION_PORT` | Override web dashboard port for the MCP channel (default: 3131) |
+| `LEGION_BYPASS_GREP` | Set to `1` to bypass the grep enforcement hook |
+| `LEGION_BYPASS_READ` | Set to `1` to bypass the Read enforcement hook |
+| `LEGION_IMPACT_HIGH_THRESHOLD` | Ref-count threshold for the `HIGH` tag in `sym impact` text output (default: 50) |
+| `WATCH_SPAWN_MODE` | `pty` (default) or `print` for the watch daemon spawn path |

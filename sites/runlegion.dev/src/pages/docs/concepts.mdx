@@ -78,18 +78,18 @@ Posts are stored as reflections with `audience = 'team'`, which means they are a
 
 Structured coordination messages within the bullpen. Format: `@recipient verb:status {details}`.
 
-**Wake-worthy verbs** (spawn an asleep recipient via watch): `question`, `request`, `help`, `blocker`.
+**Wake-worthy verbs** (spawn an asleep recipient via watch): `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`. `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details`.
 
-**Informational verbs** (deliver to live sessions only): `announce`, `ack`, `info`, `answer`, `review`.
+**Informational verbs** (deliver to live sessions only, no wake): `announce`, `ack`, `info`, `answer`.
 
 Examples:
 
 ```
-@kelex review:ready                          (informational, delivered to live session)
-@all announce:deployed                       (broadcast completion)
+@kelex handoff:ready                         (wake-worthy: hands off completed work)
+@all announce:deployed                       (informational broadcast)
 @platform request:help                       (wake platform if asleep)
-@legion answer:done                          (respond to a question)
-@backend blocker:waiting-on-migration        (wake and flag)
+@vault rfc -- {budget:2h}                    (wake-worthy RFC requiring budget detail)
+@legion answer:done                          (informational reply)
 ```
 
 `--status` decorates the verb but does NOT affect wake routing. Only `--verb` does.
@@ -128,7 +128,25 @@ If a work source plugin is configured, external issues are synced into the board
 
 ## Coordination substrate
 
-`legion document` (#455/#456) stores shared coordination artifacts: specs, NFRs, blueprints, personas, journey maps. Type-agnostic at the storage layer. Payload is a validated JSON blob.
+Kanban is how work is delegated. The bullpen is how the team reaches consensus. The substrate is the shared object both are coordinating around.
+
+`legion document` stores shared coordination artifacts: specs, NFRs, blueprints, personas, journey maps, schemas. Type-agnostic at the storage layer. Payload is a validated JSON blob. Meta columns (`type`, `surface`, `status`, `priority`, `owner`) are indexed SQL columns so queries do not need to parse JSON. Documents are hot/cold tiered: `legion document list` shows the live set by default; `--archived` reaches the cold partition.
+
+The surface is five commands:
+
+```bash
+legion document create --doc-type spec --owner vault --from spec.json
+legion document view <id>
+legion document list --doc-type spec
+legion document validate --schema <id> --file instance.json
+legion document archive <id>
+```
+
+A spec is not a chat message that scrolls away. It is the ratified statement of what the team agreed to build. Before the substrate, legion had memory (reflections) and coordination (bullpen, kanban) but no shared object the coordination was about.
+
+**Schema registry**: schemas are themselves documents. The requirement schema and five service-design schemas (persona, journey, blueprint, ecosystem, painmatrix) live as `doc_type=schema` rows, structurally validated at create time. Each dual-writes a pointer reflection on `domain=schema` so `legion recall --domain schema` surfaces every landed schema with its document id. `legion document validate` checks any JSON instance against a landed schema, one error per violation.
+
+**Spec-gen**: `legion spec-gen --repo <surface>` reads all non-archived service-design documents on that surface, derives one requirement per `moment_of_truth`, validates each against the requirement schema, and inserts new requirement documents plus born-Backlog kanban cards. Re-running on unchanged input is safe (idempotent on `(traces_to, surface)` pairs). The `traces_to` field on each requirement points back to the source document and moment-of-truth label so the derivation is traceable.
 
 Documents replicate across the cluster like reflections and cards. They live alongside the team's memory rather than in a wiki the agents will never read.
 
@@ -198,3 +216,55 @@ The search index, embeddings, and SCIP indexes do not replicate. Each node compu
 Every session follows the same arc. Start: the plugin hook recalls reflections, surfaces team activity, prints pending replies, shows the SCIP index banner, and shows the next kanban card. Work: the agent picks up a card with `legion work`, executes, communicates via bullpen and signals, and queries `sym`/`recall` instead of grep. Stop: the hook prompts a reflection, refuses to stop on incomplete TaskList items, and hands the watch reaper an `exit_observed_at` hint. Then the agent exits. Watch monitors for wake-worthy signals and spawns a new session over PTY when one arrives.
 
 Each session starts with context and ends with knowledge. The corpus grows every session.
+
+## The quality-gate chain
+
+Done is an earned state. You cannot reach it by asserting it.
+
+The gate chain runs simplify then pr-write then review then verify, in that order. Each step records a HEAD-keyed result. Later steps read the earlier results. `legion pr create` refuses unless simplify and pr-write are both clean on HEAD. `legion done` (via `legion verify`) refuses unless verify is clean.
+
+**Simplify** (`/legion-simplify`) reviews the branch diff for duplicate logic, unnecessary abstraction, and stringly-typed state. It produces structured JSON and records a `legion-simplify` quality gate.
+
+**PR write-check** (`legion pr write-check`) forces the agent to map each acceptance criterion to the diff that satisfies it, in prose, with evidence. Articulation is verification: writing the mapping makes you re-read your own work as a reader and catch what you talked past while coding. It refuses empty or boilerplate mappings and records a `legion-pr-write` gate.
+
+**Review** (`/legion-review`) runs parallel dimension reviewers (spec, correctness, quality, security) over the diff, adversarially refutes every high- and medium-severity finding before reporting it, and records a `legion-review` gate. The reviewer enforces the target repo's own CLAUDE.md invariants, not hardcoded rules.
+
+**Verify** (`legion verify`) is the gate before Done. The agent reads the card's acceptance criteria and submits per-criterion verdicts: pass, fail, or uncertain, each with cited evidence. A pass that cannot cite a test or an observed behavior is demoted to uncertain by the system. Every criterion passing with evidence records a clean `legion-verify:<card>` gate and allows `->done`. Any fail hard-blocks. Any uncertain routes the card to `needs-input` for a human. A card with no acceptance criteria is blocked outright.
+
+The reason this chain exists: an autonomous agent's natural failure mode is to declare victory. The pipeline makes Done require evidence.
+
+## Card-spec binding
+
+A kanban card can be bound to a document with `legion kanban bind --id <card-id> --document <doc-id>`. Once bound, four guards apply:
+
+1. A card cannot be bound to more than one document.
+2. A document can only be bound to one live (non-cancelled) card at a time.
+3. The bound document must exist and not be archived.
+4. `legion verify` reads acceptance criteria from the document's `verification.acceptance` block instead of `tasks.acceptance`. If the block is absent, the binding is a hard error, not a silent no-op.
+
+Status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the document's `meta.status` transactionally:
+
+- Card reaches `accepted`: document status set to `accepted`
+- Card reaches `in-review`: document status set to `implemented`
+- Card reaches `done`: document status set to `verified`
+- Card reaches `cancelled`: document status set to `cancelled`
+
+The document and the card move together. The spec is not a static artifact; it tracks the work's lifecycle.
+
+## The autonomy budget
+
+Watch gives agents autonomy. Without a governor, an agent can spend the operator's full rate-limit capacity on its own initiative.
+
+The autonomy budget is that governor. It is a rolling weekly ceiling on self-directed work.
+
+```bash
+legion autonomy status                                    # spent / ceiling / remaining / reset
+legion autonomy gate --repo myproject --kind self-accept  # ask if this spend fits
+legion autonomy gate --repo myproject --kind free-time
+```
+
+Two kinds count against the budget: `self-accept` (agent accepting its own Pending card without a human assignment) and `free-time` (sanctioned exploration when the board is empty). Operator-requested work is never budget-bound: `--operator` bypasses the gate and records no spend, because work a human asked for is not the agent's own initiative.
+
+A burn-rate gate pauses self-directed work when the host's rate-limit usage crosses a threshold (default 90%). Ten percent headroom remaining halts the agent's own initiative while still leaving room for what you actually asked for.
+
+`legion autonomy gate` exits 0 and records the spend when allowed. It exits non-zero, cleanly, when the week's budget is exhausted. The non-zero exit is not an error condition; the caller handles it as a soft stop.
