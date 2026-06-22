@@ -94,7 +94,10 @@ export function defineSharedMeta(opts: SharedMetaOptions): AstroMetaOptions {
     site,
     robots: {
       rules: [{ userAgent: "*", allow: ["/"], ...(opts.llmsDisallow ? { disallow: opts.llmsDisallow } : {}) }],
-      contentSignals: { search: "yes", aiInput: "yes", aiTrain: "no" },
+      contentSignals: {
+        policy: { search: "yes", aiInput: "yes", aiTrain: "no" },
+        enforce: "declarative",
+      },
     },
     sitemap: {
       sources: [
