@@ -21,8 +21,8 @@ importers:
   packages/shared:
     dependencies:
       '@rafters/astro-meta':
-        specifier: ^0.2.0
-        version: 0.2.0(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(linkedom@0.18.12)
+        specifier: ^0.3.0
+        version: 0.3.0(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(linkedom@0.18.12)
       astro:
         specifier: ^6.0.0
         version: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0)
@@ -1613,8 +1613,8 @@ packages:
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
 
-  '@rafters/astro-meta@0.2.0':
-    resolution: {integrity: sha512-Ddhv26S3rC/ljnvQOTDc6uXlhD6nt2/aF3TcmJLznFwomXUdOBUCwnt9E+hLA9IWLUoNXnvwEyg5kGj/+4rXSQ==}
+  '@rafters/astro-meta@0.3.0':
+    resolution: {integrity: sha512-orIWXjg+88EsfS8XTWRQFKKSMdjBCQ08iDrVWHqXZmfy4EBpst6ttVcZ+F3I3wWDiYa2EpSb5Vw5fWqvqIZt2Q==}
     engines: {node: '>=22'}
     peerDependencies:
       '@resvg/resvg-js': ^2.6.0
@@ -4034,6 +4034,7 @@ packages:
   tsconfck@3.1.6:
     resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
     engines: {node: ^18 || >=20}
+    deprecated: unmaintained
     hasBin: true
     peerDependencies:
       typescript: ^5.0.0
@@ -5552,7 +5553,7 @@ snapshots:
 
   '@poppinss/exception@1.2.3': {}
 
-  '@rafters/astro-meta@0.2.0(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(linkedom@0.18.12)':
+  '@rafters/astro-meta@0.3.0(astro@6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0))(linkedom@0.18.12)':
     dependencies:
       astro: 6.1.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.61.1)(typescript@5.9.3)(yaml@2.9.0)
     optionalDependencies:
