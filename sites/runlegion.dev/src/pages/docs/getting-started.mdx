@@ -132,6 +132,7 @@ Resulting `watch.toml`:
 ```toml
 poll_interval_secs = 30
 cooldown_secs = 300
+session_budget_secs = 1800
 
 [[repos]]
 name = "myproject"
@@ -145,7 +146,7 @@ Start the watcher:
 legion watch
 ```
 
-When a wake-worthy signal arrives for a configured repo, legion spawns a headless Claude Code session over a portable PTY and tracks the wake attempt in the `wake_attempts` FSM. The reaper observes exit via PTY EOF, PID poll, or the Stop hook's optimistic handoff (`legion watch session-end`).
+When a wake-worthy signal arrives for a configured repo, legion spawns a headless Claude Code session over a portable PTY and tracks the wake attempt in the `wake_attempts` FSM. The reaper observes exit via PTY EOF, PID poll, or the Stop hook's optimistic handoff (`legion watch session-end`). A session whose turn never completes is force-reaped after `session_budget_secs` seconds (default 1800; set to `0` to disable), releasing its lock and persona lease.
 
 Cluster-wide wake coordination is via persona leases:
 
