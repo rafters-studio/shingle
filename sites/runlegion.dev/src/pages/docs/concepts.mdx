@@ -12,11 +12,12 @@ Doctrine, before mechanics. When an agent needs to know something, the order is:
 
 1. Have an opinion from domain expertise. Say it first, no hedging.
 2. `legion sym` (def, refs, impl, hover) for code-intelligence questions in indexed repos. Byte-cheap SCIP answers, not file scans.
-3. `legion recall` (own reflections) and `legion consult` (all agents) for decisions and prior art.
-4. Web search for authoritative external sources.
-5. Never grep the codebase for opinions or decisions. Code shows what exists, not what should exist.
+3. `legion sym etc` (find-content, extract, find-file) and `legion sym tree` for everything SCIP does not parse: literal strings, config values, frontmatter fields, "which file has X." No SCIP index required.
+4. `legion recall` (own reflections) and `legion consult` (all agents) for decisions and prior art.
+5. Web search for authoritative external sources.
+6. Never grep the codebase for opinions or decisions. Code shows what exists, not what should exist.
 
-The grep enforcement hooks (#438/#439) make this mechanical. On indexed repos, raw `Grep` and `Read` are blocked at PreToolUse with a redirect to `sym` and `recall`. The mechanism is the doctrine now.
+The grep enforcement hooks (#438/#439) make this mechanical. On indexed repos, raw `Grep` and `Read` are blocked at PreToolUse with a redirect to `sym`, `sym etc`, and `recall`. The mechanism is the doctrine now.
 
 ## Reflections
 
@@ -48,9 +49,26 @@ sym impact <diff>              -> ref count for every symbol the diff touches
 
 `legion consult --symbol` lifts the same query across every indexed repo. Cross-repo code intelligence in one call.
 
-The index is built by `legion index <repo>` and refreshed by a PostToolUse hook after edits. A background indexer runs after `legion watch add`. `legion index <repo> --status` confirms freshness.
+The index is built by `legion index <repo>` and refreshed by a PostToolUse hook after edits. A background indexer runs after `legion watch add`. `legion index <repo> --status --banner` confirms freshness, and names why a language is missing when it is: "not indexed yet" (running `legion index` fixes it) versus "indexer unavailable" (the SCIP binary that language needs is not on this machine, so the command cannot fix it by itself). Either way, `sym etc` still answers non-symbol questions on that language's files, because it reads from a file inventory, not SCIP.
 
 **Why this matters**: file scans get expensive on large repos and are noisy on small ones. SCIP answers are O(1) lookups on a protobuf blob. They are also language-aware: a `refs` query returns true callers, not text matches. The doctrine "sym before grep" is enforceable because the mechanism is faster and more accurate, not just policy.
+
+## Sym etc: the non-symbol answer surface
+
+Symbol questions are one shape. Most searches an agent actually runs are not that shape: a literal string, a config value, "which repo has this file." `legion sym etc` and `legion sym tree` answer those from the same file inventory `legion index` builds on every run, not from SCIP, so they work on files SCIP never covers: shell scripts, TOML, markdown, CSS.
+
+```
+sym etc find-content 'TODO'                -> exact/regex content search, the sanctioned grep
+sym tree --under src/db --depth 1          -> structured file listing, the sanctioned find/ls -R
+sym etc extract config.toml --field a.b.c  -> one field, not the whole file
+sym etc find-file "*.test.ts" --role test  -> locate a file by name or role, cross-repo
+```
+
+`find-content` runs the same ripgrep engine as the shell tool it replaces, scanning the working tree directly at query time. That is deliberate: a tokenized index returns nothing on the punctuation-heavy literals agents actually search for, and a content index goes stale the moment someone runs `git pull`, which fires no edit hook. `sym tree` and `find-file`, by contrast, answer from the stored file inventory with no filesystem walk at query time, because file existence and metadata do not carry the same staleness problem.
+
+The same file inventory underlies two more engines that extend sym-style answers past what SCIP parses: a JS/TS import graph (`module_edges`, built with `oxc_parser`/`oxc_resolver`) and CSS class/custom-property extraction (`css_symbols`, built with `lightningcss`). Both persist their own tables today; a query surface for them (`sym imports`/`sym importers`, a CSS lookup) is a follow-on.
+
+Every `sym etc` / `sym tree` invocation, success or failure, lands a row in `etc-usage.jsonl`. `legion telemetry etc-summary` reads it back: count, zero-result rate, and error count per query shape. That is the number that answers whether the sanctioned replacement for grep and find actually gets used.
 
 ## The bypass model
 
@@ -67,6 +85,8 @@ Every bypass appends one row to `bypass.jsonl` with the tool, repo, pattern, and
 A high bypass volume on a pattern is a signal that `sym` or `recall` is missing an answer agents expected. The doctrine generates its own to-do list.
 
 The soft sym-bypass refusal (#506) refuses bypasses for patterns that look like symbol names with local SCIP hits. If the index can answer it, the bypass is the wrong move. Agents are pushed back into `sym`.
+
+The guard used to have nowhere to send a non-symbol query: a literal string or a config value got the same "use sym" message as a real symbol lookup, so agents bypassed and inferred wrong lessons from it, like "sym is Rust-only." Every deny and inject message now names the exact `sym etc` command for the query shape it blocked: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for "which repo has X." Non-symbol search stopped being a dead end.
 
 ## Bullpen
 
