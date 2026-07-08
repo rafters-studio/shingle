@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.18.0. Commands are organized by category.
+This reference covers legion 0.20.0 for the `sym` and `sym etc` surface below (CSS symbols, `sym tree`, freshness warnings, `--no-ignore`). Other sections were last verified against 0.18.0. Commands are organized by category.
 
 ---
 
@@ -491,11 +491,62 @@ legion sym impl Iterator
 legion sym hover my_function
 legion sym impact --repo myproject --diff /path/to/changes.diff
 legion sym list --kind fn
+legion sym list --lang css --repo myproject
+legion sym def --lang css button-primary --repo myproject
 ```
 
 `sym impact` parses a unified diff and reports SCIP reference counts per touched symbol, sorted descending. Pass `--json` for agent consumption. `LEGION_IMPACT_HIGH_THRESHOLD` (default 50) marks the `HIGH` tag in text output.
 
 `sym list` replaces `grep "fn "` on indexed repos: returns names and locations, not source bodies.
+
+**`--lang css`** on `sym list` and `sym def` reads class and custom-property definitions that `legion index` extracts with lightningcss. This is a separate store from the SCIP blobs, so `--kind` here takes `class` or `custom-property`, not `fn`/`struct`/etc, and `--file` scopes to one file. Cross-repo by default, each hit tagged with its owning repo. A repo with no CSS files indexed yet prints a CSS-specific message: `no CSS index found for <repo>; run legion index <repo> first`, distinct from the generic SCIP no-index error, since a fully-indexed CSS repo still reads as "empty" to the SCIP store. `sym hover --lang css` fails outright rather than returning nothing: CSS symbols have no signature or docstring to show, so it prints `css symbols have no hover surface; use sym list --lang css or sym etc find-content instead`.
+
+### sym tree
+
+A structured, cross-repo view of the file inventory `legion index` builds. Answered from the database, never a filesystem walk, so it answers instantly regardless of repo size: the sanctioned replacement for `find`, `ls -R`, or a throwaway `os.walk`.
+
+```bash
+legion sym tree --repo myproject
+legion sym tree --repo myproject --ext rs --under src/db --depth 2
+legion sym tree --json
+```
+
+`--repo` omitted returns every watched repo's files, each entry tagged with its own `repo` field. `--ext` filters server-side; `--under` and `--depth` filter in-process afterward.
+
+`--json` emits `{"snapshots": [...], "entries": [...]}`. `entries` holds the per-file `{repo, path, ext, lang, size, symbol_count}` rows. `snapshots` carries one freshness row per repo represented in the result: `indexed_at`, `head_at_index` (the repo's HEAD when `legion index` last ran), `current_head` (read live via `git rev-parse HEAD`, once per repo), and `head_drift` (true only when both HEADs are known and differ). This is a wire-format break: 0.19.0 shipped a bare `--json` array for `sym tree`, and anything parsing that shape needs to read `.entries` now instead of the top-level response. Human output prints one freshness line per repo to stderr before the table: `up to date` when HEAD matches, a re-index hint when no snapshot has been recorded yet, or a loud `WARNING` naming both SHAs when HEAD has moved since the last index run.
+
+### sym etc
+
+Non-symbol answer surface: content search and file lookup over files SCIP does not parse (docs, configs, prose).
+
+```bash
+legion sym etc find-content 'TODO' --repo myproject
+legion sym etc find-content 'api[_-]key' --repo myproject --fixed-strings
+legion sym etc find-content 'token' --repo myproject --no-ignore --hidden
+legion sym etc find-file 'components.json' --repo myproject
+legion sym etc find-file '*.test.ts' --role test
+```
+
+`find-content` is the sanctioned replacement for shell `grep`: an exact, line-accurate scan over `watch.toml` workdirs at query time, always fresh. `--fixed-strings` treats the pattern as a literal instead of a regex. `--hidden` reaches dotfiles and dot-directories (`.github/`, `.claude/`) but never `.git/`, which stays excluded regardless of any flag combination.
+
+`--no-ignore` disables the `.gitignore` / `.ignore` / parent-directory-ignore / `.git/info/exclude` / global-gitignore checks (ripgrep's `-u`), reaching content gitignore would otherwise hide: a generated, gitignored workspace like `.rafters/` is the live case that motivated it. `--no-ignore` and `--hidden` are independent toggles: reaching a gitignored dot-directory needs both together, because bypassing gitignore alone does not admit a dot-directory. Widening the scan this way also widens it to files that are commonly gitignored because they hold secrets (an un-ignored `.env` is already searched without either flag; a gitignored one only shows up with `--no-ignore`). Anything matched is printed to stdout or JSON, so treat `--no-ignore` as a deliberate, narrow reach, not a default.
+
+`find-file` locates a file by basename/glob or by role heuristic (`--role`) across every watched repo, answered from the file inventory `legion index` builds: no filesystem walk at query time. Same `{"snapshots": [...], "entries": [...]}` `--json` envelope and freshness behavior as `sym tree` above, including the wire-format break from 0.19.0's bare array.
+
+Key flags (`find-content`):
+
+- `--repo` restrict to one repo (default: every repo in `watch.toml`)
+- `--ext` restrict to files with this extension, no leading dot
+- `--fixed-strings` literal match, not regex
+- `--hidden` include dotfiles and dot-directories (never `.git/`)
+- `--no-ignore` bypass gitignore checks; combine with `--hidden` to reach a gitignored dot-directory
+- `--json` machine-readable output
+
+Key flags (`find-file`):
+
+- `--repo` restrict to one repo (default: cross-repo, each entry tagged with its own `repo`)
+- `--role` filter by a coarse role heuristic inferred from path/extension
+- `--json` machine-readable output, wrapped in the `{snapshots, entries}` envelope
 
 ---
 
