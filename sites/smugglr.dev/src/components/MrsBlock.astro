@@ -12,7 +12,7 @@ import InkBlock from "@/components/InkBlock.astro";
 import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
 import MrsTable from "@/components/MrsTable.astro";
 
-const MRS_SCOPE = "smugglr is a SQLite sync engine. Single Rust binary. Moves rows between local files, hosted SQLite backends (D1, Turso, rqlite, Datasette, StarbaseDB, SQLite Cloud), peers on the same LAN via encrypted UDP multicast, peers across the network via direct host-to-host, and peers across the internet via S3 relay. Content-hashed delta sync. No coordinator service. --output json on every command. Typed exit codes on every command.";
+const MRS_SCOPE = "smugglr is a SQLite sync engine. Single Rust binary. Moves rows between local files, hosted SQLite backends (D1, Turso, rqlite, StarbaseDB, SQLite Cloud), peers on the same LAN via encrypted UDP multicast, peers across the network via direct host-to-host, and peers across the internet via S3 relay. Content-hashed delta sync. No coordinator service. --output json on every command. Typed exit codes on every command.";
 
 const MRS_INSTALL: [string, string, string][] = [
     ["Native CLI", "cargo install smugglr", "Rust binary, also pre-built for macOS/Linux/Windows"],
@@ -26,7 +26,6 @@ const MRS_TARGETS: [string, string, string, string, string][] = [
     ["Cloudflare D1",  "d1",           "HTTP REST",           "Bearer token",     "account_id + database"],
     ["Turso / libSQL", "turso",        "Hrana (HTTP + WS)",   "JWT",              "sqld-compatible"],
     ["rqlite",         "rqlite",       "HTTP REST",           "Basic / mTLS",     "Self-hosted Raft cluster"],
-    ["Datasette",      "datasette",    "HTTP JSON",           "Plugin-based",     "Read-only by default"],
     ["StarbaseDB",     "starbasedb",   "HTTPS + WebSocket",   "API key",          "Edge (CF Workers + DO)"],
     ["SQLite Cloud",   "sqlite-cloud", "HTTP REST (Weblite)", "API key",          "Managed cluster"],
 ];

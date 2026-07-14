@@ -192,14 +192,13 @@ The `http-sql` plugin uses profiles to handle differences between backends. A pr
 | `response_paths` | JSONPath-like expressions to extract rows from the response. Each backend nests results differently. |
 | `bind_param_limit` | Maximum number of bind parameters per request. D1 caps at 100. |
 
-Seven profiles ship with smugglr:
+Six profiles ship with smugglr:
 
 | Profile | Backend | Auth | Bind limit |
 |---------|---------|------|------------|
 | `d1` | Cloudflare D1 | Bearer token | 100 |
 | `turso` | Turso / libSQL | JWT | 999 |
 | `rqlite` | rqlite | Basic / none | Unlimited |
-| `datasette` | Datasette | Token / basic | Unlimited |
 | `starbasedb` | StarbaseDB | API key | Unlimited |
 | `sqlite-cloud` | SQLite Cloud | API key | Unlimited |
 | `local` | Local SQLite | None | Unlimited |
