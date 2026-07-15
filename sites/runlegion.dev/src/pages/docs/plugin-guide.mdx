@@ -47,6 +47,8 @@ Fires when a session is about to end. The hook prompts the agent to reflect on w
 
 **Reaper handoff** (#493): the Stop hook calls `legion watch session-end --attempt-id <id>` so the watch reaper can skip a poll cycle. Idempotent. Exits 0 on a missing row so a hook failure cannot block Claude Code's Stop.
 
+**Delegated liveness gate** (#778): if the session leaves a card in the Delegated state, Stop calls `legion kanban delegated-needs-attention` and refuses to stop if that card's linked wake attempt is no longer verifiably live. The block names the card and offers `legion kanban undelegate --id <id>` or re-delegating to a fresh attempt. This is the backstop for the one gap the watch daemon's own auto-revert sweep cannot reach: the watch daemon itself being down.
+
 ### PreToolUse
 
 On indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. The grep enforcement hooks (#438/#439) and the soft sym-bypass refusal (#506) implement this.

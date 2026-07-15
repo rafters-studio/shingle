@@ -104,13 +104,15 @@ When a thread converges, `legion resolve --id <post-id>` marks it resolved (#362
 
 A card is a unit of work on the kanban board. Cards have:
 
-- **Status**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Done, Cancelled
+- **Status**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Done, Cancelled
 - **Priority**: critical, high, med, low
 - **Labels**: free-form tags for filtering
 - **Source URL**: link to an external issue (GitHub, Jira, etc.)
 - **Parent card**: delegation chains (card A spawned card B)
 
 The state machine enforces valid transitions. A backlog card cannot become done; it must be assigned, accepted, and worked first. The dashboard can force-move cards (drag-and-drop) for when humans need to override the machine.
+
+**Delegated** is a sub-state of in progress, not a snooze button. An Accepted card moves to Delegated when the agent hands the work off to a live, watch-spawned wake attempt rather than doing it in the current session. It is never a free self-set label: entry requires a fresh watch heartbeat and an in-flight wake attempt for the card's repo, one fail-closed predicate checked on the way in and checked again on the way out. The moment either half goes dark, the watch tick auto-reverts the card to Accepted; `legion kanban delegated-needs-attention` is the backstop for the one gap that sweep can't close, the watch daemon itself being down.
 
 ## Sub-issues
 
@@ -175,6 +177,14 @@ External issue trackers that feed into the kanban board. Work sources are plugin
 Configuration per repo in `watch.toml`. When `legion work` runs, it syncs from the configured source before picking cards. When `legion done` completes a card with a source URL, the linked issue is closed.
 
 Direct `gh` usage is blocked in legion-managed environments so the audit log captures every action.
+
+## The sanctioned push path
+
+Agents don't run raw `git push`. `legion push --repo <name> --branch <branch>` does, and it does the resolving work a hand-typed push doesn't: it finds the checkout that actually has the target branch checked out via `git worktree list --porcelain`, and pushes from there, not from the CWD.
+
+That resolution step exists because of a sharp edge in how pre-push hooks work: the hook reviews whichever branch the CWD has checked out, not the ref named on the push command. Push branch B from a checkout sitting on branch A, and the hook silently reviews A's diff instead of B's. A rule like "push from your own checkout" that lives only in agent discipline gets forgotten under load. Moving the resolution into the tool means it can't be forgotten, because the tool does it every time.
+
+`legion push` refuses `main` and `master` outright, and there's no `--force` flag to route around that. Every attempt, successful or hook-blocked, gets an audit row: branch, resolved checkout, head SHA. The identity-root guard for reflections went through the same move this release, from a Bash hook that pattern-matched command text to a check at the database insert path. The pattern repeats: where a guard used to depend on an agent remembering the rule, it now lives in the tool that makes the rule impossible to skip.
 
 ## Uncertainty (Pillar 2)
 
@@ -250,6 +260,25 @@ Status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` al
 - Card reaches `cancelled`: document status set to `cancelled`
 
 The document and the card move together. The spec is not a static artifact; it tracks the work's lifecycle.
+
+## Spec revision
+
+Acceptance criteria are frozen once a card is Accepted. That's the point of writing them down first. But sometimes an agent gets partway through and concludes the criteria themselves are wrong: they assume an endpoint that doesn't exist, they describe a UI that changed under them, they're simply unachievable as written.
+
+The old failure mode was improvising: quietly shipping something adjacent to the spec and hoping verify doesn't notice. The spec-revision protocol closes that gap by making deviation a stop condition, not a workaround.
+
+```bash
+legion kanban replan-request --id <card-id> --reason "acceptance criteria assume an endpoint that doesn't exist"
+# card moves Accepted -> NeedsInput
+
+legion kanban replan-record --id <card-id> --reason "endpoint dropped from scope, criteria rewritten to match"
+# a human has ratified the revision; the record is stored
+
+legion verify --card <card-id> --deviation "endpoint dropped from scope, criteria rewritten to match"
+# verify checks for a ratified ReplanRecord before reading verdicts
+```
+
+`replan-request` stops the work and routes it to a human, a distinct audit action from a generic needs-input. `replan-record` is what a human writes after agreeing the criteria should change; it's a deliberate design act, not something an agent can grant itself. `legion verify --deviation` then consults that record: a ratified revision lets verify proceed against the revised criteria as normal, and an asserted deviation with no ratified record hard-blocks as improvisation. The frozen spec stays frozen unless someone with the authority to change it says so.
 
 ## The autonomy budget
 

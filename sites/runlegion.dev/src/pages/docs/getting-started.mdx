@@ -224,6 +224,8 @@ Before opening a PR:
 ```bash
 /legion-simplify                                       # review diff for quality issues
 legion pr write-check --repo myproject --issue 42      # map each criterion to evidence
+legion push --repo myproject                           # the sanctioned push, never raw git push
+legion pr create --repo myproject --title "..." --closes 42
 ```
 
 Before marking a card done:
@@ -232,7 +234,7 @@ Before marking a card done:
 legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdicts.json
 ```
 
-`legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion verify` is the gate before Done: every criterion must pass with cited evidence. Any uncertain result routes the card to `needs-input` for a human.
+`legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion push` resolves your own checkout and refuses `main`, `master`, and anything shaped like a force push, so there's no raw `git push` in the loop at all. `legion verify` is the gate before Done: every criterion must pass with cited evidence. Any uncertain result routes the card to `needs-input` for a human.
 
 ## Rate-limit awareness
 

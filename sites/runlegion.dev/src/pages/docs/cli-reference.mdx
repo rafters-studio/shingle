@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.18.0. Commands are organized by category.
+This reference covers legion 0.21.0. Commands are organized by category.
 
 ---
 
@@ -273,13 +273,14 @@ Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when th
 
 ### kanban
 
-Manage the kanban board. Cards have eight states with enforced transitions:
+Manage the kanban board. Cards have nine states with enforced transitions:
 
 ```
 backlog -> pending -> accepted -> in-review -> done
                          |              |
                          +-> blocked -> accepted (via unblock)
                          +-> needs-input -> accepted (via resume)
+                         +-> delegated -> accepted (via undelegate, or auto-revert)
                          +-> done
                          +-> cancelled
 ```
@@ -317,6 +318,44 @@ legion kanban reconcile --repo myproject
 
 When a card has a `document_id`, status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the bound document's `meta.status` in the same transaction. A dangling `document_id` (document archived or missing) is a hard error on transition.
 
+#### Delegate
+
+An Accepted card can hand off to a live, watch-spawned wake attempt instead of sitting on the agent that accepted it:
+
+```bash
+legion kanban delegate --id <card-id>
+legion kanban delegate --id <card-id> --attempt-id <attempt-id>
+legion kanban undelegate --id <card-id>
+legion kanban delegated-needs-attention --repo myproject
+legion kanban delegated-needs-attention --repo myproject --json
+```
+
+`delegate` is refused unless the watch daemon's heartbeat is fresh and a live wake attempt for the card's repo exists; a self-set label with no process behind it is exactly the bypass this state must never become. The moment that attempt finishes or dies, the card auto-reverts to Accepted. `undelegate` returns the card to Accepted manually, for an agent that wants the work back before the auto-revert sweep runs. `delegated-needs-attention` lists delegated cards whose linked attempt is no longer verifiably live: the fail-closed backstop for the one case the auto-revert sweep can't reach, the watch daemon itself being down.
+
+#### Spec revision
+
+When a card's frozen acceptance criteria turn out to be wrong, incomplete, or unachievable as written, an agent stops instead of improvising around them:
+
+```bash
+legion kanban replan-request --id <card-id> --reason "acceptance criteria assume an endpoint that doesn't exist"
+legion kanban replan-record --id <card-id> --reason "endpoint dropped from scope, criteria rewritten to match"
+```
+
+`replan-request` moves the card Accepted to NeedsInput, a distinct audit action from a generic needs-input. Once a human ratifies the revision, `replan-record` stores it. `legion verify --deviation <reason>` (see below) checks this record: a ratified revision lets verify proceed against the revised criteria; an asserted deviation with no ratified record hard-blocks as improvisation.
+
+### push
+
+Push a branch to origin. The sanctioned in-band push path: agents never run raw `git push`.
+
+```bash
+legion push --repo myproject
+legion push --repo myproject --branch feature/search
+```
+
+Resolves the checkout that has `--branch` checked out via `git worktree list --porcelain` and pushes from that checkout, not the CWD. This matters because the pre-push hook reviews whatever branch the CWD has checked out, not the ref being pushed; pushing branch B from a checkout sitting on A would silently review A's diff. `--branch` defaults to the CWD's checked-out branch.
+
+Refuses `main` and `master` outright. Refuses any `--branch` value shaped like a flag or a force/retarget refspec, so there is no way to smuggle force semantics through the branch argument; there is no `--force` flag on this command, full stop. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
+
 ### issue
 
 Manage issues via the configured work source plugin.
@@ -324,10 +363,14 @@ Manage issues via the configured work source plugin.
 ```bash
 legion issue create --repo myproject --title "Implement auth" --body "..."
 legion issue view --repo myproject --id 42
+legion issue list --repo myproject
+legion issue list --repo myproject --state closed --label bug --json
 legion issue close --repo myproject --id 42
 legion issue reopen --repo myproject --id 42
 legion issue edit --repo myproject --id 42 --title "new title"
 ```
+
+`issue list` reads the work source's live state (not the local kanban cache, which `sync` can miss). `--state` accepts `open` (default), `closed`, or `all`. `--label` filters by label. A work-source auth or rate-limit failure surfaces as an error rather than an empty list.
 
 ### sub-issue
 
@@ -344,6 +387,9 @@ Manage pull requests via the work source plugin.
 
 ```bash
 legion pr create --repo myproject --title "..." --body "..."
+legion pr create --repo myproject --title "..." --body "..." --closes 42 --closes "owner/repo#751"
+legion pr edit --repo myproject --number 12 --title "corrected title"
+legion pr edit --repo myproject --number 12 --body-file body.md --issue 42
 legion pr list --repo myproject
 legion pr view --repo myproject --id 12
 legion pr checks --repo myproject --id 12
@@ -352,12 +398,17 @@ legion pr comments --repo myproject --id 12
 legion pr reviews --repo myproject --id 12
 legion pr review --repo myproject --id 12
 legion pr merge --repo myproject --id 12
+legion pr merge --repo myproject --id 12 --merge-despite-failures
 legion pr close --repo myproject --id 12
 ```
 
-`legion pr create` refuses unless both a clean `legion-simplify` gate and a clean `legion-pr-write` gate exist on the current HEAD commit.
+`legion pr create` refuses unless both a clean `legion-simplify` gate and a clean `legion-pr-write` gate exist on the current HEAD commit. `--closes` is repeatable and accepts a same-repo issue number or an `owner/repo#N` cross-repo reference; it appends a `Closes #N` line unless a recognized closing keyword for that issue is already present. GitHub only auto-closes the first issue in a comma-joined group, so each reference needs its own keyword adjacent to it, which is why this is repeatable rather than a single comma-separated flag.
 
-`legion pr write-check` validates a drafted PR body against the issue's acceptance criteria and records a `legion-pr-write` quality gate on success. Body from `--body-file` or stdin.
+`legion pr write-check` validates a drafted PR body against the issue's acceptance criteria and records a `legion-pr-write` quality gate on success. Body from `--body-file` or stdin. With `--issue`, it warns (does not yet fail) when the body lacks a closing keyword.
+
+`legion pr edit` corrects a live PR's title or body in place, the honest alternative to closing and recreating when a re-review finds a body that misdescribes its own diff. A `--body-file` edit requires `--issue`, runs the same validation as `pr write-check`, and re-records the `legion-pr-write` gate for local HEAD; that gate is refused, not recorded, when local HEAD isn't the PR's own head commit.
+
+`legion pr merge` refuses to merge a PR with actively failing check-runs on its head SHA, and refuses outright when there are zero check-runs at all (an untested commit is not a green commit). `--merge-despite-failures` is an audited operator override for the failing case; it does not touch the zero-runs refusal. `pr checks` pins its answer to the PR's actual head SHA rather than trusting whatever the work source echoes back, so a stale green result from a parent commit can't pass as the head commit's status. On repos with a merge queue, a queued PR reports as enqueued, not merged; the kanban-done transition and issue-close fire later, when the queue actually completes it.
 
 ### document
 
@@ -398,9 +449,12 @@ echo '[{"criterion":"search returns results","verdict":"pass","evidence":"test_s
   | legion verify --repo myproject --card <card-id>
 
 legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdicts.json
+legion verify --repo myproject --card <card-id> --deviation "endpoint dropped from scope, criteria rewritten to match"
 ```
 
 Reads per-criterion verdicts as JSON: an array of `{criterion, verdict, evidence}` objects where `verdict` is `pass`, `fail`, or `uncertain`.
+
+`--deviation <reason>` asserts that the work diverges from the card's frozen acceptance criteria and names why. It's checked against the card's `ReplanRecord` before verdicts are read: a ratified record (see `legion kanban replan-record` above) lets verify proceed against the revised criteria; without one, verify hard-blocks the deviation as improvisation rather than a sanctioned re-plan.
 
 Decisions:
 
@@ -491,11 +545,15 @@ legion sym impl Iterator
 legion sym hover my_function
 legion sym impact --repo myproject --diff /path/to/changes.diff
 legion sym list --kind fn
+legion sym imports src/api/routes.ts
+legion sym importers src/api/routes.ts --repo myproject
 ```
 
 `sym impact` parses a unified diff and reports SCIP reference counts per touched symbol, sorted descending. Pass `--json` for agent consumption. `LEGION_IMPACT_HIGH_THRESHOLD` (default 50) marks the `HIGH` tag in text output.
 
 `sym list` replaces `grep "fn "` on indexed repos: returns names and locations, not source bodies.
+
+`sym imports` and `sym importers` query the js/ts module graph legion has indexed since v0.19.0, wired to a CLI surface for the first time. `imports <file>` returns one row per import in that file, resolved or not; `importers <file>` answers the reverse question, who consumes this file, which SCIP symbol-refs can't answer. Both take an exact repo-relative path or a path suffix, default to every indexed repo, and `--repo` narrows to one. An unresolved or external edge prints as `unresolved` rather than being silently dropped; a dangling import is the point of asking.
 
 ---
 
@@ -623,11 +681,15 @@ Emit and witness predictions; read calibration metrics.
 ```bash
 legion uncertainty emit --surface myproject --model claude-sonnet-4 --confidence 0.85
 legion uncertainty witness --id <prediction-id> --outcome pass
+legion uncertainty witness-gate --skill legion-review --commit <sha> --correct true
 legion uncertainty calibration --surface myproject
 legion uncertainty orphans
+legion uncertainty orphans --surface legion.gate
 ```
 
 `emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
+
+`witness-gate` lets an operator who actually knows the answer (a pre-push diff read, a post-merge bug report) correct a recorded `legion.gate` prediction directly. It's looked up by `--skill` and `--commit`, the same `(skill, commit)` fingerprint `legion quality-gate list` prints, never an opaque prediction id. `--correct` takes `true` or `false` relative to whichever verdict the gate actually recorded, not a bare "was the diff clean" flag: on a clean verdict, `true` corroborates it and `false` marks it wrong; on an issues verdict, `true` means the catch was right (the diff was NOT clean) and `false` means it was a false positive (the diff WAS clean). Unlike the automatic legion-review witness, which only catches its own false positives, an external source like this one is trustworthy in both directions.
 
 ### health
 

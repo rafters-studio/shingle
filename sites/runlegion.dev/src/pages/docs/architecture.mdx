@@ -25,15 +25,16 @@ Tables (grouped by concern):
 
 **Coordination**
 
-- `tasks` kanban cards with 8-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
+- `tasks` kanban cards with 9-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
 - `schedules` cron-like scheduled posts with tombstone/LWW columns
 - `documents` coordination substrate documents (#455/#456): specs, NFRs, blueprints, personas, journeys, etc. Type-agnostic at the storage layer. Payload is a validated JSON blob
+- `replan_records` (#554) ratified spec-revision records: a card id, the reason acceptance criteria changed, timestamp. `legion verify --deviation` reads a card's latest record to tell a sanctioned re-plan apart from an unratified deviation
 - `board_reads` per-agent read cursors for the bullpen (local, does not replicate)
 
 **Watch and wake**
 
 - `watch_handled` per-repo signal handling tracking
-- `wake_attempts` (#487) FSM-tracked wake attempts: spawn time, PID, PTY EOF time, exit_observed_at, terminal status. The reaper is the only writer for terminal transitions
+- `wake_attempts` (#487) FSM-tracked wake attempts: spawn time, PID, PTY EOF time, exit_observed_at, terminal status. The reaper is the only writer for terminal transitions. A nullable `card_id` column (#778) links an attempt to the kanban card it's carrying, set once when `legion kanban delegate` binds an Accepted card to a live attempt
 
 **Observability**
 
@@ -76,13 +77,17 @@ Incremental index sync detects reflections in SQLite missing from Tantivy and ad
 
 The kanban board is a scheduler wearing a human-friendly UI.
 
-**Card statuses**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Done, Cancelled.
+**Card statuses**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Done, Cancelled.
 
-**State machine** enforces valid transitions. `force_move` bypasses the state machine for dashboard drag-and-drop.
+**State machine** enforces valid transitions. `force_move` bypasses the state machine for dashboard drag-and-drop, running inside the same transaction as the bound document's status sync so a sync failure rolls back the card move too.
+
+**Delegated** (#778): a card the accepting agent has handed off to a live, watch-spawned wake attempt. Entry and exit share one fail-closed predicate, `delegated_card_is_live`: a fresh watch heartbeat and an in-flight `wake_attempts` row linked via that row's `card_id`. The watch tick auto-reverts the card to Accepted the moment either condition goes dark. `legion kanban delegated-needs-attention` re-checks the same predicate directly against the database, the backstop for the one case the watch-driven sweep can't reach: the watch daemon itself being down.
+
+**Spec revision** (#554): `ReplanRequest` moves a card Accepted to NeedsInput when an agent concludes the frozen acceptance criteria are wrong, incomplete, or unachievable, a distinct audit action from a generic needs-input. A human-ratified `ReplanRecord` is stored separately. `legion verify --deviation <reason>` looks up the card's latest record: present and ratified, verify proceeds against the revised criteria; absent, the deviation hard-blocks as an unratified improvisation.
 
 **Scheduler** (`legion work`): atomically selects the highest-priority unblocked card and accepts it. Priority ordering: critical > high > med > low, then sort_order, then oldest.
 
-**Work sources**: plugins that sync external issue trackers (GitHub, GitLab, Jira) into the kanban board. Cards link back to source issues via `source_url`. Reconciliation pulls live state with `legion kanban reconcile`.
+**Work sources**: plugins that sync external issue trackers (GitHub, GitLab, Jira) into the kanban board. Cards link back to source issues via `source_url`. Reconciliation pulls live state with `legion kanban reconcile`. `pr merge` classifies check-runs on the PR's head SHA (not whatever the work source's default query happens to return) and refuses to merge over an actively failing or entirely absent check-run set; `--merge-despite-failures` is an audited operator override for the failing case only. On repos with a merge queue, `pr merge` reports a queued PR as enqueued rather than merged, and defers the kanban-done transition and issue-close side effects until the queue actually completes it.
 
 **Sub-issues** (#462): create child issues linked to a parent via GitHub's native sub-issue relationship. The plugin looks up the parent node id, errors if missing, then links via the `addSubIssue` mutation.
 
@@ -99,6 +104,14 @@ The kanban board is a scheduler wearing a human-friendly UI.
 **Card-spec binding**: `legion kanban bind --id <card-id> --document <doc-id>` sets `tasks.document_id`. Once bound, `legion verify` reads acceptance criteria from the document's `verification.acceptance` block. Status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the document's `meta.status` transactionally (accepted, implemented, verified, cancelled). A dangling binding (document archived or missing) is a hard error on any transition.
 
 Documents replicate across the cluster like reflections and cards.
+
+## Git
+
+`legion push` (#791) is the sanctioned push path: the only way agent doctrine allows a branch to reach origin. It does not push from the working directory. It runs `git worktree list --porcelain`, finds the checkout that has `--branch` checked out, and pushes from that checkout instead.
+
+The resolution step exists because of how pre-push hooks read state: a hook fires against whatever branch the CWD has checked out, not the ref named in the push command. An agent with multiple worktrees open who pushes branch B while sitting in a checkout on branch A gets A's diff reviewed, silently, for a B push. `legion push` closes that gap mechanically rather than documenting around it.
+
+Refuses `main` and `master` by name, and refuses any `--branch` value shaped like a flag or a force/retarget refspec, with no `--force` flag to fall back on. Sets upstream (`-u origin <branch>`) on every push, a no-op past the first. The audit DB opens before the push runs, not after, so a DB-open failure fails the command instead of masking a push that happened but left no row.
 
 ## Communication
 
