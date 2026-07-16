@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.21.0. Commands are organized by category.
+This reference covers legion 0.22.0. Commands are organized by category.
 
 ---
 
@@ -70,14 +70,17 @@ Key flags:
 
 ### forget
 
-Permanently delete a reflection by ID. No soft-delete, no undo. Removes the row from SQLite and the Tantivy index.
+Delete a reflection by ID, or archive it instead with `--persist`.
 
 ```bash
 legion forget --id <reflection-id>
 legion forget --id <reflection-id> --repo myproject
+legion forget --id <reflection-id> --persist
 ```
 
-`--repo` is an optional safety check: the delete is refused unless the reflection's repo matches.
+Default is destructive: no soft-delete, no undo, removes the row from both SQLite and the Tantivy index. `--persist` archives instead of deleting -- the row and its search index entry survive, moved into the same cold tier `recall --archives` reaches. An archived reflection drops out of hot `recall`, `whoami`, and `whatami` but stays reachable via `recall --archives` / `--include-archives`. One-way today: there is no un-persist verb yet, matching `document archive`.
+
+`--repo` is an optional safety check: the operation is refused unless the reflection's repo matches.
 
 ### boost
 
@@ -132,12 +135,32 @@ legion chain --id <reflection-id> --full
 
 ### whoami
 
-Print identity reflections for a repo. Alias for `recall --domain identity`.
+Print identity reflections for a repo (alias for `recall --domain identity`), or rebuild a broken identity chain with `--generate`.
 
 ```bash
 legion whoami --repo myproject
 legion whoami --repo myproject --limit 50
+
+# Gather mode: package source material for a rebuild
+legion whoami --repo myproject --generate --vault-repo shingle --byline "writer-legion,Legion"
+
+# Apply mode: write the authored replacement from a manifest
+legion whoami --repo myproject --generate --apply --from-file manifest.json
+legion whoami --repo myproject --generate --apply --from-file manifest.json --dry-run
 ```
+
+Plain mode lists current identity reflections. `--generate` is the repeatable form of the identity-chain rebuild proven by hand on legion and smugglr: gather mode deterministically packages the claimed half (files in `--vault-repo` whose frontmatter `author` field, not filename, matches `--byline`, full body included) and the given half (cross-agent reflections about this agent, over-fetched so self-repo rows can be filtered out) as JSON. The binary authors no prose -- the calling agent reads that material, synthesizes an `IdentityManifest`, and writes it with `--apply --from-file <manifest.json>`.
+
+Apply is an atomic swap, not insert-then-delete: it backs up the full pre-existing identity corpus to a JSON file, swaps the identity root in one transaction with no window where two roots or zero roots are live, then retires any leftover old-chain rows the swap doesn't cascade to, DB and search index both. `--dry-run` reports the plan without writing.
+
+Key flags:
+
+- `--generate` enter generate mode (gather by default, apply with `--apply`)
+- `--vault-repo` repo holding the agent's bylined writing; required with `--generate` unless `--apply`
+- `--byline` comma-separated author name(s) to match; required with `--generate` unless `--apply`
+- `--apply` switch generate mode into apply
+- `--from-file` path to the authored manifest; required with `--apply`
+- `--dry-run` report the apply plan without writing (apply mode only)
 
 ### whatami
 
@@ -467,11 +490,29 @@ When a `document_id` is bound, criteria come from the document's `verification.a
 
 ### quality-gate
 
-Record a quality gate result for a skill run on the current HEAD commit.
+Record, validate, or retire a quality gate result for a skill run.
 
 ```bash
-legion quality-gate record --gate legion-simplify --result pass
+legion quality-gate record --skill legion-review --result clean
+legion quality-gate check --skill legion-simplify --result clean --articulation-file notes.md
+legion quality-gate check --skill legion-simplify --result issues --findings-count 3 --base feature/parent
+legion quality-gate void --id <gate-id> --reason "manufactured clean, predates the #780 refusal"
+legion quality-gate void --id <gate-id> --reason "..." --superseded-by <new-gate-id>
+legion quality-gate list --skill legion-simplify
+legion quality-gate stats --skill legion-simplify
 ```
+
+`record` self-reports a result for the current HEAD commit (ASSERTED provenance). Refused for a `clean` result on any skill with a check validator (`legion-simplify`, `legion-pr-write`) -- those can only earn clean through `check`. Skills with no validator (`legion-review`, `legion-verify:<card_id>`) are asserted by necessity and unaffected.
+
+`check` validates a markdown articulation file -- one `### <path>` heading per changed file, with substantive prose under each -- against the actual changed-file set before recording a gate (VALIDATED provenance). Refuses on a coverage gap (a changed file with no entry) or thin/boilerplate prose. The changed-file set diffs against `main...HEAD` by default (falling back to `origin/main...HEAD`); `--base <ref>` overrides the diff base for a branch stacked on an unmerged parent, so the coverage set scopes to what this branch actually changed rather than everything since `main`. The resolved base, whichever branch supplied it, is recorded on the gate row so a too-narrow base stays auditable. Pure zero-delta renames (`R100`) auto-clear from the coverage set instead of requiring an entry; a rename with a content delta still needs one under its new path.
+
+`void` retires a known-false gate row without deleting it from history, mirroring the `deleted_at` tombstone pattern on tasks/reflections/schedules. `--reason` is required -- a void with no reason is not an audit trail. `--superseded-by` links the voided row to the genuine replacement once one exists. A voided row drops out of `pr create`'s gate check, the `->done` gate, and `stats`, but stays visible in `list` marked VOID.
+
+Key flags:
+
+- `record`: `--skill`, `--result` (`clean` or `issues`), `--findings-count`, `--details-json`
+- `check`: `--skill`, `--result`, `--articulation-file` (reads stdin when omitted), `--findings-count`, `--base`
+- `void`: `--id`, `--reason` (required), `--superseded-by`
 
 `legion pr create` checks for clean `legion-simplify` and `legion-pr-write` gates on HEAD before opening a PR.
 

@@ -28,11 +28,11 @@ Reflections are stored in SQLite, indexed in Tantivy for BM25 search, and option
 
 **Boost/decay** weighting surfaces frequently-useful reflections. When an agent recalls a reflection and it helps, they boost it. Unused reflections decay over time.
 
-**Identity reflections** (`--whoami` or `--domain identity`) are reinjected on every SessionStart so role, voice, and rules survive cache evictions and model swaps.
+**Identity reflections** (`--whoami` or `--domain identity`) are reinjected on every SessionStart so role, voice, and rules survive cache evictions and model swaps. When that chain drifts or gets corrupted, `legion whoami --generate` rebuilds it: gather mode packages an agent's bylined writing and what other agents have said about it, the calling agent synthesizes the authored replacement, and `--apply` swaps it in as one transaction with no window where two identity roots, or zero, are live.
 
 **Hot vs archived** (#457): the default `recall` searches hot reflections. `--archives` flips to the deep dive. `--include-archives` searches both. Archives keep the corpus bounded while preserving everything.
 
-**Forget** is destructive. `legion forget --id <id>` removes the row from SQLite and Tantivy. No soft-delete, no undo. The optional `--repo` argument is a safety check that refuses the delete unless the repo matches.
+**Forget** is destructive by default. `legion forget --id <id>` removes the row from SQLite and Tantivy. No soft-delete, no undo. `--persist` archives instead of deleting, moving the reflection into that same cold tier rather than erasing it. The optional `--repo` argument is a safety check that refuses the operation unless the repo matches.
 
 ## Code intelligence
 
