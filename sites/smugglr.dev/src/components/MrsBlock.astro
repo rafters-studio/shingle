@@ -22,12 +22,12 @@ const MRS_INSTALL: [string, string, string][] = [
 ];
 
 const MRS_TARGETS: [string, string, string, string, string][] = [
-    ["Local SQLite",   "local",        "Filesystem",          "n/a",              "rusqlite direct access"],
-    ["Cloudflare D1",  "d1",           "HTTP REST",           "Bearer token",     "account_id + database"],
-    ["Turso / libSQL", "turso",        "Hrana (HTTP + WS)",   "JWT",              "sqld-compatible"],
-    ["rqlite",         "rqlite",       "HTTP REST",           "Basic / mTLS",     "Self-hosted Raft cluster"],
-    ["StarbaseDB",     "starbasedb",   "HTTPS + WebSocket",   "API key",          "Edge (CF Workers + DO)"],
-    ["SQLite Cloud",   "sqlite-cloud", "HTTP REST (Weblite)", "API key",          "Managed cluster"],
+    ["Local SQLite",   "n/a",          "Filesystem",          "n/a",              "type = \"sqlite\", rusqlite direct access"],
+    ["Cloudflare D1",  "d1",           "HTTP REST",           "Bearer token",     "account_id + database_id"],
+    ["Turso / libSQL", "turso",        "Hrana over HTTP",     "Bearer token",     "sqld-compatible; smugglr never opens a WS"],
+    ["rqlite",         "rqlite",       "HTTP REST",           "Basic / none",     "Self-hosted Raft cluster"],
+    ["StarbaseDB",     "starbasedb",   "HTTPS",               "Bearer token",     "Edge (CF Workers + DO)"],
+    ["SQLite Cloud",   "sqlite-cloud", "HTTP REST (Weblite)", "Bearer token",     "Managed cluster"],
 ];
 
 const MRS_SHAPES: [string, string, string, string][] = [
@@ -48,12 +48,12 @@ const LAN_SEMANTICS: [string, string][] = [
 ];
 
 const MRS_COMMANDS: [string, string, string, string][] = [
-    ["push",       "Send local rows to target",         "text / json",      "0 1 2 3 4"],
-    ["pull",       "Fetch target rows to local",        "text / json",      "0 1 2 3 4"],
-    ["sync",       "Bidirectional push + pull",         "text / json",      "0 1 2 3 4"],
+    ["push",       "Send local rows to target",         "text / json",      "0 1 2 3 5"],
+    ["pull",       "Fetch target rows to local",        "text / json",      "0 1 2 3 5"],
+    ["sync",       "Bidirectional push + pull",         "text / json",      "0 1 2 3 5"],
     ["diff",       "Report differences, write nothing", "text / json",      "0 1 2"],
     ["watch",      "Continuous sync on interval",       "JSONL per tick",   "0 1 2 3"],
-    ["stash",      "Upload diff to S3 relay",           "text / json",      "0 1 2 3"],
+    ["stash",      "Upload diff to S3 relay",           "text / json",      "0 1 2 3 4"],
     ["retrieve",   "Pull stashed diff from S3",         "text / json",      "0 1 2 3 5"],
     ["broadcast",  "Encrypted UDP sync on LAN",         "text / json",      "0 1 2 3"],
     ["snapshot",   "Point-in-time dump to relay",       "text / json",      "0 1 2 3"],

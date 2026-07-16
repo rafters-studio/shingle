@@ -12,28 +12,30 @@ Work in progress. The full guide is waiting on a technical dump from the smuggle
 
 ## What is a profile
 
-A profile is a TOML block that tells the http-sql plugin how to talk to one specific backend. Adding a new target is usually a profile change, not a code change.
+A profile is Rust code inside `smugglr-core` that tells the http-sql plugin how to talk to one specific backend: request body shape, auth header format, and where rows and columns live in the response. Reaching a backend that already speaks one of the shipped request shapes is a config change (`name = "..."` in `[target]`). Reaching a backend with a genuinely different shape is a code change.
 
 ## Shipped profiles
 
-smugglr ships profiles for these backends out of the box:
+smugglr ships seven profiles out of the box:
 
-- Cloudflare D1
-- Turso
-- rqlite
-- StarbaseDB
-- SQLite Cloud
+- `d1` -- Cloudflare D1
+- `turso` -- Turso / libSQL
+- `rqlite` -- rqlite
+- `starbasedb` -- StarbaseDB
+- `sqlite-cloud` -- SQLite Cloud
+- `generic` -- flat `{"sql": ..., "params": [...]}` request, `{"columns": [...], "rows": [...]}` response
+- `http-sql` -- the [http-sql v0.1 wire spec](https://github.com/rafters-studio/http-sql)
 
-Each profile handles the backend's quirks: endpoint shape, auth header format, per-request statement limits, error response parsing.
+Each profile handles the backend's quirks: request body shape, auth header format, per-request bind-parameter limit, response parsing.
 
 ## Adding a custom profile
 
-Work in progress. The shape is a TOML block under `[plugins.http-sql.profiles.<name>]` with endpoint, auth, and batch-size fields.
+There is no TOML profile format; `[plugins.http-sql.profiles.<name>]` does not exist. A profile is a constructor function in `smugglr-core`'s profile module plus an arm in the name-lookup match. If your backend's HTTP requests already match the `generic` or `http-sql` shape, point `name` at that profile and skip this section. Otherwise, adding a profile means adding the constructor and the match arm: a contribution to `smugglr-core`, not a config edit.
 
 ## Auth methods per target
 
-Work in progress. Bearer token, basic auth, signed requests, and unauthenticated dev setups are all supported per profile.
+Each profile picks one of three auth formats: bearer token, HTTP basic auth, or none. `d1`, `turso`, `starbasedb`, `sqlite-cloud`, `generic`, and `http-sql` use bearer token. `rqlite` uses basic auth. The token or credential comes from `auth_token` in `[target.config]`; profiles that use bearer auth send it as `Authorization: Bearer <token>`, and profiles that use basic auth send it as the basic-auth username with no password.
 
-## How the plugin resolves HTTP endpoints
+## How the plugin resolves the HTTP endpoint
 
-Work in progress. The plugin resolves `<backend>://<name>` URLs against the active profile to produce the real HTTPS endpoint and auth headers.
+There is no URL-scheme resolution. `[target.config] url = "..."` is the literal endpoint the plugin POSTs SQL to; whatever string you set is what `reqwest` requests against. The plugin does not parse, rewrite, or template it. Point `url` at your backend's actual HTTP(S) SQL endpoint.

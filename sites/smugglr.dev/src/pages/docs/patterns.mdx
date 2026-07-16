@@ -212,7 +212,7 @@ Done. 23 operations in 1.4s.
 
 ### Watch for
 
-- `newer_wins` requires an `updated_at` column with comparable timestamps on both sides. If the column is missing, smugglr exits with code 4 (conflict error).
+- `newer_wins` needs an `updated_at` column with comparable timestamps on both sides to pick a winner. If the column is missing, empty, or identical on both sides while the content differs, smugglr does not exit with an error: it logs a warning naming the row count and skips those rows, leaving both sides unchanged. The run itself still exits 0. Check the logs, not the exit code, for skipped conflicts.
 - `uuid_v7_wins` only works when primary keys are UUIDv7. It compares the time component embedded in the ID. No clock synchronization required.
 - Bidirectional sync is not atomic. If the process is interrupted mid-sync, one direction may have completed but not the other. This is safe because content hashing is idempotent. Run sync again and it picks up where it left off.
 - If both sides modified the same row and your strategy is `local_wins`, the remote change is lost. There is no merge. Pick a strategy that matches your authority model.
@@ -242,14 +242,13 @@ api_token = "your-d1-api-token"
 [sync]
 tables = ["tasks", "reflections"]
 conflict_resolution = "local_wins"
-
-[watch]
-interval = 30
 ```
+
+There is no `[watch]` config section. The interval is a CLI flag only (`--interval`, default 30 seconds), not a config field; a `[watch]` block in `config.toml` is silently ignored.
 
 ### Commands
 
-Start the daemon:
+Start the daemon (interval defaults to 30 seconds):
 
 ```
 $ smugglr watch
@@ -596,12 +595,11 @@ jobs:
 | Code | Meaning | CI action |
 |------|---------|-----------|
 | 0 | Success | Continue pipeline |
-| 1 | General error | Fail the job. Check logs. |
+| 1 | General error | Fail the job. Check logs. Also where plugin/adapter failures land; there is no dedicated plugin exit code. |
 | 2 | Config error | Fail. Missing env vars or bad TOML. Fix config. |
 | 3 | Network/transient | Retry the step (up to 3 times). |
-| 4 | Conflict | Fail. Requires human decision on conflict strategy. |
-| 5 | Not found | Fail. Database or table does not exist at target. |
-| 6 | Plugin error | Fail. Plugin misconfiguration. |
+| 4 | Conflict | Fail. `stash`/`retrieve` hit a relay ETag conflict. |
+| 5 | Not found | Fail. Database, table, or target resource does not exist, or the target rejected the request. |
 
 ### Shell retry pattern for transient errors
 
@@ -754,9 +752,10 @@ Here is how a Claude Code agent (or similar) would call smugglr and handle the r
    - If > 0: proceed to push.
 3. Run push with --output json
 4. Check exit code:
-   - 0: success. Log result. Continue.
+   - 0: success. Compare rows_pushed against the dry-run's total_rows_to_push.
+        Fewer than expected means rows were skipped as unresolvable
+        conflicts (see stderr) -- log and continue, or escalate.
    - 3: transient. Retry up to 3 times with backoff.
-   - 4: conflict. Log conflict details. Escalate to human.
    - Any other non-zero: abort workflow. Log error.
 ```
 
@@ -799,7 +798,18 @@ def smugglr_push(config_path="config.toml", max_retries=3):
         )
 
         if push.returncode == 0:
-            return {"action": "ok", "result": json.loads(push.stdout)}
+            result = json.loads(push.stdout)
+            pushed = sum(t.get("rows_pushed", 0) for t in result.get("tables", []))
+            if pushed < total:
+                # push never exits non-zero for this: an unresolvable conflict
+                # (e.g. two rows with identical uuid_v7_wins timestamps) is
+                # logged to stderr and the row is skipped, not an error.
+                return {
+                    "action": "escalate",
+                    "reason": "fewer rows pushed than the dry-run predicted; check stderr for skipped-conflict warnings",
+                    "result": result,
+                }
+            return {"action": "ok", "result": result}
 
         error = json.loads(push.stdout) if push.stdout else {}
 
@@ -807,13 +817,6 @@ def smugglr_push(config_path="config.toml", max_retries=3):
             # Transient error. Back off and retry.
             time.sleep(2 ** attempt)
             continue
-
-        if push.returncode == 4:
-            return {
-                "action": "escalate",
-                "reason": "conflict requires human decision",
-                "details": error
-            }
 
         return {"action": "abort", "reason": error.get("error", "unknown"), "exit_code": push.returncode}
 
@@ -851,23 +854,27 @@ Tool call: Bash
   -> Exit code 0. Success on retry.
 ```
 
-If conflicts occur:
+If rows are unresolvable under the current conflict strategy, that is not an error. `push` still exits 0; the unresolvable rows are skipped and named in a stderr warning, not in the JSON on stdout:
 
 ```
 Tool call: Bash
   command: smugglr push --output json
-  -> Exit code 4. conflicts_resolved: 0 (unresolvable with current strategy).
+  -> Exit code 0. stdout: {"command":"push","status":"ok","tables":[{"name":"tasks","rows_pushed":3}]}
+  -> stderr: 2 row(s) in 'tasks' have different content but same PK with
+     identical UUIDv7 timestamp (skipped under uuid_v7_wins). Use local_wins
+     or remote_wins to resolve.
 
-Agent thinks: "Conflict I cannot resolve. Report to human."
-  -> Agent outputs: "Push to D1 hit 2 conflicts in the tasks table.
-     Current strategy is uuid_v7_wins but both rows have the same
-     timestamp. Manual resolution needed."
+Agent thinks: "Exit 0, but stderr names 2 skipped rows. The pushed count
+  is lower than expected. Report to human rather than assume convergence."
+  -> Agent outputs: "Push to D1 succeeded (3 rows) but skipped 2 rows in
+     the tasks table: uuid_v7_wins can't pick a winner when both sides
+     have the identical timestamp. Manual resolution needed."
 ```
 
 ### Watch for
 
 - Always parse stdout, not stderr. Smugglr writes JSON results to stdout and diagnostic messages to stderr. In `--output json` mode, stdout is always valid JSON (even on error).
-- Retryability is determined by exit code, not by a field in the JSON. Exit code 3 is transient (retry with backoff). Exit code 2 is config (do not retry). Exit code 4 is conflict (escalate). Exit code 6 is plugin error (escalate).
+- Retryability is determined by exit code, not by a field in the JSON. Exit code 3 is transient (retry with backoff). Exit code 2 is config (do not retry). Exit code 4 is a relay conflict, only from `stash`/`retrieve` (escalate or re-run after re-reading state).
 - Agents should always dry-run first. The cost is one extra API call. The benefit is catching surprises (unexpected row counts, conflicts) before committing.
 - For long-running agent workflows, combine `watch` with JSON output: `smugglr watch --output json` emits one JSON object per tick to stdout (JSONL format). The agent can monitor the stream for anomalies.
-- Exit code 6 (plugin error) means the target's HTTP API changed or the profile is misconfigured. Agents cannot fix this. Escalate immediately.
+- There is no dedicated plugin exit code. If the target's HTTP API changed or the profile is misconfigured, the adapter error surfaces as exit code 1 (general error) or, for a rejected request, exit code 5. Agents cannot fix either. Escalate immediately.
