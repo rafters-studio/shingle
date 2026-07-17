@@ -243,6 +243,8 @@ The gate chain runs simplify then pr-write then review then verify, in that orde
 
 The reason this chain exists: an autonomous agent's natural failure mode is to declare victory. The pipeline makes Done require evidence.
 
+**The findings ledger.** Simplify and review used to report findings as prose inside a gate's details JSON: readable once, then gone the moment the transcript scrolled past. Both now persist findings as rows in a `quality_gate_findings` table, keyed to the gate that raised them (file, line, severity, a resolving commit once one lands). A `clean` verdict is not just a claim anymore; it is a claim the gate checks against the ledger. `legion quality-gate check --result clean` refuses to record clean while any HIGH or MED finding from this branch and skill is still pending, or any LOW finding is un-acked, whether that finding came from an earlier run or is sitting in the very call reporting clean. Resolution is automatic where it can be: a commit after a finding's origin that touches the flagged file marks it resolved before the refusal check ever runs. Where it can't be automatic, `legion quality-gate finding-disposition` retires a finding with a named reason, and `legion quality-gate finding-ack` batch-clears a branch's LOW findings so cosmetic nits don't need one-by-one ceremony. A finding is a row a gate can point to, not a sentence that evaporates.
+
 ## Card-spec binding
 
 A kanban card can be bound to a document with `legion kanban bind --id <card-id> --document <doc-id>`. Once bound, four guards apply:

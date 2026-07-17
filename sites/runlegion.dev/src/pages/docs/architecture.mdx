@@ -57,6 +57,8 @@ All IDs are UUIDv7 (time-ordered). Migrations are idempotent and run on every DB
 
 Incremental index sync detects reflections in SQLite missing from Tantivy and adds them automatically. No manual reindex needed after sync.
 
+`created_at` joined the index as a fourth field in 0.23.0, alongside id/repo/text, so `--since`/`--until`/`--on` date-range queries run inside Tantivy rather than as a post-filter over a truncated result window. An index built before 0.23.0 has no `created_at` field: legion detects the mismatch at open and rebuilds the index empty rather than corrupting subsequent writes, so a one-time `legion reindex` after upgrading is required (see [Getting Started](/docs/getting-started/#upgrading)).
+
 ## Embeddings
 
 **model2vec-rs** for semantic similarity. Stored as a nullable BLOB column on reflections. Each node computes its own embeddings. They do not replicate.

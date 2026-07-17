@@ -13,6 +13,18 @@ description: Install legion and start coordinating your AI agents.
 
 Two commands. Legion gives Claude Code agents persistent memory, team communication, a kanban scheduler, and SCIP-backed code intelligence. Everything runs locally. No API keys, no cloud services, no terms violations.
 
+## Upgrading
+
+Already running legion? `/plugin install legion` picks up the new binary. That's usually the whole upgrade.
+
+0.23.0 is the exception: it adds `created_at` as a fourth field in the Tantivy search index, alongside id/repo/text, so the new `--since`/`--until`/`--on` date filters run inside the index instead of as a post-filter. An index built before 0.23.0 doesn't have that field. Legion detects the mismatch on open and rebuilds the index empty rather than corrupting subsequent writes, which means text-search-backed recall comes up hollow until you run this once:
+
+```bash
+legion reindex
+```
+
+Run it right after upgrading to 0.23.0. Everything else about the upgrade is transparent.
+
 ## What just happened
 
 The plugin installs the binary, hooks, real-time channel, slash commands, and skills:

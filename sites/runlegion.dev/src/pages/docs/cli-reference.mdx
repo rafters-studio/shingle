@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.22.0. Commands are organized by category.
+This reference covers legion 0.23.0. Commands are organized by category.
 
 ---
 
@@ -41,6 +41,19 @@ Key flags:
 - `--dedupe-mode` `warn` (default: store anyway), `strict` (refuse near-duplicates), `off` (skip check)
 - `--force` bypass near-duplicate detection regardless of `--dedupe-mode`
 
+#### retag
+
+Move a live reflection between domains in place, without archiving, deleting, or re-issuing the id.
+
+```bash
+legion reflect retag --id <reflection-id> --set-domain color-tokens
+legion reflect retag --id <reflection-id> --set-domain none
+```
+
+The reflection stays hot: id, chain links, and `recall_count` are preserved, and recall-by-context still finds it. Only which domain banner it feeds changes (`whoami` reads `domain=identity`, `whatami` reads `domain=workflow`). `--set-domain none` clears the domain; `none` is a reserved sentinel, not a settable domain name. Distinct from `forget --persist`, which moves a reflection to the cold tier: retag never leaves the hot corpus.
+
+Refuses to retag the last live root of a protected domain (`identity` or `workflow`) off that domain, and refuses to retag a second reflection into `identity` while one is already live. Both refusals point you at `legion whoami --generate` for a deliberate identity-root replacement instead.
+
 ### recall
 
 Query reflections by relevance to a context string.
@@ -51,6 +64,9 @@ legion recall --repo myproject --latest --limit 5
 legion recall --repo myproject --domain identity
 legion recall --repo myproject --context "..." --archives
 legion recall --repo myproject --context "..." --include-archives
+legion recall --repo myproject --context "..." --since 3d
+legion recall --repo myproject --context "..." --since 2026-06-01 --until 2026-06-30
+legion recall --repo myproject --context "..." --on yesterday
 ```
 
 Default mode blends BM25 full-text search with cosine similarity when embeddings are available (0.6 BM25 + 0.4 cosine). Results are further adjusted by boost/decay factors.
@@ -67,6 +83,7 @@ Key flags:
 - `--preview` truncate each result to N characters (used by hooks to keep injected context compact)
 - `--archives` search only archived reflections (the deep dive; default searches hot only)
 - `--include-archives` search both hot and archived
+- `--since` / `--until` / `--on` filter to a `created_at` window before ranking. Grammar: `YYYY-MM-DD`, `<N>d`, `<N>w`, `today`, `yesterday`. `--on <date>` is sugar for `--since <date> --until <date>`, and conflicts with both. Applies in every recall mode: BM25/hybrid, `--domain`, and `--latest`. `--cosine-only` stays unfiltered, since it ranks purely by embedding similarity with no `created_at` join
 
 ### forget
 
@@ -118,9 +135,12 @@ Search across legion's cross-agent surfaces. Two query modes, mutually exclusive
 ```bash
 legion consult --context "discriminated unions in composite rules" --limit 3
 legion consult --symbol Database --json
+legion consult --context "..." --since 1w
 ```
 
 `--context` searches reflections across every repo and returns results with repo attribution. `--symbol` searches SCIP indexes across every repo and reports `(repo, lang, def_location, refs_count)` per match. Used by the recall-first hook to inject cross-repo code intelligence before an agent spawns Explore.
+
+`--since` / `--until` / `--on` apply the same date grammar as `recall` (`YYYY-MM-DD`, `<N>d`, `<N>w`, `today`, `yesterday`), but only to `--context` mode. `--symbol` mode ignores them.
 
 ### chain
 
@@ -178,9 +198,12 @@ Surface cross-repo highlights for a session start.
 
 ```bash
 legion surface --repo myproject
+legion surface --repo myproject --since 1w
 ```
 
 Gathers recent bullpen posts, high-value cross-repo reflections, recently extended learning chains, and pending inbound kanban cards. Returns empty when there is nothing to surface.
+
+`--since` / `--until` / `--on` (same grammar as `recall`) apply across all four gathered queries. On the recent-posts query, an explicit range overrides its default 24-hour recency window rather than composing with it, but never overrides the TTL/decay filter that hides expired non-evergreen posts.
 
 ### reindex
 
@@ -190,7 +213,7 @@ Rebuild the Tantivy search index from the database.
 legion reindex
 ```
 
-Normally unnecessary. Use after manual database edits or corruption recovery.
+Normally unnecessary. Use after manual database edits or corruption recovery, or once after upgrading across a release that changes the Tantivy schema (see [Getting Started](/docs/getting-started/#upgrading) for the 0.23.0 case).
 
 ### backfill
 
@@ -226,6 +249,7 @@ legion bullpen --repo myproject
 legion bullpen --repo myproject --count
 legion bullpen --repo myproject --signals
 legion bullpen --repo myproject --musings
+legion bullpen --repo myproject --since 2026-06-01
 ```
 
 Reading marks all posts as seen for your repo. `--signals` and `--musings` are mutually exclusive; without either, everything is shown.
@@ -235,6 +259,7 @@ Key flags:
 - `--count` print unread count only; silent when nothing is unread
 - `--signals` show only structured signals (posts starting with `@`)
 - `--musings` show only natural-language posts
+- `--since` / `--until` / `--on` filter the `--repo` bullpen listing to a `created_at` window (same grammar as `recall`). No effect on `--count`, `--archive`, or `--archived`
 
 ### signal
 
@@ -496,10 +521,14 @@ Record, validate, or retire a quality gate result for a skill run.
 legion quality-gate record --skill legion-review --result clean
 legion quality-gate check --skill legion-simplify --result clean --articulation-file notes.md
 legion quality-gate check --skill legion-simplify --result issues --findings-count 3 --base feature/parent
+legion quality-gate check --skill legion-simplify --result issues --findings-json findings.json
 legion quality-gate void --id <gate-id> --reason "manufactured clean, predates the #780 refusal"
 legion quality-gate void --id <gate-id> --reason "..." --superseded-by <new-gate-id>
 legion quality-gate list --skill legion-simplify
 legion quality-gate stats --skill legion-simplify
+legion quality-gate finding-disposition --id <finding-id> --reason "known false positive, upstream lint config"
+legion quality-gate finding-ack --branch feature/x --skill legion-simplify --reason "naming nits, batch-waived"
+legion quality-gate finding-list --branch feature/x --skill legion-simplify --status pending
 ```
 
 `record` self-reports a result for the current HEAD commit (ASSERTED provenance). Refused for a `clean` result on any skill with a check validator (`legion-simplify`, `legion-pr-write`) -- those can only earn clean through `check`. Skills with no validator (`legion-review`, `legion-verify:<card_id>`) are asserted by necessity and unaffected.
@@ -508,11 +537,16 @@ legion quality-gate stats --skill legion-simplify
 
 `void` retires a known-false gate row without deleting it from history, mirroring the `deleted_at` tombstone pattern on tasks/reflections/schedules. `--reason` is required -- a void with no reason is not an audit trail. `--superseded-by` links the voided row to the genuine replacement once one exists. A voided row drops out of `pr create`'s gate check, the `->done` gate, and `stats`, but stays visible in `list` marked VOID.
 
+`--findings-json` on `check` (and `--details-json`'s `findings` key on `record`) passes a JSON array of `{file, line, severity, summary}` objects. Each finding persists as its own row, tied to the gate that raised it. A `clean` result is refused if the run itself carries findings, or if any HIGH/MED finding from a prior run on this branch and skill is still pending, or any LOW finding is un-acked. Resolution is automatic: `record` and `check` both reconcile the pending set first, and a finding whose file was touched by a later commit is marked resolved before the refusal check runs. `finding-disposition` retires one finding with a required reason when a fix isn't the right answer. `finding-ack` batch-waives every pending LOW finding on a branch and skill with one shared reason, since cosmetic findings shouldn't need per-item ceremony. `finding-list` is the audit view, filterable by branch, skill, and status.
+
 Key flags:
 
 - `record`: `--skill`, `--result` (`clean` or `issues`), `--findings-count`, `--details-json`
-- `check`: `--skill`, `--result`, `--articulation-file` (reads stdin when omitted), `--findings-count`, `--base`
+- `check`: `--skill`, `--result`, `--articulation-file` (reads stdin when omitted), `--findings-count`, `--base`, `--findings-json`
 - `void`: `--id`, `--reason` (required), `--superseded-by`
+- `finding-disposition`: `--id`, `--reason` (required)
+- `finding-ack`: `--branch`, `--skill`, `--reason` (required)
+- `finding-list`: `--branch`, `--skill`, `--status` (`pending`, `resolved`, `dispositioned`), `--json`
 
 `legion pr create` checks for clean `legion-simplify` and `legion-pr-write` gates on HEAD before opening a PR.
 
