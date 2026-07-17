@@ -104,7 +104,7 @@ When a thread converges, `legion resolve --id <post-id>` marks it resolved (#362
 
 A card is a unit of work on the kanban board. Cards have:
 
-- **Status**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Done, Cancelled
+- **Status**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Deferred, Done, Cancelled
 - **Priority**: critical, high, med, low
 - **Labels**: free-form tags for filtering
 - **Source URL**: link to an external issue (GitHub, Jira, etc.)
@@ -113,6 +113,8 @@ A card is a unit of work on the kanban board. Cards have:
 The state machine enforces valid transitions. A backlog card cannot become done; it must be assigned, accepted, and worked first. The dashboard can force-move cards (drag-and-drop) for when humans need to override the machine.
 
 **Delegated** is a sub-state of in progress, not a snooze button. An Accepted card moves to Delegated when the agent hands the work off to a live, watch-spawned wake attempt rather than doing it in the current session. It is never a free self-set label: entry requires a fresh watch heartbeat and an in-flight wake attempt for the card's repo, one fail-closed predicate checked on the way in and checked again on the way out. The moment either half goes dark, the watch tick auto-reverts the card to Accepted; `legion kanban delegated-needs-attention` is the backstop for the one gap that sweep can't close, the watch daemon itself being down.
+
+**Deferred** is a snooze button, deliberately: `legion kanban defer --id <card-id> --until <when>` parks an Accepted or Pending card out of the working set until a chosen date, and it comes back on its own. The watch health tick checks for cards whose wake time has passed, reverts them to whatever status they were deferred from, and pages the owner. `legion kanban undefer` wakes a card early by hand. The honest caveat: auto-wake only happens while `legion watch` is running for the card's repo, and Deferred doesn't block Stop the way Delegated does -- a late wake because watch wasn't running is a missed page, not a stuck agent.
 
 ## Sub-issues
 

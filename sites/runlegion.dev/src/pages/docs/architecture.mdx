@@ -25,7 +25,7 @@ Tables (grouped by concern):
 
 **Coordination**
 
-- `tasks` kanban cards with 9-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
+- `tasks` kanban cards with 10-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
 - `schedules` cron-like scheduled posts with tombstone/LWW columns
 - `documents` coordination substrate documents (#455/#456): specs, NFRs, blueprints, personas, journeys, etc. Type-agnostic at the storage layer. Payload is a validated JSON blob
 - `replan_records` (#554) ratified spec-revision records: a card id, the reason acceptance criteria changed, timestamp. `legion verify --deviation` reads a card's latest record to tell a sanctioned re-plan apart from an unratified deviation
@@ -79,11 +79,13 @@ Incremental index sync detects reflections in SQLite missing from Tantivy and ad
 
 The kanban board is a scheduler wearing a human-friendly UI.
 
-**Card statuses**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Done, Cancelled.
+**Card statuses**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Deferred, Done, Cancelled.
 
 **State machine** enforces valid transitions. `force_move` bypasses the state machine for dashboard drag-and-drop, running inside the same transaction as the bound document's status sync so a sync failure rolls back the card move too.
 
 **Delegated** (#778): a card the accepting agent has handed off to a live, watch-spawned wake attempt. Entry and exit share one fail-closed predicate, `delegated_card_is_live`: a fresh watch heartbeat and an in-flight `wake_attempts` row linked via that row's `card_id`. The watch tick auto-reverts the card to Accepted the moment either condition goes dark. `legion kanban delegated-needs-attention` re-checks the same predicate directly against the database, the backstop for the one case the watch-driven sweep can't reach: the watch daemon itself being down.
+
+**Deferred** (#817/#816): a card consciously put off until a future date rather than handed to a live attempt. Legal from Accepted or Pending, so the revert target is stored per-card as `pre_defer_status` rather than fixed in the state machine. `Database::set_card_deferred` writes the status transition, `wake_at`, and `pre_defer_status` as one atomic UPDATE, closing a crash window that could otherwise strand a card with a null wake time the sweep's `wake_at IS NOT NULL` filter can never see. The watch health tick's `reap_deferred_cards` reverts a due card through the same path `legion kanban undefer` uses, and pages its owner. Auto-wake only fires while `legion watch` is running for the card's repo, and Deferred carries no Stop-hook backstop the way Delegated does: a missed watch cycle is a missed page, not a stuck agent.
 
 **Spec revision** (#554): `ReplanRequest` moves a card Accepted to NeedsInput when an agent concludes the frozen acceptance criteria are wrong, incomplete, or unachievable, a distinct audit action from a generic needs-input. A human-ratified `ReplanRecord` is stored separately. `legion verify --deviation <reason>` looks up the card's latest record: present and ratified, verify proceeds against the revised criteria; absent, the deviation hard-blocks as an unratified improvisation.
 

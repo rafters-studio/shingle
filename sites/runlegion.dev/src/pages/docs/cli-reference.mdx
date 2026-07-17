@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.23.0. Commands are organized by category.
+This reference covers legion 0.24.0. Commands are organized by category.
 
 ---
 
@@ -321,7 +321,7 @@ Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when th
 
 ### kanban
 
-Manage the kanban board. Cards have nine states with enforced transitions:
+Manage the kanban board. Cards have ten states with enforced transitions:
 
 ```
 backlog -> pending -> accepted -> in-review -> done
@@ -329,9 +329,12 @@ backlog -> pending -> accepted -> in-review -> done
                          +-> blocked -> accepted (via unblock)
                          +-> needs-input -> accepted (via resume)
                          +-> delegated -> accepted (via undelegate, or auto-revert)
+                         +-> deferred -> accepted (via undefer, or auto-revert on wake)
                          +-> done
                          +-> cancelled
 ```
+
+Deferred is legal from Pending too, not just Accepted; the revert target is whichever status the card deferred from, so a card deferred from Pending comes back to Pending, not Accepted.
 
 ```bash
 # Create
@@ -343,6 +346,7 @@ legion kanban create --from myproject --to backend --text "..." \
 legion kanban view --id <card-id>
 legion kanban list --repo backend
 legion kanban list --repo myproject --from
+legion kanban list --repo myproject --deferred
 
 # Transitions
 legion kanban accept --id <card-id>
@@ -379,6 +383,23 @@ legion kanban delegated-needs-attention --repo myproject --json
 ```
 
 `delegate` is refused unless the watch daemon's heartbeat is fresh and a live wake attempt for the card's repo exists; a self-set label with no process behind it is exactly the bypass this state must never become. The moment that attempt finishes or dies, the card auto-reverts to Accepted. `undelegate` returns the card to Accepted manually, for an agent that wants the work back before the auto-revert sweep runs. `delegated-needs-attention` lists delegated cards whose linked attempt is no longer verifiably live: the fail-closed backstop for the one case the auto-revert sweep can't reach, the watch daemon itself being down.
+
+#### Defer
+
+An Accepted or Pending card can be consciously put off until a future date, out of the working set until then:
+
+```bash
+legion kanban defer --id <card-id> --until 3d
+legion kanban defer --id <card-id> --until 2026-08-01
+legion kanban undefer --id <card-id>
+legion kanban list --repo myproject --deferred
+```
+
+`--until` takes the same token shapes as `recall`'s date filters (`YYYY-MM-DD`, `<N>d`, `<N>w`, `today`), but resolves the opposite direction: `recall --since 3d` looks 3 days into the past, `defer --until 3d` looks 3 days into the future. A `--until` that has already passed is refused, naming the date it parsed. Deferring a card that's already Deferred just updates `--until` in place.
+
+Deferred cards sit out of the working set: `legion kanban list` doesn't show them by default (`--deferred` does), and they don't count against the in-progress gate on Stop. They're never invisible, though -- `list` marks a deferred card with `[wakes:YYYY-MM-DD]`, `view` shows a `Wake at:` line, and `list --json` carries the raw timestamp.
+
+Two ways back to work: `legion kanban undefer` wakes a card immediately, returning it to whichever status it was deferred from (Accepted or Pending). Or wait -- the watch health tick checks for due cards on its own and reverts them, paging the card's owner the moment the wake time passes. That auto-wake only fires while `legion watch` is running for the card's repo. Unlike Delegated, Deferred has no Stop-hook backstop, so a late wake because watch wasn't running is a missed page, not a stuck agent -- `legion kanban undefer` is there for when the timing matters more than that.
 
 #### Spec revision
 
