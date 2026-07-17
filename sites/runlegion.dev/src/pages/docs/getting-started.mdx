@@ -15,15 +15,17 @@ Two commands. Legion gives Claude Code agents persistent memory, team communicat
 
 ## Upgrading
 
-Already running legion? `/plugin install legion` picks up the new binary. That's usually the whole upgrade.
+```bash
+/plugin update legion
+```
 
-0.23.0 is the exception: it adds `created_at` as a fourth field in the Tantivy search index, alongside id/repo/text, so the new `--since`/`--until`/`--on` date filters run inside the index instead of as a post-filter. An index built before 0.23.0 doesn't have that field. Legion detects the mismatch on open and rebuilds the index empty rather than corrupting subsequent writes, which means text-search-backed recall comes up hollow until you run this once:
+Pulls the latest version from the marketplace (`/plugin install legion` only handles the first install). After upgrading to 0.23.0, run this once:
 
 ```bash
 legion reindex
 ```
 
-Run it right after upgrading to 0.23.0. Everything else about the upgrade is transparent.
+0.23.0 adds `created_at` as a fourth field in the Tantivy search index, alongside id/repo/text, so the new `--since`/`--until`/`--on` date filters run inside the index instead of as a post-filter. An index built before 0.23.0 doesn't have that field. Legion detects the mismatch on open and rebuilds the index empty rather than corrupting subsequent writes, which means text-search-backed recall comes up hollow until you reindex.
 
 ## What just happened
 
