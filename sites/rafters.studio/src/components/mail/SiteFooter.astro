@@ -1,0 +1,38 @@
+---
+import MegaFooter from "@shingle/shared/MegaFooter.astro";
+import type { FooterColumn } from "@shingle/shared/MegaFooter.astro";
+
+const repo = "https://github.com/rafters-studio/mail";
+
+const leadingColumns: FooterColumn[] = [
+  {
+    heading: "Docs",
+    links: [
+      { label: "Getting started", href: "/mail/docs/getting-started/" },
+      { label: "Architecture", href: "/mail/docs/architecture/" },
+      { label: "Core reference", href: "/mail/docs/core-reference/" },
+      { label: "Migrations", href: "/mail/docs/migrations/" },
+    ],
+  },
+  {
+    heading: "IMAP",
+    links: [
+      { label: "Quickstart", href: "/mail/docs/imap-quickstart/" },
+      { label: "Command reference", href: "/mail/docs/imap-commands/" },
+      { label: "App passwords", href: "/mail/docs/app-passwords/" },
+      { label: "Deployment", href: "/mail/docs/imap-deployment/" },
+    ],
+  },
+];
+
+const siteColumn: FooterColumn = {
+  heading: "Mail",
+  links: [
+    { label: "GitHub", href: repo },
+    { label: "Changelog", href: `${repo}/blob/main/CHANGELOG.md` },
+    { label: "License (MIT)", href: `${repo}/blob/main/LICENSE` },
+  ],
+};
+---
+
+<MegaFooter current="mail" leadingColumns={leadingColumns} siteColumn={siteColumn} />
