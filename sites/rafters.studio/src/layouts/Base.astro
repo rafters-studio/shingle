@@ -1,6 +1,8 @@
 ---
 import TopBar from "@/components/TopBar.astro";
 import MegaFooter from "@/components/MegaFooter.astro";
+import SiteHead from "@shingle/shared/SiteHead.astro";
+import type { JsonLdObject } from "@shingle/shared/meta";
 
 interface Props {
     title: string;
@@ -14,7 +16,7 @@ interface Props {
     /** ISO 8601 timestamp for article last-modified time. */
     modifiedTime?: string;
     /** Additional JSON-LD nodes to merge into the sitewide graph. */
-    extraJsonLd?: Record<string, unknown>[];
+    extraJsonLd?: JsonLdObject[];
     /** Render a fixed topbar that fades in after the user scrolls past the hero. */
     stickyTopbar?: boolean;
 }
@@ -35,54 +37,32 @@ const {
 } = merged;
 
 const siteOrigin = Astro.site?.origin ?? "https://rafters.studio";
-const canonical = new URL(Astro.url.pathname, siteOrigin).href;
-const absoluteImage = new URL(image, siteOrigin).href;
 const fullTitle = `${title} | Rafters`;
 
+// The shared org + WebSite JSON-LD graph comes from SiteHead (astro-meta), so
+// the head is identical across every shingle site. Only the home-page
+// SoftwareApplication node is site-specific; it references the shared org by
+// its @id and rides in as an extra schema node.
 const isHome = Astro.url.pathname === "/";
-const jsonLdGraph: Record<string, unknown>[] = [
-    {
-        "@type": "WebSite",
-        "@id": `${siteOrigin}/#website`,
-        url: `${siteOrigin}/`,
-        name: "Rafters",
-        description:
-            "The Design Intelligence Protocol. Designers encode judgment; AI reads decisions.",
-        inLanguage: "en",
-        publisher: { "@id": `${siteOrigin}/#organization` },
+const softwareApp: JsonLdObject = {
+    "@type": "SoftwareApplication",
+    "@id": `${siteOrigin}/#software`,
+    name: "Rafters",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "macOS, Linux, Windows",
+    description:
+        "AI-first design system CLI. Mathematical design rules, OKLCH color science, and an MCP server that teaches AI your design decisions.",
+    url: `${siteOrigin}/`,
+    codeRepository: "https://github.com/rafters-studio/rafters",
+    license: "https://opensource.org/licenses/MIT",
+    offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
     },
-    {
-        "@type": "Organization",
-        "@id": `${siteOrigin}/#organization`,
-        name: "Rafters Studio",
-        url: siteOrigin,
-        logo: `${siteOrigin}/logo.svg`,
-    },
-];
-if (isHome) {
-    jsonLdGraph.push({
-        "@type": "SoftwareApplication",
-        "@id": `${siteOrigin}/#software`,
-        name: "Rafters",
-        applicationCategory: "DeveloperApplication",
-        operatingSystem: "macOS, Linux, Windows",
-        description:
-            "AI-first design system CLI. Mathematical design rules, OKLCH color science, and an MCP server that teaches AI your design decisions.",
-        url: `${siteOrigin}/`,
-        codeRepository: "https://github.com/rafters-studio/rafters",
-        license: "https://opensource.org/licenses/MIT",
-        offers: {
-            "@type": "Offer",
-            price: "0",
-            priceCurrency: "USD",
-        },
-        publisher: { "@id": `${siteOrigin}/#organization` },
-    });
-}
-const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [...jsonLdGraph, ...extraJsonLd],
+    publisher: { "@id": `${siteOrigin}/#org` },
 };
+const extraSchema: JsonLdObject[] = [...(isHome ? [softwareApp] : []), ...extraJsonLd];
 ---
 
 <!doctype html>
@@ -90,39 +70,20 @@ const jsonLd = {
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content={description} />
         <title>{fullTitle}</title>
-        <link rel="canonical" href={canonical} />
+        <SiteHead
+            title={fullTitle}
+            description={description}
+            ogType={type}
+            publishedTime={publishedTime}
+            modifiedTime={modifiedTime}
+            image={image}
+            extraSchema={extraSchema}
+        />
         <meta name="theme-color" content="#0a0a0a" />
         <meta name="robots" content="index, follow" />
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-
-        <meta property="og:site_name" content="Rafters" />
-        <meta property="og:type" content={type} />
-        <meta property="og:title" content={fullTitle} />
-        <meta property="og:description" content={description} />
-        <meta property="og:url" content={canonical} />
-        <meta property="og:image" content={absoluteImage} />
-        <meta property="og:locale" content="en_US" />
-        {
-            publishedTime && (
-                <meta
-                    property="article:published_time"
-                    content={publishedTime}
-                />
-            )
-        }
-        {
-            modifiedTime && (
-                <meta property="article:modified_time" content={modifiedTime} />
-            )
-        }
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={fullTitle} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={absoluteImage} />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -141,12 +102,6 @@ const jsonLd = {
             type="text/plain"
             href="/llms-full.txt"
             title="Rafters docs (full) for LLMs"
-        />
-
-        <script
-            is:inline
-            type="application/ld+json"
-            set:html={JSON.stringify(jsonLd)}
         />
     </head>
     <body class="bg-background text-foreground">
