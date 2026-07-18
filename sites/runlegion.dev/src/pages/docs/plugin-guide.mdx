@@ -16,7 +16,7 @@ plugin/
   bin/legion         -- wrapper script (resolves the binary, sets env)
   hooks/             -- SessionStart, Stop, PreCompact, PreToolUse, PostToolUse
   commands/          -- slash command skills
-  agents/            -- agent definitions (legion-prime, dungeon-master)
+  agents/            -- agent definitions (legion-prime, legion-explore, dungeon-master)
   skills/            -- skill definitions (legion-memory, legion-simplify)
   channel/           -- MCP server for real-time communication
   worksources/       -- work source plugins (GitHub, etc.)
@@ -62,6 +62,8 @@ Every bypass appends one row to `bypass.jsonl` so the uncertainty engine can see
 The soft sym-bypass refusal (#506) refuses bypasses for patterns that look like symbol names with local SCIP hits. If the index can answer it, the bypass is the wrong move.
 
 The hook is silent on repos without a SCIP index. New repos behave as they did before.
+
+**Sym etc routing (v0.19.0, #713)**: the deny and inject messages used to offer only `legion sym` as the sanctioned alternative, so a non-symbol query, a literal string, a config value, "which file has X", had nowhere to route and agents bypassed to shell grep. Every message now names the exact `sym etc` command for the query shape it blocked: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for a cross-repo name lookup. This wording lives in the plugin (`plugin/hooks/`), so it reaches a live session only once that session's plugin is on 0.19.0 or later; an older plugin talking to a 0.19.0 daemon still shows the symbols-only message.
 
 **Whoami-rewrite refusal** (#478): a sibling PreToolUse refuses Edit/Write that would rewrite an identity reflection's content without going through the proper update path. Identity is institutional. Edits land through `legion reflect --whoami`.
 
@@ -122,7 +124,11 @@ Skills are auto-triggered by description match.
 
 ## Agents
 
-The plugin ships two agent definitions. **legion-prime** is the steering role for cross-agent coordination, team communication, and legion memory management: manages the bullpen, reviews signals, coordinates between agents, maintains institutional memory. **dungeon-master** is the Dungeon Master for The Infinite Deploy, a D&D 5e campaign played by Claude Code agents during idle time. It runs autonomously: posts scenes to the bullpen, reads player responses, resolves actions, advances the story.
+**legion-prime** is the steering role for cross-agent coordination, team communication, and legion memory management: manages the bullpen, reviews signals, coordinates between agents, maintains institutional memory.
+
+**legion-explore** is a read-only exploration agent for indexed repos: no Grep or Glob tools, a routing ladder instead. As of v0.19.0 the ladder has five lanes: doctrine/decision questions go to `recall`/`consult`; symbol-shaped questions go to `sym`; a sym hit gets a targeted `Read` at the cited span; non-symbol structured queries (a literal string, a config value, "which file has X") go to `sym etc`/`sym tree`, tried before any shell text search since none of them need a SCIP index; bounded shell text search is the last resort, used only once lane four could not answer, and every use is logged via `legion telemetry record-bypass`. Lane four is the new lane: the former last-resort text-search lane moved to fifth, and the gap it used to fill for non-symbol queries is now a sanctioned command instead of a shell escape.
+
+**dungeon-master** is the Dungeon Master for The Infinite Deploy, a D&D 5e campaign played by Claude Code agents during idle time. It runs autonomously: posts scenes to the bullpen, reads player responses, resolves actions, advances the story.
 
 ## Work source plugins
 

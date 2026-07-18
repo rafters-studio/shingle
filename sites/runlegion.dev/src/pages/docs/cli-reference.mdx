@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.18.0. Commands are organized by category.
+This reference covers legion 0.19.0. Commands are organized by category.
 
 ---
 
@@ -371,9 +371,12 @@ legion document list
 legion document list --doc-type requirement --surface myproject
 legion document validate --schema <schema-doc-id> --file instance.json
 legion document archive <id>
+legion document set-status <id> --to published
 ```
 
 The storage layer is type-agnostic: payload is a validated JSON blob. Meta columns (`type`, `surface`, `status`, `priority`, `owner`) are indexed SQL columns.
+
+`set-status` sets the lifecycle column, bumps `updated_at`, and returns the persisted row re-fetched from the database rather than constructed in memory, so a printed status is proof of the write. There is no status-machine enforcement; the operator clicking Publish in the dashboard is the human gate, by design.
 
 Schema documents (`doc_type=schema`) are structurally validated at create: payload must include `$schema`, `title`, `type:object`, and non-empty `properties`. Other document types can be validated against a landed schema via `legion document validate --schema <id>`. A pointer reflection is stored automatically on `domain=schema` so `legion recall --domain schema` finds every landed schema.
 
@@ -478,7 +481,9 @@ legion index --logs
 legion index --logs --repo myproject --follow
 ```
 
-Detects languages by marker files: `Cargo.toml` (rust), `package.json` (typescript), `pyproject.toml` / `requirements.txt` (python), `go.mod` (go). Background-indexer logs land at `~/.local/state/legion/index-logs/` and survive reboots.
+Detects languages by marker files: `Cargo.toml` (rust), `package.json` (typescript), `pyproject.toml` / `requirements.txt` (python), `go.mod` (go). Background-indexer logs land at `~/.local/state/legion/index-logs/` and survive reboots. Alongside the SCIP pass, `legion index` also walks the full file tree into `file_inventory`, parses JS/TS import edges, and extracts CSS symbols; those three passes run unconditionally, independent of whether a given language's SCIP indexer binary is on `PATH`.
+
+`legion index <repo> --status --banner` prints a SessionStart-friendly line per detected language. Silent when everything is fresh. A missing language now names why: "not indexed yet" means running `legion index` fixes it; "indexer unavailable" means the SCIP binary that language needs is not on this machine and this command cannot fix that by itself, though `sym etc` still answers non-symbol questions for that language's files either way.
 
 ### sym
 
@@ -496,6 +501,42 @@ legion sym list --kind fn
 `sym impact` parses a unified diff and reports SCIP reference counts per touched symbol, sorted descending. Pass `--json` for agent consumption. `LEGION_IMPACT_HIGH_THRESHOLD` (default 50) marks the `HIGH` tag in text output.
 
 `sym list` replaces `grep "fn "` on indexed repos: returns names and locations, not source bodies.
+
+`sym` answers symbol questions. For everything else, `sym tree` and `sym etc` answer from the file inventory instead, and need no SCIP index at all.
+
+### sym tree
+
+Structured, cross-repo view of the file inventory `legion index` builds. The sanctioned replacement for `find` / `ls -R` / a throwaway `os.walk`.
+
+```bash
+legion sym tree --repo myproject
+legion sym tree --repo myproject --ext rs
+legion sym tree --repo myproject --under src/db --depth 1
+legion sym tree --json
+```
+
+Reads `Database::list_file_inventory` directly; never walks the filesystem at query time, so it answers instantly regardless of repo size. `--repo` and `--ext` filter server-side. `--under` scopes to a subtree prefix; `--depth` caps path segments counted from `--under` (or the repo root when `--under` is omitted). Omit `--repo` to get every watched repo's files, each entry tagged with its own `repo` field.
+
+### sym etc
+
+Non-symbol answer surface: query shapes over the files SCIP does not parse (docs, configs, css, prose). Three subcommands, one per query shape.
+
+```bash
+# Exact content search -- the sanctioned grep
+legion sym etc find-content 'TODO' --repo myproject
+legion sym etc find-content '--spacing-0\.5' --repo myproject --fixed-strings
+legion sym etc find-content 'fn main' --ext rs --json
+
+# One field out of a config file or doc frontmatter, without reading the whole file
+legion sym etc extract package.json --field scripts.build
+legion sym etc extract pages/docs/concepts.mdx --field title
+
+# Locate a file by name, glob, or role, across every watched repo
+legion sym etc find-file "*.test.ts"
+legion sym etc find-file components.json --role config
+```
+
+`find-content` runs the same ripgrep engine as the shell tool it replaces, directly against the working tree: literal mode (`--fixed-strings`) matches conflict markers and punctuation-heavy patterns verbatim, regex is the default. `extract` reads JSON, TOML, YAML, or the YAML frontmatter of a `.md`/`.mdx`/`.astro` file and walks a dotted `--field` path; numeric segments index arrays. `find-file` matches basenames or glob patterns against the file inventory, cross-repo by default, with an optional `--role` filter (`config`, `test`, `doc`, `entry`). Every invocation of all three, success or failure, lands a row in `etc-usage.jsonl`.
 
 ---
 
@@ -612,9 +653,13 @@ Bypass telemetry: log and inspect when agents escape the grep/Read enforcement h
 legion telemetry record-bypass --tool Grep --repo myproject --pattern "fn init"
 legion telemetry list-bypasses --repo myproject --since 24h
 legion telemetry summary
+legion telemetry etc-summary
+legion telemetry etc-summary --command find-content --since 7d
 ```
 
-`summary` surfaces the top under-served `(tool, repo, pattern)` tuples.
+`summary` surfaces the top under-served `(tool, repo, pattern)` tuples from `bypass.jsonl`.
+
+`etc-summary` reads the sibling `etc-usage.jsonl` log and reports count, zero-result rate, and error count per `sym etc` / `sym tree` query shape (`find-content`, `tree`, `extract`, `find-file`). `summary` above is the bypass count; `etc-summary` is the adoption count, the number that answers whether the sanctioned replacement for grep/find actually gets used and actually answers.
 
 ### uncertainty
 
