@@ -297,6 +297,8 @@ smugglr: stopped. 3 cycles completed.
 
 Watch writes JSONL to stdout when `--output json` is set. Each tick is one JSON line. Useful for piping into log aggregators or agent workflows.
 
+`--dry-run` opens the local database read-only for the life of the daemon, not just per tick: no write connection is ever acquired, so a `--dry-run` watch cannot write to the local database even if a bug elsewhere tried. Text-mode tick summaries append `(dry run - no actual changes made)` so a log line with row counts is never mistaken for an applied sync.
+
 Stop with SIGINT (Ctrl+C) or SIGTERM. The daemon finishes the current cycle before exiting.
 
 ---
@@ -404,12 +406,13 @@ Every command returns a typed exit code. Use these for scripting, CI/CD gates, a
 | Code | Name | Meaning | Retry? |
 |------|------|---------|--------|
 | `0` | Success | Operation completed. | No. |
-| `1` | General error | Something unexpected broke. | Maybe. |
+| `1` | General error | Something unexpected broke, including a plugin/adapter failure. There is no dedicated plugin exit code; adapter errors fold into this bucket. | Maybe. |
 | `2` | Config error | Bad config file, missing fields, invalid values. | No. Fix the config. |
-| `3` | Network/transient | Connection failed, timeout, HTTP 5xx. | Yes, with backoff. |
-| `4` | Conflict | Concurrent write detected (ETag mismatch, row conflict). | Yes, after re-reading state. |
-| `5` | Not found | Table, snapshot, or resource does not exist. | No. Check the name. |
-| `6` | Plugin error | A DataSource adapter failed. | Depends on the adapter. |
+| `3` | Network/transient | Connection failed, timeout, HTTP 5xx, retries exhausted. | Yes, with backoff. |
+| `4` | Conflict | `stash`/`retrieve` hit a concurrent write on the relay (S3 ETag mismatch). Not used for `push`/`pull`/`sync` row conflicts -- those are resolved by your conflict strategy or, if unresolvable, logged as a warning and skipped, not an error. | Yes, after re-reading state. |
+| `5` | Not found | Table, snapshot, or resource does not exist; also covers a rejected D1/target request (bad statement, bad request). | No. Check the name or the request. |
+
+The CLI's exit codes are 0 through 5. There is no `6`.
 
 In shell scripts:
 

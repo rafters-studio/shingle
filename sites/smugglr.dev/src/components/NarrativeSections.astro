@@ -27,13 +27,12 @@ import InkBlock from "@/components/InkBlock.astro";
             <H2>A TOML file, a dry-run, a push.</H2>
             <P size="display-small">The whole product in thirty seconds. Real CLI output, no mockups.</P>
 
-            <Codeblock>{`[source]
-path = "./local.db"
+            <Codeblock>{`local_db = "./local.db"
 
 [target]
 type = "d1"
-database = "my-db"
 account_id = "abc123"
+database_id = "def456"
 api_token = "..."`}</Codeblock>
 
             <Codeblock>{`$ smugglr push --dry-run
@@ -68,13 +67,16 @@ generic       # flat {sql, params} JSON`}</Codeblock>
             <P size="display-small">This target points at D1:</P>
             <Codeblock>{`[target]
 type = "d1"
-database = "my-db"
 account_id = "abc123"
+database_id = "def456"
 api_token = "..."`}</Codeblock>
 
-            <P size="display-small">This one at Turso:</P>
+            <P size="display-small">This one at Turso, through the <Code>plugin</Code> target type:</P>
             <Codeblock>{`[target]
-type = "turso"
+type = "plugin"
+name = "turso"
+
+[target.config]
 url = "https://my-db.turso.io"
 auth_token = "..."`}</Codeblock>
 

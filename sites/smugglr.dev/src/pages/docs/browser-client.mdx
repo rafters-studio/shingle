@@ -4,7 +4,7 @@ title: Browser Client
 description: "The smugglr npm package: Smugglr.init(), push/pull/sync/diff, the table-changed event, autoSync, the OPFS/wa-sqlite local source, SmugglrError, and the zustand/nanostores reactive bridges."
 ---
 
-smugglr-core compiled to WASM, wrapped in a typed TypeScript client. Same content-hashed delta engine as the CLI, same exit-code semantics, running in a browser tab or a Node process. This page covers the `smugglr` npm package: install, `Smugglr.init()`, every instance method, the `table-changed` event, `autoSync`, the OPFS local source, error handling, and the two reactive-store bridges (`@smugglr/zustand`, `@smugglr/nanostores`).
+smugglr-core compiled to WASM, wrapped in a typed TypeScript client. Same content-hashed delta engine as the CLI, running in a browser tab or a Node process; see [Errors](#errors) for where its exit codes match the CLI's and where they don't. This page covers the `smugglr` npm package: install, `Smugglr.init()`, every instance method, the `table-changed` event, `autoSync`, the OPFS local source, error handling, and the two reactive-store bridges (`@smugglr/zustand`, `@smugglr/nanostores`).
 
 ---
 
@@ -308,7 +308,9 @@ class SmugglrError extends Error {
 }
 ```
 
-Every method that touches the sync engine throws a `SmugglrError` on failure, not a raw `Error`. `code` matches the CLI's exit code semantics: `2` config, `3` network/transient, `4` conflict, `5` not found, `6` plugin error, `1` everything else. See the CLI reference's [Exit Codes](/docs/cli-reference/#exit-codes) table for the full meaning of each code; the browser client and the CLI agree on what each number means, so error-handling logic written for one transfers to the other.
+Every method that touches the sync engine throws a `SmugglrError` on failure, not a raw `Error`. `code` matches the native CLI's exit code semantics for `1` through `5`: `2` config, `3` network/transient, `4` conflict, `5` not found, `1` everything else. See the CLI reference's [Exit Codes](/docs/cli-reference/#exit-codes) table for the full meaning of each of those.
+
+`6` is browser-client-only: `parseError` classifies any error message containing "plugin" or "Plugin" as `6`, a code the native CLI never emits (the CLI has no dedicated plugin exit code and folds adapter failures into `1`). Code written against the CLI's five codes transfers directly; code that also branches on `6` is browser-only.
 
 ```ts
 try {
