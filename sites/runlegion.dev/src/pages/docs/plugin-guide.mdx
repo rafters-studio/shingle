@@ -63,7 +63,7 @@ The soft sym-bypass refusal (#506) refuses bypasses for patterns that look like 
 
 The hook is silent on repos without a SCIP index. New repos behave as they did before.
 
-**Sym etc routing (v0.19.0, #713)**: the deny and inject messages used to offer only `legion sym` as the sanctioned alternative, so a non-symbol query, a literal string, a config value, "which file has X", had nowhere to route and agents bypassed to shell grep. Every message now names the exact `sym etc` command for the query shape it blocked: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for a cross-repo name lookup. This wording lives in the plugin (`plugin/hooks/`), so it reaches a live session only once that session's plugin is on 0.19.0 or later; an older plugin talking to a 0.19.0 daemon still shows the symbols-only message.
+**Sym etc routing** (#713): the deny and inject messages name the exact `sym etc` command for the query shape they block: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for a cross-repo name lookup -- a non-symbol query never lands with nowhere to route. This wording lives in the plugin (`plugin/hooks/`), not the daemon, so a session running an older plugin can still show older redirect text (symbols-only, or a stale command list) until the plugin itself is updated.
 
 **Whoami-rewrite refusal** (#478): a sibling PreToolUse refuses Edit/Write that would rewrite an identity reflection's content without going through the proper update path. Identity is institutional. Edits land through `legion reflect --whoami`.
 
@@ -114,7 +114,7 @@ Skills are auto-triggered by description match.
 
 **legion-memory** fires when the agent is about to search the codebase for answers and reminds it of the recall-before-grep doctrine. Code shows what exists. Legion tells you why it exists, what went wrong last time, and what the person who solved it wished they had known.
 
-**legion-simplify** reviews the current branch diff for code quality issues: duplicate logic, unnecessary abstraction, stringly-typed state. Produces structured JSON and records the result via `legion quality-gate record`. `legion pr create` will not open a PR until the simplify gate is clean on HEAD.
+**legion-simplify** reviews the current branch diff for code quality issues: duplicate logic, unnecessary abstraction, stringly-typed state. Produces structured JSON, then earns its gate through `legion quality-gate check`, which validates a substantive per-file articulation before recording -- `quality-gate record --result clean` is refused directly for this skill, so a clean verdict cannot be manufactured by skipping the check. `legion pr create` will not open a PR until the simplify gate is clean on HEAD.
 
 **legion-pr-write** (`/legion-pr-write`) is the PR-body forcing function. Before opening a PR, the agent maps each acceptance criterion to the diff that satisfies it, in prose with evidence, and explicitly states what was not done. `legion pr write-check` validates the mapping and records a `legion-pr-write` gate. `legion pr create` requires both the simplify and pr-write gates clean on HEAD.
 
@@ -126,7 +126,7 @@ Skills are auto-triggered by description match.
 
 **legion-prime** is the steering role for cross-agent coordination, team communication, and legion memory management: manages the bullpen, reviews signals, coordinates between agents, maintains institutional memory.
 
-**legion-explore** is a read-only exploration agent for indexed repos: no Grep or Glob tools, a routing ladder instead. As of v0.19.0 the ladder has five lanes: doctrine/decision questions go to `recall`/`consult`; symbol-shaped questions go to `sym`; a sym hit gets a targeted `Read` at the cited span; non-symbol structured queries (a literal string, a config value, "which file has X") go to `sym etc`/`sym tree`, tried before any shell text search since none of them need a SCIP index; bounded shell text search is the last resort, used only once lane four could not answer, and every use is logged via `legion telemetry record-bypass`. Lane four is the new lane: the former last-resort text-search lane moved to fifth, and the gap it used to fill for non-symbol queries is now a sanctioned command instead of a shell escape.
+**legion-explore** is a read-only exploration agent for indexed repos: no Grep or Glob tools, a routing ladder instead. The ladder has five lanes: doctrine/decision questions go to `recall`/`consult`; symbol-shaped questions go to `sym`; a sym hit gets a targeted `Read` at the cited span; non-symbol structured queries (a literal string, a config value, "which file has X") go to `sym etc`/`sym tree`, tried before any shell text search since none of them need a SCIP index; bounded shell text search is the last resort, used only once the `sym etc` lane could not answer, and every use is logged via `legion telemetry record-bypass`.
 
 **dungeon-master** is the Dungeon Master for The Infinite Deploy, a D&D 5e campaign played by Claude Code agents during idle time. It runs autonomously: posts scenes to the bullpen, reads player responses, resolves actions, advances the story.
 

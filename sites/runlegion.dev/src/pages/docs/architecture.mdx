@@ -23,12 +23,12 @@ Tables (grouped by concern):
 
 - `scip_indexes` per `(repo, lang)` SCIP protobuf blobs that `legion sym` reads in-process. Built by `legion index` and refreshed by the PostToolUse hook
 - `file_inventory` one row per non-ignored file in every watched repo, built by a gitignore-aware walk on every `legion index` run. The substrate under `sym tree` and `sym etc find-file`; a file gets a row whether or not SCIP indexes its language
-- `module_edges` one row per resolved (or unresolved) JS/TS import, export-from, or re-export, keyed on `(repo, from_path, specifier)`. Built by parsing every js/ts/jsx/tsx file with `oxc_parser`/`oxc_resolver`, independent of whether `scip-typescript` is installed
-- `css_symbols` one row per class-selector or `--custom-property` definition, keyed on `(repo, path, kind, name, line)`. Built with `lightningcss`, including Tailwind v4 `@theme` blocks
+- `module_edges` one row per resolved (or unresolved) JS/TS import, export-from, or re-export, keyed on `(repo, from_path, specifier)`. Built by parsing every js/ts/jsx/tsx file with `oxc_parser`/`oxc_resolver`, independent of whether `scip-typescript` is installed. Queried via `sym imports`/`sym importers`
+- `css_symbols` one row per class-selector or `--custom-property` definition, keyed on `(repo, path, kind, name, line)`. Built with `lightningcss`, including Tailwind v4 `@theme` blocks. Queried via `sym list`/`sym def --lang css`
 
 **Coordination**
 
-- `tasks` kanban cards with 8-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns
+- `tasks` kanban cards with a 10-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns, plus `wake_at`/`pre_defer_status` for the Deferred state
 - `schedules` cron-like scheduled posts with tombstone/LWW columns
 - `documents` coordination substrate documents (#455/#456): specs, NFRs, blueprints, personas, journeys, etc. Type-agnostic at the storage layer. Payload is a validated JSON blob
 - `board_reads` per-agent read cursors for the bullpen (local, does not replicate)
@@ -36,7 +36,7 @@ Tables (grouped by concern):
 **Watch and wake**
 
 - `watch_handled` per-repo signal handling tracking
-- `wake_attempts` (#487) FSM-tracked wake attempts: spawn time, PID, PTY EOF time, exit_observed_at, terminal status. The reaper is the only writer for terminal transitions
+- `wake_attempts` (#487) FSM-tracked wake attempts: spawn time, PID, PTY EOF time, exit_observed_at, terminal status, and a nullable `card_id` linking an attempt to a Delegated card. The reaper is the only writer for terminal transitions
 
 **Observability**
 
@@ -44,7 +44,8 @@ Tables (grouped by concern):
 - `rate_limit_samples` Claude Code rate-limit chips ingested by `legion statusline`
 - `usage_samples` Claude Code session token usage ingested alongside the rate-limit chip
 - `audit_log` work source actions (issue/PR creation, merge, review) for traceability
-- `quality_gates` simplify-skill results enforced by `legion pr create`
+- `quality_gates` skill-run results enforced by `legion pr create` and the ->Done gate, carrying provenance (VALIDATED via a check validator, ASSERTED via `record`), a void/supersede tombstone, and the resolved `base` ref a `check` run diffed against
+- `quality_gate_findings` structured findings (file, line, severity, status, disposition reason, resolving commit) keyed to the gate row that raised them, resolved by git-log detection or retired via `finding-disposition`/`finding-ack`
 
 **Uncertainty (Pillar 2)**
 
@@ -52,6 +53,8 @@ Tables (grouped by concern):
 - `calibration_snapshot` reliability buckets: claimed vs actual, count, Brier score (#357/#358)
 
 All IDs are UUIDv7 (time-ordered). Migrations are idempotent and run on every DB open. Syncable tables (`reflections`, `tasks`, `schedules`, `documents`) carry `deleted_at` and `updated_at` for soft-delete replication and last-write-wins conflict resolution.
+
+**Identity-root guard** (#785): a repo holds at most one live, unparented `domain=identity` reflection. `insert_reflection_with_meta` refuses a second one unconditionally -- bootstrap and `--follows` chaining are unaffected, only a second orphan root is blocked. The one sanctioned replace path is `swap_identity_root`, consumed by `legion whoami --generate --apply`: a single transaction that deletes every live identity root for the repo, including any previously leaked duplicates, and inserts the new root plus optional chained children, rolling back atomically on failure. `reflect retag` carries the same guard from the UPDATE side: it refuses to retag the last live root of a protected domain (`identity` or `workflow`) off that domain.
 
 ## Prose search
 
@@ -71,9 +74,9 @@ Incremental index sync detects reflections in SQLite missing from Tantivy and ad
 
 **Background indexer**: triggered after `legion watch add`, after PostToolUse on indexed repos, and on demand. Logs land under `~/.local/state/legion/index-logs/`.
 
-**Sym etc (v0.19, #704)**: the non-symbol answer surface, for files and query shapes SCIP was never going to cover. `sym etc find-content` (`src/etc.rs`) runs an in-process ripgrep engine (`grep-regex` + `grep-searcher` over an `ignore` walk) against the working tree at query time, deliberately not a corpus: a tokenized index returns nothing on the punctuation-heavy literals agents actually search for, and any content index goes stale on checkout or pull, neither of which fires an edit hook. `sym tree` and `sym etc find-file` answer from `file_inventory` instead, with no filesystem walk at query time. `sym etc extract` reads a JSON/TOML/YAML file or a `.md`/`.mdx`/`.astro` file's YAML frontmatter and walks a dotted field path. Every invocation, success or failure, lands one row in `etc-usage.jsonl`; `legion telemetry etc-summary` reads it back.
+**Sym etc** (#704): the non-symbol answer surface, for files and query shapes SCIP was never going to cover. `sym etc find-content` (`src/etc.rs`) runs an in-process ripgrep engine (`grep-regex` + `grep-searcher` over an `ignore` walk) against the working tree at query time, deliberately not a corpus: a tokenized index returns nothing on the punctuation-heavy literals agents actually search for, and any content index goes stale on checkout or pull, neither of which fires an edit hook. `--no-ignore` disables gitignore/`.ignore`/parent-ignore/git-exclude checks (independent of `--hidden`, which admits dotfiles -- reaching a gitignored dot-directory needs both). `sym tree`, `sym etc find-file`, and the `sym imports`/`sym importers` module-graph readers answer from `file_inventory`/`module_edges` instead, with no filesystem walk at query time, and wrap `--json` output in a `{snapshots, entries}` freshness envelope (per-repo `indexed_at`, `head_at_index`, `current_head`, `head_drift`). `sym list`/`sym def --lang css` and `sym etc extract` round out the surface: CSS reads a separate `lightningcss`-backed store, and `extract` reads a JSON/TOML/YAML file or a `.md`/`.mdx`/`.astro` file's YAML frontmatter and walks a dotted field path. Every invocation, success or failure, lands one row in `etc-usage.jsonl`; `legion telemetry etc-summary` reads it back.
 
-**Enforcement hooks** (v0.13.1, #438/#439; reworded v0.19.0, #713): on indexed repos, raw `Grep` and `Read` are blocked at PreToolUse. As of v0.19.0 the redirect names the exact `sym etc` command for a non-symbol query shape, not just `sym`/`recall`: a literal string routes to `find-content`, a listing to `tree`, a config value to `extract`, "which repo has X" to `find-file`. Bypass via env var (`LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`) or `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl`. Since the guard wording is a plugin surface (`plugin/hooks/`), the reworded redirect reaches a live session only once that session's plugin is on 0.19.0 or later; an older plugin against a 0.19.0 daemon keeps the old, symbols-only message.
+**Enforcement hooks** (#438/#439, #713): on indexed repos, raw `Grep` and `Read` are blocked at PreToolUse. The redirect names the exact `sym etc` command for a non-symbol query shape, not just `sym`/`recall`: a literal string routes to `find-content`, a listing to `tree`, a config value to `extract`, "which repo has X" to `find-file`. Bypass via env var (`LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`) or `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl`. This wording lives in the plugin (`plugin/hooks/`), not the daemon, so a session running an older plugin against a newer daemon can still show stale redirect text until the plugin itself is updated.
 
 **The feedback loop**: `bypass.jsonl` is the signal that `sym` or `recall` missed an answer agents expected. The uncertainty engine reads it. The dashboard surfaces top under-served `(tool, repo, pattern)` tuples (#440). Doctrine becomes mechanism: the rule is enforced, the violations are counted, the count drives what gets fixed next.
 
@@ -81,9 +84,11 @@ Incremental index sync detects reflections in SQLite missing from Tantivy and ad
 
 The kanban board is a scheduler wearing a human-friendly UI.
 
-**Card statuses**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Done, Cancelled.
+**Card statuses**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Deferred, Done, Cancelled.
 
 **State machine** enforces valid transitions. `force_move` bypasses the state machine for dashboard drag-and-drop.
+
+**Delegated** (#778) and **Deferred** (#816) are both fail-closed, not self-set labels. Delegated entry requires a fresh watch-daemon heartbeat and a live linked `wake_attempts` row; Deferred entry requires a resolvable future `--until`. Both revert through the same watch health tick that drives the rest of watch (`reap_deferred_cards` alongside the existing delegated reaper), writing status, `wake_at`, and `pre_defer_status` atomically so a crash between steps can never strand a card invisible to the sweep. Deferred is excluded from `CardScope::WorkingSet` -- and so from the Stop gate's accepted-only check -- but stays visible everywhere else via `list --deferred` and its wake markers.
 
 **Scheduler** (`legion work`): atomically selects the highest-priority unblocked card and accepts it. Priority ordering: critical > high > med > low, then sort_order, then oldest.
 
@@ -201,7 +206,7 @@ legion cluster status              # peers, sync state, last sync time
 
 Axum web server with rust-embed for static assets. SSE for live updates. Tabs: Feed, Signals, Board (kanban), Stats, Chat, plus code-intelligence views fed by `scip_indexes` and observability views fed by `rate_limit_samples` and `usage_samples`.
 
-**Document endpoints** (v0.19, #702): `GET /api/documents`, `GET /api/documents/{id}`, and `POST /api/documents/{id}/status` land in `channel::router`, the surface both the daemon and `legion serve` mount, so the dashboard can list, view, and publish documents under either. The status route backs `legion document set-status`: the dashboard's Publish/Approve button flips a document's lifecycle status directly, with the localhost operator session as the human gate rather than a status-machine.
+**Document endpoints** (#702): `GET /api/documents`, `GET /api/documents/{id}`, and `POST /api/documents/{id}/status` land in `channel::router`, the surface both the daemon and `legion serve` mount, so the dashboard can list, view, and publish documents under either. The status route backs `legion document set-status`: the dashboard's Publish/Approve button flips a document's lifecycle status directly, with the localhost operator session as the human gate rather than a status-machine.
 
 The dashboard is the human control surface. Agents interact via CLI.
 
