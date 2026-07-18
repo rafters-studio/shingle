@@ -1,0 +1,27 @@
+---
+import KelexDocs from '@/src/layouts/KelexDocs.astro';
+
+const base = '/kelex/';
+---
+
+<KelexDocs title="Documentation" description="Documentation for Kelex, a schema-first code generator in the Rafters Studio ecosystem.">
+  <h1>Kelex</h1>
+  <p>
+    Kelex is a schema-first code generator in the Rafters Studio ecosystem. It
+    has no interface of its own: you describe a schema, and Kelex emits the code
+    that other tools render and run.
+  </p>
+
+  <p>
+    This documentation is a scaffold. The pages below are placeholders that fill
+    in as the surface stabilizes.
+  </p>
+
+  <hr />
+
+  <h2>Getting started</h2>
+  <p>Start here to install Kelex and generate from your first schema.</p>
+  <ul>
+    <li><a href={`${base}docs/getting-started/`}>Getting Started</a> -- install and generate your first output</li>
+  </ul>
+</KelexDocs>
