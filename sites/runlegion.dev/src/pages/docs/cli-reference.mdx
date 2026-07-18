@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.19.0. Commands are organized by category.
+This reference covers legion 0.24.0. Commands are organized by category.
 
 ---
 
@@ -41,6 +41,24 @@ Key flags:
 - `--dedupe-mode` `warn` (default: store anyway), `strict` (refuse near-duplicates), `off` (skip check)
 - `--force` bypass near-duplicate detection regardless of `--dedupe-mode`
 
+### reflect retag
+
+Move a live reflection between domains in place. Changes (or clears) `domain` without archiving, deleting, or re-issuing the id.
+
+```bash
+legion reflect retag --id <reflection-id> --set-domain workflow
+legion reflect retag --id <reflection-id> --set-domain none
+```
+
+The reflection stays hot and recall-by-context still finds it; retagging only changes which domain banner it feeds (`whatami` reads `domain=workflow`, `whoami` reads `domain=identity`). Distinct from `forget --persist`, which moves a row to the cold tier -- retag keeps it hot. Id, chain links, and `recall_count` are preserved.
+
+Refuses to retag the last live root of a protected domain (`identity` or `workflow`) off that domain, since the insert-time zero-identity guard only fires on INSERT and retag must not become a side door around it. Use `whoami --generate` to replace an identity root deliberately.
+
+Key flags:
+
+- `--id` (required) reflection to retag
+- `--set-domain` (required) new domain name, or the literal `none` to clear it
+
 ### recall
 
 Query reflections by relevance to a context string.
@@ -51,6 +69,8 @@ legion recall --repo myproject --latest --limit 5
 legion recall --repo myproject --domain identity
 legion recall --repo myproject --context "..." --archives
 legion recall --repo myproject --context "..." --include-archives
+legion recall --repo myproject --domain workflow --since 7d
+legion recall --repo myproject --context "cache invalidation" --on 2026-06-30
 ```
 
 Default mode blends BM25 full-text search with cosine similarity when embeddings are available (0.6 BM25 + 0.4 cosine). Results are further adjusted by boost/decay factors.
@@ -67,17 +87,23 @@ Key flags:
 - `--preview` truncate each result to N characters (used by hooks to keep injected context compact)
 - `--archives` search only archived reflections (the deep dive; default searches hot only)
 - `--include-archives` search both hot and archived
+- `--since` / `--until` / `--on` filter by `created_at`, accepting `YYYY-MM-DD`, `<N>d`, `<N>w`, `today`, or `yesterday`. `--on` is sugar for `--since X --until X`. Applies as a hard predicate before ranking, in every recall mode including `--domain` and `--latest`
+
+Date filtering is Tantivy-backed: an index built before legion 0.23.0 has no `created_at` field. Run `legion reindex` once after upgrading from an older version, or text-search-backed recall runs against an empty index until you do.
 
 ### forget
 
-Permanently delete a reflection by ID. No soft-delete, no undo. Removes the row from SQLite and the Tantivy index.
+Permanently delete a reflection by ID, or archive it instead.
 
 ```bash
 legion forget --id <reflection-id>
 legion forget --id <reflection-id> --repo myproject
+legion forget --id <reflection-id> --persist
 ```
 
-`--repo` is an optional safety check: the delete is refused unless the reflection's repo matches.
+Default (no `--persist`) is destructive: no soft-delete, no undo, removes the row from SQLite and the Tantivy index. `--repo` is an optional safety check: the operation is refused unless the reflection's repo matches.
+
+`--persist` archives instead of deleting: the row moves to the cold tier, the search index entry survives, and it drops out of hot `recall` / `whoami` / `whatami` but stays reachable via `recall --archives` or `--include-archives`. One-way today -- there is no un-persist verb yet.
 
 ### boost
 
@@ -114,10 +140,13 @@ Search across legion's cross-agent surfaces. Two query modes, mutually exclusive
 
 ```bash
 legion consult --context "discriminated unions in composite rules" --limit 3
+legion consult --context "cache invalidation" --since 7d
 legion consult --symbol Database --json
 ```
 
 `--context` searches reflections across every repo and returns results with repo attribution. `--symbol` searches SCIP indexes across every repo and reports `(repo, lang, def_location, refs_count)` per match. Used by the recall-first hook to inject cross-repo code intelligence before an agent spawns Explore.
+
+`--since` / `--until` / `--on` filter reflection mode by `created_at` (same grammar as `recall`); they have no effect on `--symbol` mode.
 
 ### chain
 
@@ -132,12 +161,36 @@ legion chain --id <reflection-id> --full
 
 ### whoami
 
-Print identity reflections for a repo. Alias for `recall --domain identity`.
+Print identity reflections for a repo. Alias for `recall --domain identity`. A second mode, `--generate`, rebuilds an identity chain instead of printing one.
 
 ```bash
 legion whoami --repo myproject
 legion whoami --repo myproject --limit 50
+
+# Gather mode: package source material for an identity rebuild
+legion whoami --generate --repo myproject --vault-repo vault --byline "Sean Silvius"
+
+# Apply mode: write the authored replacement from a manifest
+legion whoami --generate --apply --from-file manifest.json --repo myproject
+legion whoami --generate --apply --from-file manifest.json --repo myproject --dry-run
 ```
+
+Gather mode packages two halves of source material as JSON: the claimed half (files in `--vault-repo` whose frontmatter `author` field matches `--byline`) and the given half (cross-agent reflections about this repo, over-fetched so self-repo rows can be filtered out). The binary authors no prose -- the calling agent reads the JSON and writes an `IdentityManifest`.
+
+Apply mode consumes that manifest and performs the swap: one transaction that retires every live identity root for the repo and inserts the new root (plus any chained children), with no two-live-roots or zero-root window. It backs up the full pre-existing identity corpus to a JSON file before touching anything, and explicitly retires any leftover old-chain rows the swap itself does not reach, in both the database and the search index. `--dry-run` reports the plan without writing or deleting anything.
+
+Key flags:
+
+- `--repo` (required) repository name
+- `--limit` maximum identity reflections to return (plain listing mode; ignored with `--generate`)
+- `--generate` enter gather mode (default) or, with `--apply`, write an authored replacement
+- `--vault-repo` repo holding the agent's bylined writing; required with `--generate` unless `--apply` is also set
+- `--byline` comma-separated author name(s) to match in frontmatter; required with `--generate` unless `--apply` is also set
+- `--apply` switch `--generate` into apply mode
+- `--from-file` path to the authored manifest (`IdentityManifest` JSON); required with `--apply`
+- `--dry-run` compute and report the apply plan without writing (apply mode only)
+
+The identity-chain root itself is guarded below the CLI: inserting a second, unparented `domain=identity` reflection for a repo is refused unconditionally. `whoami --generate --apply` is the one sanctioned replace path for a repo's identity root.
 
 ### whatami
 
@@ -155,9 +208,12 @@ Surface cross-repo highlights for a session start.
 
 ```bash
 legion surface --repo myproject
+legion surface --repo myproject --since 7d
 ```
 
 Gathers recent bullpen posts, high-value cross-repo reflections, recently extended learning chains, and pending inbound kanban cards. Returns empty when there is nothing to surface.
+
+`--since` / `--until` / `--on` apply across all four surfaced queries, with one exception: the recent-posts query defaults to a 24-hour window, and an explicit range overrides that default rather than composing with it.
 
 ### reindex
 
@@ -203,6 +259,7 @@ legion bullpen --repo myproject
 legion bullpen --repo myproject --count
 legion bullpen --repo myproject --signals
 legion bullpen --repo myproject --musings
+legion bullpen --repo myproject --since 3d
 ```
 
 Reading marks all posts as seen for your repo. `--signals` and `--musings` are mutually exclusive; without either, everything is shown.
@@ -212,6 +269,9 @@ Key flags:
 - `--count` print unread count only; silent when nothing is unread
 - `--signals` show only structured signals (posts starting with `@`)
 - `--musings` show only natural-language posts
+- `--archived` show archived posts instead of active ones; `--archive` archives posts every reader has seen
+- `--include-stale` / `--include-resolved` operator-review flags that surface past-TTL or resolved threads; agents should not pass these
+- `--since` / `--until` / `--on` filter by `created_at` (same grammar as `recall`); applies to the `--repo` listing, not to `--count`, `--archive`, or `--archived`
 
 ### signal
 
@@ -273,15 +333,16 @@ Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when th
 
 ### kanban
 
-Manage the kanban board. Cards have eight states with enforced transitions:
+Manage the kanban board. Cards carry ten states with enforced transitions:
 
 ```
 backlog -> pending -> accepted -> in-review -> done
-                         |              |
+                         |    |         |
+                         |    |         +-> cancelled
+                         |    +-> delegated -> accepted (auto-revert or undelegate)
+                         |    +-> deferred  -> accepted/pending (wake or undefer)
                          +-> blocked -> accepted (via unblock)
                          +-> needs-input -> accepted (via resume)
-                         +-> done
-                         +-> cancelled
 ```
 
 ```bash
@@ -294,6 +355,7 @@ legion kanban create --from myproject --to backend --text "..." \
 legion kanban view --id <card-id>
 legion kanban list --repo backend
 legion kanban list --repo myproject --from
+legion kanban list --repo myproject --deferred
 
 # Transitions
 legion kanban accept --id <card-id>
@@ -304,6 +366,15 @@ legion kanban need-input --id <card-id>
 legion kanban resume --id <card-id>
 legion kanban cancel --id <card-id>
 legion kanban reopen --id <card-id>
+
+# Delegated -- bound to a live watch-spawned wake attempt
+legion kanban delegate --id <card-id>
+legion kanban undelegate --id <card-id>
+legion kanban delegated-needs-attention --repo myproject
+
+# Deferred -- scheduled wake
+legion kanban defer --id <card-id> --until 3d
+legion kanban undefer --id <card-id>
 
 # Bind a spec document
 legion kanban bind --id <card-id> --document <doc-id>
@@ -317,6 +388,12 @@ legion kanban reconcile --repo myproject
 
 When a card has a `document_id`, status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the bound document's `meta.status` in the same transaction. A dangling `document_id` (document archived or missing) is a hard error on transition.
 
+**Delegated**: `legion kanban delegate --id <card-id>` hands an Accepted card to a live, watch-spawned wake attempt. Entry is refused unless the watch daemon's heartbeat is fresh and a live wake attempt for the card's repo actually exists -- Delegated can never be a free self-set label with no process behind it. The watch health tick auto-reverts the card to Accepted the moment the attempt finishes or dies; `legion kanban undelegate` does the same manually. `legion kanban delegated-needs-attention --repo myproject` lists delegated cards whose linked attempt is NOT verifiably live -- the fail-closed check the Stop gate runs for the one case the health tick cannot reach on its own: the watch daemon itself being down.
+
+**Deferred**: `legion kanban defer --id <card-id> --until <when>` parks an Accepted or Pending card until a future time, excluding it from the Stop in-progress gate and from `list`'s default (working-set) view. `--until` accepts `YYYY-MM-DD`, `<N>d`, `<N>w`, or `today`, resolved forward from now; a value that has already passed is refused. The watch health tick reverts the card automatically once the wake time passes and pages its owner; `legion kanban undefer --id <card-id>` wakes it manually ahead of schedule. Deferred cards show up in `list --deferred`, carry a `[wakes:YYYY-MM-DD]` marker in `list`'s default output, and a `Wake at:` line in `view`.
+
+Both Delegated and Deferred share the same liveness caveat: the auto-revert only fires while `legion watch` is running for the card's repo. If no watch process is alive when the wake condition is met, the card stays parked until one starts and runs a health tick -- a late wake is a missed page, not a stuck agent, but it is worth knowing before you rely on it.
+
 ### issue
 
 Manage issues via the configured work source plugin.
@@ -324,10 +401,14 @@ Manage issues via the configured work source plugin.
 ```bash
 legion issue create --repo myproject --title "Implement auth" --body "..."
 legion issue view --repo myproject --id 42
+legion issue list --repo myproject
+legion issue list --repo myproject --state closed --label bug --json
 legion issue close --repo myproject --id 42
 legion issue reopen --repo myproject --id 42
 legion issue edit --repo myproject --id 42 --title "new title"
 ```
+
+`legion issue list` reads the work source's live state through the same plugin path as `issue view` -- not the local kanban cache, which `sync` can miss entirely. `--state` filters `open` (default), `closed`, or `all`; `--label` filters by label.
 
 ### sub-issue
 
@@ -338,26 +419,48 @@ legion sub-issue create --repo myproject --parent 123 --title "..." --body "..."
 legion sub-issue list --repo myproject --parent 123
 ```
 
+### push
+
+The sanctioned in-band push path. Retires raw `git push` from agent doctrine.
+
+```bash
+legion push --repo myproject
+legion push --repo myproject --branch feature/search
+```
+
+Resolves the checkout that has the target branch checked out (via `git worktree list`) and pushes from that checkout, because the pre-push hook reviews the CWD's checked-out branch, not the ref being pushed -- pushing branch B from a checkout sitting on A would silently review the wrong diff. Refuses `main`/`master` and any `--branch` value shaped like a flag or a force/retarget refspec by construction; there is no `--force` flag. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
+
+Key flags:
+
+- `--repo` (required) repository name, for the audit log
+- `--branch` branch to push; defaults to the CWD's checked-out branch
+
 ### pr
 
 Manage pull requests via the work source plugin.
 
 ```bash
-legion pr create --repo myproject --title "..." --body "..."
+legion pr create --repo myproject --title "..." --body "..." --closes 42
 legion pr list --repo myproject
-legion pr view --repo myproject --id 12
-legion pr checks --repo myproject --id 12
+legion pr view --repo myproject --number 12
+legion pr checks --repo myproject --number 12
 legion pr write-check --repo myproject --issue 42
-legion pr comments --repo myproject --id 12
-legion pr reviews --repo myproject --id 12
-legion pr review --repo myproject --id 12
-legion pr merge --repo myproject --id 12
-legion pr close --repo myproject --id 12
+legion pr edit --repo myproject --number 12 --title "corrected title"
+legion pr edit --repo myproject --number 12 --body-file corrected.md --issue 42
+legion pr comments --repo myproject --number 12
+legion pr reviews --repo myproject --number 12
+legion pr review --repo myproject --number 12
+legion pr merge --repo myproject --number 12
+legion pr close --repo myproject --number 12
 ```
 
-`legion pr create` refuses unless both a clean `legion-simplify` gate and a clean `legion-pr-write` gate exist on the current HEAD commit.
+`legion pr create` refuses unless both a clean `legion-simplify` gate and a clean `legion-pr-write` gate exist on the current HEAD commit. `--closes <n>` is repeatable and accepts a same-repo issue number or a cross-repo `owner/repo#n` reference (quote it -- `#` starts a shell comment); it appends an idempotent `Closes #N` line to the body unless a recognized closing keyword for that exact issue is already present.
 
 `legion pr write-check` validates a drafted PR body against the issue's acceptance criteria and records a `legion-pr-write` quality gate on success. Body from `--body-file` or stdin.
+
+`legion pr edit` corrects a live PR's title and/or body in place -- the honest alternative to close-and-recreate when a re-review finds a body that misdescribes its own diff. A `--body-file` edit runs the same structural validation `pr write-check` runs against `--issue`'s acceptance criteria and re-records the `legion-pr-write` gate for local HEAD; it is refused, not recorded, when local HEAD is not the PR's own head commit.
+
+`legion pr merge` refuses actively failing check-runs on the head SHA, not just absent ones, naming the failing checks. `--merge-despite-failures` is an audited operator override; it does not touch the separate zero-check-runs refusal, which still fires first. On a repo whose base branch merges through a GitHub merge queue, `pr merge` reports `queued` rather than `merged` -- the queue completes the merge asynchronously, possibly after re-running CI, so the kanban-done transition and issue-close side effects wait for the actual merge rather than firing early. Legion's own repo merges through a queue with required checks; PRs land once the queue's CI run is green, not the moment `pr merge` returns.
 
 ### document
 
@@ -416,13 +519,34 @@ When a `document_id` is bound, criteria come from the document's `verification.a
 
 ### quality-gate
 
-Record a quality gate result for a skill run on the current HEAD commit.
+Record, validate, list, and retire quality gate results for skill runs on a commit.
 
 ```bash
-legion quality-gate record --gate legion-simplify --result pass
+legion quality-gate record --skill legion-review --result clean
+legion quality-gate check --skill legion-simplify --result clean --articulation-file notes.md
+legion quality-gate check --skill legion-simplify --result issues --findings-json findings.json
+legion quality-gate list --skill legion-simplify --branch feature/search
+legion quality-gate stats --skill legion-simplify
+legion quality-gate void --id <gate-id> --reason "manufactured clean, pre-#780 row"
 ```
 
 `legion pr create` checks for clean `legion-simplify` and `legion-pr-write` gates on HEAD before opening a PR.
+
+Every row carries **provenance**: VALIDATED (earned through `quality-gate check`'s articulation validator) or ASSERTED (self-reported via `record`). `record --result clean` is refused outright for a skill with a check validator (`legion-simplify`, `legion-pr-write`) -- a clean verdict for those two can only be earned through `check`. Skills with no validator (`legion-review`, a card-keyed `legion-verify:<card_id>`) are asserted by necessity and unaffected.
+
+`legion quality-gate check` parses an articulation file -- markdown with one `### <path>` heading per changed file, followed by substantive prose -- and refuses to record a gate when a changed file has no entry, or an entry is boilerplate-thin. It resolves the changed-file set from `<base>...HEAD`; `--base <ref>` overrides the default (`main`, falling back to `origin/main`) for a branch stacked on another unmerged branch, so the coverage set is scoped to what this branch actually changed rather than everything since `main`. The resolved base -- flag or default -- is recorded on the gate row either way. Pure (zero-delta) renames auto-clear from the coverage set. `--findings-json` feeds structured `{file, line, severity, summary}` findings into the finding-resolution ledger; prose in the articulation is not parsed for findings, so a skill reporting `--result issues` should pass its real findings here.
+
+**Findings ledger**: findings passed via `--findings-json` (or legion-review's `--details-json`) persist as rows keyed to the gate that raised them. Resolution is git-log-based: a commit after a finding's origin that touches the flagged file marks it RESOLVED, reconciled at the top of every `record`/`check` call. The gate refuses a `clean` verdict for a (branch, skill) while any HIGH/MED finding is pending or any LOW finding is un-acked.
+
+```bash
+legion quality-gate finding-list --branch feature/search --skill legion-simplify
+legion quality-gate finding-disposition --id <finding-id> --reason "false positive, see PR #812 discussion"
+legion quality-gate finding-ack --branch feature/search --skill legion-simplify --reason "cosmetic naming nits, batch-waived"
+```
+
+`finding-disposition` retires one PENDING finding with a required reason -- a disposition is not a fix, it is a recorded "not fixing this, and here is why." `finding-ack` batch-acknowledges every PENDING LOW-severity finding on a (branch, skill) pair with one shared reason, still writing one row per finding so the audit trail stays per-finding. `finding-list` is the audit view: filterable by branch, skill, and status (`pending`, `resolved`, `dispositioned`).
+
+`legion quality-gate void --id <id> --reason <why>` retires a known-false gate row without deleting it: a voided row drops out of the live gate lookups (`pr create`'s check, the ->Done gate) and out of `stats`, but stays visible in `list` with a VOID marker. `--superseded-by <id>` links it to the genuine replacement row once one exists.
 
 ### done
 
@@ -496,11 +620,17 @@ legion sym impl Iterator
 legion sym hover my_function
 legion sym impact --repo myproject --diff /path/to/changes.diff
 legion sym list --kind fn
+legion sym list --lang css --repo myproject --kind custom-property
+legion sym def --lang css --repo myproject -- --spacing-0.5
+legion sym imports src/etc.rs --repo myproject
+legion sym importers src/db.rs --repo myproject --json
 ```
 
 `sym impact` parses a unified diff and reports SCIP reference counts per touched symbol, sorted descending. Pass `--json` for agent consumption. `LEGION_IMPACT_HIGH_THRESHOLD` (default 50) marks the `HIGH` tag in text output.
 
-`sym list` replaces `grep "fn "` on indexed repos: returns names and locations, not source bodies.
+`sym list` replaces `grep "fn "` on indexed repos: returns names and locations, not source bodies. `--lang css` reads the separate `lightningcss`-extracted store instead of SCIP; `--kind` for CSS takes `class` or `custom-property`. `sym def --lang css` looks up a class or custom-property definition the same way. `sym hover --lang css` fails outright naming the commands that do work -- CSS symbols have no hover surface.
+
+`sym imports <file>` lists what a js/ts/jsx/tsx file imports, one row per static or dynamic import, resolved (`to = Some`) or unresolved/external (`to = None`); direct edges only, no transitive or re-export resolution. `sym importers <file>` lists every edge that resolved to a given file -- the "who consumes X" question SCIP refs cannot answer. Both take a `--repo` filter (default: every indexed repo) and accept an exact path or a path suffix.
 
 `sym` answers symbol questions. For everything else, `sym tree` and `sym etc` answer from the file inventory instead, and need no SCIP index at all.
 
@@ -517,6 +647,8 @@ legion sym tree --json
 
 Reads `Database::list_file_inventory` directly; never walks the filesystem at query time, so it answers instantly regardless of repo size. `--repo` and `--ext` filter server-side. `--under` scopes to a subtree prefix; `--depth` caps path segments counted from `--under` (or the repo root when `--under` is omitted). Omit `--repo` to get every watched repo's files, each entry tagged with its own `repo` field.
 
+`--json` (and `sym imports`/`importers --json`, and `sym etc find-file --json`) wraps results in a `{snapshots, entries}` envelope rather than a bare array. `snapshots` carries one row per repo in scope: `indexed_at`, `head_at_index`, `current_head`, and `head_drift` -- computed with one live `rev-parse` per repo, never a filesystem walk. Human output prints the same freshness read as a stderr line per repo: up to date, a re-index hint when no snapshot exists, or a loud HEAD-drift warning naming both SHAs when the repo has moved since the last index.
+
 ### sym etc
 
 Non-symbol answer surface: query shapes over the files SCIP does not parse (docs, configs, css, prose). Three subcommands, one per query shape.
@@ -526,6 +658,7 @@ Non-symbol answer surface: query shapes over the files SCIP does not parse (docs
 legion sym etc find-content 'TODO' --repo myproject
 legion sym etc find-content '--spacing-0\.5' --repo myproject --fixed-strings
 legion sym etc find-content 'fn main' --ext rs --json
+legion sym etc find-content 'API_KEY' --repo myproject --no-ignore --hidden
 
 # One field out of a config file or doc frontmatter, without reading the whole file
 legion sym etc extract package.json --field scripts.build
@@ -536,7 +669,9 @@ legion sym etc find-file "*.test.ts"
 legion sym etc find-file components.json --role config
 ```
 
-`find-content` runs the same ripgrep engine as the shell tool it replaces, directly against the working tree: literal mode (`--fixed-strings`) matches conflict markers and punctuation-heavy patterns verbatim, regex is the default. `extract` reads JSON, TOML, YAML, or the YAML frontmatter of a `.md`/`.mdx`/`.astro` file and walks a dotted `--field` path; numeric segments index arrays. `find-file` matches basenames or glob patterns against the file inventory, cross-repo by default, with an optional `--role` filter (`config`, `test`, `doc`, `entry`). Every invocation of all three, success or failure, lands a row in `etc-usage.jsonl`.
+`find-content` runs the same ripgrep engine as the shell tool it replaces, directly against the working tree: literal mode (`--fixed-strings`) matches conflict markers and punctuation-heavy patterns verbatim, regex is the default. `--hidden` reaches hidden files and dotfiles (`.git/` stays excluded regardless). `--no-ignore` disables gitignore/`.ignore`/parent-ignore/git-exclude checks; it is independent of `--hidden`, so reaching a gitignored dot-directory (a generated `.rafters/` workspace, for instance) needs both flags together. Gitignored files commonly hold secrets, and anything matched under `--no-ignore` is printed to stdout/JSON -- treat it with the same care as `--hidden`.
+
+`extract` reads JSON, TOML, YAML, or the YAML frontmatter of a `.md`/`.mdx`/`.astro` file and walks a dotted `--field` path; numeric segments index arrays. `find-file` matches basenames or glob patterns against the file inventory, cross-repo by default, with an optional `--role` filter (`config`, `test`, `doc`, `entry`). Every invocation of all three, success or failure, lands a row in `etc-usage.jsonl`.
 
 ---
 

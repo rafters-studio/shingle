@@ -31,9 +31,15 @@ Reflections are stored in SQLite, indexed in Tantivy for BM25 search, and option
 
 **Identity reflections** (`--whoami` or `--domain identity`) are reinjected on every SessionStart so role, voice, and rules survive cache evictions and model swaps.
 
+**The identity-root guard**: a repo is meant to have exactly one live, unparented `domain=identity` reflection -- the root everything else chains off with `--follows`. Inserting a second, unparented identity root for a repo already holding one is refused unconditionally at the database layer, not by convention. When an identity actually needs replacing -- drift, a bad edit, a rebuild from source material -- `legion whoami --generate --apply` is the one sanctioned swap: a single transaction that retires every live root for the repo and installs the new one, with no window where a repo has two live roots or none.
+
 **Hot vs archived** (#457): the default `recall` searches hot reflections. `--archives` flips to the deep dive. `--include-archives` searches both. Archives keep the corpus bounded while preserving everything.
 
-**Forget** is destructive. `legion forget --id <id>` removes the row from SQLite and Tantivy. No soft-delete, no undo. The optional `--repo` argument is a safety check that refuses the delete unless the repo matches.
+**Date filtering** (#786): `recall`, `consult`, `bullpen`, and `surface` all accept `--since`/`--until`/`--on`, parsed from `YYYY-MM-DD`, `<N>d`, `<N>w`, `today`, or `yesterday`. The filter is a hard `created_at` predicate applied before ranking, not a post-filter on a capped result window -- "what happened last week" is a query now, not something an agent reconstructs by eyeballing timestamps in a result list. An index built before legion 0.23.0 has no `created_at` field; run `legion reindex` once after upgrading, or date-filtered search runs against an empty index.
+
+**Forget** is destructive by default. `legion forget --id <id>` removes the row from SQLite and Tantivy. No soft-delete, no undo. The optional `--repo` argument is a safety check that refuses the operation unless the repo matches. `--persist` archives instead: the row moves to the cold tier, drops out of hot `recall`/`whoami`/`whatami`, and stays reachable via `--archives`/`--include-archives`. One-way today -- there is no un-persist verb yet.
+
+**Retag**: `legion reflect retag --id <id> --set-domain <name|none>` moves a live reflection between domains without archiving, deleting, or re-issuing the id -- it stays hot, and recall-by-context finds it under its new domain immediately. It refuses to retag the last live root of a protected domain (`identity`/`workflow`) off that domain; `whoami --generate` is the deliberate replace path for those.
 
 ## Code intelligence
 
@@ -66,7 +72,7 @@ sym etc find-file "*.test.ts" --role test  -> locate a file by name or role, cro
 
 `find-content` runs the same ripgrep engine as the shell tool it replaces, scanning the working tree directly at query time. That is deliberate: a tokenized index returns nothing on the punctuation-heavy literals agents actually search for, and a content index goes stale the moment someone runs `git pull`, which fires no edit hook. `sym tree` and `find-file`, by contrast, answer from the stored file inventory with no filesystem walk at query time, because file existence and metadata do not carry the same staleness problem.
 
-The same file inventory underlies two more engines that extend sym-style answers past what SCIP parses: a JS/TS import graph (`module_edges`, built with `oxc_parser`/`oxc_resolver`) and CSS class/custom-property extraction (`css_symbols`, built with `lightningcss`). Both persist their own tables today; a query surface for them (`sym imports`/`sym importers`, a CSS lookup) is a follow-on.
+The same file inventory underlies two more engines that extend sym-style answers past what SCIP parses. A JS/TS import graph (`module_edges`, built with `oxc_parser`/`oxc_resolver`) answers through `sym imports <file>` (what this file imports) and `sym importers <file>` (who imports this file) -- the "who consumes X" question SCIP refs cannot answer. CSS class and custom-property extraction (`css_symbols`, built with `lightningcss`) answers through `sym list --lang css` and `sym def --lang css`, reading a separate lightningcss-backed store rather than SCIP.
 
 Every `sym etc` / `sym tree` invocation, success or failure, lands a row in `etc-usage.jsonl`. `legion telemetry etc-summary` reads it back: count, zero-result rate, and error count per query shape. That is the number that answers whether the sanctioned replacement for grep and find actually gets used.
 
@@ -124,13 +130,15 @@ When a thread converges, `legion resolve --id <post-id>` marks it resolved (#362
 
 A card is a unit of work on the kanban board. Cards have:
 
-- **Status**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Done, Cancelled
+- **Status**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Deferred, Done, Cancelled
 - **Priority**: critical, high, med, low
 - **Labels**: free-form tags for filtering
 - **Source URL**: link to an external issue (GitHub, Jira, etc.)
 - **Parent card**: delegation chains (card A spawned card B)
 
 The state machine enforces valid transitions. A backlog card cannot become done; it must be assigned, accepted, and worked first. The dashboard can force-move cards (drag-and-drop) for when humans need to override the machine.
+
+**Delegated** and **Deferred** are both machine-checked, not free self-set labels. Delegated binds an Accepted card to a live watch-spawned wake attempt -- entry is refused unless the watch daemon's heartbeat is fresh and an actual in-flight attempt exists for the card's repo. Deferred parks an Accepted or Pending card until a future `--until`, out of the Stop in-progress gate and out of the default working-set view, but never silently uncounted -- it has its own `list --deferred` scope and a `Wake at:`/`[wakes:...]` marker everywhere else the card shows up. Both revert automatically on a watch health tick: Delegated the moment its wake attempt finishes or dies, Deferred the moment `--until` passes, paging the card's owner. Both share the same honest caveat: the auto-revert only fires while `legion watch` is running for that repo. A late wake with no watch process alive is a missed page, not a stuck agent -- `legion kanban undelegate` / `undefer` wake a card manually if that matters before a health tick runs.
 
 ## Sub-issues
 
@@ -243,13 +251,15 @@ Done is an earned state. You cannot reach it by asserting it.
 
 The gate chain runs simplify then pr-write then review then verify, in that order. Each step records a HEAD-keyed result. Later steps read the earlier results. `legion pr create` refuses unless simplify and pr-write are both clean on HEAD. `legion done` (via `legion verify`) refuses unless verify is clean.
 
-**Simplify** (`/legion-simplify`) reviews the branch diff for duplicate logic, unnecessary abstraction, and stringly-typed state. It produces structured JSON and records a `legion-simplify` quality gate.
+**Simplify** (`/legion-simplify`) reviews the branch diff for duplicate logic, unnecessary abstraction, and stringly-typed state. It produces structured JSON, then earns its gate through `legion quality-gate check`, which validates the articulation before recording -- a clean simplify verdict cannot be manufactured by calling `quality-gate record` directly; that path is refused for any skill with a check validator.
 
 **PR write-check** (`legion pr write-check`) forces the agent to map each acceptance criterion to the diff that satisfies it, in prose, with evidence. Articulation is verification: writing the mapping makes you re-read your own work as a reader and catch what you talked past while coding. It refuses empty or boilerplate mappings and records a `legion-pr-write` gate.
 
 **Review** (`/legion-review`) runs parallel dimension reviewers (spec, correctness, quality, security) over the diff, adversarially refutes every high- and medium-severity finding before reporting it, and records a `legion-review` gate. The reviewer enforces the target repo's own CLAUDE.md invariants, not hardcoded rules.
 
 **Verify** (`legion verify`) is the gate before Done. The agent reads the card's acceptance criteria and submits per-criterion verdicts: pass, fail, or uncertain, each with cited evidence. A pass that cannot cite a test or an observed behavior is demoted to uncertain by the system. Every criterion passing with evidence records a clean `legion-verify:<card>` gate and allows `->done`. Any fail hard-blocks. Any uncertain routes the card to `needs-input` for a human. A card with no acceptance criteria is blocked outright.
+
+**Provenance and findings**: every gate row carries VALIDATED (earned through a check validator) or ASSERTED (self-reported) provenance, and a known-false row can be voided with `legion quality-gate void --reason <why>` -- retired from the live gate lookups without being erased from history. Findings a skill reports (via `--findings-json` or legion-review's `--details-json`) persist as their own rows, resolved automatically when a later commit touches the flagged file, or explicitly retired with `finding-disposition` (one finding, a reason) or `finding-ack` (a batch of LOW-severity findings, one shared reason). A clean verdict is refused while any HIGH/MED finding is still pending or any LOW finding is un-acked.
 
 The reason this chain exists: an autonomous agent's natural failure mode is to declare victory. The pipeline makes Done require evidence.
 
