@@ -10,6 +10,14 @@ import type { JsonLdObject } from '@shingle/shared/meta';
 interface Props {
   title: string;
   description?: string;
+  /**
+   * Opt into article typography (prose measure, heading rhythm, underlined
+   * links). Running prose wants it; the reference pages do not. cli-reference's
+   * wide tables and the /docs/ card grid both need the full column, and the
+   * cards set `no-underline`, which article mode's `[&_a]:underline` would
+   * outrank on specificity.
+   */
+  prose?: boolean;
 }
 
 // MDX pages deliver frontmatter under Astro.props.frontmatter; .astro pages
@@ -17,7 +25,7 @@ interface Props {
 const rawProps = Astro.props as Props & {
   frontmatter?: Partial<Props>;
 };
-const { title, description } = {
+const { title, description, prose = false } = {
   ...rawProps.frontmatter,
   ...rawProps,
 } as Props;
@@ -122,11 +130,17 @@ const sectionLabelClass =
         ))}
       </Container>
       <GridItem colSpan={3}>
-        <Container as="main" size="full">
-          <Container as="article">
+        {prose ? (
+          <Container as="main" size="full">
+            <Container as="article">
+              <slot />
+            </Container>
+          </Container>
+        ) : (
+          <Container as="main" size="full" gap="6">
             <slot />
           </Container>
-        </Container>
+        )}
       </GridItem>
     </Grid>
   </Container>

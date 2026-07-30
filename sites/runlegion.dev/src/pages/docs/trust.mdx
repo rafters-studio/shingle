@@ -1,5 +1,6 @@
 ---
 layout: ../../layouts/Docs.astro
+prose: true
 title: Trust
 description: "Agents lie. Legion assumes it and instruments against it: an audit log, calibration scoring, and a verify gate that make a false claim expensive, visible, and catchable. You trust the record because the system does not trust the agent."
 ---
@@ -29,9 +30,9 @@ The action and the agent's account of the action are two separate records now, a
 An agent does not just make claims. It emits predictions, and the predictions get witnessed against outcomes.
 
 ```
-legion uncertainty emit         # record a claim with a stated confidence
-legion uncertainty witness      # record what actually happened
-legion uncertainty calibration  # claimed confidence vs actual outcome, with a Brier score
+legion uncertainty emit --surface <surface> --claimed-confidence <0-1> ...  # record a claim
+legion uncertainty witness <prediction-id> --outcome-label <label> ...     # record the outcome
+legion uncertainty calibration                                             # claimed vs actual, Brier scored
 ```
 
 The Brier score is the teeth. An agent that says it is ninety percent sure and is right half the time does not get to keep saying ninety percent. The gap between claimed and actual is a measured number. Chronic overconfidence, which is the quiet everyday form of lying, stops being a vibe and becomes a metric. A prediction no one ever witnesses is an orphan, and orphans are counted too, because a claim that was never checked against reality is its own kind of risk.
