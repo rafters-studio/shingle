@@ -8,3 +8,12 @@
  * which resolves through node_modules and is ignored by the scanner.
  */
 @source "../../../../packages/shared/src";
+
+/*
+ * Rafters typography role utilities are @utility declarations that only emit
+ * when Tailwind sees the class name as a literal in scanned source. Typography
+ * components build these names at runtime from size= props (a template
+ * literal), which the scanner cannot detect. Safelist them so size= props on
+ * H1/P/etc render for every page, including the mail and kelex sections.
+ */
+@source inline("text-display-large text-display-medium text-title-large text-title-medium text-title-small text-body-large text-body-medium text-body-small text-label-large text-label-medium text-label-small text-code-large text-code-small");

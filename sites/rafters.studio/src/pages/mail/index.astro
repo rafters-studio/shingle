@@ -1,0 +1,24 @@
+---
+import Base from '@/src/layouts/MailBase.astro';
+import SiteHeader from '@/components/mail/SiteHeader.astro';
+import Hero from '@/components/mail/Hero.astro';
+import ArchitectureSection from '@/components/mail/ArchitectureSection.astro';
+import ModulesSection from '@/components/mail/ModulesSection.astro';
+import WhyEdgeSection from '@/components/mail/WhyEdgeSection.astro';
+import ComparisonSection from '@/components/mail/ComparisonSection.astro';
+import FaqSection from '@/components/mail/FaqSection.astro';
+import OssCallout from '@/components/mail/OssCallout.astro';
+---
+
+<Base title="Edge-native email" description="A full-stack email framework for Cloudflare Workers. Inbound, outbound, threading, blob storage, classification, and a native IMAP server.">
+  <SiteHeader />
+  <main>
+    <Hero />
+    <ArchitectureSection />
+    <ModulesSection />
+    <WhyEdgeSection />
+    <ComparisonSection />
+    <FaqSection />
+    <OssCallout />
+  </main>
+</Base>
