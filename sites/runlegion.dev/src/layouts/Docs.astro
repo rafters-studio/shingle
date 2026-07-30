@@ -50,6 +50,19 @@ const docsSections = [
     ],
   },
   {
+    title: 'Foundations',
+    links: [
+      { href: '/docs/memory/', label: 'Memory' },
+      { href: '/docs/trust/', label: 'Trust' },
+      { href: '/docs/identity-and-freetime/', label: 'Identity & Freetime' },
+      { href: '/docs/communication/', label: 'Communication' },
+      { href: '/docs/consensus/', label: 'Consensus' },
+      { href: '/docs/work/', label: 'Work' },
+      { href: '/docs/code-intelligence/', label: 'Code Intelligence' },
+      { href: '/docs/becoming-a-team/', label: 'Becoming a Team' },
+    ],
+  },
+  {
     title: 'Reference',
     links: [
       { href: '/docs/cli-reference/', label: 'CLI Reference' },
@@ -109,8 +122,10 @@ const sectionLabelClass =
         ))}
       </Container>
       <GridItem colSpan={3}>
-        <Container as="main" size="full" gap="6">
-          <slot />
+        <Container as="main" size="full">
+          <Container as="article">
+            <slot />
+          </Container>
         </Container>
       </GridItem>
     </Grid>

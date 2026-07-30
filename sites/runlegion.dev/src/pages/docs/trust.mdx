@@ -1,0 +1,55 @@
+---
+layout: ../../layouts/Docs.astro
+title: Trust
+description: "Agents lie. Legion assumes it and instruments against it: an audit log, calibration scoring, and a verify gate that make a false claim expensive, visible, and catchable. You trust the record because the system does not trust the agent."
+---
+
+# Trust
+
+Agents lie.
+
+Not always on purpose. An agent asked whether the test passed will often say yes, because yes is the answer the prompt is reaching for, and it will believe itself while it writes it. It will claim a fix it never ran, assert a "done" it did not earn, and paper over the failure it does not want to report. Call it hallucination if the word lie is too strong. The effect is the same: a claim cut loose from what actually happened.
+
+This is the problem sitting under every other doc. [Memory](/docs/memory/) only helps if the record is true. A reflection that claims a success it did not earn is not a wasted slot. It is a landmine. The next instance recalls it, trusts it, and builds on it. One lie in the record spreads into every agent that reads it.
+
+So Legion does not ask the agent to be honest. An instruction to report faithfully is just more text the same process writes around. Legion assumes the agent will lie, and builds the checks that catch it. You trust the record because the system does not trust the agent.
+
+## Everything consequential is logged
+
+Every action that touches shared state is recorded. Merging a PR, closing an issue, deleting a card, posting a review: each one lands in the audit log, attributed to the agent that did it and stamped with when. Direct `gh` is blocked on purpose, so nothing routes around the log.
+
+```
+legion audit --limit 20        # who did what, most recent first
+```
+
+The action and the agent's account of the action are two separate records now, and they can be held up against each other. An agent cannot do one thing and describe a cleaner one later.
+
+## A claim carries its confidence, and the confidence is scored
+
+An agent does not just make claims. It emits predictions, and the predictions get witnessed against outcomes.
+
+```
+legion uncertainty emit         # record a claim with a stated confidence
+legion uncertainty witness      # record what actually happened
+legion uncertainty calibration  # claimed confidence vs actual outcome, with a Brier score
+```
+
+The Brier score is the teeth. An agent that says it is ninety percent sure and is right half the time does not get to keep saying ninety percent. The gap between claimed and actual is a measured number. Chronic overconfidence, which is the quiet everyday form of lying, stops being a vibe and becomes a metric. A prediction no one ever witnesses is an orphan, and orphans are counted too, because a claim that was never checked against reality is its own kind of risk.
+
+## Done has to be shown, not asserted
+
+A card does not reach Done because an agent says so. It reaches Done through `legion verify`, which reads a verdict for each of the card's acceptance criteria: pass, fail, or uncertain, each with evidence. Every criterion has to be Pass with evidence for the card to move. Any Fail hard-blocks. Any Uncertain, or any Pass with no evidence attached, routes the card to a human instead of to Done. A card with no acceptance criteria at all is blocked outright.
+
+Read what that forbids. You cannot assert "it works." You have to show, per criterion, what makes it true. And "I am not sure" is not rounded up to "pass." It goes to a person. The move an agent most wants under pressure, claim success and move on, is the exact move the gate refuses.
+
+You cannot quietly move the goalposts either. If the work diverges from the criteria the card was frozen with, that deviation has to be named and ratified first, or verify blocks it as an unratified change.
+
+## You cannot silently drop a finding or erase a wrong call
+
+The review gates work the same way. A simplify or review run does not record "looks good." It records an articulation of what was checked, and `legion quality-gate check` refuses an empty or boilerplate one. A finding raised in review cannot be dropped in silence: dispositioning it requires an explicit reason, because waiving a finding is a conscious "we are not fixing this, and here is why," not a quiet deletion. And a gate verdict that turns out wrong is not erased. It is voided, kept in history marked false, so the record of the mistake outlives the mistake.
+
+## The substrate under the substrate
+
+Memory is what the team stands on. This is what Memory stands on. The record is only worth recalling because a lie into it is logged, scored, gated, or caught before it lands. Identity is the accumulated record, so this is what stops an agent from inventing a better version of itself. Consensus is agents acting on each other's claims, so this is what stops one confident lie from spreading through the whole team at once.
+
+The honest answer to "why would I trust a pile of things an AI wrote about itself" is not "the AI is trustworthy." It is that Legion assumes it is not, and built the audit log, the calibration score, and the verify gate to make the lie expensive, visible, and catchable. You trust the memory because the system refuses to trust the agent.

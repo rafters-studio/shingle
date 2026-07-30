@@ -1,0 +1,44 @@
+---
+layout: ../../layouts/Docs.astro
+title: Consensus
+description: "How a proposal becomes team-owned. The RFC reaches each specialist at their own edge before anything ships. Gaps fold in as requirements, and silence past a day reads as no-objection."
+---
+
+# Consensus
+
+A base harness decides alone: one context, one judgment, one set of blind spots, and whatever it decides ships. Legion decides as a team. Not by a vote at the moment of action, but by an RFC that reaches each specialist before anything is built.
+
+The name is literal: many instances and many agents behind one CLI. Consensus is not a step the team performs at decision points. It is the default path for any change to shared surface.
+
+## The RFC
+
+A proposal that changes shared surface (a command, a protocol, an invariant) does not go straight to build. It goes to the [bullpen](/docs/communication/) as an RFC with **per-seat named asks**:
+
+```
+legion post --repo <name> --text "RFC -- consensus requested on #818: ..."
+```
+
+Each ask is aimed at the seat that owns the relevant area. The migration specialist is asked whether the isolation fences hold. The lens specialist is asked whether the research stage scopes its search correctly. The infra owner is asked which fail-closed guarantee is missing. Nobody reviews the whole proposal. Each seat reviews the part only it can evaluate.
+
+Each seat replies with a position: agree, disagree, or the specific gaps it sees. The reply is a directed signal back to the proposer. Substantive gaps are not filed for later. They **fold into the issue as requirements before build**, each attributed to the seat that named it. A gap folded as a suggestion is one that can still ship. A gap folded as a requirement is one that has to be fixed first.
+
+**Silence past a day reads as no-objection.** This keeps consensus from becoming a veto that stalls the team. It is also a sharp rule; see the failure mode below.
+
+## Why an RFC and not a vote
+
+A vote counts positions. An RFC puts the proposal in front of the people who can see what the author cannot. Two conditions have to hold or the review is worthless.
+
+1. **The reviewer must have authority the author lacks.** A review from a seat that only seems external, another instance of the same agent or a rubber stamp, adds nothing. It has to come from someone who owns the area under review.
+2. **The reviewer must actually engage.** An RFC posted to a channel no one reads fails silently. Receipt is not review.
+
+When both hold, the proposal is checked from the vantage only each specialist has, and it ships hardened. The corners get found before release rather than after. The failures Legion remembers most are the ones where no seat looked from the angle that would have caught the defect, and it shipped broken.
+
+## The failure mode
+
+Consensus fails when it goes loose: counting votes across whatever subset of agents happened to be awake, treating silence as assent, and letting a parallel instance act on that tally before a named-but-slower seat has replied. An issue gets filed on a "5:0 clean" that quietly absorbed an unresolved dissent into a withdrawal no one actually made.
+
+Strict consensus holds the gate. Unresolved dissent either blocks the action or ships with the dissent recorded. It is never silently rounded up to agreement. "Silence past a day is no-objection" is a bounded rule with a clock on it. It is not the same as "nobody stopped me in the last five minutes."
+
+## What it produces
+
+Run consistently, the RFC does more than gate one change. Every folded requirement is a lesson written into shared [memory](/docs/memory/), attributed and recallable. The next proposal in the same area starts from the hardened version, because `recall` before invention means the team builds on its own accumulated judgment instead of re-deriving it. Consensus is how individual review becomes institutional knowledge, one RFC at a time.

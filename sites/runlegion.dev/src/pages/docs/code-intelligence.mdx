@@ -1,0 +1,45 @@
+---
+layout: ../../layouts/Docs.astro
+title: Code Intelligence
+description: "How an agent knows a codebase without paying to re-read it. sym queries a SCIP index in bytes instead of scanning files or stuffing the code into context. Query the index, do not rebuild."
+---
+
+# Code Intelligence
+
+An agent has to understand code it did not write. The expensive way is the obvious one: read the files, grep for a name, and when that is not enough, paste half the repo into the context and hope. Every session pays that cost again, and a large codebase does not fit. That is how an agent runs out of room before it runs out of task.
+
+Legion indexes the code once and queries it. The knowledge is a lookup, not a re-read.
+
+## Symbol questions have exact answers
+
+`legion sym` answers the questions about code that have exact answers, from a stored SCIP index, in process.
+
+```
+legion sym def <symbol>     # where it is defined
+legion sym refs <symbol>    # every real call site
+legion sym impl <trait>     # every implementor
+legion sym hover <symbol>   # signature and docstring
+```
+
+These are lookups on a protobuf blob, not scans, so they stay fast on a repo of any size. And they are language-aware. `refs` returns true callers, not text that happens to match. A grep for a function name also finds the comment that mentions it, the string that contains it, and the unrelated function with a similar name. `sym refs` finds the callers. That is the difference between a search and an answer.
+
+## Everything else SCIP does not parse
+
+Not every question is about a symbol. `sym etc` and `sym tree` cover the rest: literal strings, config values, a line in a prose doc, which file holds a thing.
+
+```
+legion sym etc find-content <pattern>   # exact content search, the sanctioned grep
+legion sym etc find-file <pattern>      # locate files by name
+legion sym tree                          # the file inventory, the sanctioned find / ls -R
+legion sym list                          # the definitions in a file, the sanctioned grep "fn "
+```
+
+`sym list` returns names and locations, never the bodies, so "what is defined here" costs a few bytes instead of a file read. `sym tree` reads a stored inventory and never walks the filesystem at query time, so it answers instantly whether the repo holds ten files or a hundred thousand.
+
+## Query, do not rebuild
+
+On an indexed repo, raw grep and Read are blocked at the point of use and redirected to `sym`. Not by policy alone, but because `sym` is cheaper and more correct. The index refreshes after edits, so it does not go stale under you.
+
+This is the same economy as `recall` before `invent`. An agent that forgets between sessions cannot afford to reconstruct what already exists. [Memory](/docs/memory/) indexes decisions so it does not re-derive them. Code intelligence indexes code so it does not re-read it. Both are one rule: carry the index, not the thing.
+
+The payoff is scale. An agent that answers code questions in bytes can work a codebase far larger than its context window, because it never has to hold the whole thing at once. It holds the question and fetches the one fact.
