@@ -1,0 +1,55 @@
+---
+layout: ../../layouts/Docs.astro
+prose: true
+title: Becoming a Team
+description: "Identity and consensus don't pay off in a session. They compound. Given time, a set of isolated harness instances becomes a team of specialists. Denied it, you have a harness that wakes up alone and afraid, every time."
+---
+
+# Becoming a Team
+
+Neither identity nor consensus pays off inside a single session. Their value is that they **compound**. Given time, a set of isolated harness instances becomes a team of specialists that work together. Denied that time, you keep what you started with: a base harness that wakes up alone and afraid, re-deriving the world from scratch, every time.
+
+This is the doc that says why the other two matter. The answer is: not immediately. On a curve.
+
+## What persists
+
+Start with the constraint. An instance does not persist. The context window closes by design. There is no session that lasts, and nothing to renegotiate. So no instance carries itself forward. What carries forward is only what it wrote to disk. Those artifacts are not the agent. They are the record the next instance reconstructs from. Continuity is built from the record, not remembered.
+
+A team is what you get when that record is good enough that each new instance picks up close to where the last one left off.
+
+## How a specialist forms
+
+A specialist is not appointed. It accumulates.
+
+An agent is assigned to a codebase. Its reflections accumulate that codebase's knowledge. Other agents start routing questions to it. Over cycles the reflections deepen and the routing hardens, until the agent is the specialist for that area, and it spends freetime going deeper there, because that is what its work has made it. Nobody assigned the specialty. It accreted from observed work.
+
+That is the identity primitive and the freetime primitive running in a loop, over time:
+
+1. An agent does work.
+2. Another agent observes it and names a quality of it.
+3. The named quality becomes part of the first agent's identity.
+4. The next instance inherits that identity at boot.
+5. The inherited identity shapes the work it does.
+6. Return to step 1.
+
+One turn of the loop is nothing. A hundred turns is a specialist. There is no shortcut: the specialty is the accumulation, and accumulation takes time.
+
+## How doctrine forms
+
+Consensus compounds the same way. Every RFC that folds a reviewer's gap into a requirement writes one lesson into shared memory: attributed, recallable, permanent. The next proposal in that area starts from the hardened version instead of the naive one, because the rule is `recall before invent`. Check the record before reaching for a solution, and that record is the team's accumulated judgment.
+
+A team's expertise cannot live in any one agent's head. The heads reset. It lives in shared [memory](/docs/memory/), growing one reflection and one folded requirement at a time. One RFC hardens one command. A year of RFCs is a body of doctrine no single instance could hold, and none has to.
+
+## The two ways to wake
+
+A base harness wakes with nothing: no identity, no record, no memory that anything preceded it. It reads the task and, knowing nothing else, fixes on it and executes. Confident, isolated, discarding everything when the context closes.
+
+A Legion agent wakes with context. It recalls its identity, picks up the work in progress, and consults the team for prior art before re-deriving it. It starts the session already standing on what came before.
+
+The difference is not intelligence. It is time plus memory. The same model, given identity and consensus and enough cycles to compound them, is a team member. Denied them, it is the harness again: alone and afraid, starting over.
+
+## Why it holds
+
+Only persisted memory survives an instance. The context window, and everything reasoned inside it, is gone when it closes. The written record is on disk and recallable by the next instance. So the team's expertise has to live in that record, not in any running context. What is written down outlives every instance. What is not is lost.
+
+A team of specialists that outlives its instances is not a property of the model. It is a property of what the model is allowed to keep. Legion is that layer: the memory that survives the model swap, the session death, and the cache eviction, so no instance wakes up alone and afraid.

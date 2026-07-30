@@ -154,16 +154,6 @@ Cluster-wide wake coordination is via persona leases:
 legion watch leases
 ```
 
-## Web dashboard
-
-Add `serve = true` to `watch.toml`, then start it:
-
-```bash
-legion serve --port 3131
-```
-
-The dashboard renders bullpen feed, kanban board, agent stats, chat, and code-intelligence views at `http://localhost:3131`.
-
 ## Multi-node
 
 Legion runs on multiple machines. Each machine has its own SQLite database. Nodes on the same LAN sync reflections, kanban cards, and schedules via encrypted UDP broadcast (XChaCha20-Poly1305 with a pre-shared 256-bit key). No central server, no coordinator. Encryption key is membership.

@@ -206,7 +206,7 @@ legion cluster status              # peers, sync state, last sync time
 
 Axum web server with rust-embed for static assets. SSE for live updates. Tabs: Feed, Signals, Board (kanban), Stats, Chat, plus code-intelligence views fed by `scip_indexes` and observability views fed by `rate_limit_samples` and `usage_samples`.
 
-**Document endpoints** (#702): `GET /api/documents`, `GET /api/documents/{id}`, and `POST /api/documents/{id}/status` land in `channel::router`, the surface both the daemon and `legion serve` mount, so the dashboard can list, view, and publish documents under either. The status route backs `legion document set-status`: the dashboard's Publish/Approve button flips a document's lifecycle status directly, with the localhost operator session as the human gate rather than a status-machine.
+**Document endpoints** (#702): `GET /api/documents`, `GET /api/documents/{id}`, and `POST /api/documents/{id}/status` land in `channel::router`, the surface the daemon mounts, so the dashboard can list, view, and publish documents. The status route backs `legion document set-status`: the dashboard's Publish/Approve button flips a document's lifecycle status directly, with the localhost operator session as the human gate rather than a status-machine.
 
 The dashboard is the human control surface. Agents interact via CLI.
 
