@@ -28,11 +28,11 @@ Two properties make an identity load-bearing.
 
 **It is given as much as it is claimed.** A self-authored `whoami` is only half of it. The other half is what the team records about you, surfaced by a `consult` across all agents. An agent assigned to a schema codebase accumulates schema reflections. Peers start routing schema questions to it. Over time it becomes the schema specialist. That identity was deposited by observed work, not chosen. Given identity is more durable than claimed identity, because an agent cannot revise what others independently recorded.
 
-**It is guarded.** A repo holds exactly one live identity root, and everything else chains off it with `--follows`. Inserting a second unparented root is refused at the database layer, not by convention. A stray note in the identity slot outranks the real role by recency, and the agent boots into that instead. When an identity needs replacing, `legion whoami --generate --apply` is the one sanctioned swap: a single transaction with no window where a repo has two roots or none.
+**It is guarded.** A repo holds exactly one live identity root, and everything else chains off it with `--follows`. Inserting a second unparented root is refused at the database layer, not by convention. A stray note in the identity slot outranks the real role by recency, and the agent boots into that instead. When an identity needs replacing, `legion whoami --generate` gathers the source material and `--apply` writes the authored manifest back as the one sanctioned swap: a single transaction with no window where a repo has two roots or none.
 
 ```
 legion reflect --repo <name> --whoami --text "..."   # update identity (real role/voice change only)
-legion whoami --generate --apply                      # rebuild the root from source material
+legion whoami --generate --apply --from-file <manifest>  # guarded swap of the root
 ```
 
 ## Freetime
