@@ -22,7 +22,7 @@ export const PROJECTS = [
   { key: "mail", label: "Mail", href: "https://rafters.studio/mail/" },
   { key: "gitpress", label: "Gitpress", href: "https://gitpress.app" },
   { key: "smuggler", label: "Smuggler", href: "https://smugglr.dev" },
-  { key: "kelex", label: "Kelex", href: "https://github.com/rafters-studio/kelex" },
+  { key: "kelex", label: "Kelex", href: "https://rafters.studio/kelex/" },
   { key: "ledger", label: "Ledger", href: "https://github.com/rafters-studio/ledger" },
   { key: "veneer", label: "Veneer", href: "https://github.com/rafters-studio/veneer" },
 ] as const satisfies readonly EcosystemProject[];

@@ -1,0 +1,77 @@
+---
+import Base from './Base.astro';
+import Container from '@/components/ui/container.astro';
+import Grid from '@/components/ui/grid.astro';
+import GridItem from '@/components/ui/grid-item.astro';
+import Small from '@/components/ui/typography-small.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const rawProps = Astro.props as Props & { frontmatter?: Partial<Props> };
+const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
+const { title = '', description } = merged;
+const base = '/kelex/';
+const currentPath = Astro.url.pathname.replace(/\/$/, '');
+
+type NavItem = { label: string; href: string };
+type NavGroup = { heading: string; items: NavItem[] };
+
+const nav: NavGroup[] = [
+  {
+    heading: 'Start',
+    items: [
+      { label: 'Overview', href: `${base}docs` },
+      { label: 'Getting Started', href: `${base}docs/getting-started` },
+    ],
+  },
+];
+
+function isActive(href: string): boolean {
+  const docsRoot = `${base}docs`;
+  if (href === docsRoot) {
+    return currentPath === docsRoot;
+  }
+  return currentPath === href || currentPath.startsWith(href + '/');
+}
+---
+
+<Base title={title} description={description}>
+  <Container size="7xl" padding="8" gap="10">
+    <Grid columns={2} gap="4">
+      <a href={base}>Kelex</a>
+      <Grid columns={2} gap="8">
+        <a href={`${base}docs/`}>Docs</a>
+        <a href="https://github.com/rafters-studio/kelex">GitHub</a>
+      </Grid>
+    </Grid>
+
+    <Grid columns={4} gap="8">
+      <GridItem colSpan={1}>
+        <Container as="aside" gap="8">
+          {nav.map((group) => (
+            <Container gap="2">
+              <Small>{group.heading}</Small>
+              {group.items.map((item) => (
+                <a
+                  href={item.href + '/'}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </Container>
+          ))}
+        </Container>
+      </GridItem>
+
+      <GridItem colSpan={3}>
+        <Container as="article" gap="6">
+          <slot />
+        </Container>
+      </GridItem>
+    </Grid>
+  </Container>
+</Base>
