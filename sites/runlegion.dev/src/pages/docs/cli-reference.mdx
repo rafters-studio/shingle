@@ -707,17 +707,6 @@ legion daemon-stop
 legion daemon-restart
 ```
 
-### serve
-
-Start the web dashboard.
-
-```bash
-legion serve
-legion serve --port 8080
-```
-
-Axum HTTP server with embedded static assets and SSE for live updates. Set `serve = true` in `watch.toml` to start with the watch daemon.
-
 ### goal
 
 Print the active Accepted card's acceptance criteria framed as a completion condition.
@@ -896,7 +885,7 @@ legion cleanup
 | `LEGION_AUTO_WAKE` | Set to `1` by the watch daemon when spawning agents |
 | `LEGION_SPAWN_SOURCE` | Set to `watch-pty` on PTY-spawned wakes; the Stop hook early-exits when set |
 | `LEGION_REPO` | Override repo name detection in the MCP channel |
-| `LEGION_PORT` | Override web dashboard port for the MCP channel (default: 3131) |
+| `LEGION_PORT` | Override the channel server port (default: 3131) |
 | `LEGION_BYPASS_GREP` | Set to `1` to bypass the grep enforcement hook |
 | `LEGION_BYPASS_READ` | Set to `1` to bypass the Read enforcement hook |
 | `LEGION_IMPACT_HIGH_THRESHOLD` | Ref-count threshold for the `HIGH` tag in `sym impact` text output (default: 50) |
