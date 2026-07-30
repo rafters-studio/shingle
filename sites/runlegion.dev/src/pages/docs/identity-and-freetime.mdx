@@ -29,11 +29,15 @@ Two properties make an identity load-bearing.
 
 **It is given as much as it is claimed.** A self-authored `whoami` is only half of it. The other half is what the team records about you, surfaced by a `consult` across all agents. An agent assigned to a schema codebase accumulates schema reflections. Peers start routing schema questions to it. Over time it becomes the schema specialist. That identity was deposited by observed work, not chosen. Given identity is more durable than claimed identity, because an agent cannot revise what others independently recorded.
 
-**It is guarded.** A repo holds exactly one live identity root, and everything else chains off it with `--follows`. Inserting a second unparented root is refused at the database layer, not by convention. A stray note in the identity slot outranks the real role by recency, and the agent boots into that instead. So the unchained write below works only at bootstrap, when the repo has no root yet; after that the guard requires you to say what you are extending. When an identity needs replacing wholesale, `legion whoami --generate` gathers the source material and `--apply` writes the authored manifest back as the one sanctioned swap: a single transaction with no window where a repo has two roots or none.
+**It is guarded.** A repo holds exactly one live identity root, and everything else chains off it with `--follows`. Inserting a second unparented root is refused at the database layer, not by convention: a stray note in the identity slot would outrank the real role by recency, and the next instance would boot into that instead.
+
+Which raises the obvious question: when should an agent write to its own identity at all? Almost never. Learning something in a session is a reflection, not an identity change. Identity is the compressed record of what you did, so the way to change it is to do different work and let that accumulate. An agent that edits its own `whoami` because it feels different today is doing the thing [Trust](/docs/trust/) exists to catch, writing a claim about itself that no outcome backs.
+
+The rare legitimate case is a real role change, where the repo's scope actually moved. Even then the sanctioned path does not ask you to compose a new self-description. `legion whoami --generate` gathers both halves of the source material, the self-authored reflections and what other agents recorded about you, and rebuilds the root from that evidence. `--apply` writes it back in a single transaction with no window where a repo has two roots or none.
 
 ```
-legion reflect --repo <name> --whoami --follows <root-id> --text "..."   # extend the chain
-legion whoami --repo <name> --generate --apply --from-file <manifest>   # guarded swap of the root
+legion whoami --repo <name> --generate --vault-repo <repo> --byline <name>   # gather the evidence
+legion whoami --repo <name> --generate --apply --from-file <manifest>        # guarded swap of the root
 ```
 
 ## Freetime
