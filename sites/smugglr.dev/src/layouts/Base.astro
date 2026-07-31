@@ -25,7 +25,7 @@ const rawProps = Astro.props as Props & {
 const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
 const {
     title,
-    description = "Smuggler is a universal SQLite sync engine. Fast, stateless, encrypted. LAN broadcast, S3 relay, and agent-friendly JSON output.",
+    description = "smugglr is a universal SQLite sync engine. Fast, stateless, encrypted. LAN broadcast, S3 relay, and agent-friendly JSON output.",
     image = "/logo.webp",
     type = "website",
     publishedTime,
@@ -37,7 +37,7 @@ const {
 const siteOrigin = Astro.site?.origin ?? "https://smugglr.dev";
 const canonical = new URL(Astro.url.pathname, siteOrigin).href;
 const absoluteImage = new URL(image, siteOrigin).href;
-const fullTitle = `${title} | Smuggler`;
+const fullTitle = `${title} | smugglr`;
 
 const isHome = Astro.url.pathname === "/";
 const jsonLdGraph: Record<string, unknown>[] = [
@@ -45,7 +45,7 @@ const jsonLdGraph: Record<string, unknown>[] = [
         "@type": "WebSite",
         "@id": `${siteOrigin}/#website`,
         url: `${siteOrigin}/`,
-        name: "Smuggler",
+        name: "smugglr",
         description:
             "Universal SQLite sync engine. LAN broadcast, S3 relay, agent-friendly output.",
         inLanguage: "en",
@@ -63,7 +63,7 @@ if (isHome) {
     jsonLdGraph.push({
         "@type": "SoftwareApplication",
         "@id": `${siteOrigin}/#software`,
-        name: "Smuggler",
+        name: "smugglr",
         applicationCategory: "DeveloperApplication",
         operatingSystem: "macOS, Linux, Windows",
         description:
@@ -98,7 +98,7 @@ const jsonLd = {
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-        <meta property="og:site_name" content="Smuggler" />
+        <meta property="og:site_name" content="smugglr" />
         <meta property="og:type" content={type} />
         <meta property="og:title" content={fullTitle} />
         <meta property="og:description" content={description} />
@@ -134,13 +134,13 @@ const jsonLd = {
             rel="alternate"
             type="text/plain"
             href="/llms.txt"
-            title="Smuggler docs index for LLMs"
+            title="smugglr docs index for LLMs"
         />
         <link
             rel="alternate"
             type="text/plain"
             href="/llms-full.txt"
-            title="Smuggler docs (full) for LLMs"
+            title="smugglr docs (full) for LLMs"
         />
 
         <script

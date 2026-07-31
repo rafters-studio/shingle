@@ -22,9 +22,9 @@ export default defineConfig({
       defineSharedMeta({
         site: defineSite({
           url: 'https://smugglr.dev',
-          name: 'Smuggler',
+          name: 'smugglr',
           description:
-            'Smuggler is a universal SQLite sync engine. Fast, stateless, encrypted. LAN broadcast, S3 relay, and agent-friendly JSON output.',
+            'smugglr is a universal SQLite sync engine. Fast, stateless, encrypted. LAN broadcast, S3 relay, and agent-friendly JSON output.',
           locale: 'en-US',
         }),
       }),
