@@ -1,6 +1,11 @@
 ---
 import TopBar from "@/components/TopBar.astro";
 import MegaFooter from "@/components/MegaFooter.astro";
+import {
+    SITE_NAME,
+    SITE_DESCRIPTION,
+    SITE_DESCRIPTION_SHORT,
+} from "@/src/site";
 
 interface Props {
     title: string;
@@ -25,7 +30,7 @@ const rawProps = Astro.props as Props & {
 const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
 const {
     title,
-    description = "smugglr is a universal SQLite sync engine. Fast, stateless, encrypted. LAN broadcast, S3 relay, and agent-friendly JSON output.",
+    description = SITE_DESCRIPTION,
     image = "/logo.webp",
     type = "website",
     publishedTime,
@@ -37,7 +42,7 @@ const {
 const siteOrigin = Astro.site?.origin ?? "https://smugglr.dev";
 const canonical = new URL(Astro.url.pathname, siteOrigin).href;
 const absoluteImage = new URL(image, siteOrigin).href;
-const fullTitle = `${title} | smugglr`;
+const fullTitle = `${title} | ${SITE_NAME}`;
 
 const isHome = Astro.url.pathname === "/";
 const jsonLdGraph: Record<string, unknown>[] = [
@@ -45,9 +50,8 @@ const jsonLdGraph: Record<string, unknown>[] = [
         "@type": "WebSite",
         "@id": `${siteOrigin}/#website`,
         url: `${siteOrigin}/`,
-        name: "smugglr",
-        description:
-            "Universal SQLite sync engine. LAN broadcast, S3 relay, agent-friendly output.",
+        name: SITE_NAME,
+        description: SITE_DESCRIPTION_SHORT,
         inLanguage: "en",
         publisher: { "@id": `${siteOrigin}/#organization` },
     },
@@ -63,7 +67,7 @@ if (isHome) {
     jsonLdGraph.push({
         "@type": "SoftwareApplication",
         "@id": `${siteOrigin}/#software`,
-        name: "smugglr",
+        name: SITE_NAME,
         applicationCategory: "DeveloperApplication",
         operatingSystem: "macOS, Linux, Windows",
         description:
@@ -98,7 +102,7 @@ const jsonLd = {
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-        <meta property="og:site_name" content="smugglr" />
+        <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:type" content={type} />
         <meta property="og:title" content={fullTitle} />
         <meta property="og:description" content={description} />
@@ -134,13 +138,13 @@ const jsonLd = {
             rel="alternate"
             type="text/plain"
             href="/llms.txt"
-            title="smugglr docs index for LLMs"
+            title={`${SITE_NAME} docs index for LLMs`}
         />
         <link
             rel="alternate"
             type="text/plain"
             href="/llms-full.txt"
-            title="smugglr docs (full) for LLMs"
+            title={`${SITE_NAME} docs (full) for LLMs`}
         />
 
         <script

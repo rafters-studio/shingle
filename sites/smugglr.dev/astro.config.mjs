@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import tailwindcss from '@tailwindcss/vite';
 import { astroMeta, defineSharedMeta, defineSite } from '@shingle/shared/meta';
+import { SITE_NAME, SITE_DESCRIPTION } from './src/site.ts';
 
 export default defineConfig({
   site: 'https://smugglr.dev',
@@ -22,9 +23,8 @@ export default defineConfig({
       defineSharedMeta({
         site: defineSite({
           url: 'https://smugglr.dev',
-          name: 'smugglr',
-          description:
-            'smugglr is a universal SQLite sync engine. Fast, stateless, encrypted. LAN broadcast, S3 relay, and agent-friendly JSON output.',
+          name: SITE_NAME,
+          description: SITE_DESCRIPTION,
           locale: 'en-US',
         }),
       }),
