@@ -18,10 +18,11 @@ import { article, breadcrumbList, mergeGraph, softwareApplication } from "@rafte
 import type { JsonLdObject } from "@rafters/astro-meta/schema";
 import { ecosystemSameAs } from "./ecosystem";
 import { collectPages } from "./collect-pages";
+import { collectDistBodies } from "./collect-dist";
 
 // Re-export the per-page schema builders so sites depend only on @shingle/shared
 // and never name @rafters/astro-meta directly (avoids a pnpm phantom dependency).
-export { astroMeta, defineSite, collectPages, article, breadcrumbList, mergeGraph, softwareApplication };
+export { astroMeta, defineSite, collectPages, collectDistBodies, article, breadcrumbList, mergeGraph, softwareApplication };
 export type { SiteIdentity, AstroMetaOptions, JsonLdObject };
 
 /** The studio organization. Identical across every site; only the WebSite node varies. */
@@ -116,15 +117,23 @@ export function defineSharedMeta(opts: SharedMetaOptions): AstroMetaOptions {
         {
           key: ["pages"],
           collect: async () => {
-            const pages = await collectPages({ pagesDir });
+            // Titles and descriptions come from authored frontmatter, which was
+            // never broken. Only bodies move to the rendered output, because
+            // page source is component wiring rather than content, and .astro
+            // pages have no source body at all.
+            const [pages, bodies] = await Promise.all([
+              collectPages({ pagesDir }),
+              collectDistBodies(),
+            ]);
             return pages
-              .filter((p) => p.body !== undefined)
-              .map((p) => ({
-                title: p.title,
-                url: p.route,
-                summary: p.description,
-                body: p.body,
-                section: sectionForRoute(p.route),
+              .map((p) => ({ page: p, body: bodies.get(p.route) }))
+              .filter((entry) => entry.body !== undefined)
+              .map(({ page, body }) => ({
+                title: page.title,
+                url: page.route,
+                summary: page.description,
+                body,
+                section: sectionForRoute(page.route),
               }));
           },
         },
