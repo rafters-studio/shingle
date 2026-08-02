@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.24.0. Commands are organized by category.
+This reference covers legion 0.25.0. Commands are organized by category.
 
 ---
 
@@ -430,6 +430,8 @@ legion push --repo myproject --branch feature/search
 
 Resolves the checkout that has the target branch checked out (via `git worktree list`) and pushes from that checkout, because the pre-push hook reviews the CWD's checked-out branch, not the ref being pushed -- pushing branch B from a checkout sitting on A would silently review the wrong diff. Refuses `main`/`master` and any `--branch` value shaped like a flag or a force/retarget refspec by construction; there is no `--force` flag. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
 
+A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push` and says so before running it. Anything the sanctioned command cannot express -- a force push in any spelling, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied outright, naming the flag, rather than silently dropped.
+
 Key flags:
 
 - `--repo` (required) repository name, for the audit log
@@ -543,6 +545,8 @@ legion quality-gate finding-list --branch feature/search --skill legion-simplify
 legion quality-gate finding-disposition --id <finding-id> --reason "false positive, see PR #812 discussion"
 legion quality-gate finding-ack --branch feature/search --skill legion-simplify --reason "cosmetic naming nits, batch-waived"
 ```
+
+`finding-list` prints the full 36-character finding id -- legion ids are UUIDv7, and two findings recorded close together can share most of a truncated prefix, so a short id is often ambiguous. `finding-disposition --id` and `quality-gate void --id` accept either the full id or an unambiguous prefix; more than one match is refused with every candidate named, never a silent pick.
 
 `finding-disposition` retires one PENDING finding with a required reason -- a disposition is not a fix, it is a recorded "not fixing this, and here is why." `finding-ack` batch-acknowledges every PENDING LOW-severity finding on a (branch, skill) pair with one shared reason, still writing one row per finding so the audit trail stays per-finding. `finding-list` is the audit view: filterable by branch, skill, and status (`pending`, `resolved`, `dispositioned`).
 
@@ -790,13 +794,26 @@ legion telemetry etc-summary --command find-content --since 7d
 Emit and witness predictions; read calibration metrics.
 
 ```bash
-legion uncertainty emit --surface myproject --model claude-sonnet-4 --confidence 0.85
-legion uncertainty witness --id <prediction-id> --outcome pass
-legion uncertainty calibration --surface myproject
-legion uncertainty orphans
+legion uncertainty emit \
+  --surface legion.task \
+  --feature-key scip.high-connectivity-refactor \
+  --input-fingerprint <hash> \
+  --claimed-confidence 0.85 \
+  --payload '{"predicted_tokens": 5000000}'
+
+# Resolve the model from the session instead of naming it
+legion uncertainty emit --session-id <session-id> ...
+
+legion uncertainty witness <prediction-id> --outcome-label shipped --outcome-correctness 1.0
+legion uncertainty calibration --surface legion.task
+legion uncertainty orphans --json
 ```
 
-`emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
+`emit` requires five flags: `--surface`, `--feature-key`, `--input-fingerprint`, `--claimed-confidence`, and `--payload`. `--orphan-ttl-days` defaults to 30, and `0` disables the orphan sweep for that row.
+
+`witness` takes the prediction id as a positional argument, not a flag, plus `--outcome-label` (`shipped`, `scoped-down`, `escalated`, or `abandoned`) and `--outcome-correctness` in `[0.0, 1.0]`. An optional `--payload` carries the actuals.
+
+`--model` and `--model-version` are optional. Without `--model`, resolution falls to `--session-id`: it looks up the newest model seen for that session in the statusline samples. Pass neither and the row gets an explicit `UNKNOWN_MODEL` marker instead of a guessed id -- filterable and honest, where a plausible-but-wrong default would quietly pollute a real cohort. `emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
 
 ### health
 

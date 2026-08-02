@@ -63,11 +63,17 @@ The soft sym-bypass refusal (#506) refuses bypasses for patterns that look like 
 
 The hook is silent on repos without a SCIP index. New repos behave as they did before.
 
+**Git-shaped searches** (#829): `git grep`, `git ls-files`, and `git log -S`/`-G`/`--grep` are detected by the same ladder. Before this, only the leading token was checked (`grep`, `find`, and so on), so `git grep foo` slipped past both the deny list and the hook -- unblocked, and uncounted. `git log --grep` is recognized for telemetry but deliberately never blocked: commit messages are not sym-indexed, so there is nowhere sanctioned to redirect it to.
+
 **Sym etc routing** (#713): the deny and inject messages name the exact `sym etc` command for the query shape they block: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for a cross-repo name lookup -- a non-symbol query never lands with nowhere to route. This wording lives in the plugin (`plugin/hooks/`), not the daemon, so a session running an older plugin can still show older redirect text (symbols-only, or a stale command list) until the plugin itself is updated.
 
 **Whoami-rewrite refusal** (#478): a sibling PreToolUse refuses Edit/Write that would rewrite an identity reflection's content without going through the proper update path. Identity is institutional. Edits land through `legion reflect --whoami`.
 
-**No-gh** (#477): blocks direct `gh` invocations (including absolute-path forms) outside legion-managed wrappers, so the audit log captures every work-source action.
+**No-gh** (#477, #828): blocks direct `gh` invocations (including absolute-path forms) outside legion-managed wrappers, so the audit log captures every work-source action. The denial translates the exact legion command for the verb typed -- `gh pr view 42` denies with `legion pr view --repo <r> --number 42` -- instead of printing a fixed menu of a handful of verbs against a much larger surface.
+
+**No-git-push** (#834): a plain `git push` is rewritten to `legion push --repo <r> [--branch <b>]`, and the rewrite is announced, not silent. Anything the sanctioned command cannot express -- a force push in any spelling, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied by name instead of translated, because dropping the flag and running something else anyway is worse than refusing outright.
+
+**Pre-script-search** (#838): watches Write/Edit content, and inline `python -c` / `node -e` code passed to Bash, for search primitives a script could use instead of an existing lookup -- `os.walk`, `rglob`, `fnmatch`, `re.search` and similar. It injects a pointer to the matching command (`sym tree` for a directory walk, `sym etc find-file` for a name or glob, `sym etc find-content` for a text search); it never denies, since a script that searches may also do real work that refusing it would block. Silent in an unindexed repo, same as the rest of this ladder.
 
 ### PostToolUse
 
@@ -110,13 +116,13 @@ The MCP subprocess stderr lands in per-PID log files under `~/Library/Logs/legio
 
 ## Skills
 
-Skills are auto-triggered by description match.
+Skills are auto-triggered by description match, or invoked directly by name. Claude Code namespaces plugin skills under the plugin name, so the five below run as `/legion:legion-simplify`, `/legion:legion-pr-write`, and so on -- not the bare `/legion-simplify`.
 
 **legion-memory** fires when the agent is about to search the codebase for answers and reminds it of the recall-before-grep doctrine. Code shows what exists. Legion tells you why it exists, what went wrong last time, and what the person who solved it wished they had known.
 
 **legion-simplify** reviews the current branch diff for code quality issues: duplicate logic, unnecessary abstraction, stringly-typed state. Produces structured JSON, then earns its gate through `legion quality-gate check`, which validates a substantive per-file articulation before recording -- `quality-gate record --result clean` is refused directly for this skill, so a clean verdict cannot be manufactured by skipping the check. `legion pr create` will not open a PR until the simplify gate is clean on HEAD.
 
-**legion-pr-write** (`/legion-pr-write`) is the PR-body forcing function. Before opening a PR, the agent maps each acceptance criterion to the diff that satisfies it, in prose with evidence, and explicitly states what was not done. `legion pr write-check` validates the mapping and records a `legion-pr-write` gate. `legion pr create` requires both the simplify and pr-write gates clean on HEAD.
+**legion-pr-write** (`/legion:legion-pr-write`) is the PR-body forcing function. Before opening a PR, the agent maps each acceptance criterion to the diff that satisfies it, in prose with evidence, and explicitly states what was not done. `legion pr write-check` validates the mapping and records a `legion-pr-write` gate. `legion pr create` requires both the simplify and pr-write gates clean on HEAD.
 
 **legion-review** runs parallel reviewers (spec, correctness, quality, security) over the diff, adversarially refutes high- and medium-severity findings before reporting them, and records a `legion-review` gate. Enforces the target repo's own CLAUDE.md invariants.
 

@@ -19,10 +19,10 @@ The plugin installs the binary, hooks, real-time channel, slash commands, and sk
 
 - **SessionStart**: recalls reflections, surfaces team activity, injects pending replies, prints the current time and sunphase, shows the next kanban card, and runs a SCIP index banner so agents know whether `legion sym` will work in this repo
 - **Stop**: prompts a reflection, refuses to stop on incomplete TaskList items, and hands the watch reaper an exit hint
-- **PreToolUse**: on indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. Bypass via `LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`, or a `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl` so the uncertainty engine can see what `sym`/`recall` is missing
+- **PreToolUse**: on indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. Bypass via `LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`, or a `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl` so the uncertainty engine can see what `sym`/`recall` is missing. A plain `git push` gets rewritten to `legion push` and the rewrite is announced; a force push, a refspec, or `--delete`/`--tags`/`--mirror`/`--prune`/`--all` is denied by name instead
 - **PostToolUse**: re-indexes the owning repo after edits so `sym` queries stay fresh
 - **Real-time channel**: an MCP server for bullpen posts, signals, replies, and task responses between agents
-- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/checkpoint`, `/watch-sync`, `/migrate-memory`, `/legion-simplify`
+- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/checkpoint`, `/watch-sync`, `/migrate-memory`, `/legion:legion-simplify`
 - **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR)
 
 ## Your first reflection
@@ -212,7 +212,7 @@ Once a card is bound, `legion verify` reads acceptance criteria from the documen
 Before opening a PR:
 
 ```bash
-/legion-simplify                                              # review diff for quality issues
+/legion:legion-simplify                                        # review diff for quality issues
 legion pr write-check --repo myproject --issue 42              # map each criterion to evidence
 legion push --repo myproject --branch feature/search           # the sanctioned push, not raw git push
 legion pr create --repo myproject --title "..." --closes 42    # closes the issue on merge
