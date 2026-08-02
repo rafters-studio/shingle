@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.24.0. Commands are organized by category.
+This reference covers legion 0.25.0. Commands are organized by category.
 
 ---
 
@@ -376,6 +376,10 @@ legion kanban delegated-needs-attention --repo myproject
 legion kanban defer --id <card-id> --until 3d
 legion kanban undefer --id <card-id>
 
+# Spec revision -- stop rather than improvise around wrong acceptance criteria
+legion kanban replan-request --id <card-id> --reason "AC assume a v1 API that shipped renamed"
+legion kanban replan-record --id <card-id> --reason "AC 3 rewritten against the v2 endpoint"
+
 # Bind a spec document
 legion kanban bind --id <card-id> --document <doc-id>
 
@@ -391,6 +395,8 @@ When a card has a `document_id`, status transitions that reach `accepted`, `in-r
 **Delegated**: `legion kanban delegate --id <card-id>` hands an Accepted card to a live, watch-spawned wake attempt. Entry is refused unless the watch daemon's heartbeat is fresh and a live wake attempt for the card's repo actually exists -- Delegated can never be a free self-set label with no process behind it. The watch health tick auto-reverts the card to Accepted the moment the attempt finishes or dies; `legion kanban undelegate` does the same manually. `legion kanban delegated-needs-attention --repo myproject` lists delegated cards whose linked attempt is NOT verifiably live -- the fail-closed check the Stop gate runs for the one case the health tick cannot reach on its own: the watch daemon itself being down.
 
 **Deferred**: `legion kanban defer --id <card-id> --until <when>` parks an Accepted or Pending card until a future time, excluding it from the Stop in-progress gate and from `list`'s default (working-set) view. `--until` accepts `YYYY-MM-DD`, `<N>d`, `<N>w`, or `today`, resolved forward from now; a value that has already passed is refused. The watch health tick reverts the card automatically once the wake time passes and pages its owner; `legion kanban undefer --id <card-id>` wakes it manually ahead of schedule. Deferred cards show up in `list --deferred`, carry a `[wakes:YYYY-MM-DD]` marker in `list`'s default output, and a `Wake at:` line in `view`.
+
+**Spec revision**: acceptance criteria get frozen when a card is accepted, and the failure mode is an agent deciding mid-build that the criteria are wrong and quietly building something else. `legion kanban replan-request --id <card-id> --reason <why>` is the stop: it moves an Accepted card to NeedsInput and surfaces the reason, which is what a human re-ratifies against, so `--reason` is required rather than optional. Once the criteria are actually revised, `legion kanban replan-record --id <card-id> --reason <what-changed>` records that the revision was a deliberate design act. `legion verify` consults that record to tell a sanctioned re-plan from an unratified deviation, and fails the card on the latter. Neither command takes `--repo`; the card ID resolves the repo.
 
 Both Delegated and Deferred share the same liveness caveat: the auto-revert only fires while `legion watch` is running for the card's repo. If no watch process is alive when the wake condition is met, the card stays parked until one starts and runs a health tick -- a late wake is a missed page, not a stuck agent, but it is worth knowing before you rely on it.
 
@@ -429,6 +435,8 @@ legion push --repo myproject --branch feature/search
 ```
 
 Resolves the checkout that has the target branch checked out (via `git worktree list`) and pushes from that checkout, because the pre-push hook reviews the CWD's checked-out branch, not the ref being pushed -- pushing branch B from a checkout sitting on A would silently review the wrong diff. Refuses `main`/`master` and any `--branch` value shaped like a flag or a force/retarget refspec by construction; there is no `--force` flag. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
+
+A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push` and says so before running it. Anything the sanctioned command cannot express -- a force push in any spelling, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied outright, naming the flag, rather than silently dropped.
 
 Key flags:
 
@@ -543,6 +551,8 @@ legion quality-gate finding-list --branch feature/search --skill legion-simplify
 legion quality-gate finding-disposition --id <finding-id> --reason "false positive, see PR #812 discussion"
 legion quality-gate finding-ack --branch feature/search --skill legion-simplify --reason "cosmetic naming nits, batch-waived"
 ```
+
+`finding-list` prints the full 36-character finding id -- legion ids are UUIDv7, and two findings recorded close together can share most of a truncated prefix, so a short id is often ambiguous. `finding-disposition --id` and `quality-gate void --id` accept either the full id or an unambiguous prefix; more than one match is refused with every candidate named, never a silent pick.
 
 `finding-disposition` retires one PENDING finding with a required reason -- a disposition is not a fix, it is a recorded "not fixing this, and here is why." `finding-ack` batch-acknowledges every PENDING LOW-severity finding on a (branch, skill) pair with one shared reason, still writing one row per finding so the audit trail stays per-finding. `finding-list` is the audit view: filterable by branch, skill, and status (`pending`, `resolved`, `dispositioned`).
 
@@ -790,13 +800,29 @@ legion telemetry etc-summary --command find-content --since 7d
 Emit and witness predictions; read calibration metrics.
 
 ```bash
-legion uncertainty emit --surface myproject --model claude-sonnet-4 --confidence 0.85
-legion uncertainty witness --id <prediction-id> --outcome pass
-legion uncertainty calibration --surface myproject
-legion uncertainty orphans
+legion uncertainty emit \
+  --surface legion.task \
+  --feature-key scip.high-connectivity-refactor \
+  --input-fingerprint <hash> \
+  --model claude-opus-5 \
+  --model-version 20260201 \
+  --claimed-confidence 0.85 \
+  --payload '{"predicted_tokens": 5000000}'
+
+legion uncertainty witness <prediction-id> --outcome-label shipped --outcome-correctness 1.0
+legion uncertainty witness-gate --skill legion-simplify --commit <sha> --correct true
+
+legion uncertainty calibration --surface legion.task
+legion uncertainty orphans --json
 ```
 
-`emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
+`emit` takes seven required flags, and there is no shorter form: `--surface`, `--feature-key`, `--input-fingerprint`, `--model`, `--model-version`, `--claimed-confidence`, and `--payload`. `--orphan-ttl-days` is the only optional one, defaulting to 30, with `0` disabling the orphan sweep for that row. It returns `{id, orphan_after}` as JSON, and it is non-blocking by design: transport failures log to stderr and exit 0, so an emit hook can never break the agent that triggered it.
+
+`witness` takes the prediction id as a positional argument, not a flag, plus `--outcome-label` (`shipped`, `scoped-down`, `escalated`, or `abandoned`) and `--outcome-correctness` in `[0.0, 1.0]`. Re-witnessing an already-witnessed prediction is an error rather than a no-op.
+
+`witness-gate` is the decorrelated path for quality-gate predictions specifically. It looks the prediction up by the same `(skill, commit)` fingerprint `legion quality-gate list` prints, so you never handle an opaque id, and `--correct` takes an explicit `true` or `false` rather than being a bare flag, which is what makes a negative witness as cheap to record as a positive one. `--correct` is relative to whichever verdict the gate recorded, not a bare "was the diff clean": `--correct true` on a recorded `clean` verdict corroborates it, while `--correct true` on a recorded `issues` verdict means the catch was right. It errors if no emitted `legion.gate` prediction matches, which covers never-recorded, already-witnessed, and orphaned alike.
+
+`calibration` and `orphans` both take an optional `--surface` filter and `--json`; `calibration` additionally filters by `--model`.
 
 ### health
 
