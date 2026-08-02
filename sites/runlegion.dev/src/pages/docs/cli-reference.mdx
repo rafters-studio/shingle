@@ -794,12 +794,24 @@ legion telemetry etc-summary --command find-content --since 7d
 Emit and witness predictions; read calibration metrics.
 
 ```bash
-legion uncertainty emit --surface myproject --confidence 0.85
-legion uncertainty emit --surface myproject --session-id <id> --confidence 0.85
-legion uncertainty witness --id <prediction-id> --outcome pass
-legion uncertainty calibration --surface myproject
-legion uncertainty orphans
+legion uncertainty emit \
+  --surface legion.task \
+  --feature-key scip.high-connectivity-refactor \
+  --input-fingerprint <hash> \
+  --claimed-confidence 0.85 \
+  --payload '{"predicted_tokens": 5000000}'
+
+# Resolve the model from the session instead of naming it
+legion uncertainty emit --session-id <session-id> ...
+
+legion uncertainty witness <prediction-id> --outcome-label shipped --outcome-correctness 1.0
+legion uncertainty calibration --surface legion.task
+legion uncertainty orphans --json
 ```
+
+`emit` requires five flags: `--surface`, `--feature-key`, `--input-fingerprint`, `--claimed-confidence`, and `--payload`. `--orphan-ttl-days` defaults to 30, and `0` disables the orphan sweep for that row.
+
+`witness` takes the prediction id as a positional argument, not a flag, plus `--outcome-label` (`shipped`, `scoped-down`, `escalated`, or `abandoned`) and `--outcome-correctness` in `[0.0, 1.0]`. An optional `--payload` carries the actuals.
 
 `--model` and `--model-version` are optional. Without `--model`, resolution falls to `--session-id`: it looks up the newest model seen for that session in the statusline samples. Pass neither and the row gets an explicit `UNKNOWN_MODEL` marker instead of a guessed id -- filterable and honest, where a plausible-but-wrong default would quietly pollute a real cohort. `emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
 
