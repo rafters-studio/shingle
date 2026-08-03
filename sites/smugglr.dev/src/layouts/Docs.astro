@@ -61,7 +61,7 @@ function isActive(href: string): boolean {
       </Grid>
     </Grid>
 
-    <Grid columns={4} gap="8">
+    <Grid columns={{ base: 1, lg: 4 }} gap="8">
       <GridItem colSpan={1}>
         <Container as="aside" gap="8">
           {nav.map((group) => (
