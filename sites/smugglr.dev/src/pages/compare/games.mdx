@@ -2,7 +2,6 @@
 layout: '@/src/layouts/Base.astro'
 title: compare games
 description: "smugglr for game developers. Photon, Colyseus, Mirror, Nakama, PlayFab, Firebase. Where smugglr fits as the persistent tier behind a netcode framework, and the whole backend for games without a tick rate."
-stickyTopbar: true
 ---
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
@@ -13,7 +12,6 @@ import Small from "@/components/ui/typography-small.astro";
 import Code from "@/components/ui/typography-code.astro";
 import Codeblock from "@/components/ui/typography-codeblock.astro";
 import InkBlock from "@/components/InkBlock.astro";
-import SiteHeader from "@/components/SiteHeader.astro";
 import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
 import MrsTable from "@/components/MrsTable.astro";
 import Card from "@/components/ui/card.astro";
@@ -46,8 +44,6 @@ export const NOT_SMUGGLR_ROWS = [
     ["Matchmaking / lobby coordination",                               "Photon, Nakama, PlayFab. Pairing players is not row sync."],
     ["Voice / video chat",                                             "Vivox, Agora, Photon Voice. Different transport entirely."],
 ];
-
-<SiteHeader />
 
 <Container as="section" size="full" class="border-b border-border">
     <Container size="5xl" padding="20" gap="10" class="items-center text-center">

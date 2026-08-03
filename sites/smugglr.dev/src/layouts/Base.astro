@@ -1,5 +1,5 @@
 ---
-import TopBar from "@/components/TopBar.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
 import MegaFooter from "@/components/MegaFooter.astro";
 import {
     SITE_NAME,
@@ -20,8 +20,6 @@ interface Props {
     modifiedTime?: string;
     /** Additional JSON-LD nodes to merge into the sitewide graph. */
     extraJsonLd?: Record<string, unknown>[];
-    /** Render a fixed topbar that fades in after the user scrolls past the hero. */
-    stickyTopbar?: boolean;
 }
 
 const rawProps = Astro.props as Props & {
@@ -36,7 +34,6 @@ const {
     publishedTime,
     modifiedTime,
     extraJsonLd = [],
-    stickyTopbar = false,
 } = merged;
 
 const siteOrigin = Astro.site?.origin ?? "https://smugglr.dev";
@@ -154,7 +151,7 @@ const jsonLd = {
         />
     </head>
     <body class="bg-background text-foreground">
-        {stickyTopbar && <TopBar />}
+        <SiteHeader />
         <main>
             <slot />
         </main>

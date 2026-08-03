@@ -2,7 +2,6 @@
 layout: '@/src/layouts/Base.astro'
 title: compare
 description: "smugglr versus every comparable sync engine, hosted service, and client-cache layer. Litestream, rqlite, ElectricSQL, PowerSync, Turso embedded, CR-SQLite, Replicache, Zero, Yjs, Firebase, Supabase, Convex, MongoDB Atlas. Honest, falsifiable."
-stickyTopbar: true
 ---
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
@@ -13,7 +12,6 @@ import Small from "@/components/ui/typography-small.astro";
 import Code from "@/components/ui/typography-code.astro";
 import Codeblock from "@/components/ui/typography-codeblock.astro";
 import InkBlock from "@/components/InkBlock.astro";
-import SiteHeader from "@/components/SiteHeader.astro";
 import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
 import MrsTable from "@/components/MrsTable.astro";
 import Card from "@/components/ui/card.astro";
@@ -51,8 +49,6 @@ export const NOT_SMUGGLR_ROWS = [
     ["Reactive cache with mutators",    "Replicache, Zero, Convex. smugglr does not own client state."],
     ["Pub-sub at the row level",        "Supabase Realtime, Liveblocks broadcast. smugglr pulls; it does not push events."],
 ];
-
-<SiteHeader />
 
 <Container as="section" size="full" class="border-b border-border">
     <Container size="5xl" padding="20" gap="10" class="items-center text-center">

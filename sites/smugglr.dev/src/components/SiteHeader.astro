@@ -1,22 +1,30 @@
 ---
 /**
- * SiteHeader - Top-of-page header, always visible.
- * Mirrors handoff Hero.jsx SiteHeader: wordmark + version pill (left),
- * nav links (right). Candidate for upstream rafters composite.
+ * SiteHeader - the site's ONE header. Sticky, so it stays reachable.
+ *
+ * The brand is the logotype, the lowercase "smugglr" wordmark, not an image.
+ *
+ * This replaces three headers that disagreed with each other: this one with
+ * seven links, a fixed TopBar that faded in past the hero showing /logo.webp
+ * and two links, and a fourth copy inlined in Docs.astro. Every /compare/
+ * route rendered two of them at once, which is what "the site has two
+ * topbars" looked like from the reading side.
+ *
+ * Base.astro renders it on every page, so no page imports it and no page can
+ * opt out into having no nav. get-started previously did exactly that: it set
+ * stickyTopbar and rendered no in-flow header, so it had no navigation at all
+ * until you scrolled past 80vh.
  */
+import { NAV_LINKS } from "./nav-links";
 ---
 
-<header class="flex items-center justify-between border-b border-border px-10 py-5 font-heading">
+<header class="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-y-3 border-b border-border bg-background px-10 py-5 font-heading">
     <div class="flex items-baseline gap-3">
-        <span class="font-heading font-semibold text-xl tracking-tight text-foreground">smugglr</span>
+        <a href="/" class="font-heading font-semibold text-xl tracking-tight text-foreground no-underline">smugglr</a>
     </div>
-    <nav class="flex items-center gap-7 font-sans text-sm text-muted-foreground">
-        <a href="/docs/" class="hover:text-foreground transition-colors">docs</a>
-        <a href="/docs/cli-reference/" class="hover:text-foreground transition-colors">cli</a>
-        <a href="/#targets" class="hover:text-foreground transition-colors">targets</a>
-        <a href="/#shapes" class="hover:text-foreground transition-colors">shapes</a>
-        <a href="/compare/" class="hover:text-foreground transition-colors">compare</a>
-        <a href="/compare/games/" class="hover:text-foreground transition-colors">games</a>
-        <a href="https://github.com/rafters-studio/smugglr" class="hover:text-foreground transition-colors">github</a>
+    <nav class="flex flex-wrap items-center gap-x-7 gap-y-2 font-sans text-sm text-muted-foreground">
+        {NAV_LINKS.map((link) => (
+            <a href={link.href} class="hover:text-foreground transition-colors">{link.label}</a>
+        ))}
     </nav>
 </header>
