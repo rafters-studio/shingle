@@ -17,8 +17,6 @@ interface Props {
     modifiedTime?: string;
     /** Additional JSON-LD nodes to merge into the sitewide graph. */
     extraJsonLd?: JsonLdObject[];
-    /** Render a fixed topbar that fades in after the user scrolls past the hero. */
-    stickyTopbar?: boolean;
 }
 
 const rawProps = Astro.props as Props & {
@@ -33,7 +31,6 @@ const {
     publishedTime,
     modifiedTime,
     extraJsonLd = [],
-    stickyTopbar = false,
 } = merged;
 
 const siteOrigin = Astro.site?.origin ?? "https://rafters.studio";
@@ -105,7 +102,7 @@ const extraSchema: JsonLdObject[] = [...(isHome ? [softwareApp] : []), ...extraJ
         />
     </head>
     <body class="bg-background text-foreground">
-        {stickyTopbar && <TopBar />}
+        <TopBar />
         <main>
             <slot />
         </main>

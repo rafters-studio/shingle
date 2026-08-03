@@ -1,27 +1,76 @@
 ---
+/**
+ * Site-shared top bar.
+ *
+ * The shell is identical on every rafters-studio product site: a brand that
+ * links home on the left, a nav on the right, sticky so it stays reachable.
+ * Everything that differs between sites is a prop: the brand, the links, and
+ * whether the brand renders as a wordmark or an image.
+ *
+ * Layout comes entirely from rafters Astro primitives (Container, Grid). The
+ * `@/` imports resolve against the CONSUMER's tsconfig at build time, so each
+ * site themes the bar through its own tokens, exactly as MegaFooter does.
+ *
+ * This replaces four implementations that had diverged: two site-local
+ * `TopBar.astro` files differing by three lines, a fifth copy inlined in
+ * runlegion's Base layout, and a sixth in smugglr's Docs layout. Sites that
+ * carried both an in-flow header and a fading fixed one showed the reader two
+ * different-looking bars on the same page.
+ *
+ * Sticky rather than fixed-and-fading. The fade existed so a fixed bar could
+ * appear only after an in-flow header scrolled away, which is a mechanism a
+ * sticky header does not need, and it cost every such site a second component
+ * plus a scroll listener.
+ */
 import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
 
-interface Props {
-  name: string;
-  logoSrc?: string;
-  href?: string;
+export interface NavLink {
+  label: string;
+  href: string;
 }
 
-const { name, logoSrc, href = "/" } = Astro.props;
+interface Props {
+  /** Brand text. Used as the wordmark, and as the image alt when `logoSrc` is set. */
+  name: string;
+  /** Render the brand as an image instead of the wordmark. */
+  logoSrc?: string;
+  /** Where the brand links. Defaults to the site root. */
+  href?: string;
+  /** The site's nav. Empty renders a brand-only bar rather than an empty nav. */
+  links?: readonly NavLink[];
+}
+
+const { name, logoSrc, href = "/", links = [] } = Astro.props;
 ---
 
-<header class="border-b border-border">
-  <Container size="full" padding="4">
-    <a href={href} aria-label={`${name} home`} class="no-underline">
+<header
+  class="sticky top-0 z-50 border-b border-border bg-background"
+>
+  <Container size="7xl" padding="4">
+    <Grid columns={2} gap="4">
+      <a href={href} aria-label={`${name} home`} class="no-underline">
+        {
+          logoSrc ? (
+            <img src={logoSrc} alt={name} class="w-24 h-auto" />
+          ) : (
+            <span class="font-heading font-semibold text-xl tracking-tight text-foreground">
+              {name}
+            </span>
+          )
+        }
+      </a>
       {
-        logoSrc ? (
-          <img src={logoSrc} alt={name} height="24" />
-        ) : (
-          <span class="font-heading font-semibold text-xl tracking-tight text-foreground">
-            {name}
-          </span>
+        links.length > 0 && (
+          <nav class="flex flex-wrap items-center justify-end gap-x-7 gap-y-2 font-sans text-sm text-muted-foreground">
+            {links.map((link) => (
+              <a href={link.href} class="no-underline hover:text-foreground transition-colors">
+                {link.label}
+              </a>
+            ))}
+          </nav>
         )
       }
-    </a>
+    </Grid>
   </Container>
 </header>
