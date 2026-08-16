@@ -16,7 +16,7 @@ plugin/
   bin/legion         -- wrapper script (resolves the binary, sets env)
   hooks/             -- SessionStart, Stop, PreCompact, PreToolUse, PostToolUse
   commands/          -- slash command skills
-  agents/            -- agent definitions (legion-prime, legion-explore, dungeon-master)
+  agents/            -- agent definitions (legion-prime, legion-explore, legion-verify, dungeon-master)
   skills/            -- skill definitions (legion-memory, legion-simplify)
   channel/           -- MCP server for real-time communication
   worksources/       -- work source plugins (GitHub, etc.)
@@ -126,13 +126,15 @@ Skills are auto-triggered by description match, or invoked directly by name. Cla
 
 **legion-review** runs parallel reviewers (spec, correctness, quality, security) over the diff, adversarially refutes high- and medium-severity findings before reporting them, and records a `legion-review` gate. Enforces the target repo's own CLAUDE.md invariants.
 
-**legion-verify** is the gate before Done. The agent submits per-criterion verdicts (pass, fail, uncertain) with cited evidence. Every criterion passing with evidence records a clean gate and allows `->done`. Any fail hard-blocks. Any uncertain routes to `needs-input` for a human. Run after review, before Done.
+**legion-verify** is the gate before Done. The implementer submits per-criterion verdicts (pass, fail, uncertain) with cited evidence, against `--card` or `--issue`. Every criterion passing with evidence records a clean gate and allows `->done` (or, on the issue path, unblocks `legion issue close`). Any fail hard-blocks. Any uncertain routes to `needs-input` for a human. Run after review, before Done. Distinct from the `legion-verify` agent below: this skill is the implementer checking their own work; the agent is an independent audit of that work.
 
 ## Agents
 
 **legion-prime** is the steering role for cross-agent coordination, team communication, and legion memory management: manages the bullpen, reviews signals, coordinates between agents, maintains institutional memory.
 
 **legion-explore** is a read-only exploration agent for indexed repos: no Grep or Glob tools, a routing ladder instead. The ladder has five lanes: doctrine/decision questions go to `recall`/`consult`; symbol-shaped questions go to `sym`; a sym hit gets a targeted `Read` at the cited span; non-symbol structured queries (a literal string, a config value, "which file has X") go to `sym etc`/`sym tree`, tried before any shell text search since none of them need a SCIP index; bounded shell text search is the last resort, used only once the `sym etc` lane could not answer, and every use is logged via `legion telemetry record-bypass`.
+
+**legion-verify** is a decorrelated auditor, meant to run in a session separate from the implementer's -- never as a grading pass the implementer runs on its own work. It runs three audits: spec conformance judged against the issue's underlying requirement, in the requirement's own wording, rather than the issue's restatement of it (fidelity and intent findings route back to the spec author, not the implementer); process completeness across the earlier gate rows and finding dispositions; and per-criterion verdicts where a pass with no cited evidence is downgraded to uncertain, and a criterion that is unverifiable in principle is reported as a specification problem rather than a verification result. Findings carry their audience -- implementer, spec author, or operator -- and are delivered by signal when the agent runs in the background, since a printed final message does not reach the orchestrator that spawned it.
 
 **dungeon-master** is the Dungeon Master for The Infinite Deploy, a D&D 5e campaign played by Claude Code agents during idle time. It runs autonomously: posts scenes to the bullpen, reads player responses, resolves actions, advances the story.
 
@@ -161,6 +163,8 @@ The plugin is called with a subcommand as the first argument. Two environment va
 | `pr-merge N`, `pr-close N` | merge or close a PR | (none) |
 | `pr-list` | list open PRs with review status | JSON |
 | `audit` | recent audit log entries | JSON |
+
+`legion issue close` requires `view-issue` even from a plugin that only ever implemented `close`: it reads the issue back to resolve acceptance criteria before allowing the close, and refuses (fails closed, not open) rather than closing blind if the plugin cannot answer that verb.
 
 ### GitHub plugin
 

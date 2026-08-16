@@ -226,6 +226,8 @@ legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdict
 
 `legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion push` resolves the checkout that actually has your branch and refuses `main` by construction -- there is no `--force`. `legion verify` is the gate before Done: every criterion must pass with cited evidence. Any uncertain result routes the card to `needs-input` for a human.
 
+No card in play, just an issue? `legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json` verifies the same way, reading criteria straight from the issue body, and `legion issue close` will refuse to close #42 without that verdict on file if it declares any.
+
 ## Rate-limit awareness
 
 The statusline subcommand persists Claude Code rate-limit and usage samples to SQLite each tick. Wire it into Claude Code via `statusLine.command` in `settings.json`. `legion mesh` then ranks hosts by headroom so a multi-node fleet places new work where there's room:

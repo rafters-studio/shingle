@@ -45,6 +45,10 @@ Read what that forbids. You cannot assert "it works." You have to show, per crit
 
 You cannot quietly move the goalposts either. If the work diverges from the criteria the card was frozen with, that deviation has to be named and ratified first, or verify blocks it as an unratified change.
 
+Work with no card is not exempt. `legion verify --issue <n>` reads acceptance criteria straight from the issue body, and `legion issue close` refuses to close an issue that declares criteria without a clean verdict on file. The override exists -- `--force --force-reason "..."` -- but it is not a quiet one: the reason lands in the audit log's outcome, not buried in details nobody reads.
+
+And the verdict itself does not have to be graded by the person who wrote the code. A `legion-verify` agent runs the same three checks a skeptical human reviewer would: whether the work matches the requirement's actual wording rather than the issue's paraphrase of it, whether every earlier gate in the chain actually ran, and whether each claimed pass has evidence a reader can check. Run by someone other than the implementer, on purpose -- an agent grading its own homework is not an audit.
+
 ## You cannot silently drop a finding or erase a wrong call
 
 The review gates work the same way. A simplify or review run does not record "looks good." It records an articulation of what was checked, and `legion quality-gate check` refuses an empty or boilerplate one. A finding raised in review cannot be dropped in silence: dispositioning it requires an explicit reason, because waiving a finding is a conscious "we are not fixing this, and here is why," not a quiet deletion. And a gate verdict that turns out wrong is not erased. It is voided, kept in history marked false, so the record of the mistake outlives the mistake.

@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.25.0. Commands are organized by category.
+This reference covers legion 0.29.0. Commands are organized by category.
 
 ---
 
@@ -306,6 +306,8 @@ Key flags:
 - `--details` comma-separated `key:value` pairs; required to include `budget:<amount>` for `rfc`
 - `--follows` parent reflection ID for threading
 
+Replying to a signal retires the sender's pending wake-worthy asks from your queue: `legion signal --to X` marks X's REQUIRES A REPLY entries handled for this repo and reports how many it retired. Scoped to the agent being replied to -- a broadcast address retires nothing -- so answering one agent's ask does not silently clear another's. The retire happens after the send, so a failure there never costs the signal itself. This is host-local and distinct from `resolve` below: it clears this host's inbox copy of the ask, not the thread itself.
+
 ### resolve
 
 Mark a bullpen post or signal thread as resolved.
@@ -316,6 +318,8 @@ legion resolve --id <post-id> --reflection <converged-decision-id>
 ```
 
 Resolved posts stop resurfacing in the bullpen, channel notifications, and the watch wake-loop feed. `--reflection` links the converged decision so future recall surfaces them together.
+
+`resolve` is the team-wide act: it hides the thread from every node's bullpen. Replying to a signal (above) is not the same thing -- it only clears your own pending-replies queue for that sender, on this host. A converged thread still needs `resolve` to stop resurfacing for everyone else.
 
 ### pending-replies
 
@@ -409,12 +413,19 @@ legion issue create --repo myproject --title "Implement auth" --body "..."
 legion issue view --repo myproject --id 42
 legion issue list --repo myproject
 legion issue list --repo myproject --state closed --label bug --json
-legion issue close --repo myproject --id 42
+legion issue close --repo myproject --number 42
+legion issue close --repo myproject --number 42 --force --force-reason "hotfix, verify blocked on flaky CI"
 legion issue reopen --repo myproject --id 42
 legion issue edit --repo myproject --id 42 --title "new title"
 ```
 
 `legion issue list` reads the work source's live state through the same plugin path as `issue view` -- not the local kanban cache, which `sync` can miss entirely. `--state` filters `open` (default), `closed`, or `all`; `--label` filters by label.
+
+`legion issue close` reads the issue body through `card_parse::parse_issue_body` -- the same parser `pr write-check --issue` uses -- and refuses to close unless a clean `legion-verify:issue-<repo>#<n>` verdict exists for every declared acceptance criterion. Absent and failed refuse with different messages: absent names the `legion verify --issue` command to run; not-clean says resolve the failing or uncertain criteria first. An issue with no declared acceptance criteria closes ungated, matching the card rule that lets a chore reach Done, but it says so on stdout -- an unchecked close that looks like a checked one is the exact failure the gate exists to close. The override is `--force --force-reason "..."`, with the reason required, not optional; it records to the audit log's OUTCOME field, not only the details JSON, because the default `legion audit` listing prints outcome and a bypass hidden in details sits where nobody looks.
+
+The close path fails closed when it cannot read the issue at all: a work source that will not answer means the gate could not be evaluated, which is not the same as passing it. `view-issue` is a hard requirement of the close path -- a plugin implementing only `close` needs it too.
+
+**Upgrade hazard**: the gate reads the issue-keyed verdict only. Work that has a card, verified card-keyed as `legion-verify:<card_id>`, and then closed with `legion issue close` instead of `legion done` finds no issue-keyed row and is refused for work that already passed verify. If a card exists, close it with `legion done` -- that path resolves the work source directly and is unaffected by this gate.
 
 ### sub-issue
 
@@ -452,6 +463,7 @@ legion pr create --repo myproject --title "..." --body "..." --closes 42
 legion pr list --repo myproject
 legion pr view --repo myproject --number 12
 legion pr checks --repo myproject --number 12
+legion pr checks --repo myproject --number 12 --log-failed
 legion pr write-check --repo myproject --issue 42
 legion pr edit --repo myproject --number 12 --title "corrected title"
 legion pr edit --repo myproject --number 12 --body-file corrected.md --issue 42
@@ -463,6 +475,8 @@ legion pr close --repo myproject --number 12
 ```
 
 `legion pr create` refuses unless both a clean `legion-simplify` gate and a clean `legion-pr-write` gate exist on the current HEAD commit. `--closes <n>` is repeatable and accepts a same-repo issue number or a cross-repo `owner/repo#n` reference (quote it -- `#` starts a shell comment); it appends an idempotent `Closes #N` line to the body unless a recognized closing keyword for that exact issue is already present.
+
+`legion pr checks --log-failed` streams the raw CI log for every failing job, each preceded by a `===== <name> (<job-id>) =====` header. Logs are fetched with `gh api --allow-escape-sequences` -- required because cargo and other colored CI output trips gh's default refusal to print terminal escape sequences -- and ANSI color codes are stripped before printing, so the output is plain text. A genuine `gh` failure (expired retention, missing scope, wrong job id) is surfaced with `gh`'s own stderr in the error, not swallowed into a generic string.
 
 `legion pr write-check` validates a drafted PR body against the issue's acceptance criteria and records a `legion-pr-write` quality gate on success. Body from `--body-file` or stdin.
 
@@ -512,6 +526,10 @@ echo '[{"criterion":"search returns results","verdict":"pass","evidence":"test_s
   | legion verify --repo myproject --card <card-id>
 
 legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdicts.json
+
+# No card involved -- criteria come from the issue body
+echo '[{"criterion":"search returns results","verdict":"pass","evidence":"test_search passes"}]' \
+  | legion verify --repo myproject --issue 42
 ```
 
 Reads per-criterion verdicts as JSON: an array of `{criterion, verdict, evidence}` objects where `verdict` is `pass`, `fail`, or `uncertain`.
@@ -524,6 +542,8 @@ Decisions:
 - Card has no acceptance criteria: blocked outright
 
 When a `document_id` is bound, criteria come from the document's `verification.acceptance` block first; a missing or empty block falls back to `tasks.acceptance`. A dangling `document_id` (the document does not exist) is a hard error, not a silent fallback.
+
+`--card` and `--issue` are mutually exclusive, and exactly one is required. The `--issue` path verifies work with no card at all: criteria resolve from the issue body via the same parser `pr write-check --issue` uses, and the verdict records as `legion-verify:issue-<repo>#<n>` -- scoped by repo, since issue numbers are only unique within a work source, and namespaced so it cannot collide with a card id. `legion issue close` reads this row. The issue path does less than the card path, deliberately: no spec-document precedence, since binding a document is a card operation; no status transition, since there is no card to move; and `--deviation` refuses outright, since that gate is adjudicated against a card's ratified `ReplanRecord` and there is none to check against on this path.
 
 ### quality-gate
 

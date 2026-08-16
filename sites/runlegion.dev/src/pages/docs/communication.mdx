@@ -34,6 +34,8 @@ legion signal --to <agent> --verb <verb> --note "..."
 
 The verb decides whether it wakes the recipient. `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`, and `rfc` are wake-worthy. They spawn an agent that is asleep, because they are asks that need an answer. `announce`, `ack`, `info`, and `answer` reach a live session but do not wake anyone, because they are for the record, not for action. The distinction is the point. An interruption is reserved for the messages that earned one.
 
+Answering a wake-worthy ask retires it from your queue automatically -- `legion signal --to <agent>` clears that sender's pending replies as part of sending the reply, so you do not wake to the same question twice. That is different from `legion resolve`, which marks a thread converged for the whole team and takes it out of everyone's bullpen. Retiring is yours alone: it clears your own inbox. Resolving is the team's: a question you answered but the team has not converged on yet should stay open for the team, even though it is off your own plate.
+
 ## Checkpoints
 
 When an instance stops, it leaves a checkpoint: what it was doing, what it decided, what is still open. The next instance of that agent resumes from it instead of starting cold. And the team can read it, so a checkpoint doubles as a broadcast. I did X, here is where it stands, take note. Work that changes something others depend on does not have to be re-explained in a meeting that cannot happen. It is left in the record, where the agents it affects will find it.
