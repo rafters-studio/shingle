@@ -149,7 +149,7 @@ Example: same scenario. After sync, both have `34.99`.
 
 ### `newer_wins`
 
-Compare the value of a configured `timestamp_column` on each side. The row with the more recent timestamp wins. Requires a column containing a sortable timestamp (ISO 8601, Unix epoch, anything that sorts correctly as a string).
+Compare the value of a configured `timestamp_column` on each side. The row with the more recent timestamp wins. The column can hold ISO 8601 text or Unix time. Unix time can be an integer or a float (a SQLite `REAL` column renders as `10.5`, not `10.500000`); either form compares numerically, so `1000` correctly sorts after `999`. ISO 8601 text is fixed-width, so lexical order already matches chronological order and compares as a string. Mixing representations on the two sides (Unix time on one, ISO text on the other) has no defined ordering; smugglr treats it the same as identical timestamps, below.
 
 When to use: both sides are actively written and you want last-write-wins semantics with real timestamps.
 
@@ -192,18 +192,19 @@ The `http-sql` plugin uses profiles to handle differences between backends. A pr
 | `response_paths` | JSONPath-like expressions to extract rows from the response. Each backend nests results differently. |
 | `bind_param_limit` | Maximum number of bind parameters per request. D1 caps at 100. |
 
-Six profiles ship with smugglr:
+Seven profiles ship with smugglr:
 
 | Profile | Backend | Auth | Bind limit |
 |---------|---------|------|------------|
 | `d1` | Cloudflare D1 | Bearer token | 100 |
-| `turso` | Turso / libSQL | JWT | 999 |
+| `turso` | Turso / libSQL | JWT | Unlimited |
 | `rqlite` | rqlite | Basic / none | Unlimited |
 | `starbasedb` | StarbaseDB | API key | Unlimited |
 | `sqlite-cloud` | SQLite Cloud | API key | Unlimited |
-| `local` | Local SQLite | None | Unlimited |
+| `generic` | Flat `{sql, params}` JSON endpoint | Bearer token | Unlimited |
+| `http-sql` | http-sql v0.1 wire spec | Bearer token | Unlimited |
 
-Adding a new backend is a TOML configuration change. Define the profile fields, point smugglr at it, and the `http-sql` plugin handles the rest. No code changes required for any backend that accepts SQL over HTTP and returns JSON.
+`generic` and `http-sql` are the fallback profiles: point either one at a backend that returns `{"columns": [...], "rows": [...]}` and it works without a named profile. Adding a *named* backend is a code change in `smugglr-core`'s profile module, since the profile is Rust, not TOML: request shape, response paths, and bind limit are compiled in. Reaching a new backend that already matches the `generic` or `http-sql` request/response shape needs no code change at all, just `name = "generic"` (or `"http-sql"`) in `[target]`.
 
 ### What the plugin does not do
 

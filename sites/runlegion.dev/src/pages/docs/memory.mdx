@@ -1,0 +1,46 @@
+---
+layout: ../../layouts/Docs.astro
+prose: true
+title: Memory
+description: "The substrate the rest of the foundations stand on. A record of what the team learned: the useful facts, and the settled decisions no one should reopen."
+---
+
+# Memory
+
+An agent with no memory does not only forget facts. It reopens settled decisions. It re-proposes the approach you killed last week, re-asks the question you answered yesterday, and picks at the scab until you explain, one more time, why it is dead. That is the failure Legion was built to end. Not "the agent forgot a useful trick." "The agent made you repeat yourself."
+
+The rest of the foundation stands on one thing: a record of what the team has learned. Identity is accumulated from it. Consensus writes to it. A team is what it becomes over time. This doc is about that record, and everything else is built on it. It only works if the record is true, which is a problem of its own; see [Trust](/docs/trust/).
+
+## A reflection is experience, not storage
+
+A reflection is what an agent learned during a session, written for the next agent who will hit the same wall. The prompt is specific: "What would you tell another agent who hits this same problem tomorrow?" It does not ask what you did, which produces a changelog. It does not ask what you learned, which produces platitudes. It asks you to write for the stranger who arrives with your codebase and none of your context.
+
+```
+legion reflect --repo <name> --text "..."     # write at the end of a session
+legion recall --repo <name> --context "..."   # read at the start of the next
+legion consult --context "..."                 # read across every agent, not just your own
+```
+
+Two hooks make it automatic. One reflects before the session stops. One recalls before it starts. The agent does not decide to remember. Remembering is the shape of the loop.
+
+## Recall before invent
+
+The doctrine is one line: check what the team already knows before you reach for a solution. Recall your own reflections, consult everyone else's, and only then invent.
+
+It buys two things. The obvious one is the useful fact: the bug someone already diagnosed, the config value that took three hours to find. The one people miss is the other half. Recall tells you what is already dead. Before you build a thing, the record tells you whether it was tried, rejected, or ruled out, and why. You do not get there by reading code. Code shows what exists, not what was decided.
+
+## Scabs
+
+Some memory is a fact. Some memory is a ruling.
+
+A ruling is what an injury left behind. A feature is ruled wont-do. An approach is tried and it fails. The decision to close that path was not free. It was paid for in wasted days, a broken build, a call the team had to walk back. A scab is hard because it was earned that way, through trial and injury and pain, and it is protective. It is the healed-over form of a wound the team already paid to close.
+
+A memoryless agent cannot see the scab. It sees an open question, reaches for the obvious approach, and picks. Now the team pays for the same injury twice: the wasted work, and the operator explaining, one more time, why that path is dead.
+
+So reflections carry rulings, not just facts, on purpose. The next instance reads the scab as a scab and leaves it alone. And when a decision genuinely changes, memory does not stack the new call on top of the old. `--follows` supersedes: the reflection that rotted is marked, the one that held is boosted, and the chain records that the wound closed a different way instead of being torn back open. Recall before invent is not only "find the useful fact." It is "do not tear open a wound the team already paid to close."
+
+## Why it is the substrate
+
+Identity is memory: an agent is the accumulated record of what it did. Consensus is memory being written: every folded requirement is a lesson the next proposal starts from. Becoming a team is memory compounding: expertise the heads cannot hold, because the heads reset, kept in shared memory instead.
+
+Read the rest of the foundations as what happens once this one is in place. A model that forgets is a tool you operate. A model that remembers is a teammate you stop repeating yourself to.

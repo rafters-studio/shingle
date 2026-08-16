@@ -11,9 +11,9 @@ interface Props {
 const { id, title, tint = false } = Astro.props;
 ---
 
-<section id={id} class:list={[tint && "bg-muted"]}>
+<Container as="section" id={id} size="full" background={tint ? "muted" : "none"}>
   <Container size="4xl" padding="16" gap="12">
     {title && <H2>{title}</H2>}
     <slot />
   </Container>
-</section>
+</Container>

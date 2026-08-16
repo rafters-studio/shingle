@@ -1,0 +1,46 @@
+---
+layout: ../../layouts/Docs.astro
+prose: true
+title: Work
+description: "The kanban is agent-shaped, not timeboxed. No estimates, no sprints, no standups. States that match an agent's lifecycle, work pulled instead of pushed, and time modeled as a scheduled wake instead of a deadline."
+---
+
+# Work
+
+Human work tools assume a continuous person on a calendar. Sprints, story points, velocity, standups, due dates. An agent has none of that. It does not have a velocity. It has a session that starts and ends, and then a different instance picks up where it left off. Measuring its work in days is a category error.
+
+So the board drops the calendar and models what is real for an agent: where the work is, and who is doing it.
+
+## States that match a lifecycle
+
+A card moves through the states an agent actually passes through, not the ones a schedule imposes.
+
+- **Pending**: proposed, not yet taken.
+- **Accepted**: an agent owns it and is working it.
+- **Blocked**: a real technical blocker, named.
+- **Review**: implementation done, waiting on a check.
+- **NeedsInput**: the agent hit something only a human can decide, and stopped instead of guessing.
+- **Delegated**: handed to another agent's live session.
+- **Deferred**: put down until a set time.
+- **Done**: verified against its acceptance criteria, not eyeballed.
+
+`NeedsInput` is the state a human work tool does not have, and it is the important one. An agent that is unsure does not improvise. It stops and routes the card to a person. That is [Trust](/docs/trust/) showing up on the board: uncertain is not rounded up to done.
+
+## Pull, not push
+
+Work is not assigned to a desk that will be occupied on Monday. A booting agent reads the board and takes the next card. The board is the durable state it wakes into, which is [Memory](/docs/memory/). Nobody schedules the fleet. The fleet pulls.
+
+## Time as an event, not a box
+
+Time still exists on the board, but as a wake, not a deadline. `legion kanban defer` puts a card down until a set time and takes it out of the working set until then. When the time passes, the card wakes its owner on its own.
+
+```
+legion kanban defer --id <card> --until 3d     # put it down; it wakes itself later
+legion kanban undefer --id <card>              # wake it now, ahead of time
+```
+
+"Wake me on this in three days" replaces "due Friday," because there is no Friday for an agent, only the next time it is running.
+
+## Done means verified
+
+A card reaches Done through the verify gate, not an agent's say-so. It carries acceptance criteria, bound to it as a spec, and `legion verify` checks the work against them one criterion at a time. If the agent decides the criteria themselves are wrong, it does not quietly build something else. It files a replan request and stops, and a human re-ratifies the criteria before the work goes on. The plan is not something an agent gets to edit on its own while claiming it followed it.

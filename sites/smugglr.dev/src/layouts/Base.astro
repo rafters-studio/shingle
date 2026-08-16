@@ -1,6 +1,11 @@
 ---
 import TopBar from "@/components/TopBar.astro";
 import MegaFooter from "@/components/MegaFooter.astro";
+import {
+    SITE_NAME,
+    SITE_DESCRIPTION,
+    SITE_DESCRIPTION_SHORT,
+} from "@/src/site";
 
 interface Props {
     title: string;
@@ -25,7 +30,7 @@ const rawProps = Astro.props as Props & {
 const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
 const {
     title,
-    description = "Smuggler is a universal SQLite sync engine. Fast, stateless, encrypted. LAN broadcast, S3 relay, and agent-friendly JSON output.",
+    description = SITE_DESCRIPTION,
     image = "/logo.webp",
     type = "website",
     publishedTime,
@@ -37,7 +42,7 @@ const {
 const siteOrigin = Astro.site?.origin ?? "https://smugglr.dev";
 const canonical = new URL(Astro.url.pathname, siteOrigin).href;
 const absoluteImage = new URL(image, siteOrigin).href;
-const fullTitle = `${title} | Smuggler`;
+const fullTitle = `${title} | ${SITE_NAME}`;
 
 const isHome = Astro.url.pathname === "/";
 const jsonLdGraph: Record<string, unknown>[] = [
@@ -45,9 +50,8 @@ const jsonLdGraph: Record<string, unknown>[] = [
         "@type": "WebSite",
         "@id": `${siteOrigin}/#website`,
         url: `${siteOrigin}/`,
-        name: "Smuggler",
-        description:
-            "Universal SQLite sync engine. LAN broadcast, S3 relay, agent-friendly output.",
+        name: SITE_NAME,
+        description: SITE_DESCRIPTION_SHORT,
         inLanguage: "en",
         publisher: { "@id": `${siteOrigin}/#organization` },
     },
@@ -63,7 +67,7 @@ if (isHome) {
     jsonLdGraph.push({
         "@type": "SoftwareApplication",
         "@id": `${siteOrigin}/#software`,
-        name: "Smuggler",
+        name: SITE_NAME,
         applicationCategory: "DeveloperApplication",
         operatingSystem: "macOS, Linux, Windows",
         description:
@@ -98,7 +102,7 @@ const jsonLd = {
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-        <meta property="og:site_name" content="Smuggler" />
+        <meta property="og:site_name" content={SITE_NAME} />
         <meta property="og:type" content={type} />
         <meta property="og:title" content={fullTitle} />
         <meta property="og:description" content={description} />
@@ -134,13 +138,13 @@ const jsonLd = {
             rel="alternate"
             type="text/plain"
             href="/llms.txt"
-            title="Smuggler docs index for LLMs"
+            title={`${SITE_NAME} docs index for LLMs`}
         />
         <link
             rel="alternate"
             type="text/plain"
             href="/llms-full.txt"
-            title="Smuggler docs (full) for LLMs"
+            title={`${SITE_NAME} docs (full) for LLMs`}
         />
 
         <script
@@ -160,6 +164,39 @@ const jsonLd = {
 
 <style is:global>
     @import "../styles/global.css";
+
+    /*
+     * Tables need a scroll container and do not have one.
+     *
+     * Article mode styles tables with `[&_table]:w-full` and nothing else, and
+     * the registry's `tableWrapperClasses` ("relative w-full overflow-auto")
+     * applies only to the Table COMPONENT. Neither the .mdx docs tables nor
+     * the MrsBlock tables on the home page are that component, so both are
+     * bare <table> elements that never see it.
+     *
+     * Measured at 375px before this rule: /docs/cli-reference/ overflowed the
+     * document by 136px with a 348px table inside a 311px article, and / by
+     * 177px with a 472px table. That is the horizontal overflow in #101.
+     *
+     * This sits in Base rather than Docs because the home page has seven
+     * tables and does not use the Docs layout, so a docs-scoped rule fixed
+     * the smaller half of the problem and left the front page broken.
+     *
+     * `display: block` is what makes overflow-x apply to a table at all. It
+     * costs full-width automatic column sizing, which is the accepted trade:
+     * a table that scrolls beats a page that does.
+     *
+     * It lives here and not in container.classes.ts because that file is
+     * registry-installed and the next `rafters add` would overwrite it, and it
+     * targets the element rather than a class because Rafters components own
+     * their classes and refuse a consumer `class` prop.
+     */
+    table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
     :root {
         --font-sans:
             "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",

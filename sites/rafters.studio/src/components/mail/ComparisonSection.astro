@@ -1,0 +1,114 @@
+---
+import Container from '@/components/ui/container.astro';
+import P from '@/components/ui/typography-p.astro';
+import Code from '@/components/ui/typography-code.astro';
+import Table from '@/components/ui/table.astro';
+import TableBody from '@/components/ui/table-body.astro';
+import TableCell from '@/components/ui/table-cell.astro';
+import TableHead from '@/components/ui/table-head.astro';
+import TableHeader from '@/components/ui/table-header.astro';
+import TableRow from '@/components/ui/table-row.astro';
+import SectionHead from '@/components/mail/composites/SectionHead.astro';
+---
+
+<section id="compare" class="border-b border-border bg-muted">
+  <Container size="6xl" padding="20">
+    <SectionHead no="04 / honestly" title="vs. self-hosted.">
+      Postfix and Dovecot work. They have worked for twenty-five years. But if you
+      haven't babysat a mail server through a PTR-record outage, you will.
+    </SectionHead>
+
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Concern</TableHead>
+          <TableHead>Postfix + Dovecot on a VPS</TableHead>
+          <TableHead>@rafters/mail</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell class="align-top text-muted-foreground">Inbound MX</TableCell>
+          <TableCell class="align-top text-muted-foreground">
+            <span class="text-destructive mr-2" aria-hidden="true">×</span>
+            Run <Code>smtpd</Code>. Tune greylisting. Apply CVEs.
+          </TableCell>
+          <TableCell class="align-top">
+            <span class="mr-2" aria-hidden="true">✓</span>
+            Cloudflare Email Routing handles MX, SPF, DKIM, and spam.
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell class="align-top text-muted-foreground">Outbound SMTP</TableCell>
+          <TableCell class="align-top text-muted-foreground">
+            <span class="text-destructive mr-2" aria-hidden="true">×</span>
+            Your IP gets on a blocklist by Tuesday.
+          </TableCell>
+          <TableCell class="align-top">
+            <span class="mr-2" aria-hidden="true">✓</span>
+            Hand off to Resend / Postmark / SES. Deliverability is their problem.
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell class="align-top text-muted-foreground">IMAP server</TableCell>
+          <TableCell class="align-top text-muted-foreground">
+            <span class="text-destructive mr-2" aria-hidden="true">×</span>
+            Dovecot on a long-lived VM. State in maildir.
+          </TableCell>
+          <TableCell class="align-top">
+            <span class="mr-2" aria-hidden="true">✓</span>
+            Durable Object per user. State is a database row.
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell class="align-top text-muted-foreground">Storage</TableCell>
+          <TableCell class="align-top text-muted-foreground">
+            <span class="text-destructive mr-2" aria-hidden="true">×</span>
+            Disk fills up. Someone has to rotate it.
+          </TableCell>
+          <TableCell class="align-top">
+            <span class="mr-2" aria-hidden="true">✓</span>
+            R2 for blobs, D1 for metadata. Infinite, indexed.
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell class="align-top text-muted-foreground">Scaling</TableCell>
+          <TableCell class="align-top text-muted-foreground">
+            <span class="text-destructive mr-2" aria-hidden="true">×</span>
+            Resize the VM. Pray the fsync survives.
+          </TableCell>
+          <TableCell class="align-top">
+            <span class="mr-2" aria-hidden="true">✓</span>
+            Per-user isolate. Scales to zero when no one's checking mail.
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell class="align-top text-muted-foreground">Threading, classification, webhooks</TableCell>
+          <TableCell class="align-top text-muted-foreground">
+            <span class="text-destructive mr-2" aria-hidden="true">×</span>
+            You wire up Sieve, SpamAssassin, and a cron job.
+          </TableCell>
+          <TableCell class="align-top">
+            <span class="mr-2" aria-hidden="true">✓</span>
+            Built in. One <Code>InboundAdapter</Code> hook.
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell class="align-top text-muted-foreground">Your 2AM pager</TableCell>
+          <TableCell class="align-top text-muted-foreground">
+            <span class="text-destructive mr-2" aria-hidden="true">×</span>
+            "disk 97% full on mail-01"
+          </TableCell>
+          <TableCell class="align-top">
+            <span class="mr-2" aria-hidden="true">✓</span>
+            Silent.
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+
+    <P size="body-medium" color="muted-foreground" class="max-w-prose mt-6">
+      <strong class="text-foreground">To be clear:</strong> we don't do edge SMTP. That would be a nightmare. Outbound goes through a real transactional provider. What we <em>do</em> is everything after the TCP handshake.
+    </P>
+  </Container>
+</section>

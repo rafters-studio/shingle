@@ -53,7 +53,7 @@ function isActive(href: string): boolean {
   <Container size="7xl" padding="8" gap="10">
     <Grid columns={2} gap="4" class="@sm:mb-8 @md:mb-16 @lg:mb-32">
       <a href="/">
-        <img src="/logo.webp" alt="Smuggler" class="w-24 h-auto" />
+        <img src="/logo.webp" alt="smugglr" class="w-24 h-auto" />
       </a>
       <Grid columns={2} gap="8" class="justify-self-end w-fit">
         <a href="/docs/">Docs</a>
@@ -61,7 +61,7 @@ function isActive(href: string): boolean {
       </Grid>
     </Grid>
 
-    <Grid columns={4} gap="8">
+    <Grid columns={{ base: 1, lg: 4 }} gap="8">
       <GridItem colSpan={1}>
         <Container as="aside" gap="8">
           {nav.map((group) => (

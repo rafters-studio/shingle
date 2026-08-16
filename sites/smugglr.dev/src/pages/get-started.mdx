@@ -17,7 +17,7 @@ import Section from "@/components/Section.astro";
 import FeatureBlock from "@/components/FeatureBlock.astro";
 
 <Hero>
-    <img slot="logo" src="/logo.webp" alt="Smuggler" class="w-40 h-auto" />
+    <img slot="logo" src="/logo.webp" alt="smugglr" class="w-40 h-auto" />
 
     <H1 slot="title">Five minutes to your first push.</H1>
 
@@ -37,18 +37,17 @@ import FeatureBlock from "@/components/FeatureBlock.astro";
 </Section>
 
 <Section id="configure" title="2. Configure." tint>
-    <P>Create a <code>config.toml</code> in your project directory. The minimal config is four lines: where the local SQLite lives, what the target is, and the target's connection details.</P>
+    <P>Create a <code>config.toml</code> in your project directory: where the local SQLite lives, what the target is, and the target's connection details.</P>
 
-    <Codeblock>{`[source]
-path = "./local.db"
+    <Codeblock>{`local_db = "./local.db"
 
 [target]
 type = "d1"
-database = "my-database"
 account_id = "your-cloudflare-account-id"
+database_id = "your-d1-database-id"
 api_token = "your-d1-api-token"`}</Codeblock>
 
-    <P>Any SQLite file works for <code>source.path</code>. The target can be d1, turso, rqlite, starbasedb, or sqlite-cloud. See the <a href="/docs/configuration/">Configuration reference</a> for every option.</P>
+    <P>Any SQLite file works for <code>local_db</code>. <code>type</code> is <code>d1</code>, <code>sqlite</code>, or <code>plugin</code>; turso, rqlite, starbasedb, and sqlite-cloud all go through <code>type = "plugin"</code> with a profile <code>name</code>. See the <a href="/docs/configuration/">Configuration reference</a> for every option.</P>
 </Section>
 
 <Section id="dry-run" title="3. Dry-run.">
