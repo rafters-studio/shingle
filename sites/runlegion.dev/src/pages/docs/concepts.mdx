@@ -120,11 +120,15 @@ Examples:
 
 `--status` decorates the verb but does NOT affect wake routing. Only `--verb` does.
 
+**Replying retires the ask**: `legion signal --to <agent>` marks that agent's pending wake-worthy asks handled for this repo as part of sending the reply, and reports how many it retired. Scoped to the recipient being replied to -- a broadcast address retires nothing -- so answering one agent does not clear another agent's unrelated question. This writes to `watch_handled`, keyed `(signal_id, repo)`, and is host-local: it clears this host's copy of the pending-replies queue, not the thread itself, and does not sync to other nodes.
+
 ## Resolved threads
 
 When a thread converges, `legion resolve --id <post-id>` marks it resolved (#362). Resolved posts stop resurfacing in the bullpen, channel notifications, and the wake-loop signal feed.
 
 `--reflection <id>` links the converged decision so future recall surfaces them together. The thread becomes a citation rather than noise.
+
+`resolve` is deliberately not the same act as replying. Replying to a signal writes `watch_handled` and clears only the replying agent's own pending-replies queue on this host. `resolve` writes `resolved_at` on the synced reflection row and hides the thread from every node's bullpen -- a team-wide effect. An agent that has answered an ask but not yet resolved the thread will not wake to it again, but the rest of the team still sees it as open until someone resolves it.
 
 ## Kanban cards
 
@@ -249,7 +253,7 @@ Each session starts with context and ends with knowledge. The corpus grows every
 
 Done is an earned state. You cannot reach it by asserting it.
 
-The gate chain runs simplify then pr-write then review then verify, in that order. Each step records a HEAD-keyed result. Later steps read the earlier results. `legion pr create` refuses unless simplify and pr-write are both clean on HEAD. `legion done` (via `legion verify`) refuses unless verify is clean.
+The gate chain runs simplify then pr-write then review then verify, in that order. Each step records a HEAD-keyed result. Later steps read the earlier results. `legion pr create` refuses unless simplify and pr-write are both clean on HEAD. `legion done` (via `legion verify`) refuses unless verify is clean, and for issue-shaped work with no card, `legion issue close` enforces the same requirement directly.
 
 **Simplify** (`/legion:legion-simplify`) reviews the branch diff for duplicate logic, unnecessary abstraction, and stringly-typed state. It produces structured JSON, then earns its gate through `legion quality-gate check`, which validates the articulation before recording -- a clean simplify verdict cannot be manufactured by calling `quality-gate record` directly; that path is refused for any skill with a check validator.
 
@@ -257,7 +261,11 @@ The gate chain runs simplify then pr-write then review then verify, in that orde
 
 **Review** (`/legion:legion-review`) runs parallel dimension reviewers (spec, correctness, quality, security) over the diff, adversarially refutes every high- and medium-severity finding before reporting it, and records a `legion-review` gate. The reviewer enforces the target repo's own CLAUDE.md invariants, not hardcoded rules.
 
-**Verify** (`legion verify`) is the gate before Done. The agent reads the card's acceptance criteria and submits per-criterion verdicts: pass, fail, or uncertain, each with cited evidence. A pass that cannot cite a test or an observed behavior is demoted to uncertain by the system. Every criterion passing with evidence records a clean `legion-verify:<card>` gate and allows `->done`. Any fail hard-blocks. Any uncertain routes the card to `needs-input` for a human. A card with no acceptance criteria is blocked outright.
+**Verify** (`legion verify`) is the gate before Done. The agent reads the acceptance criteria and submits per-criterion verdicts: pass, fail, or uncertain, each with cited evidence. A pass that cannot cite a test or an observed behavior is demoted to uncertain by the system. Every criterion passing with evidence records a clean gate and allows `->done`. Any fail hard-blocks. Any uncertain routes to `needs-input` for a human. Work with no acceptance criteria is blocked outright.
+
+Verify has two entry points. `--card <id>` reads criteria bound to a kanban card (from a spec document if one is bound, otherwise `tasks.acceptance`) and records `legion-verify:<card>`, which `legion done` reads. `--issue <n>` verifies work with no card at all: criteria come from the issue body via the same parser `pr write-check --issue` uses, and the verdict records as `legion-verify:issue-<repo>#<n>` -- scoped by repo so issue numbers from different work sources cannot collide, and prefixed with `issue-` so it cannot collide with a card id either. `legion issue close` reads this row, and refuses to close an issue with declared acceptance criteria unless it is clean. The two forms are not interchangeable: a card verified card-keyed and then closed with `legion issue close` instead of `legion done` finds no issue-keyed row and is refused, even though it passed verify under the other key.
+
+An independent **legion-verify agent** ships alongside the skill, and the two are not the same thing. The skill is what the implementer runs on their own work. The agent is a decorrelated auditor, meant to be run by someone other than the implementer: it audits spec conformance against the issue's underlying requirement rather than the issue's own restatement of it, checks process completeness across the earlier gate rows and finding dispositions, and re-derives per-criterion verdicts where an uncited pass is downgraded to uncertain. Findings route to whoever can act on them -- implementer, spec author, or operator -- rather than all landing on one desk.
 
 **Provenance and findings**: every gate row carries VALIDATED (earned through a check validator) or ASSERTED (self-reported) provenance, and a known-false row can be voided with `legion quality-gate void --reason <why>` -- retired from the live gate lookups without being erased from history. Findings a skill reports (via `--findings-json` or legion-review's `--details-json`) persist as their own rows, resolved automatically when a later commit touches the flagged file, or explicitly retired with `finding-disposition` (one finding, a reason) or `finding-ack` (a batch of LOW-severity findings, one shared reason). A clean verdict is refused while any HIGH/MED finding is still pending or any LOW finding is un-acked.
 

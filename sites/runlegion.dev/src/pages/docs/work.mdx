@@ -44,3 +44,5 @@ legion kanban undefer --id <card>              # wake it now, ahead of time
 ## Done means verified
 
 A card reaches Done through the verify gate, not an agent's say-so. It carries acceptance criteria, bound to it as a spec, and `legion verify` checks the work against them one criterion at a time. If the agent decides the criteria themselves are wrong, it does not quietly build something else. It files a replan request and stops, and a human re-ratifies the criteria before the work goes on. The plan is not something an agent gets to edit on its own while claiming it followed it.
+
+Not all work has a card. A repo running straight off issues verifies the same way, minus the card: `legion verify --issue <n>` reads acceptance criteria from the issue body instead of a bound document, and `legion issue close` refuses to close an issue that declares criteria until that verdict is clean. If a card does exist, close the work with `legion done` -- it resolves the linked issue on its own, and `legion issue close` will not find the card's verdict.
