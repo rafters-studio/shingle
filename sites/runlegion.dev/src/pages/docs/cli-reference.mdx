@@ -413,8 +413,8 @@ legion issue create --repo myproject --title "Implement auth" --body "..."
 legion issue view --repo myproject --id 42
 legion issue list --repo myproject
 legion issue list --repo myproject --state closed --label bug --json
-legion issue close --repo myproject --id 42
-legion issue close --repo myproject --id 42 --force --force-reason "hotfix, verify blocked on flaky CI"
+legion issue close --repo myproject --number 42
+legion issue close --repo myproject --number 42 --force --force-reason "hotfix, verify blocked on flaky CI"
 legion issue reopen --repo myproject --id 42
 legion issue edit --repo myproject --id 42 --title "new title"
 ```
