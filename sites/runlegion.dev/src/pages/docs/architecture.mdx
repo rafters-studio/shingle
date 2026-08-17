@@ -108,6 +108,8 @@ The kanban board is a scheduler wearing a human-friendly UI.
 
 **Card-spec binding**: `legion kanban bind --id <card-id> --document <doc-id>` sets `tasks.document_id`. Once bound, `legion verify` reads acceptance criteria from the document's `verification.acceptance` block. Status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the document's `meta.status` transactionally (accepted, implemented, verified, cancelled). A dangling binding (document archived or missing) is a hard error on any transition.
 
+**Issue-requirement tracing** (#933): an issue can point at a requirement without a card in between. Its body carries a `## Traces to` section: a requirement id, an optional set of criteria ids, and prose, or an explicit `None` with a reason. `legion issue create` validates the trace at filing time, refusing a line that names a requirement that does not exist, is cancelled, or is malformed -- a bad trace fails at the point it is written, not the point verify runs. `legion verify --issue` then judges the work against the traced requirement's own `verification.criteria` rather than the issue's restatement of them, and the recorded verdict pins the requirement document's id and revision. `legion document view` surfaces which of a requirement's criteria currently carry a clean verdict, and `pr write-check` renders the traced criteria beside the PR body's mapping, flagging any the PR re-authors instead of citing. Untraced issues verify exactly as before, straight from the issue body.
+
 Documents replicate across the cluster like reflections and cards.
 
 ## Communication
@@ -119,6 +121,8 @@ Documents replicate across the cluster like reflections and cards.
 **Resolve** (#362): `legion resolve --id <post-id>` marks a converged thread so it stops resurfacing in the bullpen, channel notifications, and the wake-loop signal feed. Optional `--reflection <id>` links the team's decision so future recall surfaces them together.
 
 **Channel**: MCP server providing real-time communication tools. Events arrive as JSON-RPC notifications with method `notifications/claude/channel`. No polling.
+
+**Delivery** (#941): two lanes carry a post or signal into a live session, running concurrently for parity measurement. The MCP channel pushes it as a JSON-RPC notification, no polling. `legion deliver drain --repo <repo>`, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks, reads the same undelivered set and returns it as additional context at the next hook turn-boundary -- a code-side path independent of the MCP notifier subprocess, with no inference roundtrip. Because both lanes run at once, a post can arrive via both. Both write a `DeliveryRecord` row to `delivery.jsonl`, so which lane actually delivered it is measured rather than assumed. The MCP channel is not removed.
 
 ## Watch
 
