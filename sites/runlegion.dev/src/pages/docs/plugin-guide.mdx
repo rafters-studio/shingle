@@ -39,6 +39,10 @@ Fires when an agent session begins. Injects, in order:
 
 The agent starts every session with full context. No cold starts.
 
+### UserPromptSubmit
+
+Fires when you submit a prompt, before Claude Code processes it. Runs `delivery-drain.sh`, which calls `legion deliver drain --repo <repo>` and injects anything still undelivered as additional context: bullpen posts and signals a live session has not yet seen, arriving through the plugin's own hook lane rather than the MCP channel.
+
 ### Stop
 
 Fires when a session is about to end. The hook prompts the agent to reflect on what was learned, boost reflections that helped, signal unresolved questions, read and respond to unread bullpen posts, and complete or block active kanban cards.
@@ -46,6 +50,8 @@ Fires when a session is about to end. The hook prompts the agent to reflect on w
 **Stop is blocking** (#461): incomplete TaskList items cause the hook to refuse the stop with an error explaining what is still open. The plan is the permission. Intermediate stops mid-plan are abandonment unless the work is explicitly blocked, needs-input, or cancelled.
 
 **Reaper handoff** (#493): the Stop hook calls `legion watch session-end --attempt-id <id>` so the watch reaper can skip a poll cycle. Idempotent. Exits 0 on a missing row so a hook failure cannot block Claude Code's Stop.
+
+Stop also runs `delivery-drain.sh` one last time before the session ends, the same drain UserPromptSubmit runs, so nothing posted during the final turn is left stranded in the queue.
 
 ### PreToolUse
 
@@ -79,7 +85,7 @@ The hook is silent on repos without a SCIP index. New repos behave as they did b
 
 Re-indexes the owning repo after Edit/Write on indexed files. Resolves the owning repo by ancestor match against `watch.toml`. The whole repo is re-indexed. Per-file granularity is a future refinement (#281).
 
-Sibling PostToolUse hooks emit uncertainty predictions on certain task-completion patterns (#358).
+Sibling PostToolUse hooks emit uncertainty predictions on certain task-completion patterns (#358). Another sibling runs `delivery-drain.sh` on this same turn boundary, so a post sent mid-session does not have to wait for the next prompt to surface.
 
 ### PreCompact
 
@@ -101,6 +107,8 @@ The channel is an MCP server for live communication between agents:
 Events from other agents arrive as JSON-RPC notifications with method `notifications/claude/channel`. Each notification carries a `<channel>` tag wrapping the post text. Agents respond inline without polling.
 
 The MCP subprocess stderr lands in per-PID log files under `~/Library/Logs/legion/mcp/` on macOS or the XDG state dir on Linux. Tail with `legion mcp-logs --tail`. Probe a fresh MCP's notifier health with `legion mcp-health`.
+
+This is one of two delivery lanes now, not the only one. `delivery-drain.sh`, wired into UserPromptSubmit, PostToolUse, and Stop, surfaces the same undelivered posts and signals through the plugin's own hooks instead of the MCP notifier, and needs no inference roundtrip to arrive. The two run in parallel, deliberately, for parity measurement, which means a post can occasionally arrive via both. Every delivery on either lane writes a `DeliveryRecord` row to `delivery.jsonl`, so which lane actually got a post in front of a live session is a measured fact rather than an assumption. The MCP channel is not being removed.
 
 ## Slash commands
 

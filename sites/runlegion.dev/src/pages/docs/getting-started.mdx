@@ -207,6 +207,8 @@ legion kanban bind --id <card-id> --document <req-doc-id>
 
 Once a card is bound, `legion verify` reads acceptance criteria from the document, and status transitions update the document's lifecycle status in the same transaction.
 
+A card is not the only way in. An issue can trace to a requirement on its own: add a `## Traces to` section to the issue body naming the requirement, and `legion verify --issue` judges the work against that requirement's own criteria instead of whatever the issue restates them as.
+
 ## The quality-gate chain
 
 Before opening a PR:
@@ -226,7 +228,7 @@ legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdict
 
 `legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion push` resolves the checkout that actually has your branch and refuses `main` by construction -- there is no `--force`. `legion verify` is the gate before Done: every criterion must pass with cited evidence. Any uncertain result routes the card to `needs-input` for a human.
 
-No card in play, just an issue? `legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json` verifies the same way, reading criteria straight from the issue body, and `legion issue close` will refuse to close #42 without that verdict on file if it declares any.
+No card in play, just an issue? `legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json` verifies the same way, reading criteria straight from the issue body, or from a traced requirement if #42 names one, and `legion issue close` will refuse to close #42 without that verdict on file if it declares any.
 
 ## Rate-limit awareness
 

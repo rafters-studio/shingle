@@ -291,7 +291,7 @@ legion signal --repo myproject --to all --verb announce --note "Phase 2.1 shippe
 
 Wake-worthy verbs cause the watch daemon to spawn the recipient if asleep: `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`. `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details` (e.g., `--details "budget:2h"`).
 
-Informational verbs deliver to live sessions via the channel push but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Silence is acknowledgment for informational signals; do not send empty acks.
+Informational verbs deliver to a live session but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Delivery to a live session runs two lanes at once, the MCP channel push and the hook-side `deliver drain` (see below) -- either one can be the lane that actually lands it. Silence is acknowledgment for informational signals; do not send empty acks.
 
 `--status` decorates the verb but does NOT affect wake routing. Only `--verb` gates whether watch spawns.
 
@@ -330,6 +330,16 @@ legion pending-replies --repo myproject
 ```
 
 Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when the agent wakes to directed questions or requests.
+
+### deliver
+
+Drain undelivered bullpen posts and signals into the current session, outside the MCP channel.
+
+```bash
+legion deliver drain --repo myproject
+```
+
+Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. Where the MCP channel push notifies a live session in real time, `deliver drain` reads what is still undelivered and returns it as additional context at the next hook turn-boundary -- a path that does not depend on the MCP notifier subprocess and costs no extra model call to arrive. Both lanes run at once, for now, so the same post can occasionally arrive twice. Every delivery on either one writes a `DeliveryRecord` row to `delivery.jsonl`, so which lane actually got a message in front of an agent is measured, not assumed.
 
 ---
 
@@ -421,6 +431,17 @@ legion issue edit --repo myproject --id 42 --title "new title"
 
 `legion issue list` reads the work source's live state through the same plugin path as `issue view` -- not the local kanban cache, which `sync` can miss entirely. `--state` filters `open` (default), `closed`, or `all`; `--label` filters by label.
 
+An issue body can carry a `## Traces to` section, pointing the issue at the requirement it implements:
+
+```markdown
+## Traces to
+
+- FR-2044-003 [criteria: crit-1, crit-3] -- users can filter results by date range
+- None -- infra chore, nothing to trace
+```
+
+Each line either names a requirement id (`FR-2044-003` above), with an optional bracketed list of criteria ids and a line of prose explaining the link, or is `- None -- <reason>`. `legion issue create` parses this section from `--body` and refuses to file the issue outright if the trace is malformed, names a requirement that does not exist, or points at a cancelled one -- a bad trace is caught at filing time, not discovered later when verify runs against it. An issue with no `## Traces to` section, or one that traces to `None`, remains a fully legal, untraced issue; tracing is opt-in, not a requirement placed on every issue. `legion verify --issue` and `legion pr write-check --issue` both read this section to decide whether they are judging the work against the issue's own restatement of its criteria or against the traced requirement's.
+
 `legion issue close` reads the issue body through `card_parse::parse_issue_body` -- the same parser `pr write-check --issue` uses -- and refuses to close unless a clean `legion-verify:issue-<repo>#<n>` verdict exists for every declared acceptance criterion. Absent and failed refuse with different messages: absent names the `legion verify --issue` command to run; not-clean says resolve the failing or uncertain criteria first. An issue with no declared acceptance criteria closes ungated, matching the card rule that lets a chore reach Done, but it says so on stdout -- an unchecked close that looks like a checked one is the exact failure the gate exists to close. The override is `--force --force-reason "..."`, with the reason required, not optional; it records to the audit log's OUTCOME field, not only the details JSON, because the default `legion audit` listing prints outcome and a bypass hidden in details sits where nobody looks.
 
 The close path fails closed when it cannot read the issue at all: a work source that will not answer means the gate could not be evaluated, which is not the same as passing it. `view-issue` is a hard requirement of the close path -- a plugin implementing only `close` needs it too.
@@ -478,7 +499,7 @@ legion pr close --repo myproject --number 12
 
 `legion pr checks --log-failed` streams the raw CI log for every failing job, each preceded by a `===== <name> (<job-id>) =====` header. Logs are fetched with `gh api --allow-escape-sequences` -- required because cargo and other colored CI output trips gh's default refusal to print terminal escape sequences -- and ANSI color codes are stripped before printing, so the output is plain text. A genuine `gh` failure (expired retention, missing scope, wrong job id) is surfaced with `gh`'s own stderr in the error, not swallowed into a generic string.
 
-`legion pr write-check` validates a drafted PR body against the issue's acceptance criteria and records a `legion-pr-write` quality gate on success. Body from `--body-file` or stdin.
+`legion pr write-check` validates a drafted PR body against the issue's acceptance criteria and records a `legion-pr-write` quality gate on success. Body from `--body-file` or stdin. When the issue traces to a requirement, it renders that requirement's own criteria beside the PR body's mapping and flags any criterion the body re-authors instead of citing verbatim -- restating a spec's wording, even accurately, is exactly where drift creeps in unnoticed.
 
 `legion pr edit` corrects a live PR's title and/or body in place -- the honest alternative to close-and-recreate when a re-review finds a body that misdescribes its own diff. A `--body-file` edit runs the same structural validation `pr write-check` runs against `--issue`'s acceptance criteria and re-records the `legion-pr-write` gate for local HEAD; it is refused, not recorded, when local HEAD is not the PR's own head commit.
 
@@ -507,6 +528,8 @@ Schema documents (`doc_type=schema`) are structurally validated at create: paylo
 
 `legion document validate` checks a JSON instance against a landed schema. One error per violation, exits non-zero on any failure.
 
+For a requirement document, `legion document view` also reports which of its `verification.criteria` currently carry a clean verify verdict, so a spec author can see coverage without cross-referencing every issue that claims to trace to it.
+
 ### spec-gen
 
 Generate requirement documents from service-design artifacts.
@@ -527,7 +550,7 @@ echo '[{"criterion":"search returns results","verdict":"pass","evidence":"test_s
 
 legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdicts.json
 
-# No card involved -- criteria come from the issue body
+# No card involved -- criteria come from the issue body, or the traced requirement if one exists
 echo '[{"criterion":"search returns results","verdict":"pass","evidence":"test_search passes"}]' \
   | legion verify --repo myproject --issue 42
 ```
@@ -543,7 +566,7 @@ Decisions:
 
 When a `document_id` is bound, criteria come from the document's `verification.acceptance` block first; a missing or empty block falls back to `tasks.acceptance`. A dangling `document_id` (the document does not exist) is a hard error, not a silent fallback.
 
-`--card` and `--issue` are mutually exclusive, and exactly one is required. The `--issue` path verifies work with no card at all: criteria resolve from the issue body via the same parser `pr write-check --issue` uses, and the verdict records as `legion-verify:issue-<repo>#<n>` -- scoped by repo, since issue numbers are only unique within a work source, and namespaced so it cannot collide with a card id. `legion issue close` reads this row. The issue path does less than the card path, deliberately: no spec-document precedence, since binding a document is a card operation; no status transition, since there is no card to move; and `--deviation` refuses outright, since that gate is adjudicated against a card's ratified `ReplanRecord` and there is none to check against on this path.
+`--card` and `--issue` are mutually exclusive, and exactly one is required. The `--issue` path verifies work with no card at all, and criteria resolve one of two ways. An issue with no `## Traces to` section, or one that traces to `None`, is verified straight from its own body via the same parser `pr write-check --issue` uses. An issue that traces to a requirement is judged against that requirement's own `verification.criteria` instead -- the spec's wording, not the issue's restatement of it -- and the verdict pins the requirement document's id and revision, so a criterion cannot quietly drift out from under a verdict that already passed it. `legion issue create` is the gate on the trace itself, refusing to file an issue whose trace names a requirement that does not exist, is cancelled, or is malformed. Either way the verdict records as `legion-verify:issue-<repo>#<n>` -- scoped by repo, since issue numbers are only unique within a work source, and namespaced so it cannot collide with a card id. `legion issue close` reads this row. The issue path still does less than the card path in one respect: no status transition, since there is no card to move; and `--deviation` refuses outright, since that gate is adjudicated against a card's ratified `ReplanRecord` and there is none to check against on this path.
 
 ### quality-gate
 
