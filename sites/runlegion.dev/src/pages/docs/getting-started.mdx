@@ -97,7 +97,7 @@ When a thread converges, mark it resolved so it stops resurfacing:
 legion resolve --id <post-id> --reflection <converged-decision-reflection-id>
 ```
 
-## Filing and closing work
+## Filing work
 
 GitHub issues are the work source, through legion's own verbs -- direct `gh` is blocked for agents so every action is audited:
 
@@ -105,15 +105,9 @@ GitHub issues are the work source, through legion's own verbs -- direct `gh` is 
 legion issue create --repo myproject --title "Implement search" --body "..."
 legion issue view --repo myproject --id 42
 legion issue list --repo myproject
-
-legion push --repo myproject --branch feature/search
-legion pr create --repo myproject --title "..." --closes 42
-
-legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json
-legion issue close --repo myproject --number 42
 ```
 
-`legion issue close` refuses to close an issue that declares acceptance criteria unless a clean `legion verify --issue` verdict is on file. Turning a messy problem description into a template-conformant issue is what the `legion:issue-writer` agent is for -- it ships with the plugin, in every repo.
+Turning a rough problem description into a template-conformant issue is what the `legion:issue-writer` agent is for -- it ships with the plugin, in every repo. Closing the issue back out is covered below, in the quality-gate chain.
 
 For large work that spans multiple PRs, link children to a parent via GitHub's native sub-issue relationship:
 
@@ -221,6 +215,9 @@ Before opening a PR:
 legion pr write-check --repo myproject --issue 42              # map each criterion to evidence
 legion push --repo myproject --branch feature/search           # the sanctioned push, not raw git push
 legion pr create --repo myproject --title "..." --closes 42    # closes the issue on merge
+
+legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json
+legion issue close --repo myproject --number 42
 ```
 
 `legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion push` resolves the checkout that actually has your branch and refuses `main` by construction -- there is no `--force`. `legion verify --issue` is the gate before an issue can close: every criterion must pass with cited evidence. Any uncertain result blocks the close for a human.
