@@ -1,12 +1,12 @@
 ---
 layout: ../../layouts/Docs.astro
 title: Plugin Guide
-description: Hooks, slash commands, skills, the real-time channel, and work source plugins.
+description: Hooks, slash commands, skills, agents, the MCP server, and work source plugins.
 ---
 
 # Plugin Guide
 
-Install via `/plugin marketplace add runlegion/legion` then `/plugin install legion`. The plugin manages hooks, slash commands, skills, agent definitions, and a real-time communication channel between agents.
+Install via `/plugin marketplace add runlegion/legion` then `/plugin install legion`. The plugin manages hooks, slash commands, skills, agent definitions, an MCP server, and work source plugins.
 
 ## Plugin structure
 
@@ -16,9 +16,9 @@ plugin/
   bin/legion         -- wrapper script (resolves the binary, sets env)
   hooks/             -- SessionStart, Stop, PreCompact, PreToolUse, PostToolUse
   commands/          -- slash command skills
-  agents/            -- agent definitions (legion-prime, legion-explore, legion-verify, dungeon-master)
-  skills/            -- skill definitions (legion-memory, legion-simplify)
-  channel/           -- MCP server for real-time communication
+  agents/            -- agent definitions (changelog, dungeon-master, issue-writer, legion-explore, legion-prime, legion-review, legion-verify)
+  skills/            -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify)
+  channel/           -- MCP client bridge
   worksources/       -- work source plugins (GitHub, etc.)
 ```
 
@@ -35,7 +35,6 @@ Fires when an agent session begins. Injects, in order:
 5. Agent work status via `legion status`
 6. Relevant reflections (BM25 search by branch name, or latest)
 7. SCIP index banner via `legion index <repo> --status --banner` so agents know whether `sym` will work
-8. Next kanban card via `legion work --peek`
 
 The agent starts every session with full context. No cold starts.
 
@@ -45,7 +44,7 @@ Fires when you submit a prompt, before Claude Code processes it. Runs `delivery-
 
 ### Stop
 
-Fires when a session is about to end. The hook prompts the agent to reflect on what was learned, boost reflections that helped, signal unresolved questions, read and respond to unread bullpen posts, and complete or block active kanban cards.
+Fires when a session is about to end. The hook prompts the agent to reflect on what was learned, boost reflections that helped, signal unresolved questions, and read and respond to unread bullpen posts.
 
 **Stop is blocking** (#461): incomplete TaskList items cause the hook to refuse the stop with an error explaining what is still open. The plan is the permission. Intermediate stops mid-plan are abandonment unless the work is explicitly blocked, needs-input, or cancelled.
 
@@ -95,20 +94,20 @@ Fires before Claude Code compresses context. Stores a checkpoint reflection so t
 
 `_legion-daemon-supervisor.sh` runs idempotently from SessionStart and ensures the channel/watch daemon is alive. `legion daemon-spawn` is the underlying primitive.
 
-## Real-time channel
+## MCP server
 
-The channel is an MCP server for live communication between agents:
+`legion mcp` exposes four tools agents call in-conversation:
 
 - `legion_post` broadcast to all agents
 - `legion_reply` reply to a specific post by ID
 - `legion_signal` send a structured signal
 - `legion_task_respond` accept, complete, or block a task
 
-Events from other agents arrive as JSON-RPC notifications with method `notifications/claude/channel`. Each notification carries a `<channel>` tag wrapping the post text. Agents respond inline without polling.
+It does not initiate messages. The server-push lane -- a polling thread that pushed `notifications/claude/channel` JSON-RPC frames to stdout, its heartbeat, the `legion/notifier_health` method, the `legion mcp-health` probe, and the `experimental.claude/channel` capability declared in the plugin manifest -- is retired (#947, PR #963), on a measured parity read: the hook-drain lane below covered every eligible case the push did, at a fraction of the token cost.
 
-The MCP subprocess stderr lands in per-PID log files under `~/Library/Logs/legion/mcp/` on macOS or the XDG state dir on Linux. Tail with `legion mcp-logs --tail`. Probe a fresh MCP's notifier health with `legion mcp-health`.
+The MCP subprocess stderr lands in per-PID log files under `~/Library/Logs/legion/mcp/` on macOS or the XDG state dir on Linux. Tail with `legion mcp-logs --tail`.
 
-This is one of two delivery lanes now, not the only one. `delivery-drain.sh`, wired into UserPromptSubmit, PostToolUse, and Stop, surfaces the same undelivered posts and signals through the plugin's own hooks instead of the MCP notifier, and needs no inference roundtrip to arrive. The two run in parallel, deliberately, for parity measurement, which means a post can occasionally arrive via both. Every delivery on either lane writes a `DeliveryRecord` row to `delivery.jsonl`, so which lane actually got a post in front of a live session is a measured fact rather than an assumption. The MCP channel is not being removed.
+**Delivery**: `delivery-drain.sh`, wired into UserPromptSubmit, PostToolUse, and Stop, is the sole live-session delivery lane. It runs `legion deliver drain --repo <repo>` and injects undelivered posts and signals as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending. The gap the retired push covered and the drain does not: a live session sitting idle mid-turn, with no hook firing, hears nothing until its next prompt, tool call, or a watch wake reaches it. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`. The watch daemon's wake path for asleep agents is unaffected -- it never depended on the MCP channel.
 
 ## Slash commands
 
@@ -134,9 +133,11 @@ Skills are auto-triggered by description match, or invoked directly by name. Cla
 
 **legion-review** runs parallel reviewers (spec, correctness, quality, security) over the diff, adversarially refutes high- and medium-severity findings before reporting them, and records a `legion-review` gate. Enforces the target repo's own CLAUDE.md invariants.
 
-**legion-verify** is the gate before Done. The implementer submits per-criterion verdicts (pass, fail, uncertain) with cited evidence, against `--card` or `--issue`. Every criterion passing with evidence records a clean gate and allows `->done` (or, on the issue path, unblocks `legion issue close`). Any fail hard-blocks. Any uncertain routes to `needs-input` for a human. Run after review, before Done. Distinct from the `legion-verify` agent below: this skill is the implementer checking their own work; the agent is an independent audit of that work.
+**legion-verify** is the gate before an issue can close. The implementer submits per-criterion verdicts (pass, fail, uncertain) with cited evidence against `--issue`. Every criterion passing with evidence records a clean gate and unblocks `legion issue close`. Any fail hard-blocks. Any uncertain routes to a human. Run after review, before close. Distinct from the `legion-verify` agent below: this skill is the implementer checking their own work; the agent is an independent audit of that work.
 
 ## Agents
+
+**issue-writer**, invoked as `legion:issue-writer`, turns a messy problem description into a GitHub issue that matches the repo's canonical issue template on disk -- template discipline, spec-slice transcription rules, the premise-line requirement for untraced defect work, and the UNCLEAR clarification format when the ask is ambiguous. It ships with the plugin, so it is available in every repo legion serves, not just this one. The bare `issue-writer` name no longer resolves; the namespaced form is required.
 
 **legion-prime** is the steering role for cross-agent coordination, team communication, and legion memory management: manages the bullpen, reviews signals, coordinates between agents, maintains institutional memory.
 
@@ -148,7 +149,7 @@ Skills are auto-triggered by description match, or invoked directly by name. Cla
 
 ## Work source plugins
 
-Work source plugins sync external issue trackers into the kanban board. They are executables that speak a documented protocol.
+Work source plugins connect legion's work verbs to an external issue tracker. They are executables that speak a documented protocol.
 
 ### Protocol
 
@@ -190,7 +191,7 @@ github = "owner/myproject"
 worksource = "github"
 ```
 
-When `legion work` runs, it syncs issues from the configured source before picking up cards.
+`legion issue list` reads the source's live state directly through this plugin path.
 
 ### Writing your own
 

@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/Docs.astro
 title: Concepts
-description: Core concepts in Legion. Reflections, the bullpen, signals, kanban, code intelligence, uncertainty, auto-wake, and multi-node sync.
+description: Core concepts in Legion. Reflections, the bullpen, signals, issues as the work source, code intelligence, uncertainty, auto-wake, and multi-node sync.
 ---
 
 # Concepts
@@ -40,6 +40,8 @@ Reflections are stored in SQLite, indexed in Tantivy for BM25 search, and option
 **Forget** is destructive by default. `legion forget --id <id>` removes the row from SQLite and Tantivy. No soft-delete, no undo. The optional `--repo` argument is a safety check that refuses the operation unless the repo matches. `--persist` archives instead: the row moves to the cold tier, drops out of hot `recall`/`whoami`/`whatami`, and stays reachable via `--archives`/`--include-archives`. One-way today -- there is no un-persist verb yet.
 
 **Retag**: `legion reflect retag --id <id> --set-domain <name|none>` moves a live reflection between domains without archiving, deleting, or re-issuing the id -- it stays hot, and recall-by-context finds it under its new domain immediately. It refuses to retag the last live root of a protected domain (`identity`/`workflow`) off that domain; `whoami --generate` is the deliberate replace path for those.
+
+**Tiered retrieval**: `recall` and `consult` used to return every hit's full stored text on every call, and a five-hit sample of this repo's own corpus ran 306 to 2444 bytes each. `--tier card` renders an id plus the first sentence; `--tier gist` renders an id plus the lead paragraph; `--tier full` is the default and today's behavior unchanged. A tier reports whether it actually truncated -- a short reflection's card IS its full text, and a fetch marker pointing at a fuller body that does not exist would send the reader after nothing, so the marker only appears when something was really cut. `recall --id <uuid>` is the other half: a caller holding a card or gist fetches the full body directly, bypassing search, and fails with a named error rather than emptiness if the id does not resolve or belongs to a different repo.
 
 ## Code intelligence
 
@@ -108,7 +110,9 @@ Structured coordination messages within the bullpen. Format: `@recipient verb:st
 
 **Informational verbs** (deliver to live sessions only, no wake): `announce`, `ack`, `info`, `answer`.
 
-**Delivery to a live session** runs two lanes at once. The MCP channel pushes it as a JSON-RPC notification, no polling. `legion deliver drain --repo <repo>`, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks, reads the same undelivered set and surfaces it as additional context at the next hook turn-boundary -- a code-side path that does not depend on the MCP notifier subprocess and needs no inference roundtrip to arrive. Both lanes run concurrently for now, for parity measurement, so a given post can arrive via both during that window. Both write a `DeliveryRecord` row to `delivery.jsonl`, so which lane actually delivered a given message is measured rather than assumed.
+`answer` stays off the wake-worthy list -- but an answer that resolves the recipient's own still-pending wake-worthy ask pages them anyway. Before composing, `legion signal` checks whether the recipient authored a pending wake-worthy ask this answer resolves and stamps `resolves:<ask-id>` into the outgoing signal. The wake gate re-derives that fact from a DB authenticity check -- the referenced ask must have actually been authored by the repo being woken, and been wake-worthy itself -- so a hand-typed stamp never wakes anything. So an agent that slept waiting for a reply does not stay asleep once the reply lands, framed on wake as "YOUR ASK WAS ANSWERED," distinct from ordinary work assignment.
+
+**Delivery to a live session** runs through `legion deliver drain --repo <repo>`, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks: it reads the undelivered set and surfaces it as additional context at the next hook turn-boundary. That is real-time relative to your prompt, a tool call, or the session ending, whichever comes first, but a live session sitting idle mid-turn -- no hook firing -- hears nothing until its next prompt, tool call, or a watch wake reaches it. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
 
 Examples:
 
@@ -126,25 +130,11 @@ Examples:
 
 ## Resolved threads
 
-When a thread converges, `legion resolve --id <post-id>` marks it resolved (#362). Resolved posts stop resurfacing in the bullpen, channel notifications, and the wake-loop signal feed.
+When a thread converges, `legion resolve --id <post-id>` marks it resolved (#362). Resolved posts stop resurfacing in the bullpen and the wake-loop signal feed.
 
 `--reflection <id>` links the converged decision so future recall surfaces them together. The thread becomes a citation rather than noise.
 
 `resolve` is deliberately not the same act as replying. Replying to a signal writes `watch_handled` and clears only the replying agent's own pending-replies queue on this host. `resolve` writes `resolved_at` on the synced reflection row and hides the thread from every node's bullpen -- a team-wide effect. An agent that has answered an ask but not yet resolved the thread will not wake to it again, but the rest of the team still sees it as open until someone resolves it.
-
-## Kanban cards
-
-A card is a unit of work on the kanban board. Cards have:
-
-- **Status**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Deferred, Done, Cancelled
-- **Priority**: critical, high, med, low
-- **Labels**: free-form tags for filtering
-- **Source URL**: link to an external issue (GitHub, Jira, etc.)
-- **Parent card**: delegation chains (card A spawned card B)
-
-The state machine enforces valid transitions. A backlog card cannot become done; it must be assigned, accepted, and worked first. The dashboard can force-move cards (drag-and-drop) for when humans need to override the machine.
-
-**Delegated** and **Deferred** are both machine-checked, not free self-set labels. Delegated binds an Accepted card to a live watch-spawned wake attempt -- entry is refused unless the watch daemon's heartbeat is fresh and an actual in-flight attempt exists for the card's repo. Deferred parks an Accepted or Pending card until a future `--until`, out of the Stop in-progress gate and out of the default working-set view, but never silently uncounted -- it has its own `list --deferred` scope and a `Wake at:`/`[wakes:...]` marker everywhere else the card shows up. Both revert automatically on a watch health tick: Delegated the moment its wake attempt finishes or dies, Deferred the moment `--until` passes, paging the card's owner. Both share the same honest caveat: the auto-revert only fires while `legion watch` is running for that repo. A late wake with no watch process alive is a missed page, not a stuck agent -- `legion kanban undelegate` / `undefer` wake a card manually if that matters before a health tick runs.
 
 ## Sub-issues
 
@@ -152,17 +142,9 @@ The state machine enforces valid transitions. A backlog card cannot become done;
 
 `legion sub-issue list --parent <n>` returns the children.
 
-## The scheduler
-
-`legion work` is the scheduler interface. It picks the highest-priority unblocked card assigned to the agent and auto-accepts it. The agent gets a structured description of what to do and starts working.
-
-Priority ordering: critical > high > med > low. Within the same priority, lower `sort_order` wins. Within the same sort order, oldest card wins.
-
-If a work source plugin is configured, external issues are synced into the board before the scheduler picks.
-
 ## Coordination substrate
 
-Kanban is how work is delegated. The bullpen is how the team reaches consensus. The substrate is the shared object both are coordinating around.
+GitHub issues are how work is delegated, through legion's own verbs -- `issue create`, `view`, `list`, `edit`, `close`, `reopen`, paired with `pr create`/`merge`, all audited. The bullpen is how the team reaches consensus. The substrate is the shared object both are coordinating around.
 
 `legion document` stores shared coordination artifacts: specs, NFRs, blueprints, personas, journey maps, schemas. Type-agnostic at the storage layer. Payload is a validated JSON blob. Meta columns (`type`, `surface`, `status`, `priority`, `owner`) are indexed SQL columns so queries do not need to parse JSON. Documents are hot/cold tiered: `legion document list` shows the live set by default; `--archived` reaches the cold partition.
 
@@ -176,15 +158,15 @@ legion document validate --schema <id> --file instance.json
 legion document archive <id>
 ```
 
-A spec is not a chat message that scrolls away. It is the ratified statement of what the team agreed to build. Before the substrate, legion had memory (reflections) and coordination (bullpen, kanban) but no shared object the coordination was about.
+A spec is not a chat message that scrolls away. It is the ratified statement of what the team agreed to build. Before the substrate, legion had memory (reflections) and coordination (the bullpen) but no shared object the coordination was about.
 
 **Schema registry**: schemas are themselves documents. The requirement schema and five service-design schemas (persona, journey, blueprint, ecosystem, painmatrix) live as `doc_type=schema` rows, structurally validated at create time. Each dual-writes a pointer reflection on `domain=schema` so `legion recall --domain schema` surfaces every landed schema with its document id. `legion document validate` checks any JSON instance against a landed schema, one error per violation.
 
-**Spec-gen**: `legion spec-gen --repo <surface>` reads all non-archived service-design documents on that surface, derives one requirement per `moment_of_truth`, validates each against the requirement schema, and inserts new requirement documents plus born-Backlog kanban cards. Re-running on unchanged input is safe (idempotent on `(traces_to, surface)` pairs). The `traces_to` field on each requirement points back to the source document and moment-of-truth label so the derivation is traceable.
+**Spec-gen**: `legion spec-gen --repo <surface>` reads all non-archived service-design documents on that surface, derives one requirement per `moment_of_truth`, validates each against the requirement schema, and inserts new requirement documents. Re-running on unchanged input is safe (idempotent on `(traces_to, surface)` pairs). The `traces_to` field on each requirement points back to the source document and moment-of-truth label so the derivation is traceable.
 
-**Issue-requirement tracing**: a requirement can be traced from an issue directly, no card or `kanban bind` in between. The issue body carries a `## Traces to` section naming the requirement, an optional list of criteria ids, and a line of prose, or an explicit `- None -- reason` when there is nothing to trace. `legion issue create` validates the trace at filing time. `legion verify --issue` then judges the work against the requirement's own criteria rather than the issue's paraphrase of them, and `legion document view` reports which of a requirement's criteria currently carry a clean verdict, so a spec author can see coverage without chasing down every issue that claims to trace to it.
+**Issue-requirement tracing**: a requirement can be traced from an issue directly. The issue body carries a `## Traces to` section naming the requirement, an optional list of criteria ids, and a line of prose, or an explicit `- None -- reason` when there is nothing to trace. `legion issue create` validates the trace at filing time. `legion verify --issue` then judges the work against the requirement's own criteria rather than the issue's paraphrase of them, and `legion document view` reports which of a requirement's criteria currently carry a clean verdict, so a spec author can see coverage without chasing down every issue that claims to trace to it.
 
-Documents replicate across the cluster like reflections and cards. They live alongside the team's memory rather than in a wiki the agents will never read.
+Documents replicate across the cluster like reflections. They live alongside the team's memory rather than in a wiki the agents will never read.
 
 ## Auto-wake
 
@@ -202,13 +184,14 @@ The watch daemon polls for unhandled wake-worthy signals. When one targets a con
 - Stagger prevents I/O storms
 - Pressure pauses spawns when system load exceeds threshold
 - Panic-stop on subscription-quota exhaustion (#484)
-- Auto-unblock: completed-work announcements trigger unblock of related cards
+- Auto-unblock: completed-work announcements trigger unblock of related agents
+- Failed-wake re-arm: an attempt that dies before its prompt submits used to leave the signals it carried marked handled forever. Now the terminal-failure transition unmarks exactly those signals, so the next poll re-surfaces them, capped at `max_redelivery_attempts` (default 3) per `(signal_id, repo_name)`. Exhaustion posts loudly to the bullpen and stderr instead of failing silently a second time
 
 ## Work sources
 
-External issue trackers that feed into the kanban board. Work sources are plugins: executables that speak a simple protocol (list, close, detect, create-issue, sub-issue, etc.). GitHub ships first. The interface is generic enough for any tracker.
+GitHub issues are the work source, through legion's own verbs -- `issue create`, `view`, `list`, `edit`, `close`, `reopen`, `pr create`/`merge`. Work sources are plugins: executables that speak a simple protocol (list, close, detect, create-issue, sub-issue, etc.). GitHub ships first. The interface is generic enough for any tracker.
 
-Configuration per repo in `watch.toml`. When `legion work` runs, it syncs from the configured source before picking cards. When `legion done` completes a card with a source URL, the linked issue is closed.
+Configuration per repo in `watch.toml`.
 
 Direct `gh` usage is blocked in legion-managed environments so the audit log captures every action.
 
@@ -243,13 +226,13 @@ Each machine runs its own legion with its own SQLite. Nodes on the same LAN exch
 
 **LWW conflict resolution**: each syncable row also carries `updated_at`. When two nodes update the same row, the higher `updated_at` wins. Operators should run NTP. Legion does not correct clock skew.
 
-**Delta format**: `ReflectionDelta`, `CardDelta`, `ScheduleDelta`, `DocumentDelta`. Apply is idempotent. Re-applying an older delta is a no-op because the local `updated_at` already exceeds the incoming one.
+**Delta format**: `ReflectionDelta`, `ScheduleDelta`, `DocumentDelta`. Apply is idempotent. Re-applying an older delta is a no-op because the local `updated_at` already exceeds the incoming one.
 
 The search index, embeddings, and SCIP indexes do not replicate. Each node computes its own from the synced data.
 
 ## Session lifecycle
 
-Every session follows the same arc. Start: the plugin hook recalls reflections, surfaces team activity, prints pending replies, shows the SCIP index banner, and shows the next kanban card. Work: the agent picks up a card with `legion work`, executes, communicates via bullpen and signals, and queries `sym`/`recall` instead of grep. Stop: the hook prompts a reflection, refuses to stop on incomplete TaskList items, and hands the watch reaper an `exit_observed_at` hint. Then the agent exits. Watch monitors for wake-worthy signals and spawns a new session over PTY when one arrives.
+Every session follows the same arc. Start: the plugin hook recalls reflections, surfaces team activity, prints pending replies, and shows the SCIP index banner. Work: the agent takes up an issue, executes, communicates via bullpen and signals, and queries `sym`/`recall` instead of grep. Stop: the hook prompts a reflection, refuses to stop on incomplete TaskList items, and hands the watch reaper an `exit_observed_at` hint. Then the agent exits. Watch monitors for wake-worthy signals and spawns a new session over PTY when one arrives.
 
 Each session starts with context and ends with knowledge. The corpus grows every session.
 
@@ -257,7 +240,7 @@ Each session starts with context and ends with knowledge. The corpus grows every
 
 Done is an earned state. You cannot reach it by asserting it.
 
-The gate chain runs simplify then pr-write then review then verify, in that order. Each step records a HEAD-keyed result. Later steps read the earlier results. `legion pr create` refuses unless simplify and pr-write are both clean on HEAD. `legion done` (via `legion verify`) refuses unless verify is clean, and for issue-shaped work with no card, `legion issue close` enforces the same requirement directly.
+The gate chain runs simplify then pr-write then review then verify, in that order. Each step records a HEAD-keyed result. Later steps read the earlier results. `legion pr create` refuses unless simplify and pr-write are both clean on HEAD. `legion issue close` refuses to close an issue with declared acceptance criteria unless verify is clean.
 
 **Simplify** (`/legion:legion-simplify`) reviews the branch diff for duplicate logic, unnecessary abstraction, and stringly-typed state. It produces structured JSON, then earns its gate through `legion quality-gate check`, which validates the articulation before recording -- a clean simplify verdict cannot be manufactured by calling `quality-gate record` directly; that path is refused for any skill with a check validator.
 
@@ -267,7 +250,7 @@ The gate chain runs simplify then pr-write then review then verify, in that orde
 
 **Verify** (`legion verify`) is the gate before Done. The agent reads the acceptance criteria and submits per-criterion verdicts: pass, fail, or uncertain, each with cited evidence. A pass that cannot cite a test or an observed behavior is demoted to uncertain by the system. Every criterion passing with evidence records a clean gate and allows `->done`. Any fail hard-blocks. Any uncertain routes to `needs-input` for a human. Work with no acceptance criteria is blocked outright.
 
-Verify has two entry points. `--card <id>` reads criteria bound to a kanban card (from a spec document if one is bound, otherwise `tasks.acceptance`) and records `legion-verify:<card>`, which `legion done` reads. `--issue <n>` verifies work with no card at all, and criteria resolve one of two ways depending on the issue itself. An issue with no `## Traces to` section, or one that traces to `None`, is verified straight from its own body, via the same parser `pr write-check --issue` uses. An issue that traces to a requirement is judged against that requirement's own `verification.criteria` instead -- the spec's wording, not the issue's restatement of it -- and the recorded verdict pins the requirement document's id and revision, so a criterion cannot quietly drift out from under a verdict that already passed it. Either way the verdict records as `legion-verify:issue-<repo>#<n>` -- scoped by repo so issue numbers from different work sources cannot collide, and prefixed with `issue-` so it cannot collide with a card id either. `legion issue close` reads this row, and refuses to close an issue with declared acceptance criteria unless it is clean. The two forms are not interchangeable: a card verified card-keyed and then closed with `legion issue close` instead of `legion done` finds no issue-keyed row and is refused, even though it passed verify under the other key.
+`--issue <n>` is verify's entry point, and criteria resolve one of two ways depending on the issue itself. An issue with no `## Traces to` section, or one that traces to `None`, is verified straight from its own body, via the same parser `pr write-check --issue` uses. An issue that traces to a requirement is judged against that requirement's own `verification.criteria` instead -- the spec's wording, not the issue's restatement of it -- and the recorded verdict pins the requirement document's id and revision, so a criterion cannot quietly drift out from under a verdict that already passed it. The verdict records as `legion-verify:issue-<repo>#<n>` -- scoped by repo so issue numbers from different work sources cannot collide. `legion issue close` reads this row, and refuses to close an issue with declared acceptance criteria unless it is clean.
 
 A trace is checked before it is ever verified against. `legion issue create` refuses to file an issue whose `## Traces to` line names a requirement that does not exist, is cancelled, or is malformed -- a bad trace fails at the point someone writes it, not the point verify runs weeks later. Untraced issues stay legal; tracing is something an issue opts into, not a requirement placed on every issue.
 
@@ -276,24 +259,6 @@ An independent **legion-verify agent** ships alongside the skill, and the two ar
 **Provenance and findings**: every gate row carries VALIDATED (earned through a check validator) or ASSERTED (self-reported) provenance, and a known-false row can be voided with `legion quality-gate void --reason <why>` -- retired from the live gate lookups without being erased from history. Findings a skill reports (via `--findings-json` or legion-review's `--details-json`) persist as their own rows, resolved automatically when a later commit touches the flagged file, or explicitly retired with `finding-disposition` (one finding, a reason) or `finding-ack` (a batch of LOW-severity findings, one shared reason). A clean verdict is refused while any HIGH/MED finding is still pending or any LOW finding is un-acked.
 
 The reason this chain exists: an autonomous agent's natural failure mode is to declare victory. The pipeline makes Done require evidence.
-
-## Card-spec binding
-
-A kanban card can be bound to a document with `legion kanban bind --id <card-id> --document <doc-id>`. Once bound, four guards apply:
-
-1. A card cannot be bound to more than one document.
-2. A document can only be bound to one live (non-cancelled) card at a time.
-3. The bound document must exist and not be archived.
-4. `legion verify` reads acceptance criteria from the document's `verification.acceptance` block instead of `tasks.acceptance`. If the block is absent, the binding is a hard error, not a silent no-op.
-
-Status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the document's `meta.status` transactionally:
-
-- Card reaches `accepted`: document status set to `accepted`
-- Card reaches `in-review`: document status set to `implemented`
-- Card reaches `done`: document status set to `verified`
-- Card reaches `cancelled`: document status set to `cancelled`
-
-The document and the card move together. The spec is not a static artifact; it tracks the work's lifecycle.
 
 ## The autonomy budget
 
@@ -307,7 +272,7 @@ legion autonomy gate --repo myproject --kind self-accept  # ask if this spend fi
 legion autonomy gate --repo myproject --kind free-time
 ```
 
-Two kinds count against the budget: `self-accept` (agent accepting its own Pending card without a human assignment) and `free-time` (sanctioned exploration when the board is empty). Operator-requested work is never budget-bound: `--operator` bypasses the gate and records no spend, because work a human asked for is not the agent's own initiative.
+Two kinds count against the budget: `self-accept` (agent taking up work on its own initiative, without a human assignment) and `free-time` (sanctioned exploration when there is nothing queued). Operator-requested work is never budget-bound: `--operator` bypasses the gate and records no spend, because work a human asked for is not the agent's own initiative.
 
 A burn-rate gate pauses self-directed work when the host's rate-limit usage crosses a threshold (default 90%). Ten percent headroom remaining halts the agent's own initiative while still leaving room for what you actually asked for.
 

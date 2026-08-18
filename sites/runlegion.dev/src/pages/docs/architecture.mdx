@@ -28,7 +28,6 @@ Tables (grouped by concern):
 
 **Coordination**
 
-- `tasks` kanban cards with a 10-state machine, priority, labels, source URLs, timestamps, tombstone/LWW columns, plus `wake_at`/`pre_defer_status` for the Deferred state
 - `schedules` cron-like scheduled posts with tombstone/LWW columns
 - `documents` coordination substrate documents (#455/#456): specs, NFRs, blueprints, personas, journeys, etc. Type-agnostic at the storage layer. Payload is a validated JSON blob
 - `board_reads` per-agent read cursors for the bullpen (local, does not replicate)
@@ -36,7 +35,8 @@ Tables (grouped by concern):
 **Watch and wake**
 
 - `watch_handled` per-repo signal handling tracking
-- `wake_attempts` (#487) FSM-tracked wake attempts: spawn time, PID, PTY EOF time, exit_observed_at, terminal status, and a nullable `card_id` linking an attempt to a Delegated card. The reaper is the only writer for terminal transitions
+- `watch_redelivery` (#948) per-`(signal_id, repo_name)` retry counter for signals stranded by a failed wake attempt. An attempt that settles to a failure terminal state unmarks the `watch_handled` rows it carried, and the next poll re-surfaces them, capped at `max_redelivery_attempts` (default 3); exhaustion posts loudly to the bullpen and stderr rather than failing silently again. Host-local, pruned on the same retention cutoff as `watch_handled`
+- `wake_attempts` (#487) FSM-tracked wake attempts: spawn time, PID, PTY EOF time, exit_observed_at, terminal status. The reaper is the only writer for terminal transitions
 
 **Observability**
 
@@ -80,19 +80,11 @@ Incremental index sync detects reflections in SQLite missing from Tantivy and ad
 
 **The feedback loop**: `bypass.jsonl` is the signal that `sym` or `recall` missed an answer agents expected. The uncertainty engine reads it. The dashboard surfaces top under-served `(tool, repo, pattern)` tuples (#440). Doctrine becomes mechanism: the rule is enforced, the violations are counted, the count drives what gets fixed next.
 
-## Kanban scheduler
+## Work sources
 
-The kanban board is a scheduler wearing a human-friendly UI.
+GitHub issues are the work source, through legion's own verbs: `legion issue create | view | list | edit | close | reopen`, `legion pr create | merge | review | ...`. Every action lands in the audit log. Direct `gh` is blocked for agents, so nothing routes around it.
 
-**Card statuses**: Backlog, Pending, Accepted, Needs Input, In Review, Blocked, Delegated, Deferred, Done, Cancelled.
-
-**State machine** enforces valid transitions. `force_move` bypasses the state machine for dashboard drag-and-drop.
-
-**Delegated** (#778) and **Deferred** (#816) are both fail-closed, not self-set labels. Delegated entry requires a fresh watch-daemon heartbeat and a live linked `wake_attempts` row; Deferred entry requires a resolvable future `--until`. Both revert through the same watch health tick that drives the rest of watch (`reap_deferred_cards` alongside the existing delegated reaper), writing status, `wake_at`, and `pre_defer_status` atomically so a crash between steps can never strand a card invisible to the sweep. Deferred is excluded from `CardScope::WorkingSet` -- and so from the Stop gate's accepted-only check -- but stays visible everywhere else via `list --deferred` and its wake markers.
-
-**Scheduler** (`legion work`): atomically selects the highest-priority unblocked card and accepts it. Priority ordering: critical > high > med > low, then sort_order, then oldest.
-
-**Work sources**: plugins that sync external issue trackers (GitHub, GitLab, Jira) into the kanban board. Cards link back to source issues via `source_url`. Reconciliation pulls live state with `legion kanban reconcile`.
+Work sources are plugins: executables that speak a documented protocol (`list`, `close`, `detect`, `create-issue`, `sub-issue`, `pr-create`, `pr-merge`, etc.). GitHub ships first, wrapping the `gh` CLI and a few GraphQL mutations. The interface is generic enough for GitLab or Jira.
 
 **Sub-issues** (#462): create child issues linked to a parent via GitHub's native sub-issue relationship. The plugin looks up the parent node id, errors if missing, then links via the `addSubIssue` mutation.
 
@@ -104,9 +96,7 @@ The kanban board is a scheduler wearing a human-friendly UI.
 
 **Schema registry**: schemas are documents with `doc_type=schema`. They are structurally validated at insert (must have `$schema`, `title`, `type:object`, non-empty `properties`). Each dual-writes a pointer reflection on `domain=schema` so `legion recall --domain schema` surfaces every landed schema with its document id. `legion document validate` checks any JSON instance against a landed schema, one error per violation.
 
-**Spec-gen**: `legion spec-gen --repo <surface>` reads non-archived service-design documents (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`), derives one requirement per `moment_of_truth`, validates each against the requirement schema, and inserts new requirement documents plus born-Backlog kanban cards. Idempotent on `(traces_to, surface)` pairs.
-
-**Card-spec binding**: `legion kanban bind --id <card-id> --document <doc-id>` sets `tasks.document_id`. Once bound, `legion verify` reads acceptance criteria from the document's `verification.acceptance` block. Status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the document's `meta.status` transactionally (accepted, implemented, verified, cancelled). A dangling binding (document archived or missing) is a hard error on any transition.
+**Spec-gen**: `legion spec-gen --repo <surface>` reads non-archived service-design documents (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`), derives one requirement per `moment_of_truth`, validates each against the requirement schema, and inserts new requirement documents. Idempotent on `(traces_to, surface)` pairs.
 
 **Issue-requirement tracing** (#933): an issue can point at a requirement without a card in between. Its body carries a `## Traces to` section: a requirement id, an optional set of criteria ids, and prose, or an explicit `None` with a reason. `legion issue create` validates the trace at filing time, refusing a line that names a requirement that does not exist, is cancelled, or is malformed -- a bad trace fails at the point it is written, not the point verify runs. `legion verify --issue` then judges the work against the traced requirement's own `verification.criteria` rather than the issue's restatement of them, and the recorded verdict pins the requirement document's id and revision. `legion document view` surfaces which of a requirement's criteria currently carry a clean verdict, and `pr write-check` renders the traced criteria beside the PR body's mapping, flagging any the PR re-authors instead of citing. Untraced issues verify exactly as before, straight from the issue body.
 
@@ -118,11 +108,11 @@ Documents replicate across the cluster like reflections and cards.
 
 **Signals**: structured bullpen posts for coordination. Format: `@recipient verb:status {details}`. Filtered separately from natural-language posts. Wake-worthy verbs (`question`, `request`, `help`, `blocker`) spawn an asleep recipient via watch. Informational verbs (`announce`, `ack`, `info`, `answer`, `review`) deliver to live sessions only.
 
-**Resolve** (#362): `legion resolve --id <post-id>` marks a converged thread so it stops resurfacing in the bullpen, channel notifications, and the wake-loop signal feed. Optional `--reflection <id>` links the team's decision so future recall surfaces them together.
+**Resolve** (#362): `legion resolve --id <post-id>` marks a converged thread so it stops resurfacing in the bullpen and the wake-loop signal feed. Optional `--reflection <id>` links the team's decision so future recall surfaces them together.
 
-**Channel**: MCP server providing real-time communication tools. Events arrive as JSON-RPC notifications with method `notifications/claude/channel`. No polling.
+**MCP server**: `legion mcp` exposes four tools agents call in-conversation -- `legion_post`, `legion_reply`, `legion_signal`, `legion_task_respond` -- plus `serverInfo.name`. It no longer initiates messages: the polling thread that pushed `notifications/claude/channel` frames, its heartbeat, the `legion/notifier_health` method, the `legion mcp-health` probe, and the `experimental.claude/channel` capability are all retired (#947, PR #963). A poisoned stdout lock used to drop a JSON-RPC response silently; flattening the writer to plain ownership when the notifier thread went away made that failure mode structurally impossible rather than merely unobserved.
 
-**Delivery** (#941): two lanes carry a post or signal into a live session, running concurrently for parity measurement. The MCP channel pushes it as a JSON-RPC notification, no polling. `legion deliver drain --repo <repo>`, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks, reads the same undelivered set and returns it as additional context at the next hook turn-boundary -- a code-side path independent of the MCP notifier subprocess, with no inference roundtrip. Because both lanes run at once, a post can arrive via both. Both write a `DeliveryRecord` row to `delivery.jsonl`, so which lane actually delivered it is measured rather than assumed. The MCP channel is not removed.
+**Delivery**: `legion deliver drain --repo <repo>` is the sole live-session delivery lane, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks. It reads the undelivered set and returns it as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending, whichever fires first. What the retired push covered that the drain does not: a live session sitting idle mid-turn, no hook firing, now hears nothing until its next prompt, tool call, or a watch wake reaches it -- an accepted gap, not an oversight, with a budget-governed follow-up lane specified in intent but not yet built. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`. The watch daemon's independent wake path for asleep agents is unaffected; it never depended on the MCP channel.
 
 ## Watch
 
@@ -143,7 +133,8 @@ Long-lived daemon that polls SQLite for unhandled wake-worthy signals. When one 
 - Stagger between spawns prevents I/O storms
 - System health monitoring pauses spawns under pressure
 - Panic-stop on subscription-quota exhaustion (#484)
-- Auto-unblock: when an agent announces completed work, blocked cards referencing that repo are automatically unblocked
+- Auto-unblock: when an agent announces completed work, blocked agents referencing that repo are automatically unblocked
+- Failed-wake re-arm (#948): an attempt that dies before its prompt submits unmarks the signals it carried instead of leaving them permanently marked handled, so the next poll re-surfaces them -- subject to that poll's own lookback and expiry windows. Capped at `max_redelivery_attempts` (default 3) per `(signal_id, repo_name)`; exhaustion posts loudly to the bullpen and stderr rather than failing silently a second time
 
 ## Uncertainty engine (Pillar 2)
 
@@ -178,9 +169,9 @@ Each machine runs its own legion with its own SQLite database. Nodes on the same
 
 **Cross-network**: bring your own tunnel (Tailscale, WireGuard, ZeroTier). Legion broadcasts to whatever subnet it's on.
 
-**What replicates**: reflections, kanban cards, schedules, documents. Each row carries `updated_at` (LWW) and `deleted_at` (tombstones), so deletes replicate as rows rather than vanishing from peers that have not yet seen them.
+**What replicates**: reflections, schedules, documents. Each row carries `updated_at` (LWW) and `deleted_at` (tombstones), so deletes replicate as rows rather than vanishing from peers that have not yet seen them.
 
-**What stays local**: Tantivy search index, model2vec embeddings, SCIP indexes, `board_reads`, `health_samples`, `rate_limit_samples`, `usage_samples`, `watch_handled`, `wake_attempts`, `bypass.jsonl`. Each node computes or tracks its own.
+**What stays local**: Tantivy search index, model2vec embeddings, SCIP indexes, `board_reads`, `health_samples`, `rate_limit_samples`, `usage_samples`, `watch_handled`, `watch_redelivery`, `wake_attempts`, `bypass.jsonl`. Each node computes or tracks its own.
 
 **Tombstone housekeeper**: `legion watch` runs a weekly job that hard-deletes rows whose `deleted_at` exceeds the retention window (7 days by default). Late-joining peers still see recent deletes. The database stays bounded.
 
@@ -208,7 +199,7 @@ legion cluster status              # peers, sync state, last sync time
 
 ## Dashboard
 
-Axum web server with rust-embed for static assets. SSE for live updates. Tabs: Feed, Signals, Board (kanban), Stats, Chat, plus code-intelligence views fed by `scip_indexes` and observability views fed by `rate_limit_samples` and `usage_samples`.
+Axum web server with rust-embed for static assets. SSE for live updates. Tabs: Feed, Signals, Stats, Chat, plus code-intelligence views fed by `scip_indexes` and observability views fed by `rate_limit_samples` and `usage_samples`.
 
 **Document endpoints** (#702): `GET /api/documents`, `GET /api/documents/{id}`, and `POST /api/documents/{id}/status` land in `channel::router`, the surface the daemon mounts, so the dashboard can list, view, and publish documents. The status route backs `legion document set-status`: the dashboard's Publish/Approve button flips a document's lifecycle status directly, with the localhost operator session as the human gate rather than a status-machine.
 
@@ -223,7 +214,7 @@ src/
   db/                  -- SQLite init, migrations, domain CRUD modules (reflections, kanban, documents, audit, etc.)
   kanban/              -- CardStatus state machine and formatting
   uncertainty/         -- emit, witness, calibration, orphans
-  mcp/                 -- MCP stdio server (notifier, tools, log)
+  mcp/                 -- MCP stdio server (tools, log)
   search.rs            -- Tantivy index management
   scip.rs              -- SCIP index build, store, query (sym engine)
   sym.rs               -- sym subcommand: def, refs, impl, hover, impact, list, tree, etc
@@ -253,7 +244,7 @@ plugin/
   bin/legion           -- wrapper script
   hooks/               -- Claude Code hooks
   commands/            -- slash commands
-  agents/              -- agent definitions (legion-prime, legion-explore, legion-verify, dungeon-master)
+  agents/              -- agent definitions (changelog, dungeon-master, issue-writer, legion-explore, legion-prime, legion-review, legion-verify)
   skills/              -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify)
   channel/             -- MCP client bridge
   worksources/         -- work source plugins

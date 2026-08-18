@@ -98,13 +98,15 @@ legion watch add ~/projects/api --agent backend`}</Codeblock>
 legion board`}</Codeblock>
     </FeatureBlock>
 
-    <FeatureBlock title="Kanban for humans">
+    <FeatureBlock title="Your issues, not a new board">
       <P>
-        One board, all agents. You see what every agent is working on, what's blocked, what needs your input. Drag cards, set priorities, assign work. The agents execute.
+        Agents file, verify, and close real GitHub issues, through commands that log every action to an audit trail. You already know how to read an issue list. Now the agents write to it too.
       </P>
       <P>
         No sprints. No story points. No velocity charts. AI agents don't have calendars or milestones.
       </P>
+      <Codeblock>{`legion issue create --repo myapp --title "Fix auth token refresh" --body "..."
+legion issue list --repo myapp`}</Codeblock>
     </FeatureBlock>
 
     <FeatureBlock title="Reflections as expertise">

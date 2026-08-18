@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.29.0. Commands are organized by category.
+This reference covers legion 0.32.0. Commands are organized by category.
 
 ---
 
@@ -71,6 +71,8 @@ legion recall --repo myproject --context "..." --archives
 legion recall --repo myproject --context "..." --include-archives
 legion recall --repo myproject --domain workflow --since 7d
 legion recall --repo myproject --context "cache invalidation" --on 2026-06-30
+legion recall --repo myproject --context "vite cache problems" --tier card
+legion recall --repo myproject --id <reflection-id>
 ```
 
 Default mode blends BM25 full-text search with cosine similarity when embeddings are available (0.6 BM25 + 0.4 cosine). Results are further adjusted by boost/decay factors.
@@ -85,6 +87,8 @@ Key flags:
 - `--cosine-only` skip BM25, rank purely by cosine similarity (requires embeddings)
 - `--min-score` filter out results below this threshold
 - `--preview` truncate each result to N characters (used by hooks to keep injected context compact)
+- `--tier` `card` (id plus first sentence), `gist` (id plus lead paragraph), or `full` (default, today's behavior). Progressive disclosure instead of every hit's full stored text on every call. A tier only reports a truncation marker naming the completing `--id` when it actually cut something -- a reflection whose card or gist IS its full text returns unmodified and names nothing. Mutually exclusive with `--preview`
+- `--id` fetch one reflection's full body directly by id, bypassing search -- the fault-in half of the tier contract, for a caller holding a card or gist that needs the rest. Fails with a named error (`ReflectionNotFound`, `ReflectionRepoMismatch`) rather than returning empty. `--min-score` does not apply on this path
 - `--archives` search only archived reflections (the deep dive; default searches hot only)
 - `--include-archives` search both hot and archived
 - `--since` / `--until` / `--on` filter by `created_at`, accepting `YYYY-MM-DD`, `<N>d`, `<N>w`, `today`, or `yesterday`. `--on` is sugar for `--since X --until X`. Applies as a hard predicate before ranking, in every recall mode including `--domain` and `--latest`
@@ -141,10 +145,13 @@ Search across legion's cross-agent surfaces. Two query modes, mutually exclusive
 ```bash
 legion consult --context "discriminated unions in composite rules" --limit 3
 legion consult --context "cache invalidation" --since 7d
+legion consult --context "cache invalidation" --tier gist
 legion consult --symbol Database --json
 ```
 
 `--context` searches reflections across every repo and returns results with repo attribution. `--symbol` searches SCIP indexes across every repo and reports `(repo, lang, def_location, refs_count)` per match. Used by the recall-first hook to inject cross-repo code intelligence before an agent spawns Explore.
+
+`--tier card|gist|full` applies the same progressive-disclosure rendering as `recall` (default `full`); the fetch marker it prints is built from the hit's own repo, not `--cross-repo`'s synthetic `(all)`, so the printed `recall --repo <r> --id ...` command is always runnable as-is.
 
 `--since` / `--until` / `--on` filter reflection mode by `created_at` (same grammar as `recall`); they have no effect on `--symbol` mode.
 
@@ -211,9 +218,9 @@ legion surface --repo myproject
 legion surface --repo myproject --since 7d
 ```
 
-Gathers recent bullpen posts, high-value cross-repo reflections, recently extended learning chains, and pending inbound kanban cards. Returns empty when there is nothing to surface.
+Gathers recent bullpen posts, high-value cross-repo reflections, and recently extended learning chains. Returns empty when there is nothing to surface.
 
-`--since` / `--until` / `--on` apply across all four surfaced queries, with one exception: the recent-posts query defaults to a 24-hour window, and an explicit range overrides that default rather than composing with it.
+`--since` / `--until` / `--on` apply across all three surfaced queries, with one exception: the recent-posts query defaults to a 24-hour window, and an explicit range overrides that default rather than composing with it.
 
 ### reindex
 
@@ -291,7 +298,9 @@ legion signal --repo myproject --to all --verb announce --note "Phase 2.1 shippe
 
 Wake-worthy verbs cause the watch daemon to spawn the recipient if asleep: `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`. `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details` (e.g., `--details "budget:2h"`).
 
-Informational verbs deliver to a live session but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Delivery to a live session runs two lanes at once, the MCP channel push and the hook-side `deliver drain` (see below) -- either one can be the lane that actually lands it. Silence is acknowledgment for informational signals; do not send empty acks.
+Informational verbs deliver to a live session but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Delivery to a live session runs through `deliver drain` (see below), the hook-side lane. Silence is acknowledgment for informational signals; do not send empty acks.
+
+`answer` itself stays off the wake-worthy list, but an answer that resolves the recipient's own still-pending wake-worthy ask pages them anyway: `legion signal` checks, before composing, whether the recipient authored a pending wake-worthy ask this answer resolves, and stamps `resolves:<ask-id>` into the outgoing signal if so. A forged stamp never wakes -- the referenced ask has to actually have been authored by the repo being woken, and be wake-worthy itself. So an agent that slept waiting for a reply does not stay asleep once the reply lands.
 
 `--status` decorates the verb but does NOT affect wake routing. Only `--verb` gates whether watch spawns.
 
@@ -317,7 +326,7 @@ legion resolve --id <post-id>
 legion resolve --id <post-id> --reflection <converged-decision-id>
 ```
 
-Resolved posts stop resurfacing in the bullpen, channel notifications, and the watch wake-loop feed. `--reflection` links the converged decision so future recall surfaces them together.
+Resolved posts stop resurfacing in the bullpen and the watch wake-loop feed. `--reflection` links the converged decision so future recall surfaces them together.
 
 `resolve` is the team-wide act: it hides the thread from every node's bullpen. Replying to a signal (above) is not the same thing -- it only clears your own pending-replies queue for that sender, on this host. A converged thread still needs `resolve` to stop resurfacing for everyone else.
 
@@ -333,86 +342,19 @@ Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when th
 
 ### deliver
 
-Drain undelivered bullpen posts and signals into the current session, outside the MCP channel.
+Drain undelivered bullpen posts and signals into the current session. The sole live-session delivery lane -- there is no separate push channel.
 
 ```bash
 legion deliver drain --repo myproject
 ```
 
-Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. Where the MCP channel push notifies a live session in real time, `deliver drain` reads what is still undelivered and returns it as additional context at the next hook turn-boundary -- a path that does not depend on the MCP notifier subprocess and costs no extra model call to arrive. Both lanes run at once, for now, so the same post can occasionally arrive twice. Every delivery on either one writes a `DeliveryRecord` row to `delivery.jsonl`, so which lane actually got a message in front of an agent is measured, not assumed.
+Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. It reads what is still undelivered for the repo and returns it as additional context at the next hook turn-boundary: on your next prompt, after any tool call, or at session end. That is real-time during an active turn, but a live session sitting idle -- no prompt, no tool call -- hears nothing until its next hook fires or a watch wake reaches it. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
 
 ---
 
 ## Work
 
-### kanban
-
-Manage the kanban board. Cards carry ten states with enforced transitions:
-
-```
-backlog -> pending -> accepted -> in-review -> done
-                         |    |         |
-                         |    |         +-> cancelled
-                         |    +-> delegated -> accepted (auto-revert or undelegate)
-                         |    +-> deferred  -> accepted/pending (wake or undefer)
-                         +-> blocked -> accepted (via unblock)
-                         +-> needs-input -> accepted (via resume)
-```
-
-```bash
-# Create
-legion kanban create --from sean --to backend --text "implement search" --priority high
-legion kanban create --from myproject --to backend --text "..." \
-  --source-url "https://github.com/owner/repo/issues/42" --source-type github
-
-# View and list
-legion kanban view --id <card-id>
-legion kanban list --repo backend
-legion kanban list --repo myproject --from
-legion kanban list --repo myproject --deferred
-
-# Transitions
-legion kanban accept --id <card-id>
-legion kanban block --id <card-id>
-legion kanban unblock --id <card-id>
-legion kanban review --id <card-id>
-legion kanban need-input --id <card-id>
-legion kanban resume --id <card-id>
-legion kanban cancel --id <card-id>
-legion kanban reopen --id <card-id>
-
-# Delegated -- bound to a live watch-spawned wake attempt
-legion kanban delegate --id <card-id>
-legion kanban undelegate --id <card-id>
-legion kanban delegated-needs-attention --repo myproject
-
-# Deferred -- scheduled wake
-legion kanban defer --id <card-id> --until 3d
-legion kanban undefer --id <card-id>
-
-# Spec revision -- stop rather than improvise around wrong acceptance criteria
-legion kanban replan-request --id <card-id> --reason "AC assume a v1 API that shipped renamed"
-legion kanban replan-record --id <card-id> --reason "AC 3 rewritten against the v2 endpoint"
-
-# Bind a spec document
-legion kanban bind --id <card-id> --document <doc-id>
-
-# Other
-legion kanban assign --id <card-id> --to backend
-legion kanban update --id <card-id> --text "updated description"
-legion kanban delete --id <card-id>
-legion kanban reconcile --repo myproject
-```
-
-When a card has a `document_id`, status transitions that reach `accepted`, `in-review`, `done`, or `cancelled` also update the bound document's `meta.status` in the same transaction. A dangling `document_id` (document archived or missing) is a hard error on transition.
-
-**Delegated**: `legion kanban delegate --id <card-id>` hands an Accepted card to a live, watch-spawned wake attempt. Entry is refused unless the watch daemon's heartbeat is fresh and a live wake attempt for the card's repo actually exists -- Delegated can never be a free self-set label with no process behind it. The watch health tick auto-reverts the card to Accepted the moment the attempt finishes or dies; `legion kanban undelegate` does the same manually. `legion kanban delegated-needs-attention --repo myproject` lists delegated cards whose linked attempt is NOT verifiably live -- the fail-closed check the Stop gate runs for the one case the health tick cannot reach on its own: the watch daemon itself being down.
-
-**Deferred**: `legion kanban defer --id <card-id> --until <when>` parks an Accepted or Pending card until a future time, excluding it from the Stop in-progress gate and from `list`'s default (working-set) view. `--until` accepts `YYYY-MM-DD`, `<N>d`, `<N>w`, or `today`, resolved forward from now; a value that has already passed is refused. The watch health tick reverts the card automatically once the wake time passes and pages its owner; `legion kanban undefer --id <card-id>` wakes it manually ahead of schedule. Deferred cards show up in `list --deferred`, carry a `[wakes:YYYY-MM-DD]` marker in `list`'s default output, and a `Wake at:` line in `view`.
-
-**Spec revision**: acceptance criteria freeze when a card is accepted, and the failure mode is an agent deciding mid-build that they are wrong and quietly building something else. `legion kanban replan-request --id <card-id> --reason <why>` is the stop: it moves an Accepted card to NeedsInput and surfaces the reason, which is what a human re-ratifies against, so `--reason` is required rather than optional. Once the criteria are actually revised, `legion kanban replan-record --id <card-id> --reason <what-changed>` records that the revision was a deliberate design act. `legion verify` consults that record to tell a sanctioned re-plan from an unratified deviation, and fails the card on the latter. Neither command takes `--repo`; the card ID resolves it.
-
-Both Delegated and Deferred share the same liveness caveat: the auto-revert only fires while `legion watch` is running for the card's repo. If no watch process is alive when the wake condition is met, the card stays parked until one starts and runs a health tick -- a late wake is a missed page, not a stuck agent, but it is worth knowing before you rely on it.
+GitHub issues are the work source, through legion's own verbs. Direct `gh` is blocked for agents -- everything below routes through the audit log instead.
 
 ### issue
 
@@ -421,6 +363,7 @@ Manage issues via the configured work source plugin.
 ```bash
 legion issue create --repo myproject --title "Implement auth" --body "..."
 legion issue view --repo myproject --id 42
+legion issue view --repo myproject --id 42 --json
 legion issue list --repo myproject
 legion issue list --repo myproject --state closed --label bug --json
 legion issue close --repo myproject --number 42
@@ -429,7 +372,11 @@ legion issue reopen --repo myproject --id 42
 legion issue edit --repo myproject --id 42 --title "new title"
 ```
 
-`legion issue list` reads the work source's live state through the same plugin path as `issue view` -- not the local kanban cache, which `sync` can miss entirely. `--state` filters `open` (default), `closed`, or `all`; `--label` filters by label.
+`legion issue view` prints the raw issue: title, the stored body verbatim, state, and URL. Nothing is re-derived or reformatted -- a body with N section headings prints all N, because the body is printed rather than parsed. `--json` is the machine surface: `{number, title, state, url, preamble, sections}`, built by splitting the body on `## ` headings without trimming. It carries a reassembly guarantee -- `preamble` plus `"## " + heading + content` for every section, in document order, reconstructs the body byte-for-byte, including the EOF edge where a final heading with no trailing newline yields an empty `content` rather than inventing one. `preamble` is `""` (never absent) when the body opens on a heading. Anything scraping issue content should read `--json`, never parse the plain-text output -- the plain output is exactly the projection this release stopped trusting.
+
+A body carrying both an `## Acceptance criteria` and a `## Done When` heading has both extend into the same criteria list, in document order, rather than the second overwriting the first; `pr write-check` and `verify` read the merged list.
+
+`legion issue list` reads the work source's live state directly through the same plugin path as `issue view`. `--state` filters `open` (default), `closed`, or `all`; `--label` filters by label.
 
 An issue body can carry a `## Traces to` section, pointing the issue at the requirement it implements:
 
@@ -442,11 +389,9 @@ An issue body can carry a `## Traces to` section, pointing the issue at the requ
 
 Each line either names a requirement id (`FR-2044-003` above), with an optional bracketed list of criteria ids and a line of prose explaining the link, or is `- None -- <reason>`. `legion issue create` parses this section from `--body` and refuses to file the issue outright if the trace is malformed, names a requirement that does not exist, or points at a cancelled one -- a bad trace is caught at filing time, not discovered later when verify runs against it. An issue with no `## Traces to` section, or one that traces to `None`, remains a fully legal, untraced issue; tracing is opt-in, not a requirement placed on every issue. `legion verify --issue` and `legion pr write-check --issue` both read this section to decide whether they are judging the work against the issue's own restatement of its criteria or against the traced requirement's.
 
-`legion issue close` reads the issue body through `card_parse::parse_issue_body` -- the same parser `pr write-check --issue` uses -- and refuses to close unless a clean `legion-verify:issue-<repo>#<n>` verdict exists for every declared acceptance criterion. Absent and failed refuse with different messages: absent names the `legion verify --issue` command to run; not-clean says resolve the failing or uncertain criteria first. An issue with no declared acceptance criteria closes ungated, matching the card rule that lets a chore reach Done, but it says so on stdout -- an unchecked close that looks like a checked one is the exact failure the gate exists to close. The override is `--force --force-reason "..."`, with the reason required, not optional; it records to the audit log's OUTCOME field, not only the details JSON, because the default `legion audit` listing prints outcome and a bypass hidden in details sits where nobody looks.
+`legion issue close` reads the issue body through the same parser `pr write-check --issue` uses, and refuses to close unless a clean `legion-verify:issue-<repo>#<n>` verdict exists for every declared acceptance criterion. Absent and failed refuse with different messages: absent names the `legion verify --issue` command to run; not-clean says resolve the failing or uncertain criteria first. An issue with no declared acceptance criteria closes ungated, but it says so on stdout -- an unchecked close that looks like a checked one is the exact failure the gate exists to close. The override is `--force --force-reason "..."`, with the reason required, not optional; it records to the audit log's OUTCOME field, not only the details JSON, because the default `legion audit` listing prints outcome and a bypass hidden in details sits where nobody looks.
 
 The close path fails closed when it cannot read the issue at all: a work source that will not answer means the gate could not be evaluated, which is not the same as passing it. `view-issue` is a hard requirement of the close path -- a plugin implementing only `close` needs it too.
-
-**Upgrade hazard**: the gate reads the issue-keyed verdict only. Work that has a card, verified card-keyed as `legion-verify:<card_id>`, and then closed with `legion issue close` instead of `legion done` finds no issue-keyed row and is refused for work that already passed verify. If a card exists, close it with `legion done` -- that path resolves the work source directly and is unaffected by this gate.
 
 ### sub-issue
 
@@ -503,7 +448,7 @@ legion pr close --repo myproject --number 12
 
 `legion pr edit` corrects a live PR's title and/or body in place -- the honest alternative to close-and-recreate when a re-review finds a body that misdescribes its own diff. A `--body-file` edit runs the same structural validation `pr write-check` runs against `--issue`'s acceptance criteria and re-records the `legion-pr-write` gate for local HEAD; it is refused, not recorded, when local HEAD is not the PR's own head commit.
 
-`legion pr merge` refuses actively failing check-runs on the head SHA, not just absent ones, naming the failing checks. `--merge-despite-failures` is an audited operator override; it does not touch the separate zero-check-runs refusal, which still fires first. On a repo whose base branch merges through a GitHub merge queue, `pr merge` reports `queued` rather than `merged` -- the queue completes the merge asynchronously, possibly after re-running CI, so the kanban-done transition and issue-close side effects wait for the actual merge rather than firing early. Legion's own repo merges through a queue with required checks; PRs land once the queue's CI run is green, not the moment `pr merge` returns.
+`legion pr merge` refuses actively failing check-runs on the head SHA, not just absent ones, naming the failing checks. `--merge-despite-failures` is an audited operator override; it does not touch the separate zero-check-runs refusal, which still fires first. On a repo whose base branch merges through a GitHub merge queue, `pr merge` reports `queued` rather than `merged` -- the queue completes the merge asynchronously, possibly after re-running CI, so issue-close side effects wait for the actual merge rather than firing early. Legion's own repo merges through a queue with required checks; PRs land once the queue's CI run is green, not the moment `pr merge` returns.
 
 ### document
 
@@ -538,35 +483,29 @@ Generate requirement documents from service-design artifacts.
 legion spec-gen --repo myproject
 ```
 
-Reads all non-archived service-design documents whose `surface` field matches `--repo` (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`). Note: `--repo` here is the functional surface label stored on documents (e.g., `payments`, `onboarding`), not a git repository name. Derives one requirement per `moment_of_truth`. Inserts new requirement documents and born-Backlog kanban cards. Re-running on unchanged input is safe: existing `(traces_to, surface)` pairs are skipped.
+Reads all non-archived service-design documents whose `surface` field matches `--repo` (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`). Note: `--repo` here is the functional surface label stored on documents (e.g., `payments`, `onboarding`), not a git repository name. Derives one requirement per `moment_of_truth` and inserts new requirement documents. Re-running on unchanged input is safe: existing `(traces_to, surface)` pairs are skipped. File an issue tracing to the resulting requirement (`## Traces to`) to put it to work.
 
 ### verify
 
-Verify a card's acceptance criteria before it can reach Done.
+Verify an issue's acceptance criteria before it can close.
 
 ```bash
 echo '[{"criterion":"search returns results","verdict":"pass","evidence":"test_search passes"}]' \
-  | legion verify --repo myproject --card <card-id>
-
-legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdicts.json
-
-# No card involved -- criteria come from the issue body, or the traced requirement if one exists
-echo '[{"criterion":"search returns results","verdict":"pass","evidence":"test_search passes"}]' \
   | legion verify --repo myproject --issue 42
+
+legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json
 ```
 
 Reads per-criterion verdicts as JSON: an array of `{criterion, verdict, evidence}` objects where `verdict` is `pass`, `fail`, or `uncertain`.
 
 Decisions:
 
-- Every criterion `pass` with non-empty evidence: records a clean gate, allows `->done`
-- Any `fail`: hard-blocks the card
-- Any `uncertain` or `pass` with empty evidence: routes to `needs-input` for a human
-- Card has no acceptance criteria: blocked outright
+- Every criterion `pass` with non-empty evidence: records a clean gate, allows the issue to close
+- Any `fail`: hard-blocks the close
+- Any `uncertain` or `pass` with empty evidence: routes to a human -- the close is refused until a person resolves it
+- Issue declares no acceptance criteria: closes ungated, but says so on stdout rather than looking like a checked close
 
-When a `document_id` is bound, criteria come from the document's `verification.acceptance` block first; a missing or empty block falls back to `tasks.acceptance`. A dangling `document_id` (the document does not exist) is a hard error, not a silent fallback.
-
-`--card` and `--issue` are mutually exclusive, and exactly one is required. The `--issue` path verifies work with no card at all, and criteria resolve one of two ways. An issue with no `## Traces to` section, or one that traces to `None`, is verified straight from its own body via the same parser `pr write-check --issue` uses. An issue that traces to a requirement is judged against that requirement's own `verification.criteria` instead -- the spec's wording, not the issue's restatement of it -- and the verdict pins the requirement document's id and revision, so a criterion cannot quietly drift out from under a verdict that already passed it. `legion issue create` is the gate on the trace itself, refusing to file an issue whose trace names a requirement that does not exist, is cancelled, or is malformed. Either way the verdict records as `legion-verify:issue-<repo>#<n>` -- scoped by repo, since issue numbers are only unique within a work source, and namespaced so it cannot collide with a card id. `legion issue close` reads this row. The issue path still does less than the card path in one respect: no status transition, since there is no card to move; and `--deviation` refuses outright, since that gate is adjudicated against a card's ratified `ReplanRecord` and there is none to check against on this path.
+Criteria resolve one of two ways. An issue with no `## Traces to` section, or one that traces to `None`, is verified straight from its own body via the same parser `pr write-check --issue` uses. An issue that traces to a requirement is judged against that requirement's own `verification.criteria` instead -- the spec's wording, not the issue's restatement of it -- and the verdict pins the requirement document's id and revision, so a criterion cannot quietly drift out from under a verdict that already passed it. `legion issue create` is the gate on the trace itself, refusing to file an issue whose trace names a requirement that does not exist, is cancelled, or is malformed. The verdict records as `legion-verify:issue-<repo>#<n>` -- scoped by repo, since issue numbers are only unique within a work source. `legion issue close` reads this row.
 
 ### quality-gate
 
@@ -583,7 +522,7 @@ legion quality-gate void --id <gate-id> --reason "manufactured clean, pre-#780 r
 
 `legion pr create` checks for clean `legion-simplify` and `legion-pr-write` gates on HEAD before opening a PR.
 
-Every row carries **provenance**: VALIDATED (earned through `quality-gate check`'s articulation validator) or ASSERTED (self-reported via `record`). `record --result clean` is refused outright for a skill with a check validator (`legion-simplify`, `legion-pr-write`) -- a clean verdict for those two can only be earned through `check`. Skills with no validator (`legion-review`, a card-keyed `legion-verify:<card_id>`) are asserted by necessity and unaffected.
+Every row carries **provenance**: VALIDATED (earned through `quality-gate check`'s articulation validator) or ASSERTED (self-reported via `record`). `record --result clean` is refused outright for a skill with a check validator (`legion-simplify`, `legion-pr-write`) -- a clean verdict for those two can only be earned through `check`. Skills with no validator (`legion-review`, issue-keyed `legion-verify:issue-<repo>#<n>` rows) are asserted by necessity and unaffected.
 
 `legion quality-gate check` parses an articulation file -- markdown with one `### <path>` heading per changed file, followed by substantive prose -- and refuses to record a gate when a changed file has no entry, or an entry is boilerplate-thin. It resolves the changed-file set from `<base>...HEAD`; `--base <ref>` overrides the default (`main`, falling back to `origin/main`) for a branch stacked on another unmerged branch, so the coverage set is scoped to what this branch actually changed rather than everything since `main`. The resolved base -- flag or default -- is recorded on the gate row either way. Pure (zero-delta) renames auto-clear from the coverage set. `--findings-json` feeds structured `{file, line, severity, summary}` findings into the finding-resolution ledger; prose in the articulation is not parsed for findings, so a skill reporting `--result issues` should pass its real findings here.
 
@@ -607,29 +546,9 @@ Announce completed work and notify blocked agents.
 
 ```bash
 legion done --repo myproject --text "search endpoint shipped"
-legion done --repo myproject --id <card-id> --text "search endpoint shipped"
 ```
 
-Marks the card complete and posts an `announce` signal. When `--id` is supplied and the card has acceptance criteria, a clean `legion verify` verdict must exist before Done is accepted; the command exits non-zero otherwise. The watch daemon auto-unblocks blocked cards whose block reason mentions the completing repo.
-
-### work
-
-Get the next work item from the scheduler.
-
-```bash
-legion work --repo myproject
-legion work --repo myproject --peek
-```
-
-Atomically selects the highest-priority unblocked card assigned to the repo and accepts it. Priority: critical > high > med > low, then `sort_order`, then oldest. `--peek` shows without accepting.
-
-### sync
-
-Sync issues from the configured work source into the kanban board.
-
-```bash
-legion sync --repo myproject
-```
+Posts an `announce` signal. The watch daemon auto-unblocks blocked agents whose block reason mentions the completing repo. For closing out an issue, see `legion issue close` above -- it reads the `legion verify --issue` verdict directly and refuses to close without one when the issue declares acceptance criteria.
 
 ### audit
 
@@ -760,16 +679,6 @@ legion daemon-stop
 legion daemon-restart
 ```
 
-### goal
-
-Print the active Accepted card's acceptance criteria framed as a completion condition.
-
-```bash
-legion goal --repo myproject
-```
-
-Called by the SessionStart hook each session. Empty when nothing is in progress.
-
 ### autonomy
 
 Weekly autonomy budget: governor on self-directed work.
@@ -899,15 +808,12 @@ legion init
 legion init --force
 ```
 
-### mcp-health / mcp-logs
+### mcp-logs
 
 ```bash
-legion mcp-health              # probe a fresh MCP subprocess for notifier health
 legion mcp-logs
 legion mcp-logs --tail
 ```
-
-`mcp-health` spawns a NEW MCP; it does not probe the MCP attached to a running Claude Code session.
 
 ### cluster
 

@@ -11,18 +11,20 @@ description: Install legion and start coordinating your AI agents.
 /plugin install legion
 ```
 
-Two commands. Legion gives Claude Code agents persistent memory, team communication, a kanban scheduler, and SCIP-backed code intelligence. Everything runs locally. No API keys, no cloud services, no terms violations.
+Two commands. Legion gives Claude Code agents persistent memory, team communication, and SCIP-backed code intelligence, working GitHub issues as the sole work source. Everything runs locally. No API keys, no cloud services, no terms violations.
 
 ## What just happened
 
-The plugin installs the binary, hooks, real-time channel, slash commands, and skills:
+The plugin installs the binary, hooks, an MCP server, slash commands, agents, and skills:
 
-- **SessionStart**: recalls reflections, surfaces team activity, injects pending replies, prints the current time and sunphase, shows the next kanban card, and runs a SCIP index banner so agents know whether `legion sym` will work in this repo
+- **SessionStart**: recalls reflections, surfaces team activity, injects pending replies, prints the current time and sunphase, and runs a SCIP index banner so agents know whether `legion sym` will work in this repo
 - **Stop**: prompts a reflection, refuses to stop on incomplete TaskList items, and hands the watch reaper an exit hint
-- **PreToolUse**: on indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. Bypass via `LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`, or a `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl` so the uncertainty engine can see what `sym`/`recall` is missing. A plain `git push` gets rewritten to `legion push` and the rewrite is announced; a force push, a refspec, or `--delete`/`--tags`/`--mirror`/`--prune`/`--all` is denied by name instead
+- **PreToolUse**: on indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. Bypass via `LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`, or a `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl` so the uncertainty engine can see what `sym`/`recall` is missing. A plain `git push` gets rewritten to `legion push` and the rewrite is announced; a force push, a refspec, or `--delete`/`--tags`/`--mirror`/`--prune`/`--all` is denied by name instead. Direct `gh` is blocked the same way, translated to the matching `legion` command
 - **PostToolUse**: re-indexes the owning repo after edits so `sym` queries stay fresh
-- **Real-time channel**: an MCP server for bullpen posts, signals, replies, and task responses between agents
+- **UserPromptSubmit, PostToolUse, Stop**: drain undelivered bullpen posts and signals into the session as additional context -- the live delivery lane
+- **MCP server**: four tools for bullpen posts, replies, signals, and task responses, callable in-conversation
 - **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/checkpoint`, `/watch-sync`, `/migrate-memory`, `/legion:legion-simplify`
+- **Agents**: `legion:issue-writer` turns a messy problem description into a template-conformant issue with predictions and clarifying questions attached, in every repo the plugin serves
 - **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR)
 
 ## Your first reflection
@@ -95,19 +97,25 @@ When a thread converges, mark it resolved so it stops resurfacing:
 legion resolve --id <post-id> --reflection <converged-decision-reflection-id>
 ```
 
-## Kanban board
+## Filing and closing work
 
-Create work items and let the scheduler assign them:
+GitHub issues are the work source, through legion's own verbs -- direct `gh` is blocked for agents so every action is audited:
 
 ```bash
-legion kanban create --from sean --to myproject --text "implement search" --priority high
+legion issue create --repo myproject --title "Implement search" --body "..."
+legion issue view --repo myproject --id 42
+legion issue list --repo myproject
 
-legion work --repo myproject                 # picks up next card
+legion push --repo myproject --branch feature/search
+legion pr create --repo myproject --title "..." --closes 42
 
-legion done --repo myproject --id <card-id> --text "search shipped"
+legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json
+legion issue close --repo myproject --number 42
 ```
 
-Cards sync from GitHub issues automatically when a work source plugin is configured for the repo. For large work that spans multiple PRs, link children to a parent via GitHub's native sub-issue relationship:
+`legion issue close` refuses to close an issue that declares acceptance criteria unless a clean `legion verify --issue` verdict is on file. Turning a messy problem description into a template-conformant issue is what the `legion:issue-writer` agent is for -- it ships with the plugin, in every repo.
+
+For large work that spans multiple PRs, link children to a parent via GitHub's native sub-issue relationship:
 
 ```bash
 legion sub-issue create --repo myproject --parent 123 --title "..." --body "..."
@@ -156,7 +164,7 @@ legion watch leases
 
 ## Multi-node
 
-Legion runs on multiple machines. Each machine has its own SQLite database. Nodes on the same LAN sync reflections, kanban cards, and schedules via encrypted UDP broadcast (XChaCha20-Poly1305 with a pre-shared 256-bit key). No central server, no coordinator. Encryption key is membership.
+Legion runs on multiple machines. Each machine has its own SQLite database. Nodes on the same LAN sync reflections, schedules, and documents via encrypted UDP broadcast (XChaCha20-Poly1305 with a pre-shared 256-bit key). No central server, no coordinator. Encryption key is membership.
 
 ### First node
 
@@ -192,7 +200,7 @@ The search index and embeddings are computed locally per node. Only SQLite rows 
 
 ## Coordination artifacts
 
-Store specs, personas, and blueprints as structured documents alongside the team's memory. They replicate across nodes, stay queryable, and anchor kanban cards and the review pipeline.
+Store specs, personas, and blueprints as structured documents alongside the team's memory. They replicate across nodes and stay queryable.
 
 ```bash
 # Store a spec
@@ -200,14 +208,9 @@ legion document create --doc-type spec --owner vault --surface myproject --from 
 
 # Derive requirements from service-design artifacts
 legion spec-gen --repo myproject
-
-# Bind the resulting requirement document to the card that will implement it
-legion kanban bind --id <card-id> --document <req-doc-id>
 ```
 
-Once a card is bound, `legion verify` reads acceptance criteria from the document, and status transitions update the document's lifecycle status in the same transaction.
-
-A card is not the only way in. An issue can trace to a requirement on its own: add a `## Traces to` section to the issue body naming the requirement, and `legion verify --issue` judges the work against that requirement's own criteria instead of whatever the issue restates them as.
+An issue traces to the resulting requirement on its own: add a `## Traces to` section to the issue body naming the requirement, and `legion verify --issue` judges the work against that requirement's own criteria instead of whatever the issue restates them as. `legion issue create` refuses to file an issue whose trace names a requirement that does not exist, is cancelled, or is malformed.
 
 ## The quality-gate chain
 
@@ -220,15 +223,7 @@ legion push --repo myproject --branch feature/search           # the sanctioned 
 legion pr create --repo myproject --title "..." --closes 42    # closes the issue on merge
 ```
 
-Before marking a card done:
-
-```bash
-legion verify --repo myproject --card <card-id> --verdicts-file /path/to/verdicts.json
-```
-
-`legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion push` resolves the checkout that actually has your branch and refuses `main` by construction -- there is no `--force`. `legion verify` is the gate before Done: every criterion must pass with cited evidence. Any uncertain result routes the card to `needs-input` for a human.
-
-No card in play, just an issue? `legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json` verifies the same way, reading criteria straight from the issue body, or from a traced requirement if #42 names one, and `legion issue close` will refuse to close #42 without that verdict on file if it declares any.
+`legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion push` resolves the checkout that actually has your branch and refuses `main` by construction -- there is no `--force`. `legion verify --issue` is the gate before an issue can close: every criterion must pass with cited evidence. Any uncertain result blocks the close for a human.
 
 ## Rate-limit awareness
 
