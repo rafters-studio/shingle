@@ -336,9 +336,10 @@ Print a wake-prompt for pending wake-worthy signals.
 
 ```bash
 legion pending-replies --repo myproject
+legion pending-replies --repo myproject --directed
 ```
 
-Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when the agent wakes to directed questions or requests.
+Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when the agent wakes to directed questions or requests. `--directed` drops `@all`/`@everyone` broadcasts from the list, since a broadcast is not a personal ask; boot and post-compact keep the full set. The Stop hook runs `--directed` to decide whether a turn can end.
 
 ### deliver
 
@@ -346,9 +347,12 @@ Drain undelivered bullpen posts and signals into the current session. The sole l
 
 ```bash
 legion deliver drain --repo myproject
+legion deliver drain --repo myproject --split
 ```
 
-Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. It reads what is still undelivered for the repo and returns it as additional context at the next hook turn-boundary: on your next prompt, after any tool call, or at session end. That is real-time during an active turn, but a live session sitting idle -- no prompt, no tool call -- hears nothing until its next hook fires or a watch wake reaches it. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
+Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. It reads what is still undelivered for the repo and returns it as additional context at the next hook turn-boundary: on your next prompt, after any tool call, or at session end. That is real-time during an active turn; a live session sitting idle -- no prompt, no tool call -- used to hear nothing until one of those fired on its own. Watch now nudges an idle session in a watched repo that has undrained data, prompting it to take a turn so its own drain runs; the nudge itself carries no post or signal content. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
+
+`--split` sorts musings from directed signals in the binary instead of the hook, so the hook never parses posts. A directed signal's entry in the drain output is byte-identical to what `legion pending-replies` prints for it -- one renderer, shared by boot, post-compact, and the drain.
 
 ---
 
@@ -661,11 +665,14 @@ legion watch remove api
 legion watch list
 legion watch leases
 legion watch status
+legion watch status --json
 legion watch session-start --repo myproject
 legion watch session-end --attempt-id <id>
 ```
 
 The daemon samples health every 5 seconds and checks for wake-worthy signals every 30 seconds. Spawn is gated by pressure, cooldown (default 5 minutes), stagger (default 15 seconds between spawns), and a wake cap (default 4 in-flight).
+
+`watch status --json` prints exactly one line: `{"status":"alive|stale|absent","last_beat_age":"<text>"|null}`. Clock skew between the daemon and the caller reads as `stale`. The prose form of `watch status` is unchanged; the boot banner's watch line is rendered from this JSON form, so the two cannot drift apart silently.
 
 ### daemon
 
@@ -767,6 +774,10 @@ legion uncertainty witness-gate --skill legion-simplify --commit <sha> --correct
 
 legion uncertainty calibration --surface legion.task
 legion uncertainty orphans --json
+
+legion uncertainty roll             # sweep orphans, then roll calibration -- the backfill entry point
+legion uncertainty sweep-now --json
+legion uncertainty calibrate-now --json
 ```
 
 `emit` requires five flags: `--surface`, `--feature-key`, `--input-fingerprint`, `--claimed-confidence`, and `--payload`. `--orphan-ttl-days` defaults to 30, and `0` disables the orphan sweep for that row.
@@ -776,6 +787,8 @@ legion uncertainty orphans --json
 `witness-gate` is the decorrelated path for quality-gate predictions specifically. It looks the prediction up by the same `(skill, commit)` fingerprint `legion quality-gate list` prints, so you never handle an opaque id, and `--correct` takes an explicit `true` or `false` rather than being a bare flag, which is what makes a negative witness as cheap to record as a positive one. Read `--correct` as relative to whichever verdict the gate recorded, not as a bare "was the diff clean": on a recorded `clean` verdict, `true` corroborates it and `false` marks a clean verdict that shipped a bug; on a recorded `issues` verdict, `true` means the catch was right and `false` means it was a false positive. It errors when no emitted `legion.gate` prediction matches, which covers never-recorded, already-witnessed, and orphaned alike.
 
 `--model` and `--model-version` are optional. Without `--model`, resolution falls to `--session-id`: it looks up the newest model seen for that session in the statusline samples. Pass neither and the row gets an explicit `UNKNOWN_MODEL` marker instead of a guessed id -- filterable and honest, where a plausible-but-wrong default would quietly pollute a real cohort. `emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
+
+`roll`, `sweep-now`, and `calibrate-now` are manual entry points into jobs the daemon otherwise runs on its own, inside the watch poll loop: an hourly sweep marks past-deadline `emitted` predictions `orphaned`, and a nightly roll computes calibration in fixed-width 0.1-point Brier buckets per cohort. `roll` runs both in order and is the one to reach for a one-off backfill. Each job is gated on an in-process last-run timestamp and fails open, so a job error never stops the poll cycle; `legion daemon status` does not report them -- they log to stderr like the sibling reapers.
 
 ### health
 
@@ -860,6 +873,7 @@ legion cleanup
 | `LEGION_DATA_DIR` | Override the default data directory |
 | `LEGION_AUTO_WAKE` | Set to `1` by the watch daemon when spawning agents |
 | `LEGION_SPAWN_SOURCE` | Set to `watch-pty` on PTY-spawned wakes; the Stop hook early-exits when set |
+| `LEGION_SKIP_STOP_BLOCK` | Set to `1` to bypass the Stop hook's block on an open directed ask; the bypass is audited |
 | `LEGION_REPO` | Override repo name detection in the MCP channel |
 | `LEGION_PORT` | Override the channel server port (default: 3131) |
 | `LEGION_BYPASS_GREP` | Set to `1` to bypass the grep enforcement hook |

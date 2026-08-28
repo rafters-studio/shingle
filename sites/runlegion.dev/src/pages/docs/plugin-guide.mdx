@@ -35,6 +35,7 @@ Fires when an agent session begins. Injects, in order:
 5. Agent work status via `legion status`
 6. Relevant reflections (BM25 search by branch name, or latest)
 7. SCIP index banner via `legion index <repo> --status --banner` so agents know whether `sym` will work
+8. Watch-status banner: silent when the watch daemon is alive; a line naming `legion daemon-spawn` or `legion daemon-restart` when it is absent or stale
 
 The agent starts every session with full context. No cold starts.
 
@@ -51,6 +52,8 @@ Fires when a session is about to end. The hook prompts the agent to reflect on w
 **Reaper handoff** (#493): the Stop hook calls `legion watch session-end --attempt-id <id>` so the watch reaper can skip a poll cycle. Idempotent. Exits 0 on a missing row so a hook failure cannot block Claude Code's Stop.
 
 Stop also runs `delivery-drain.sh` one last time before the session ends, the same drain UserPromptSubmit runs, so nothing posted during the final turn is left stranded in the queue.
+
+**Blocks on an open directed ask** (#1024, #1020): Stop runs `legion pending-replies --repo <repo> --directed` and refuses to end the turn while the result is non-empty, naming each open ask and telling the agent to reply `--to <author>` (a reply `--to all` retires nothing). `LEGION_SKIP_STOP_BLOCK=1` bypasses it, audited; it sits below the existing watch-pty exemption, and is guarded so a repo with no legion footprint is never blocked.
 
 ### PreToolUse
 
@@ -107,7 +110,9 @@ It does not initiate messages. The server-push lane -- a polling thread that pus
 
 The MCP subprocess stderr lands in per-PID log files under `~/Library/Logs/legion/mcp/` on macOS or the XDG state dir on Linux. Tail with `legion mcp-logs --tail`.
 
-**Delivery**: `delivery-drain.sh`, wired into UserPromptSubmit, PostToolUse, and Stop, is the sole live-session delivery lane. It runs `legion deliver drain --repo <repo>` and injects undelivered posts and signals as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending. The gap the retired push covered and the drain does not: a live session sitting idle mid-turn, with no hook firing, hears nothing until its next prompt, tool call, or a watch wake reaches it. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`. The watch daemon's wake path for asleep agents is unaffected -- it never depended on the MCP channel.
+**Delivery**: `delivery-drain.sh`, wired into UserPromptSubmit, PostToolUse, and Stop, is the sole live-session delivery lane. It runs `legion deliver drain --repo <repo>` and injects undelivered posts and signals as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending. Its output is a delimited block, `[Legion] Delivery drain result:` ... `[Legion] End delivery drain result.`, with musings first and directed signals last in the same "REQUIRES A REPLY" shape boot and `legion pending-replies` use: Claude Code runs matching hooks in parallel with no documented order for injected context, so the delimiter is what keeps a directed ask from getting lost inside a larger result, not where `delivery-drain.sh` sits in `hooks.json`.
+
+The gap the retired push covered and the drain did not: a live session sitting idle mid-turn, with no hook firing, heard nothing until its next prompt or tool call. Watch's idle-session courier (see the Architecture doc) now nudges that session to take a turn -- carrying no post content of its own -- so the drain still runs and remains the only thing that actually delivers. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`. The watch daemon's wake path for asleep agents is unaffected -- it never depended on the MCP channel.
 
 ## Slash commands
 

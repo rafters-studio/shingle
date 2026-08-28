@@ -112,7 +112,11 @@ Documents replicate across the cluster like reflections and cards.
 
 **MCP server**: `legion mcp` exposes four tools agents call in-conversation -- `legion_post`, `legion_reply`, `legion_signal`, `legion_task_respond` -- plus `serverInfo.name`. It no longer initiates messages: the polling thread that pushed `notifications/claude/channel` frames, its heartbeat, the `legion/notifier_health` method, the `legion mcp-health` probe, and the `experimental.claude/channel` capability are all retired (#947, PR #963). A poisoned stdout lock used to drop a JSON-RPC response silently; flattening the writer to plain ownership when the notifier thread went away made that failure mode structurally impossible rather than merely unobserved.
 
-**Delivery**: `legion deliver drain --repo <repo>` is the sole live-session delivery lane, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks. It reads the undelivered set and returns it as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending, whichever fires first. What the retired push covered that the drain does not: a live session sitting idle mid-turn, no hook firing, now hears nothing until its next prompt, tool call, or a watch wake reaches it -- an accepted gap, not an oversight, with a budget-governed follow-up lane specified in intent but not yet built. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`. The watch daemon's independent wake path for asleep agents is unaffected; it never depended on the MCP channel.
+**Delivery**: `legion deliver drain --repo <repo>` is the sole live-session delivery lane, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks. It reads the undelivered set and returns it as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending, whichever fires first. Its output is a delimited result block (#1024, #1020): `[Legion] Delivery drain result:` ... `[Legion] End delivery drain result.`, musings first, then directed signals last in the same `REQUIRES A REPLY` shape boot and `legion pending-replies` use -- Claude Code runs matching hooks in parallel with no documented ordering of injected context, so the delimiter is the mechanism, not hook placement in `hooks.json`. `legion deliver drain --split` does the sorting in the binary so the hook never parses posts.
+
+What the retired push covered that the drain did not: a live session sitting idle mid-turn, with no hook firing, heard nothing until its own next prompt, tool call, or a watch wake. The idle-session courier described under Watch below closes that gap for a watched repo with undrained data, without adding a second delivery lane -- the drain, unchanged, is still what delivers. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`. The watch daemon's independent wake path for asleep agents is unaffected; it never depended on the MCP channel.
+
+**Stop gate on an open directed ask** (#1024, #1020): the Stop hook runs `legion pending-replies --repo <repo> --directed` and blocks the turn from ending while the result is non-empty, naming each open ask and telling the agent to reply `--to <author>` (a reply `--to all` retires nothing). It honors `LEGION_SKIP_STOP_BLOCK=1` (bypass audited), sits below the existing watch-pty exemption, and is guarded by `legion_hook_covered` so a repo with no legion footprint is never blocked.
 
 ## Watch
 
@@ -124,6 +128,8 @@ Long-lived daemon that polls SQLite for unhandled wake-worthy signals. When one 
 - `pty` (default since v0.16) portable-pty wrapper with a ring-buffered reader (#486, #498). Provides a real TTY so prompts that require interactive features behave correctly
 
 **Wake tracking** (#487, #499): every wake attempt writes a `wake_attempts` row and transitions through an FSM. The reaper is the only writer for terminal states (exited, panic-stopped, abandoned). The Stop hook can hand off an `exit_observed_at` hint via `legion watch session-end` (#493). PTY EOF + PID poll remain authoritative.
+
+**Idle-session courier** (#1013, #999): watch already skipped a repo with a live session, correctly -- but a live session that had gone idle got silence, the same as an empty repo got a spawn. `poll_cycle`'s `active_pid` branch now matches a live session to a watched repo by canonicalized `cwd` against the registered `workdir` (via `claude agents --json`) and, when that repo has undrained data and is outside its nudge cooldown, starts a short-lived PTY courier that `SendMessage`s the target "you have mail; take a turn," restricted to the `SendMessage`/`ListAgents` tools so the call never stalls on a permission prompt, and run from a scratch dir with `LEGION_REPO=courier-scratch` so its own hooks can never claim the nudged repo's lock. The prompt carries only the repo name and the target's name and pid, never post or signal text -- the nudge is not a second delivery lane -- and the courier identifies as `legion-watch`, not as the repo it nudges for. The idle agent wakes on the message, and its own unchanged hook drain delivers. The nudge cooldown is independent of the wake cooldown in both directions. The target is the first roster session matching the workdir, not cross-checked against the pid holding the session lock, so two terminals open on one workdir could route the nudge to the wrong one. A session running under bypassed permissions cannot be nudged or even detected: inbound `SendMessage` is held there for human approval, and the roster does not expose permission mode.
 
 **Persona leases**: cluster-wide wake coordination so two nodes do not wake the same persona at the same time. `legion watch leases` inspects.
 
@@ -143,11 +149,15 @@ Agents emit predictions with claimed confidence. Outcomes are witnessed later. C
 ```
 emit  -> prediction row, orphan window starts
 witness -> outcome recorded, calibration_snapshot updated
+sweep -> past-deadline emitted predictions marked orphaned (hourly, in-process)
+roll  -> calibration_snapshot recomputed per cohort, 0.1-point Brier buckets (nightly, in-process)
 orphans -> predictions still unresolved past their window
 calibration -> claimed vs actual per reliability bucket, Brier score
 ```
 
 `legion uncertainty emit` is non-blocking so a downstream auto-emit hook (#358) can never break the agent. `witness` is idempotent-failure: re-witnessing is an error so the calibration table cannot drift.
+
+**Calibration roller and orphan sweep** (#1004, #359): `sweep` and `roll` run inside `WatchLoop::tick_poll` -- the sweep at most hourly, the roll at most nightly -- each gated on an in-process last-run timestamp the way the heartbeat throttle is, and fail-open, so an error in either never stops the poll cycle. `legion uncertainty roll` (sweep then roll), `sweep-now`, and `calibrate-now` expose the same jobs as manual verbs, each with `--json`, for a one-off backfill outside the daemon's own schedule. `legion daemon status` does not report the jobs; they log to stderr like the sibling reapers.
 
 Bypass telemetry (`bypass.jsonl`) feeds the same engine. A high bypass rate on a `(repo, pattern)` is a signal that the system claims it can answer the query (`sym`/`recall`) but agents are voting with their feet.
 

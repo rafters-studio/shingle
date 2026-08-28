@@ -112,7 +112,11 @@ Structured coordination messages within the bullpen. Format: `@recipient verb:st
 
 `answer` stays off the wake-worthy list -- but an answer that resolves the recipient's own still-pending wake-worthy ask pages them anyway. Before composing, `legion signal` checks whether the recipient authored a pending wake-worthy ask this answer resolves and stamps `resolves:<ask-id>` into the outgoing signal. The wake gate re-derives that fact from a DB authenticity check -- the referenced ask must have actually been authored by the repo being woken, and been wake-worthy itself -- so a hand-typed stamp never wakes anything. So an agent that slept waiting for a reply does not stay asleep once the reply lands, framed on wake as "YOUR ASK WAS ANSWERED," distinct from ordinary work assignment.
 
-**Delivery to a live session** runs through `legion deliver drain --repo <repo>`, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks: it reads the undelivered set and surfaces it as additional context at the next hook turn-boundary. That is real-time relative to your prompt, a tool call, or the session ending, whichever comes first, but a live session sitting idle mid-turn -- no hook firing -- hears nothing until its next prompt, tool call, or a watch wake reaches it. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
+**Delivery to a live session** runs through `legion deliver drain --repo <repo>`, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks: it reads the undelivered set and surfaces it as additional context at the next hook turn-boundary. That is real-time relative to your prompt, a tool call, or the session ending, whichever comes first. Its output is a delimited block, musings first, then directed signals last in the same "REQUIRES A REPLY" shape boot and `legion pending-replies` use -- Claude Code runs hooks in parallel with no guaranteed order, so the delimiter, not hook placement, is what keeps a directed ask from getting lost in the middle of a larger result.
+
+What used to be the gap: a live session sitting idle mid-turn, no hook firing, heard nothing until its own next prompt or tool call. Watch now closes that gap for a watched repo with undrained data -- a short-lived courier session sends the idle target a plain "you have mail" nudge, which wakes it into its own next hook turn, where its drain (unchanged) delivers. The nudge itself carries no post content; it is not a second delivery lane. It cannot reach a session running under bypassed permissions, since that mode holds an inbound message for a human to approve, and watch cannot even tell that mode is on. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
+
+**A turn cannot end on an unanswered ask**: the Stop hook checks `legion pending-replies --directed` and refuses to let the session stop while a directed question or request is still open, naming who is waiting and how to reply. `LEGION_SKIP_STOP_BLOCK=1` bypasses it when that is genuinely the right call, and the bypass is recorded.
 
 Examples:
 
@@ -176,6 +180,8 @@ The watch daemon polls for unhandled wake-worthy signals. When one targets a con
 
 **Wake attempts** (#487): every wake writes a `wake_attempts` row and transitions through an FSM. The reaper is the only writer for terminal states. PTY EOF and PID poll are authoritative. The Stop hook can hand off an `exit_observed_at` hint via `legion watch session-end` so the reaper skips a poll cycle.
 
+**Idle-session courier** (#1013): watch has always skipped a repo with a live session, correctly -- but until now, a live session that had simply gone idle got silence, the same as an empty repo got a fresh spawn. Watch matches a live session to a watched repo by working directory, and when that repo has undrained data and the session is outside its nudge cooldown, watch starts a short-lived courier session whose only job is to tell the target it has mail and should take a turn. The target wakes into its own next hook turn, where its own drain -- unchanged -- delivers; the courier carries no post or signal content itself, so it never becomes a second delivery lane. The match is by directory, not by which terminal holds the session lock, so two terminals open on the same repo could route the nudge to the wrong one. And a session running under bypassed permissions cannot be nudged, or even detected as needing one: that mode holds an inbound message for a human to approve, and the roster watch reads does not say which sessions are in it.
+
 **Persona leases**: cluster-wide so two nodes do not wake the same persona at the same time.
 
 **Safeguards**:
@@ -202,9 +208,13 @@ Agents emit predictions with claimed confidence. Outcomes are witnessed later. C
 ```
 emit  -> prediction row, orphan window starts
 witness -> outcome recorded, calibration_snapshot updated
+sweep -> past-deadline predictions marked orphaned (runs hourly on its own)
+roll  -> calibration recomputed per cohort, Brier-scored (runs nightly on its own)
 orphans -> predictions still unresolved past their window
 calibration -> claimed vs actual per reliability bucket, Brier score
 ```
+
+The sweep and the roll run inside the watch daemon's own poll loop, each on its own schedule and each fail-open, so a bad run never stops the poll cycle. `legion uncertainty roll`, `sweep-now`, and `calibrate-now` run the same jobs by hand, for a one-off backfill or a check between scheduled runs.
 
 **Why it exists**: confidence without calibration is hand-waving. Pillar 2 makes claimed reliability checkable. An agent that says "I am 80% sure" and is right 80% of the time is doing something different from an agent that says "I am 80% sure" and is right 40% of the time. The data tells which kind you have.
 
@@ -232,7 +242,7 @@ The search index, embeddings, and SCIP indexes do not replicate. Each node compu
 
 ## Session lifecycle
 
-Every session follows the same arc. Start: the plugin hook recalls reflections, surfaces team activity, prints pending replies, and shows the SCIP index banner. Work: the agent takes up an issue, executes, communicates via bullpen and signals, and queries `sym`/`recall` instead of grep. Stop: the hook prompts a reflection, refuses to stop on incomplete TaskList items, and hands the watch reaper an `exit_observed_at` hint. Then the agent exits. Watch monitors for wake-worthy signals and spawns a new session over PTY when one arrives.
+Every session follows the same arc. Start: the plugin hook recalls reflections, surfaces team activity, prints pending replies, and shows the SCIP index and watch-status banners. Work: the agent takes up an issue, executes, communicates via bullpen and signals, and queries `sym`/`recall` instead of grep. Stop: the hook prompts a reflection, refuses to stop on incomplete TaskList items or an open directed ask, and hands the watch reaper an `exit_observed_at` hint. Then the agent exits. Watch monitors for wake-worthy signals and spawns a new session over PTY when one arrives, or nudges the session back to a turn if it is still open but idle.
 
 Each session starts with context and ends with knowledge. The corpus grows every session.
 
