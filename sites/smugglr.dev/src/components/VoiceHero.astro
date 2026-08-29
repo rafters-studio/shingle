@@ -25,19 +25,19 @@ import HeroTopology from "@/components/HeroTopology.astro";
         </H1>
 
         <P align="center" size="display-small" class="max-w-prose">
-            LAN UDP fan-out. S3 relay. Host-to-host. D1, Turso, rqlite, StarbaseDB, SQLite Cloud. One binary.
+            SQLite to SQLite. LAN UDP multicast. S3 relay. Turso, rqlite, Datasette, StarbaseDB, SQLite Cloud, and D1 once its three open defects land. One binary, plus one plugin.
         </P>
 
         <HeroTopology />
 
         <P align="center" color="muted-foreground" class="max-w-prose">
-            Nothing else combines these shapes in a single tool. Litestream does S3 backup. rqlite does Raft. ElectricSQL needs a server. smugglr does host, LAN, relay, and hosted backend: content-hashed delta sync, no coordinator, no service to run.
+            Nothing else combines these shapes in a single tool. Litestream does S3 backup. rqlite does Raft. ElectricSQL needs a server. smugglr does local, LAN, relay, and hosted backend: content-hashed delta sync, no coordinator, no service to run.
         </P>
 
         <div class="w-full max-w-xl">
             <HeroInstallCTA
                 command="curl -fsSL https://smugglr.dev/install | bash"
-                subline="Installs the latest checksum-verified binary on macOS and Linux. On Windows, use cargo install smugglr or the release binary."
+                subline="Installs the checksum-verified binaries on macOS and Linux x64. On Windows, use cargo install smugglr and cargo install smugglr-http-sql, or the release zip."
             />
         </div>
     </Container>

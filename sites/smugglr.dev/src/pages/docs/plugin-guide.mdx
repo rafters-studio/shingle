@@ -1,41 +1,81 @@
 ---
 layout: '@/src/layouts/Docs.astro'
 title: Plugin Guide
-description: "The http-sql plugin, shipped target profiles, adding a custom profile, auth methods, and endpoint resolution."
+description: "The smugglr-http-sql plugin, the eight shipped profiles and their aliases, auth per profile, how the endpoint is resolved, and what adding a profile takes."
 ---
 
 # Plugin Guide
 
-How the http-sql plugin works and how to teach smugglr about a new target.
+Every hosted backend is reached through one plugin, `smugglr-http-sql`, and a profile that names the backend's request shape. This page covers what the plugin is, the eight profiles it ships, and what teaching it a ninth takes. Every fact here was read from `smugglr-core`'s `profile.rs` and `plugin.rs` and the plugin's `adapter.rs` at 0.5.0.
 
-Work in progress. The full guide is waiting on a technical dump from the smuggler agent.
+## Two binaries
 
-## What is a profile
+`cargo install smugglr` and the curl installer give you the CLI, which reaches a second SQLite file on its own and nothing else. A remote target needs `smugglr-http-sql`, a separate binary: `cargo install smugglr-http-sql`, or the release archive, which carries it beside `smugglr` from 0.5.1. The 0.5.0 archive does not ([smugglr#430](https://github.com/rafters-studio/smugglr/issues/430)).
 
-A profile is Rust code inside `smugglr-core` that tells the http-sql plugin how to talk to one specific backend: request body shape, auth header format, and where rows and columns live in the response. Reaching a backend that already speaks one of the shipped request shapes is a config change (`name = "..."` in `[target]`). Reaching a backend with a genuinely different shape is a code change.
+smugglr finds a plugin by name. For `name = "http-sql"` it looks for `~/.smugglr/plugins/smugglr-http-sql`, then for `smugglr-http-sql` on `$PATH`. When neither exists the command stops with `Plugin 'http-sql' not found`, the two places it searched, and the install command. `[target] path = "..."` skips the search and loads a binary from a given location; when both keys are set, `path` wins.
 
-## Shipped profiles
+The plugin is a child process. smugglr starts it, speaks JSON-RPC to it over stdin and stdout, and hands it the `[target.config]` table as string keys. If the plugin exits, the command exits 1.
 
-smugglr ships seven profiles out of the box:
+## The config shape
 
-- `d1` -- Cloudflare D1
-- `turso` -- Turso / libSQL
-- `rqlite` -- rqlite
-- `starbasedb` -- StarbaseDB
-- `sqlite-cloud` -- SQLite Cloud
-- `generic` -- flat `{"sql": ..., "params": [...]}` request, `{"columns": [...], "rows": [...]}` response
-- `http-sql` -- the [http-sql v0.1 wire spec](https://github.com/rafters-studio/http-sql)
+From `docs/examples/cli-http-sql-turso/config.example.toml`:
 
-Each profile handles the backend's quirks: request body shape, auth header format, per-request bind-parameter limit, response parsing.
+```toml
+local_db = "./local.db"
 
-## Adding a custom profile
+[target]
+type = "plugin"
+name = "http-sql"
 
-There is no TOML profile format; `[plugins.http-sql.profiles.<name>]` does not exist. A profile is a constructor function in `smugglr-core`'s profile module plus an arm in the name-lookup match. If your backend's HTTP requests already match the `generic` or `http-sql` shape, point `name` at that profile and skip this section. Otherwise, adding a profile means adding the constructor and the match arm: a contribution to `smugglr-core`, not a config edit.
+[target.config]
+profile = "turso"
+url = "https://my-db.turso.io"
+auth_token = "${TURSO_TOKEN}"
+```
 
-## Auth methods per target
+`name` is the plugin binary. `profile` is the backend. `name = "turso"` is the mistake this page exists to prevent: it makes smugglr look for a binary called `smugglr-turso` and fail with `Plugin 'turso' not found`.
 
-Each profile picks one of three auth formats: bearer token, HTTP basic auth, or none. `d1`, `turso`, `starbasedb`, `sqlite-cloud`, `generic`, and `http-sql` use bearer token. `rqlite` uses basic auth. The token or credential comes from `auth_token` in `[target.config]`; profiles that use bearer auth send it as `Authorization: Bearer <token>`, and profiles that use basic auth send it as the basic-auth username with no password.
+The plugin reads three keys from `[target.config]`. `url` is required; without it the plugin stops with `missing config: url`. `profile` defaults to `generic`; a name the plugin does not know stops it with `unknown profile: <name>`. `auth_token` defaults to empty, which sends no `Authorization` header. After reading them the plugin runs `SELECT 1` against the endpoint, so a bad URL or token fails at initialize, before any table is read.
 
-## How the plugin resolves the HTTP endpoint
+`[target] type = "d1"` is this shape in disguise: at runtime it becomes a plugin target with `profile = "d1"`, and needs the same binary. In 0.5.0 that path does not reach D1; the [Configuration Reference](/docs/configuration/#target-type-d1) names the three issues.
 
-There is no URL-scheme resolution. `[target.config] url = "..."` is the literal endpoint the plugin POSTs SQL to; whatever string you set is what `reqwest` requests against. The plugin does not parse, rewrite, or template it. Point `url` at your backend's actual HTTP(S) SQL endpoint.
+## What a profile is
+
+A profile is a Rust struct in `smugglr-core` with five fields: `auth_format` (bearer, basic, or none), `request_format` (how SQL and bind parameters become a request body), `rows_path` and `columns_path` (where in the response JSON the rows and the column names live), and `max_bind_params` (a per-request limit, 0 for none). `Profile::from_name` maps a name to a constructor. That is the whole mechanism. A backend whose HTTP API fits one of the shipped shapes is a config change; a backend with a different shape is a code change.
+
+## The eight profiles
+
+| Profile | Aliases | Backend | Request body | Auth | Bind limit |
+|---------|---------|---------|--------------|------|------------|
+| `d1` | `cloudflare-d1` | Cloudflare D1 | `{"sql": ..., "params": [...]}` | Bearer | 100 |
+| `turso` | `libsql` | Turso, libSQL | `{"requests": [{"type": "execute", "stmt": {...}}]}` | Bearer | none |
+| `rqlite` | | rqlite | `[["<sql>", ...params]]` | Basic | none |
+| `datasette` | | Datasette | `{"sql": ..., "_shape": "array"}` | Bearer | none |
+| `sqlite-cloud` | `sqlitecloud` | SQLite Cloud | `{"sql": ..., "params": [...]}` | Bearer | none |
+| `starbasedb` | `starbase` | StarbaseDB | `{"sql": ..., "params": [...]}` | Bearer | none |
+| `generic` | | Any flat `{sql, params}` endpoint | `{"sql": ..., "params": [...]}` | Bearer | none |
+| `http-sql` | `httpsql` | The [http-sql v0.1 spec](https://github.com/rafters-studio/http-sql) | `{"sql": ..., "params": [...]}` | Bearer | none |
+
+Four profiles share the flat request body and differ only in where they read the response: `d1` at `result[0].results`, `sqlite-cloud` at `data` and `columns`, `starbasedb` at `result` and `columns`, `generic` and `http-sql` at `rows` and `columns`. Print the canonical names; the aliases resolve but nothing else on this site uses them.
+
+Two profiles carry limits worth knowing before a push. `datasette` has no positional bind API, so a statement with bound parameters is refused rather than sent with unbound placeholders. And `d1` reads its rows and its columns from the same path, so table discovery collapses against real D1 ([smugglr#436](https://github.com/rafters-studio/smugglr/issues/436)); until that lands the profile is a shape, not a working target.
+
+## Auth
+
+The plugin never chooses an auth format; the profile does. Seven profiles send `auth_token` as `Authorization: Bearer <token>`. `rqlite` sends it as the HTTP basic-auth username with no password. An empty `auth_token` sends no header on any profile. There is no per-target override.
+
+## The endpoint
+
+There is no URL-scheme resolution. `url` is the literal string the plugin POSTs every request to; it is not parsed, rewritten, or templated, and no profile appends a path. Point it at the backend's actual HTTP SQL endpoint. For Turso, whether the bare host or `/v2/pipeline` is the endpoint that answers is recorded as a test to write under smugglr#436; the example above shows the bare host as committed. Nobody maintaining that example holds a Turso token, so it has been run as far as the plugin's initialize and no further.
+
+## Retries
+
+`[sync]` carries a retry policy, and the engine implements it. In 0.5.0 the plugin reports every 429 and 5xx as permanent, so the policy never fires against a hosted backend and a rate limit ends the push on the first response with exit 1 ([smugglr#432](https://github.com/rafters-studio/smugglr/issues/432)).
+
+## Adding a profile
+
+There is no TOML profile format; `[plugins.http-sql.profiles.<name>]` does not exist. A ninth profile is a constructor in `smugglr-core`'s `profile.rs` returning the five fields, plus an arm in `from_name`. If the backend's request and response already match `generic` or `http-sql`, set `profile` to that name and skip the code. Otherwise the change is a contribution to `smugglr-core`, and because the WASM adapter shares the same module, the browser and Node package gain the backend in the same commit.
+
+## Writing a different plugin
+
+The plugin protocol is public. `smugglr-plugin-sdk` is the crate `smugglr-http-sql` is built on: implement the `PluginAdapter` trait, seven async methods from `initialize` to `row_count`, and call `run` to get a binary that speaks the protocol. Install it as `~/.smugglr/plugins/smugglr-<name>` or on `$PATH`, or name it with `path`. A ninth profile is a constructor; a different wire is a plugin. Neither is a fork.

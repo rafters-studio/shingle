@@ -25,7 +25,7 @@ import CardContent from "@/components/ui/card-content.astro";
 export const MATRIX_HEAD = ["Tool", "Lane", "Server required", "Conflict model", "Cost floor"];
 
 export const MATRIX_ROWS = [
-    ["smugglr",                 "SQLite to SQLite sync",          "No",                          "Last-received-wins, UUIDv7",  "Free, MIT"],
+    ["smugglr",                 "SQLite to SQLite sync",          "No",                          "local_wins default; remote_wins, newer_wins; UUIDv7 keys required",  "Free, MIT"],
     ["Litestream",              "SQLite to S3 backup",            "No",                          "Single writer assumed",       "Free, Apache"],
     ["rqlite, dqlite",          "Raft-clustered SQLite",          "Yes, the cluster itself",     "Linearizable via Raft",       "Free, MIT / LGPL"],
     ["CR-SQLite",               "CRDT extension to SQLite",       "No (per-node), yes (relay)",  "CRDT merge by construction",  "Free, MIT"],
@@ -347,7 +347,7 @@ export const NOT_SMUGGLR_ROWS = [
         </CardHeader>
         <CardContent>
             <Codeblock>{`curl -fsSL https://smugglr.dev/install | bash`}</Codeblock>
-            <P>The curl installer covers macOS and Linux. On Windows, use <Code>cargo install smugglr</Code> or the release binary.</P>
+            <P>The curl installer covers macOS and Linux x64 and installs both binaries from 0.5.1. On Windows, use <Code>cargo install smugglr</Code> and <Code>cargo install smugglr-http-sql</Code>, or the release zip.</P>
         </CardContent>
     </Card>
 
@@ -379,7 +379,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 <Container as="section" gap="6">
     <Small color="muted-foreground">
-        * Free as in OSS, not free as in beer, even though we do ship under MIT.
+        Free as in MIT, which is also free as in beer.
     </Small>
 </Container>
 

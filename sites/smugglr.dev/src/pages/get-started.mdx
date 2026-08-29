@@ -21,13 +21,13 @@ import FeatureBlock from "@/components/FeatureBlock.astro";
 
     <H1 slot="title">Five minutes to your first push.</H1>
 
-    <P slot="tagline" size="display-medium" color="muted-foreground">Four steps. Real commands. Nothing hidden.</P>
+    <P slot="tagline" size="display-medium" color="muted-foreground">Four steps. Real commands. Real output.</P>
 
-    <P slot="description">Install smugglr, point it at a local SQLite file and a Cloudflare D1 target, dry-run the push to see what would change, then push. If you already know Workers, the Cloudflare quickstart is even shorter.</P>
+    <P slot="description">Install smugglr, point it at two SQLite files, dry-run the push to see what would change, then push. Every block below was captured from the 0.5.0 binary against the Westwind sample that ships in the repository; the same steps work on any two files whose tables share a globally unique primary key.</P>
 </Hero>
 
 <Section id="install" title="1. Install.">
-    <P>Cargo is the recommended install. Pre-built binaries and a one-line installer script are on the GitHub releases page.</P>
+    <P>Two binaries. <code>smugglr</code> is the CLI; <code>smugglr-http-sql</code> is the plugin every hosted backend is reached through, and this page does not need it. Cargo is the recommended install; pre-built binaries and the installer script are on the releases page.</P>
 
     <Codeblock>{`cargo install smugglr`}</Codeblock>
 
@@ -37,49 +37,77 @@ import FeatureBlock from "@/components/FeatureBlock.astro";
 </Section>
 
 <Section id="configure" title="2. Configure." tint>
-    <P>Create a <code>config.toml</code> in your project directory: where the local SQLite lives, what the target is, and the target's connection details.</P>
+    <P>Create a <code>config.toml</code> in your project directory: where the local SQLite lives, and what the target is. This is the configuration from <a href="https://github.com/rafters-studio/smugglr/tree/main/docs/examples/cli-sqlite-to-sqlite">cli-sqlite-to-sqlite</a>, two files on one machine.</P>
 
     <Codeblock>{`local_db = "./local.db"
 
 [target]
-type = "d1"
-account_id = "your-cloudflare-account-id"
-database_id = "your-d1-database-id"
-api_token = "your-d1-api-token"`}</Codeblock>
+type = "sqlite"
+database = "./backup.db"
 
-    <P>Any SQLite file works for <code>local_db</code>. <code>type</code> is <code>d1</code>, <code>sqlite</code>, or <code>plugin</code>; turso, rqlite, starbasedb, and sqlite-cloud all go through <code>type = "plugin"</code> with a profile <code>name</code>. See the <a href="/docs/configuration/">Configuration reference</a> for every option.</P>
+[sync]
+tables = []
+timestamp_column = "updated_at"
+conflict_resolution = "local_wins"`}</Codeblock>
+
+    <P>The target must already have the tables; smugglr moves rows, not DDL. <code>type</code> is <code>sqlite</code> or <code>plugin</code>; Turso, rqlite, Datasette, StarbaseDB, and SQLite Cloud go through <code>type = "plugin"</code> with <code>name = "http-sql"</code> and the vendor in <code>profile</code>, which needs the second binary. D1 is not reachable in 0.5.0 (smugglr#429, #430, #436). See the <a href="/docs/configuration/">Configuration reference</a> for every option.</P>
 </Section>
 
 <Section id="dry-run" title="3. Dry-run.">
-    <P>See what the push would do before doing it. Dry-run reads both sides, hashes, diffs, and reports. Nothing is written.</P>
+    <P>See what the push would do before doing it. Dry-run reads both sides, hashes every row, diffs, and reports. Nothing is written.</P>
 
-    <Codeblock>{`smugglr push --dry-run`}</Codeblock>
+    <Codeblock>{`$ smugglr push --dry-run
+--- Push Summary ---
+  order_details: 788 rows
+  suppliers: 8 rows
+  employees: 9 rows
+  shippers: 3 rows
+  categories: 8 rows
+  products: 20 rows
+  customers: 40 rows
+  orders: 320 rows
 
-    <P>The output tells you how many rows would push per table and whether they are new or updated. Run this as many times as you like. It is safe.</P>
+  (dry run - no actual changes made)`}</Codeblock>
+
+    <P>One line per table with rows to move. Run it as many times as you like. It is safe. The timestamped INFO lines smugglr also writes to stderr are not shown; the block is stdout.</P>
 </Section>
 
 <Section id="push" title="4. Push." tint>
     <P>When the dry-run looks right, drop the flag.</P>
 
-    <Codeblock>{`smugglr push`}</Codeblock>
+    <Codeblock>{`$ smugglr push
+--- Push Summary ---
+  suppliers: 8 rows
+  products: 20 rows
+  employees: 9 rows
+  customers: 40 rows
+  order_details: 788 rows
+  categories: 8 rows
+  orders: 320 rows
+  shippers: 3 rows`}</Codeblock>
 
-    <P>smugglr pushes only the rows that actually changed, batched to respect the target's per-request SQL parameter limit. Transient HTTP failures retry with exponential backoff. Exit code 0 means success.</P>
+    <P>Same counts as the dry-run; the lines come out in whichever order the set iterates. smugglr pushes only the rows whose content hash differs, batched to the target's limits. Exit code 0 means success. Push again and there is nothing to move:</P>
+
+    <Codeblock>{`$ smugglr push
+
+--- Push Summary ---
+  No changes to push`}</Codeblock>
 </Section>
 
 <Section id="next" title="What Next.">
     <Grid columns={3} gap="6">
-        <FeatureBlock title="Watch daemon.">
-            <P>Background sync on a fixed interval. Set it and forget it.</P>
-            <P><a href="/docs/cli-reference/#watch">watch reference</a></P>
+        <FeatureBlock title="Output for agents.">
+            <P><code>smugglr --output json push --dry-run</code> prints one JSON object with every table and every bucket; the flag goes before the command.</P>
+            <P><a href="/docs/cli-reference/#json-output">JSON output</a></P>
         </FeatureBlock>
 
         <FeatureBlock title="Stash and retrieve.">
-            <P>S3-compatible relay for machines that cannot reach each other directly.</P>
+            <P>An S3-compatible relay for machines that cannot reach each other; a <code>file://</code> URL runs the whole workflow on one machine.</P>
             <P><a href="/docs/cli-reference/#stash">stash reference</a></P>
         </FeatureBlock>
 
         <FeatureBlock title="Full docs.">
-            <P>CLI reference, configuration, internals, and nine usage patterns.</P>
+            <P>CLI reference, configuration, internals, and the patterns.</P>
             <P><a href="/docs/">docs hub</a></P>
         </FeatureBlock>
     </Grid>

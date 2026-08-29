@@ -5,543 +5,624 @@ description: "Nine cookbook scenarios: local-to-cloud, cloud-to-local, bidirecti
 ---
 
 
-Nine real scenarios with full config and CLI examples. Each one runs as written.
+Nine scenarios. Every config block below is a file under `docs/examples/` in the smugglr repository, named where it is used. Every output block is stdout from smugglr 0.5.0 run against the Westwind sample in `docs/examples/westwind/` (forty customers, three hundred and twenty orders, seven hundred and eighty-eight order lines), copied from that example's README or captured on 2026-08-28. Text mode also writes timestamped `INFO` lines to stderr; a section says so where stderr is what it shows. The summary block lists tables in map order, so two runs print the same counts in a different order. Compare counts, not line positions.
+
+Two install facts apply to every pattern with a remote target. `cargo install smugglr` and the curl installer give the CLI. Any target other than a local SQLite file is reached through a second binary, `smugglr-http-sql` (`cargo install smugglr-http-sql`, or the release archive from 0.5.1, which carries both). D1 is one profile of that plugin, and in 0.5.0 it cannot be reached: the core hands the plugin the wrong keys (smugglr#429), the plugin does not ship with the CLI (smugglr#430), and the d1 profile misreads its rows (smugglr#436). Where a pattern below names D1, the runnable form is a second SQLite file or the `type = "plugin"` shape, and the D1 variant waits on those three issues.
 
 ---
 
 ## 1. Local to Cloud
 
-Push a local SQLite database to Cloudflare D1 for production deployment.
+Push a local SQLite database, one direction, to a target you treat as a copy.
 
 ### When to use
 
-You have a local SQLite database (your dev environment, a seed database, a migration result) and need to get it into D1. One direction. You are the source of truth.
+You have a local database (your dev environment, a seed, a migration result) and one target that should match it. You are the source of truth. The runnable form is `docs/examples/cli-sqlite-to-sqlite`: two SQLite files on one machine, no credentials, no plugin. The same diff engine and the same summary block run against every hosted backend, and the D1 variant of this pattern waits on smugglr#429, #430, and #436.
 
 ### Config
 
+`docs/examples/cli-sqlite-to-sqlite/config.example.toml`, comments removed:
+
 ```toml
-# config.toml
-local_db = "./app.db"
+local_db = "./local.db"
 
 [target]
-type = "d1"
-database_id = "a1b2c3d4-5678-90ab-cdef-1234567890ab"
-account_id = "your-cloudflare-account-id"
-api_token = "your-d1-api-token"
+type = "sqlite"
+database = "./backup.db"
 
 [sync]
-tables = ["users", "posts", "settings"]
-batch_size = 500
+tables = []
+timestamp_column = "updated_at"
+conflict_resolution = "local_wins"
 ```
+
+Build both files from the sample: `../westwind/make.sh ./local.db` and `../westwind/make.sh --empty ./backup.db`. smugglr moves rows, not DDL, so the target must already carry the tables.
 
 ### Commands
 
-Preview what would change:
+A dry-run reads both sides, hashes every row, and reports what a push would write. From the example README:
 
 ```
 $ smugglr push --dry-run
-[dry-run] push: app.db -> D1 (a1b2c3d4)
-  users:    142 rows (12 new, 3 changed, 0 deleted)
-  posts:    891 rows (47 new, 0 changed, 0 deleted)
-  settings: 8 rows (0 new, 1 changed, 0 deleted)
+--- Push Summary ---
+  order_details: 788 rows
+  suppliers: 8 rows
+  employees: 9 rows
+  shippers: 3 rows
+  categories: 8 rows
+  products: 20 rows
+  customers: 40 rows
+  orders: 320 rows
 
-Total: 63 operations. No data moved.
+  (dry run - no actual changes made)
 ```
 
-Execute:
+The push writes what the dry-run described. Same counts, minus the dry-run line:
 
 ```
 $ smugglr push
-push: app.db -> D1 (a1b2c3d4)
-  users:    12 inserted, 3 updated    [batch 1/1]
-  posts:    47 inserted               [batch 1/1]
-  settings: 1 updated                 [batch 1/1]
-
-Done. 63 operations in 1.8s.
+--- Push Summary ---
+  suppliers: 8 rows
+  products: 20 rows
+  employees: 9 rows
+  customers: 40 rows
+  order_details: 788 rows
+  categories: 8 rows
+  orders: 320 rows
+  shippers: 3 rows
 ```
 
-Push a single table:
+One table, with `--table`. Captured against a fresh pair, before the full push:
 
 ```
-$ smugglr push --table users
-push: app.db -> D1 (a1b2c3d4)
-  users: 12 inserted, 3 updated    [batch 1/1]
+$ smugglr push --dry-run --table customers
 
-Done. 15 operations in 0.4s.
+--- Push Summary ---
+  customers: 40 rows
+
+  (dry run - no actual changes made)
+```
+
+```
+$ smugglr push --table customers
+
+--- Push Summary ---
+  customers: 40 rows
+```
+
+A second push has nothing to move, because every content hash now matches. From the example README:
+
+```
+$ smugglr push
+
+--- Push Summary ---
+  No changes to push
 ```
 
 ### Watch for
 
-- D1 has a 100KB max statement size. Rows exceeding this are rejected by the D1 API as a bad request, which smugglr surfaces as exit code 5 (target error) with the failing row's primary key in the error output.
-- `batch_size` controls how many rows per D1 API call. smugglr also caps each query at D1's 100 bind-parameter limit (rows multiplied by columns). Stay at the default unless you have reason to change it.
-- If `tables` is omitted, smugglr syncs every table found in both source and target. Be explicit.
-- The API token needs D1 edit permissions. A read-only token is rejected by the D1 API and surfaces as exit code 5 (target error); a transport-level auth failure surfaces as exit code 3 (connection error).
+`tables = []` means every table except `exclude_tables`, whose default already holds `sqlite_sequence`, `_cf_KV`, `__drizzle_migrations`, and `_smugglr_migrations`. Matching on `exclude_tables` is exact, not glob. A `--table` name that does not exist exits 2 and lists the tables that do.
+
+Push adds and updates. A row deleted locally stays on the target, because deletes do not replicate on any path in 0.5.0 (smugglr#311). Rows the target holds and local lacks are left alone; that is `pull`'s direction.
 
 ---
 
 ## 2. Cloud to Local
 
-Pull production data from Cloudflare D1 into your local dev environment.
+Pull a copy of the target's data into a local database.
 
 ### When to use
 
-You need a local copy of production data for development, debugging, or analysis. D1 is the source of truth.
+You need a local copy of another database for development, debugging, or analysis. The target is the source of truth. The runnable form is the same example as pattern 1 with the roles reversed: `backup.db` holds the data and `local.db` is the empty copy. The D1 variant waits on smugglr#429, #430, and #436.
 
 ### Config
 
-```toml
-# config.toml
-local_db = "./local-dev.db"
-
-[target]
-type = "d1"
-database_id = "a1b2c3d4-5678-90ab-cdef-1234567890ab"
-account_id = "your-cloudflare-account-id"
-api_token = "your-d1-api-token"
-
-[sync]
-tables = ["users", "posts", "settings"]
-```
+`docs/examples/cli-sqlite-to-sqlite/config.example.toml`, as in pattern 1. Build the files the other way around: `../westwind/make.sh --empty ./local.db` and `../westwind/make.sh ./backup.db`.
 
 ### Commands
 
-See what is different before pulling anything:
+See what is different before pulling anything. `diff` names the bucket each row landed in and prints the first five primary keys per bucket; one table here, to keep the block short:
 
 ```
-$ smugglr diff
-diff: D1 (a1b2c3d4) vs local-dev.db
-  users:    3 only in source, 0 only in target, 2 changed
-  posts:    104 only in source, 0 only in target, 0 changed
-  settings: 0 only in source, 0 only in target, 1 changed
+$ smugglr diff --table shippers
 
-5 rows differ across 3 tables.
+--- Differences ---
+
+shippers
+  +3 remote only
+    Remote only: 019438ea-9036-7221-933c-951305c6e3c1, 019438ea-9407-710d-937e-7bb98998b123, 019438ea-97d8-7ad2-b922-440d57e02ef3
 ```
 
-Pull:
+Dry-run, then pull:
+
+```
+$ smugglr pull --dry-run
+
+--- Pull Summary ---
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  customers: 40 rows
+  shippers: 3 rows
+  categories: 8 rows
+  suppliers: 8 rows
+
+  (dry run - no actual changes made)
+```
 
 ```
 $ smugglr pull
-pull: D1 (a1b2c3d4) -> local-dev.db
-  users:    3 inserted, 2 updated
-  posts:    104 inserted
-  settings: 1 updated
 
-Done. 110 operations in 2.1s.
+--- Pull Summary ---
+  categories: 8 rows
+  employees: 9 rows
+  customers: 40 rows
+  order_details: 788 rows
+  suppliers: 8 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+```
+
+```
+$ smugglr pull
+
+--- Pull Summary ---
+  No changes to pull
 ```
 
 ### Watch for
 
-- If `local-dev.db` does not exist, smugglr creates it. But it will not create tables. Your local database must already have the schema. Run your migrations first.
-- Pulling large tables from D1 is rate-limited by Cloudflare. For databases with 100K+ rows, expect the operation to take minutes, not seconds. Content hashing means subsequent pulls are fast (only deltas move).
-- If your local database has rows that D1 does not, `pull` does not delete them. Pull adds and updates. It does not remove. Use `sync` with a conflict strategy if you need full convergence.
+The local file must exist and carry the schema before the first pull. smugglr opens it read-write without creating it; a missing file ends the run with `Local database error: unable to open database file: ./local.db` and exit 1. Run your migrations first.
+
+Pull adds and updates. It never removes: a row local holds and the target lacks stays where it is (smugglr#311). Content hashing means a second pull against an unchanged target moves nothing.
+
+Through the plugin, a hosted backend's rate limit is not retried in 0.5.0. A 429 or 5xx is reported as a permanent error and ends the pull on the first such response (smugglr#432).
 
 ---
 
 ## 3. Bidirectional Sync
 
-Keep a local database and a cloud target in sync with automatic conflict resolution.
+Keep two databases converged with a stated rule for the rows both sides changed.
 
 ### When to use
 
-Two databases are both being written to. Local dev and cloud staging. Two machines sharing state. You need changes flowing both directions with a deterministic rule for conflicts.
+Both databases take writes. Local dev and a shared copy. Two machines that see the same target. You need changes flowing both ways and a deterministic answer when the same row changed on each side. The runnable form is the pattern 1 example; the D1 variant waits on smugglr#429, #430, and #436.
 
 ### Config
 
-```toml
-# config.toml
-local_db = "./local.db"
-
-[target]
-type = "d1"
-database_id = "a1b2c3d4-5678-90ab-cdef-1234567890ab"
-account_id = "your-cloudflare-account-id"
-api_token = "your-d1-api-token"
-
-[sync]
-tables = ["tasks", "reflections", "schedules"]
-conflict_resolution = "newer_wins"
-```
+`docs/examples/cli-sqlite-to-sqlite/config.example.toml`, as in pattern 1. The two keys that matter are `timestamp_column = "updated_at"` and `conflict_resolution = "local_wins"`.
 
 ### Conflict strategies
 
-| Strategy | Behavior |
-|----------|----------|
-| `local_wins` | Local row always overwrites remote. Default. |
-| `remote_wins` | Remote row always overwrites local. |
-| `newer_wins` | Row with the later timestamp wins. Requires a `updated_at` column. |
-| `uuid_v7_wins` | Row with the higher UUIDv7 primary key wins. Time-ordered IDs, no clock sync needed. |
+Every row lands in one of six buckets by comparing `timestamp_column` and the content hash: `local_only`, `remote_only`, `local_newer`, `remote_newer`, `content_differs`, `identical`. Under every policy, `local_newer` rows push and `remote_newer` rows pull. The policy decides only `content_differs`: rows whose timestamps match while their content does not.
+
+| Strategy | Behavior on `content_differs` |
+|----------|-------------------------------|
+| `local_wins` | The local row overwrites the remote one. Default. |
+| `remote_wins` | The remote row overwrites the local one. |
+| `newer_wins` | Nothing moves; the row cannot be ordered, so it is skipped with a warning on stderr. |
+| `uuid_v7_wins` | Behaves as `newer_wins` in 0.5.0. No UUID is parsed (smugglr#431). |
 
 ### Commands
 
-Dry-run to see what sync would do:
+Starting from a converged pair, six orders were edited locally, one customer and one product on the target, each edit bumping `updated_at`:
+
+```sh
+sqlite3 local.db "UPDATE orders SET freight = freight + 5, updated_at = updated_at + 60 WHERE ship_city = 'Dragonstone'"
+sqlite3 backup.db "UPDATE customers SET contact = contact || ' (remote)', updated_at = updated_at + 60 WHERE code = 'ARBOR'"
+sqlite3 backup.db "UPDATE products SET unit_price = unit_price + 2, updated_at = updated_at + 120 WHERE name = (SELECT name FROM products ORDER BY name LIMIT 1)"
+```
 
 ```
 $ smugglr sync --dry-run
-[dry-run] sync: local.db <-> D1 (a1b2c3d4)
-  Strategy: newer_wins
 
-  tasks:
-    -> push 5 rows (local newer)
-    <- pull 3 rows (remote newer)
-    ! 2 conflicts (resolved: newer_wins)
+--- Sync Summary ---
+  orders: 6 pushed, 0 pulled
+  products: 0 pushed, 1 pulled
+  customers: 0 pushed, 1 pulled
 
-  reflections:
-    -> push 12 rows
-    <- pull 0 rows
-
-  schedules:
-    -> push 0 rows
-    <- pull 1 row
-
-Total: 23 operations. No data moved.
+  (dry run - no actual changes made)
 ```
-
-Execute:
 
 ```
 $ smugglr sync
-sync: local.db <-> D1 (a1b2c3d4)
-  Strategy: newer_wins
 
-  tasks:       5 pushed, 3 pulled, 2 conflicts resolved
-  reflections: 12 pushed, 0 pulled
-  schedules:   0 pushed, 1 pulled
-
-Done. 23 operations in 1.4s.
+--- Sync Summary ---
+  customers: 0 pushed, 1 pulled
+  orders: 6 pushed, 0 pulled
+  products: 0 pushed, 1 pulled
 ```
+
+```
+$ smugglr sync
+
+--- Sync Summary ---
+  No changes to sync
+```
+
+The product row was `remote_newer`, so it pulled under `local_wins`. The policy never saw it.
 
 ### Watch for
 
-- `newer_wins` needs an `updated_at` column with comparable timestamps on both sides to pick a winner. If the column is missing, empty, or identical on both sides while the content differs, smugglr does not exit with an error: it logs a warning naming the row count and skips those rows, leaving both sides unchanged. The run itself still exits 0. Check the logs, not the exit code, for skipped conflicts.
-- `uuid_v7_wins` only works when primary keys are UUIDv7. It compares the time component embedded in the ID. No clock synchronization required.
-- Bidirectional sync is not atomic. If the process is interrupted mid-sync, one direction may have completed but not the other. This is safe because content hashing is idempotent. Run sync again and it picks up where it left off.
-- If both sides modified the same row and your strategy is `local_wins`, the remote change is lost. There is no merge. Pick a strategy that matches your authority model.
+A `content_differs` row under `newer_wins` or `uuid_v7_wins` does not fail the run. It is skipped, both sides keep their version, the exit code is 0, and stderr carries one warning per table. Captured after editing the same supplier on both sides without touching `updated_at`, with `conflict_resolution = "newer_wins"`:
+
+```
+ WARN 1 row(s) in 'suppliers' have different content but missing or incomparable timestamps (skipped under newer_wins). Use local_wins or remote_wins to resolve.
+```
+
+Check stderr, not the exit code, for skipped rows.
+
+`sync` is a push followed by a pull, per table, and it is not atomic. An interrupted run leaves one direction done and the other not; the next run picks up the rest, because applying a row twice is a no-op. Deletes do not replicate in either direction (smugglr#311); model a delete as a `deleted_at` column, which rides the upsert path and converges.
 
 ---
 
 ## 4. Background Sync
 
-Run the watch daemon for continuous replication on an interval.
+Run the watch daemon: a `sync` on an interval, in one process.
 
 ### When to use
 
-You want sync to happen automatically without running commands. A development machine that stays in sync with staging. A local database that mirrors production every 30 seconds. Set it and walk away.
+You want the sync to happen without running commands. A development machine that follows a shared copy. A local database that mirrors another every thirty seconds. The runnable form is the pattern 1 example; the D1 variant waits on smugglr#429, #430, and #436.
 
 ### Config
 
-```toml
-# config.toml
-local_db = "./local.db"
-
-[target]
-type = "d1"
-database_id = "a1b2c3d4-5678-90ab-cdef-1234567890ab"
-account_id = "your-cloudflare-account-id"
-api_token = "your-d1-api-token"
-
-[sync]
-tables = ["tasks", "reflections"]
-conflict_resolution = "local_wins"
-```
-
-There is no `[watch]` config section. The interval is a CLI flag only (`--interval`, default 30 seconds), not a config field; a `[watch]` block in `config.toml` is silently ignored.
+`docs/examples/cli-sqlite-to-sqlite/config.example.toml`, as in pattern 1. There is no `[watch]` section. The interval is a flag, `--interval` (`-i`), default 30 seconds; a `[watch]` block in `config.toml` is ignored.
 
 ### Commands
 
-Start the daemon (interval defaults to 30 seconds):
-
-```
-$ smugglr watch
-watch: local.db <-> D1 (a1b2c3d4) every 30s
-  [14:23:01] tick: 0 changes detected
-  [14:23:31] tick: 3 rows pushed (tasks: 2, reflections: 1)
-  [14:24:01] tick: 0 changes detected
-  [14:24:31] tick: 1 row pulled (tasks: 1)
-  ^C
-watch: stopped. 4 ticks, 4 operations total.
-```
-
-Run in the background:
-
-```
-$ smugglr watch &
-[1] 48291
-watch: local.db <-> D1 (a1b2c3d4) every 30s
-```
-
-Custom interval (every 5 seconds for development):
+In text mode `watch` writes nothing to stdout. Everything it says is on stderr. Captured with `--interval 5` on the pattern 1 pair, with six orders edited locally after the second tick and the daemon stopped with SIGINT after the third; the first two lines, then the third tick through shutdown (ANSI color stripped):
 
 ```
 $ smugglr watch --interval 5
-watch: local.db <-> D1 (a1b2c3d4) every 5s
-  [14:23:01] tick: 0 changes detected
-  ...
+2026-08-29T02:24:24.849255Z  INFO Acquired PID lock: .smugglr.pid (PID 91242)
+2026-08-29T02:24:24.849285Z  INFO Starting watch daemon (interval: 5s, dry_run: false)
 ```
+
+```
+2026-08-29T02:24:34.852362Z  INFO Watch tick #3
+2026-08-29T02:24:34.852451Z  INFO Opening local database: ./local.db
+2026-08-29T02:24:34.852976Z  INFO Opening local database: ./backup.db
+2026-08-29T02:24:34.855582Z  INFO Found 8 tables to sync
+2026-08-29T02:24:34.855645Z  INFO Computing diff for table: categories
+2026-08-29T02:24:34.856719Z  INFO Table categories is in sync
+2026-08-29T02:24:34.856773Z  INFO Computing diff for table: employees
+2026-08-29T02:24:34.858022Z  INFO Table employees is in sync
+2026-08-29T02:24:34.858072Z  INFO Computing diff for table: customers
+2026-08-29T02:24:34.862275Z  INFO Table customers is in sync
+2026-08-29T02:24:34.862346Z  INFO Computing diff for table: order_details
+2026-08-29T02:24:34.894316Z  INFO Table order_details is in sync
+2026-08-29T02:24:34.894361Z  INFO Computing diff for table: products
+2026-08-29T02:24:34.895182Z  INFO Table products is in sync
+2026-08-29T02:24:34.895192Z  INFO Computing diff for table: suppliers
+2026-08-29T02:24:34.895475Z  INFO Table suppliers is in sync
+2026-08-29T02:24:34.895482Z  INFO Computing diff for table: orders
+2026-08-29T02:24:34.909630Z  INFO Pushing 6 rows to table: orders (dry_run=false)
+2026-08-29T02:24:34.910411Z  INFO Upserted 6 rows into orders
+2026-08-29T02:24:34.910428Z  INFO No changes to pull for table: orders
+2026-08-29T02:24:34.910438Z  INFO Computing diff for table: shippers
+2026-08-29T02:24:34.910574Z  INFO Table shippers is in sync
+2026-08-29T02:24:34.910626Z  INFO Tick #3: 6 pushed, 0 pulled across 8 tables
+2026-08-29T02:24:34.910724Z  INFO Updated last_sync to 2026-08-29T02:24:34Z
+2026-08-29T02:24:37.867578Z  INFO Received shutdown signal. Stopping watch daemon.
+2026-08-29T02:24:37.868066Z  INFO Watch daemon stopped after 3 ticks
+2026-08-29T02:24:37.868585Z  INFO Released PID lock: .smugglr.pid
+```
+
+With `--output json`, stderr is silent and stdout carries one object per tick, so the stream is JSONL. Captured on the same pair with one customer edited after the second tick:
+
+```
+$ smugglr --output json watch --interval 5
+{"command":"watch","tick":1,"status":"ok","tables":[]}
+{"command":"watch","tick":2,"status":"ok","tables":[]}
+{"command":"watch","tick":3,"status":"ok","tables":[{"name":"customers","rows_pushed":1}]}
+```
+
+To run it in the background, put the whole stream in a file: `smugglr watch >> smugglr.log 2>&1 &`.
 
 ### Watch for
 
-- Watch uses the same sync logic as `smugglr sync`. Every tick is a full content-hash comparison. On large databases, short intervals create sustained API load. Start with 30 seconds and tune down only if you need lower latency.
-- Watch acquires a read lock on the local SQLite file during each tick. If your application does heavy writes, WAL mode on the local database avoids contention. Smugglr does not set WAL mode for you.
-- The daemon writes to stdout. In production, pipe to a log file: `smugglr watch >> /var/log/smugglr.log 2>&1 &`
-- If the network is unreachable, the daemon logs the error and continues. It does not crash. The next tick retries. Persistent failures appear as repeated error lines in the output.
-- Stop the daemon with SIGINT or SIGTERM. It finishes the current tick before exiting.
+Every tick is a full content-hash comparison of every configured table, the same work as one `smugglr sync`. After each successful tick the daemon writes `last_sync = "<timestamp>"` under `[sync]` in `config.toml`; it is informational and gates nothing, but it does mean the daemon edits your config file. On large tables a short interval is sustained load on the target; start at 30 seconds.
+
+The daemon takes a PID lock, `.smugglr.pid`, beside the config file. A second daemon started on the same config refuses. It stops on SIGINT (Ctrl-C or `kill -INT`), finishing the current tick first. SIGTERM ends the process without the shutdown line and leaves the PID file behind; remove it before the next start.
+
+An error classed as transient (the exit-3 family) is logged and the next tick retries. Any other error ends the daemon with that error's exit code, and in JSON mode the last line on stdout is a `"status":"error"` record. A locked or missing local file is fatal. In 0.5.0 nothing that comes back through the `smugglr-http-sql` plugin is classed as transient (smugglr#432), so against a hosted backend a 5xx ends the daemon rather than being retried on the next tick.
 
 ---
 
 ## 5. Multi-Machine (LAN)
 
-Broadcast sync across machines on the same network using encrypted UDP.
+Keep databases on machines that share a subnet converged over UDP multicast.
 
 ### When to use
 
-Multiple machines on the same LAN (or connected via Tailscale, WireGuard, ZeroTier) need to keep their SQLite databases converged. No relay, no server, no coordinator. Changes fan out as encrypted broadcast datagrams. Any machine with the key participates.
+Several machines on one LAN, or one virtual subnet through Tailscale, WireGuard, or ZeroTier, need the same rows. No relay, no server, no coordinator. Every node runs the identical loop: it multicasts a `primary_key -> content_hash` digest of its tables each interval, requests the rows it lacks, and applies what arrives idempotently. The runnable form is `docs/examples/cli-lan-broadcast`.
 
 ### Config
 
-On every machine:
+`docs/examples/cli-lan-broadcast/config.example.toml`, comments removed. Same `secret` and same `port` on every machine; paths need not match:
 
 ```toml
-# config.toml
-local_db = "./legion.db"
+local_db = "./node.db"
 
 [sync]
-tables = ["reflections", "tasks", "board_reads", "schedules"]
-conflict_resolution = "uuid_v7_wins"
+tables = []
+timestamp_column = "updated_at"
+exclude_columns = ["*_embedding", "vector"]
 
 [broadcast]
+secret = "REPLACE_WITH_OUTPUT_OF_openssl_rand_-hex_32"
 port = 31337
-interval_secs = 30
-secret = "your-64-char-hex-key-from-openssl-rand-hex-32-command-goes-here"
+interval_secs = 5
+conflict_resolution = "newer_wins"
+ordering_columns = ["updated_at"]
 ```
 
 ### Generate the shared key
 
 ```
 $ openssl rand -hex 32
-a3f1b2c4d5e6f7089012345678abcdef0123456789abcdef0123456789abcdef
+4e2a90071fefca644af45b2f563d914f272a1fa052cb96b268944246659b06b2
 ```
 
-Paste the output into the `secret` field in config.toml on every machine. The key IS membership. No other auth exists.
+Paste one key into `secret` on every machine and distribute it out of band. With the key set, every datagram is XChaCha20-Poly1305 with a fresh nonce, and a node holding a different key sees ciphertext it cannot open. The key is membership. Leave `secret` out and the node still runs, in the clear, accepting any well-formed datagram on the subnet; it warns once at start.
 
 ### Commands
 
-Start the broadcast daemon:
+`broadcast` writes nothing to stdout in text mode; everything is on stderr. From the example README, captured from a test node with its own port, interval, and `instance_id` (timestamps and ANSI color stripped):
 
 ```
 $ smugglr broadcast
-broadcast: legion.db on port 31337
-  encryption: XChaCha20-Poly1305
-  tables: reflections, tasks, board_reads, schedules
-  heartbeat: every 60s
-
-  [14:23:01] listening...
-  [14:23:05] received 3 rows from 192.168.1.42 (reflections: 2, tasks: 1)
-  [14:23:05] applied 3 rows (0 duplicates)
-  [14:23:18] local change detected: 1 row (tasks)
-  [14:23:18] delta: 1 row to 239.255.43.21:31337
-  [14:24:01] heartbeat: broadcasting 847 hashes
-  [14:24:02] peer 192.168.1.42 requests 2 rows (missed broadcast)
-  [14:24:02] sent 2 rows to 192.168.1.42
+ INFO Acquired PID lock: .smugglr-broadcast.pid (PID 30382)
+ INFO Starting masterless multicast sync (group 239.255.43.21, port 31999, interval 2s, instance peer-d, dry_run false)
+ INFO Opening local database: d.db
+ INFO Heartbeat #1: multicast 1 digest datagram(s)
+ INFO Heartbeat #2: multicast 1 digest datagram(s)
 ```
+
+`--dry-run` advertises and applies nothing. `--once` sends one heartbeat, waits briefly for answers, and exits. `-v` shows every table read and every datagram handled.
 
 ### Watch for
 
-- Broadcast uses UDP. Datagrams can be lost. This is fine. Content hashing makes missed messages safe. The heartbeat (periodic hash comparison) catches gaps.
-- Datagrams stay under MTU (~1400 bytes). Large rows are chunked across multiple datagrams with sequence IDs. If a chunk is lost, the entire row is discarded and resent on the next heartbeat.
-- The key file must be identical on every machine. A single byte difference means decryption fails silently. The receiver drops the datagram with no error logged (by design: you cannot distinguish "wrong key" from "not a smugglr packet").
-- Broadcast does not cross subnets without a tunnel. If your machines are on different networks, use Tailscale, WireGuard, or ZeroTier to put them on the same virtual subnet. Smugglr broadcasts to whatever subnet it is on.
-- Port 31337 must be open for UDP on all participating machines. Firewalls block this by default on most Linux distros.
-- Embedding BLOBs are not excluded by default (`exclude_columns` is empty). To keep large embedding columns off the wire and have each node compute them locally, you must configure it explicitly, e.g. `exclude_columns = ["*_embedding", "vector"]` under `[sync]`.
+UDP loses datagrams, and that is safe. Applying a row twice is a no-op, and the next heartbeat re-reconciles whatever a lost packet skipped. A late joiner that starts empty hears the next digest and converges with no special step.
+
+Multicast does not cross routers or VLANs. Machines on different networks need a tunnel that puts them on one virtual subnet. UDP on the chosen port must be open on every machine; on macOS the application firewall silently drops inbound multicast for a binary it has not been told about, and the node hears nothing and logs nothing about it.
+
+Conflict policy is apply-side and per node, and it is not negotiated on the wire. `remote_wins`, the default, is last-received-wins, so two nodes that receive two writes in different orders can hold different rows for that key. `newer_wins` takes the row whose `ordering_columns` maximum is greater and is the only policy that converges under concurrent edits; every node must set it. Deletes do not replicate (smugglr#311); a `deleted_at` column rides the upsert path and converges.
+
+`exclude_columns` keeps the named columns out of the content hash, so an edit confined to them does not churn the mesh. In 0.5.0 those columns still ride the wire when a peer requests the row (smugglr#322). It is a hashing rule, not a privacy rule.
+
+Two nodes on one host, for a first test, need two things the defaults do not give: a distinct `[broadcast] instance_id` in each config, because a node drops every datagram carrying its own id and the id defaults to the hostname, and a separate working directory for each, because each writes `.smugglr-broadcast.pid` where it starts.
 
 ---
 
 ## 6. Cross-Network
 
-Stash and retrieve via S3-compatible relay for machines that cannot see each other.
+Stash and retrieve through an S3-compatible relay for machines that cannot see each other.
 
 ### When to use
 
-Two machines on different networks need to exchange SQLite data. No shared LAN, no tunnel. The relay (any S3-compatible object store: R2, S3, MinIO, Backblaze B2) acts as a dead drop. One machine stashes, the other retrieves.
+Two machines on different networks, no shared LAN, no tunnel. The relay is a SQLite file in an object store (S3, R2, MinIO, or a `file://` path on a shared filesystem). One machine stashes, the other retrieves. The runnable form is `docs/examples/cli-stash-file-relay`, which plays both roles on one machine through a `file://` URL, so the whole workflow runs with no bucket and no credentials.
 
 ### Config
 
-On both machines:
+`docs/examples/cli-stash-file-relay/config.example.toml`, comments removed:
 
 ```toml
-# config.toml
-local_db = "./app.db"
-
-[sync]
-tables = ["users", "posts"]
+local_db = "./machine-a.db"
 
 [stash]
-url = "s3://smugglr-relay"
-endpoint = "https://your-account.r2.cloudflarestorage.com"
-region = "auto"
-access_key_id = "your-r2-access-key"
-secret_access_key = "your-r2-secret-key"
+url = "file:///tmp/smugglr-relay/relay.sqlite"
+
+[sync]
+timestamp_column = "updated_at"
+conflict_resolution = "newer_wins"
+```
+
+Machine B's config differs only in `local_db`. For S3 or R2, replace `url` with `s3://bucket/path/relay.sqlite` and add `access_key_id`, `secret_access_key`, `region` (default `us-east-1`), and, for R2 or MinIO, `endpoint`. The key names a file, not a prefix. In CI, put the two keys in the environment with the `${VAR}` form the `cli-d1-sync` example uses for its token; an unset variable exits 2.
+
+Setup, from the example README:
+
+```sh
+mkdir -p /tmp/smugglr-relay
+../westwind/make.sh ./machine-a.db
+../westwind/make.sh --empty ./machine-b.db
+cp config.example.toml config-a.toml
+sed 's/machine-a.db/machine-b.db/' config.example.toml > config-b.toml
 ```
 
 ### Commands
 
-Machine A stashes its data to the relay:
+Machine A stashes. On the first run the relay does not exist, so smugglr creates it from A's schema, diffs A against it, and uploads it:
 
 ```
-$ smugglr stash
-stash: app.db -> s3://smugglr-relay/app.db
-  users: 142 rows
-  posts: 891 rows
+$ smugglr -c config-a.toml stash
 
-Stashed. ETag: "a3f8c9d2e1b4"
+--- Stash Summary ---
+  categories: 8 rows
+  customers: 40 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
 ```
 
-Machine B retrieves from the relay:
+Machine B retrieves. smugglr downloads the relay, diffs it against B, and applies the rows B lacks:
 
 ```
-$ smugglr retrieve
-retrieve: s3://smugglr-relay/app.db -> app.db
-  users: 142 rows (12 new, 3 changed)
-  posts: 891 rows (47 new, 0 changed)
+$ smugglr -c config-b.toml retrieve
 
-Retrieved. 62 operations in 0.9s.
-```
-
-Using a local filesystem relay instead of S3 (for testing or air-gapped environments):
-
-```toml
-[stash]
-url = "file:///mnt/shared/smugglr-relay"
+--- Retrieve Summary ---
+  categories: 8 rows
+  customers: 40 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
 ```
 
 ```
-$ smugglr stash
-stash: app.db -> file:///mnt/shared/smugglr-relay/app.db
-  Stashed. 1.2 MB written.
+$ smugglr -c config-b.toml retrieve
+
+--- Retrieve Summary ---
+  No changes to retrieve
 ```
+
+Both commands take `--dry-run` and `--table`.
 
 ### Watch for
 
-- Stash is not sync. It is a snapshot uploaded to object storage. Retrieve applies it as a one-way pull. For bidirectional exchange, both machines stash and retrieve (coordinate who goes first, or use conflict strategies).
-- For S3-compatible relays, the ETag provides concurrency protection by rejecting the conflicting write. If two machines stash to the same key simultaneously, one succeeds and the other gets a 412 Precondition Failed, surfaced as exit code 4 (conflict) rather than silently clobbering the first write. Only `file://` relays are last-write-wins, since they have no ETag check. For multi-writer S3 scenarios, point each machine at a distinct stash `url` prefix.
-- S3 credentials in the config file are plain text. Use environment variables in CI or shared environments:
-  ```toml
-  [stash]
-  access_key_id = "${SMUGGLR_S3_KEY}"
-  secret_access_key = "${SMUGGLR_S3_SECRET}"
-  ```
-- R2 does not charge for egress. S3 does. For relay workloads, R2 is significantly cheaper.
-- `file://` endpoints work on shared filesystems (NFS, SMB) or USB drives. Useful for air-gapped transfers.
+The relay is a SQLite file the diff engine syncs row by row, in both commands. `stash` downloads it, upserts local rows into it, and uploads it back; `retrieve` downloads it and upserts its rows into the local database. The local file is never replaced wholesale, and for two-way exchange both machines stash and retrieve, with `conflict_resolution` settling the rows both changed.
+
+On S3 the upload is conditional on the ETag read at download, so two machines stashing at once cannot overwrite each other: the loser exits 4 (`conflict`) and runs again. On `file://` there is no ETag, the put is unconditional, and smugglr warns once. Point machines that write concurrently at separate `file://` relays.
+
+Two limits before pointing this at a bucket. `exclude_columns` is not applied on this path in 0.5.0, so a column excluded from the hash still reaches the relay (smugglr#322). And the relay's schema is copied from the first machine to stash, so every machine needs the same tables. Deletes do not replicate (smugglr#311).
 
 ---
 
 ## 7. Disaster Recovery
 
-Snapshot before risky operations. Restore when things go wrong.
+Snapshot the local file before a risky operation. Restore when it goes wrong.
 
 ### When to use
 
-Before a migration, a bulk update, a schema change, or any operation where "oops" means data loss. Snapshots are point-in-time copies stored on the relay. Restore replaces the current database state with a snapshot.
+Before a migration, a bulk update, a schema change, or anything where "oops" means data loss. A snapshot is a copy of the local database file stored under `snapshots/` on the relay. Restore replaces the local file with a snapshot. Both act on the local file only, never on a hosted target.
 
 ### Config
 
+The `[stash]` relay from `docs/examples/cli-stash-file-relay/config.example.toml`; the `[sync]` section is not needed:
+
 ```toml
-# config.toml
-local_db = "./production.db"
+local_db = "./machine-a.db"
 
 [stash]
-url = "s3://smugglr-snapshots"
-endpoint = "https://your-account.r2.cloudflarestorage.com"
-region = "auto"
-access_key_id = "your-r2-access-key"
-secret_access_key = "your-r2-secret-key"
+url = "file:///tmp/smugglr-relay/relay.sqlite"
 ```
+
+Snapshots go to `snapshots/` beside the relay file, on S3 as well as `file://`.
 
 ### Commands
 
-Take a snapshot before a risky operation:
+Take a snapshot. Captured against a fresh Westwind build; the ledger table counts as one of the nine:
 
 ```
 $ smugglr snapshot
-snapshot: production.db -> s3://smugglr-snapshots/snapshots/2026-04-04T14:30:00.000Z.sqlite
-  8 tables, 12,847 rows, 4.2 MB
 
-Snapshot saved: 2026-04-04T14:30:00.000Z
+--- Snapshot ---
+  Timestamp: 2026-08-29T02:24:12.054Z-f2cd230b
+  Size: 417792 bytes
+  _smugglr_migrations: 8 rows
+  categories: 8 rows
+  customers: 40 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
 ```
 
-Do the risky thing. It goes wrong. List available snapshots:
+Do the risky thing. It goes wrong (here, six orders deleted). List the snapshots:
 
 ```
 $ smugglr snapshots
-snapshots: s3://smugglr-snapshots/snapshots/
 
-  2026-04-04T14:30:00.000Z  4.2 MB  8 tables  12,847 rows
-  2026-04-03T09:00:00.000Z  4.1 MB  8 tables  12,340 rows
-  2026-04-02T09:00:00.000Z  3.9 MB  8 tables  11,892 rows
+--- Snapshots ---
+  2026-08-29T02:24:12.054Z-f2cd230b (417792 bytes, 9 tables, 1204 rows)
+
+  1 snapshot(s) available
 ```
 
-Restore:
-
-A snapshot restore is a whole-file swap, not a row-by-row merge. smugglr downloads the snapshot, verifies it, and renames it over the local database. The report lists each table's total row count in the restored file, not a per-row diff against the current state.
+Restore is a whole-file swap, not a row merge. smugglr downloads the snapshot, runs SQLite's integrity check on it, and moves it over the local file. The report lists each table's row count in the restored file, not a diff against the current state. Dry-run, then restore:
 
 ```
-$ smugglr restore 2026-04-04T14:30:00.000Z --dry-run
+$ smugglr restore 2026-08-29T02:24:12.054Z-f2cd230b --dry-run
 
 --- Restore ---
-  Restored snapshot: 2026-04-04T14:30:00.000Z
-  Size: 4404019 bytes
-  users:    8201 rows
-  posts:    4599 rows
-  settings: 47 rows
+  Restored snapshot: 2026-08-29T02:24:12.054Z-f2cd230b
+  Size: 417792 bytes
+  _smugglr_migrations: 8 rows
+  categories: 8 rows
+  customers: 40 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
 
   (dry run - no changes applied)
 ```
 
 ```
-$ smugglr restore 2026-04-04T14:30:00.000Z
+$ smugglr restore 2026-08-29T02:24:12.054Z-f2cd230b
 
 --- Restore ---
-  Restored snapshot: 2026-04-04T14:30:00.000Z
-  Size: 4404019 bytes
-  users:    8201 rows
-  posts:    4599 rows
-  settings: 47 rows
+  Restored snapshot: 2026-08-29T02:24:12.054Z-f2cd230b
+  Size: 417792 bytes
+  _smugglr_migrations: 8 rows
+  categories: 8 rows
+  customers: 40 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
 ```
+
+The six orders are back. Same block, same counts.
 
 ### Watch for
 
-- Snapshots are stored as objects in S3/R2. They cost storage. Set bucket lifecycle rules to auto-expire old snapshots: keep daily for 30 days, weekly for 90 days.
-- Restore is destructive. It overwrites current data with the snapshot state. Always dry-run first. There is no "undo restore" except taking another snapshot before restoring.
-- Snapshots include data, not schema. If you changed the schema between snapshot and restore, the restore may fail. Restore to a database with the schema that existed at snapshot time.
-- `smugglr snapshot` before `smugglr restore` is the safety pattern. Make it a habit. Snapshot the current broken state before restoring the known good state. Now you have both.
+Pass the name as `snapshots` prints it, suffix included, or any later timestamp: `restore` takes the latest snapshot at or before the argument. The bare timestamp without its suffix sorts before the snapshot and fails with `No snapshot found at or before`.
+
+`snapshot` reads the database file as it is on disk. A database in WAL mode with an uncheckpointed WAL loses those pages from the snapshot (smugglr#433); run `PRAGMA wal_checkpoint(TRUNCATE)` first. The copy carries schema and data together, and `restore` puts both back, so a schema change made after the snapshot is undone with it.
+
+Restore overwrites the local file. Dry-run first, and take a snapshot of the broken state before restoring the good one; then you hold both. Snapshots on S3 or R2 are objects and cost storage; a bucket lifecycle rule on the `snapshots/` prefix expires the old ones.
 
 ---
 
 ## 8. CI/CD Integration
 
-Run sync as a deploy step with exit code handling and structured output.
+Run a push as a deploy step, with the exit code driving the pipeline.
 
 ### When to use
 
-Your CI pipeline needs to sync a database as part of deployment. Seed staging from production. Push migrations to D1. Validate that source and target are in sync before shipping. Exit codes drive pipeline logic.
+Your pipeline seeds a hosted database from a checked-in SQLite file, or checks that the two agree before shipping. Exit codes and JSON are the interface. The runnable form is `docs/examples/cli-http-sql-turso`, the shape every hosted backend uses; the D1 variant waits on smugglr#429, #430, and #436.
 
 ### Config
 
+`docs/examples/cli-http-sql-turso/config.example.toml`, comments removed:
+
 ```toml
-# config.toml
-local_db = "./seed.db"
+local_db = "./local.db"
 
 [target]
-type = "d1"
-database_id = "staging-d1-database-id"
-account_id = "${CF_ACCOUNT_ID}"
-api_token = "${CF_API_TOKEN}"
+type = "plugin"
+name = "http-sql"
+
+[target.config]
+profile = "turso"
+url = "https://my-db.turso.io"
+auth_token = "${TURSO_TOKEN}"
 
 [sync]
-tables = ["users", "posts", "settings"]
-batch_size = 500
+tables = []
+timestamp_column = "updated_at"
+conflict_resolution = "local_wins"
 ```
 
+`name` is the plugin binary, `smugglr-http-sql`, resolved from `~/.smugglr/plugins/` or `$PATH`. `profile` picks the backend: `d1`, `turso`, `rqlite`, `datasette`, `sqlite-cloud`, `starbasedb`, `generic`, `http-sql`. `${TURSO_TOKEN}` is expanded at load; unset, it exits 2.
+
 ### GitHub Actions example
+
+`--output json` is a global flag and goes before the subcommand.
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -553,55 +634,47 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install smugglr
-        run: cargo install smugglr
+      - name: Install smugglr and the http-sql plugin
+        run: cargo install smugglr smugglr-http-sql
 
-      - name: Snapshot before sync
-        env:
-          SMUGGLR_S3_KEY: ${{ secrets.R2_ACCESS_KEY }}
-          SMUGGLR_S3_SECRET: ${{ secrets.R2_SECRET_KEY }}
-        run: smugglr snapshot
-
-      - name: Dry-run sync
+      - name: Dry-run
         id: dryrun
-        env:
-          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
-          smugglr push --dry-run --output json > dryrun.json
-          echo "operations=$(jq '.total_rows_to_push + .total_rows_to_pull' dryrun.json)" >> $GITHUB_OUTPUT
+          smugglr --output json push --dry-run > dryrun.json
+          echo "rows=$(jq '.total_rows_to_push' dryrun.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Push to D1
-        if: steps.dryrun.outputs.operations != '0'
-        env:
-          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      - name: Push
+        if: steps.dryrun.outputs.rows != '0'
         run: |
-          smugglr push --output json > result.json
-          EXIT_CODE=$?
-          if [ $EXIT_CODE -ne 0 ]; then
-            echo "::error::smugglr push failed with exit code $EXIT_CODE"
+          code=0
+          smugglr --output json push > result.json || code=$?
+          if [ "$code" -ne 0 ]; then
+            echo "::error::smugglr push failed with exit code $code"
             cat result.json
-            exit $EXIT_CODE
+            exit "$code"
           fi
-          echo "Synced $(jq '[.tables[] | (.rows_pushed // 0) + (.rows_pulled // 0)] | add // 0' result.json) operations"
+          echo "Pushed $(jq '[.tables[].rows_pushed] | add // 0' result.json) rows"
 ```
 
 ### Exit codes in CI
 
+Codes map from the error, not from the command.
+
 | Code | Meaning | CI action |
 |------|---------|-----------|
-| 0 | Success | Continue pipeline |
-| 1 | General error | Fail the job. Check logs. Also where plugin/adapter failures land; there is no dedicated plugin exit code. |
-| 2 | Config error | Fail. Missing env vars or bad TOML. Fix config. |
-| 3 | Network/transient | Retry the step (up to 3 times). |
-| 4 | Conflict | Fail. `stash`/`retrieve` hit a relay ETag conflict. |
-| 5 | Not found | Fail. Database, table, or target resource does not exist, or the target rejected the request. |
+| 0 | Success | Continue. |
+| 1 | General error | Fail. Plugin and adapter failures land here; there is no plugin-specific code. |
+| 2 | Configuration error | Fail. Bad TOML, an unset `${VAR}`, or a `--table` that does not exist. Fix the config. |
+| 3 | Connection error | Retry the step. |
+| 4 | Conflict | Fail. A relay ETag mismatch from `stash`, or a duplicate primary key. |
+| 5 | Target not found | Fail. A database file, relay, or table the target lacks, or a rejected request. |
 
-### Shell retry pattern for transient errors
+### Shell retry for exit 3
 
 ```bash
 #!/bin/bash
@@ -609,18 +682,18 @@ MAX_RETRIES=3
 RETRY_DELAY=5
 
 for i in $(seq 1 $MAX_RETRIES); do
-  smugglr push --output json > result.json 2>&1
+  smugglr --output json push > result.json
   EXIT_CODE=$?
 
   if [ $EXIT_CODE -eq 0 ]; then
     echo "Push succeeded on attempt $i"
     exit 0
   elif [ $EXIT_CODE -eq 3 ]; then
-    echo "Transient error on attempt $i. Retrying in ${RETRY_DELAY}s..."
+    echo "Connection error on attempt $i. Retrying in ${RETRY_DELAY}s."
     sleep $RETRY_DELAY
     RETRY_DELAY=$((RETRY_DELAY * 2))
   else
-    echo "Fatal error (exit code $EXIT_CODE). Aborting."
+    echo "Exit code $EXIT_CODE. Aborting."
     cat result.json
     exit $EXIT_CODE
   fi
@@ -632,151 +705,71 @@ exit 1
 
 ### Watch for
 
-- Always use `--output json` in CI. Human-readable output is for terminals. JSON is for machines.
-- Snapshot before push in CI, every time. If the deploy is bad, you need a restore point.
-- Environment variables in config.toml (`${VAR}`) are expanded at runtime. Use this for secrets in CI. Never commit API tokens to config files.
-- If dry-run shows zero operations, skip the push step. No reason to hit the API for nothing.
-- Exit code 3 (network/transient) is the only one worth retrying. All other non-zero codes indicate a problem that retrying will not fix.
+Use `--output json` in CI and parse stdout; tracing goes to stderr. Keep secrets in the environment through `${VAR}` and never in the committed file. Skip the push when the dry-run reports zero rows.
+
+Exit 3 is the only code worth retrying, and in 0.5.0 it does not come back through the plugin: a 429 or 5xx from the backend is reported as a plugin error, exit 1, and the built-in retry with backoff never runs (smugglr#432). Until that lands, the loop above aborts on a rate limit rather than waiting it out.
+
+A snapshot step is not a rollback for this pattern. `snapshot` copies the local file, which in CI is the checked-in seed; it does not capture the hosted target.
 
 ---
 
 ## 9. Agent Automation
 
-JSON output and exit codes for AI agent workflows. How an autonomous agent parses output and makes retry/abort decisions.
+JSON on stdout and typed exit codes, for an agent that calls smugglr and decides what to do next.
 
 ### When to use
 
-An AI agent (Claude Code, a custom agent, a legion daemon) needs to sync data as part of an autonomous workflow. The agent calls smugglr, parses the JSON result, and decides what to do next. No human in the loop. Structured output and typed exit codes are the entire interface.
+An agent (Claude Code, a custom loop, a legion daemon) syncs data as part of an autonomous workflow. It runs a command, parses one JSON object, reads the exit code, and continues, retries, or escalates. No human in the loop. The runnable form is the pattern 1 example, where the JSON blocks below were captured; the D1 variant waits on smugglr#429, #430, and #436.
 
 ### Config
 
-```toml
-# config.toml
-local_db = "./agent-workspace.db"
-
-[target]
-type = "d1"
-database_id = "production-d1-id"
-account_id = "${CF_ACCOUNT_ID}"
-api_token = "${CF_API_TOKEN}"
-
-[sync]
-tables = ["analysis_results", "generated_reports"]
-conflict_resolution = "uuid_v7_wins"
-batch_size = 200
-```
+`docs/examples/cli-sqlite-to-sqlite/config.example.toml`, as in pattern 1.
 
 ### JSON output structure
 
-Every command with `--output json` returns structured data:
+`--output json` silences tracing on stderr and prints one object on stdout. From the example README, captured after touching six orders locally:
 
 ```
-$ smugglr push --dry-run --output json
+$ sqlite3 local.db "UPDATE orders SET freight = freight + 5, updated_at = updated_at + 60 WHERE ship_city = 'Dragonstone'"
+$ smugglr --output json push --dry-run
+{"command":"push","status":"dry_run","tables":[{"name":"suppliers","local_only":0,"remote_only":0,"local_newer":0,"remote_newer":0,"content_differs":0,"identical":8,"rows_to_push":0,"rows_to_pull":0},{"name":"categories","local_only":0,"remote_only":0,"local_newer":0,"remote_newer":0,"content_differs":0,"identical":8,"rows_to_push":0,"rows_to_pull":0},{"name":"orders","local_only":0,"remote_only":0,"local_newer":6,"remote_newer":0,"content_differs":0,"identical":314,"rows_to_push":6,"rows_to_pull":0},{"name":"shippers","local_only":0,"remote_only":0,"local_newer":0,"remote_newer":0,"content_differs":0,"identical":3,"rows_to_push":0,"rows_to_pull":0},{"name":"order_details","local_only":0,"remote_only":0,"local_newer":0,"remote_newer":0,"content_differs":0,"identical":788,"rows_to_push":0,"rows_to_pull":0},{"name":"customers","local_only":0,"remote_only":0,"local_newer":0,"remote_newer":0,"content_differs":0,"identical":40,"rows_to_push":0,"rows_to_pull":0},{"name":"employees","local_only":0,"remote_only":0,"local_newer":0,"remote_newer":0,"content_differs":0,"identical":9,"rows_to_push":0,"rows_to_pull":0},{"name":"products","local_only":0,"remote_only":0,"local_newer":0,"remote_newer":0,"content_differs":0,"identical":20,"rows_to_push":0,"rows_to_pull":0}],"total_rows_to_push":6,"total_rows_to_pull":0,"exit_code":0}
+
+$ smugglr --output json push
+{"command":"push","status":"ok","tables":[{"name":"orders","rows_pushed":6}]}
+
+$ smugglr --output json push
+{"command":"push","status":"ok","tables":[]}
 ```
 
-```json
-{
-  "command": "push",
-  "status": "dry_run",
-  "tables": [
-    {
-      "name": "analysis_results",
-      "local_only": 23,
-      "remote_only": 0,
-      "local_newer": 5,
-      "remote_newer": 0,
-      "content_differs": 0,
-      "identical": 312,
-      "rows_to_push": 28,
-      "rows_to_pull": 0
-    },
-    {
-      "name": "generated_reports",
-      "local_only": 3,
-      "remote_only": 0,
-      "local_newer": 0,
-      "remote_newer": 0,
-      "content_differs": 0,
-      "identical": 40,
-      "rows_to_push": 3,
-      "rows_to_pull": 0
-    }
-  ],
-  "total_rows_to_push": 31,
-  "total_rows_to_pull": 0,
-  "exit_code": 0
-}
-```
+The dry-run object carries every table with its six bucket counts plus `rows_to_push` and `rows_to_pull`, and the top level carries `total_rows_to_push`, `total_rows_to_pull`, and `exit_code`. The push object carries only the tables that moved, so an empty `tables` is a no-op. There are no `insert`, `update`, `delete`, `total_operations`, or `duration_ms` fields.
 
-`tables` is an array, not an object map. There are no `insert`/`update`/`delete`, `total_operations`, or `duration_ms` fields. Each table carries the six diff counts plus `rows_to_push`/`rows_to_pull`; the top level carries `total_rows_to_push` and `total_rows_to_pull` (both always present) and `exit_code`.
-
-After execution:
+An error is one object too, with the exit code inside it. Captured with the pattern 8 config on a machine without the plugin, and then with `TURSO_TOKEN` unset:
 
 ```
-$ smugglr push --output json
+$ smugglr --output json push
+{"command":"push","status":"error","error":"Plugin error: Plugin 'http-sql' not found. Searched: ~/.smugglr/plugins/smugglr-http-sql, $PATH/smugglr-http-sql. Get it with `cargo install smugglr-http-sql`, or from the release archive, which carries it beside `smugglr` since v0.5.1.","exit_code":1}
 ```
 
-```json
-{
-  "command": "push",
-  "status": "ok",
-  "dry_run": false,
-  "tables": [
-    {"name": "analysis_results", "rows_pushed": 28},
-    {"name": "generated_reports", "rows_pushed": 3}
-  ]
-}
 ```
-
-Error output:
-
-```json
-{
-  "command": "push",
-  "status": "error",
-  "error": "D1 API returned 503: service temporarily unavailable",
-  "exit_code": 3
-}
+$ smugglr --output json push
+{"command":"push","status":"error","error":"Config references unset environment variable ${TURSO_TOKEN}","exit_code":2}
 ```
 
 ### Agent decision logic
 
-Here is how a Claude Code agent (or similar) would call smugglr and handle the result. This is pseudocode for the decision tree, followed by a real implementation.
-
-**Decision tree:**
-
-```
-1. Run dry-run with --output json
-2. Parse JSON. Check total_rows_to_push + total_rows_to_pull.
-   - If 0: nothing to do. Skip.
-   - If > 0: proceed to push.
-3. Run push with --output json
-4. Check exit code:
-   - 0: success. Compare rows_pushed against the dry-run's total_rows_to_push.
-        Fewer than expected means rows were skipped as unresolvable
-        conflicts (see stderr) -- log and continue, or escalate.
-   - 3: transient. Retry up to 3 times with backoff.
-   - Any other non-zero: abort workflow. Log error.
-```
-
-**Real implementation (agent tool call pattern):**
-
-An agent calling smugglr as a shell tool:
+Dry-run first and read `total_rows_to_push`; zero means skip. Push, and branch on the exit code: 0 is done, 3 is retry with backoff, anything else is abort with the `error` string. On 0, sum `rows_pushed` and compare it with the dry-run's `total_rows_to_push`; a shortfall means rows were skipped under `newer_wins` or `uuid_v7_wins` (pattern 3), which is reported as a warning on stderr and never as a non-zero exit, so it is the one condition an agent must infer.
 
 ```python
-import subprocess
 import json
+import subprocess
 import time
 
+
 def smugglr_push(config_path="config.toml", max_retries=3):
-    """Push local data to remote target. Returns parsed result or raises."""
+    """Dry-run, then push. Returns a dict with an `action` for the caller."""
+    base = ["smugglr", "--output", "json", "--config", config_path]
 
-    # Step 1: dry-run
-    dry = subprocess.run(
-        ["smugglr", "push", "--dry-run", "--output", "json", "--config", config_path],
-        capture_output=True, text=True
-    )
-
+    dry = subprocess.run(base + ["push", "--dry-run"], capture_output=True, text=True)
     if dry.returncode != 0:
         result = json.loads(dry.stdout) if dry.stdout else {}
         reason = result.get("error", "unknown error")
@@ -784,97 +777,39 @@ def smugglr_push(config_path="config.toml", max_retries=3):
             return {"action": "retry", "reason": reason}
         return {"action": "abort", "reason": reason, "exit_code": dry.returncode}
 
-    preview = json.loads(dry.stdout)
-    # Dry-run output uses top-level totals and per-table rows_to_push / rows_to_pull.
-    total = preview.get("total_rows_to_push", 0) + preview.get("total_rows_to_pull", 0)
-    if total == 0:
+    expected = json.loads(dry.stdout)["total_rows_to_push"]
+    if expected == 0:
         return {"action": "skip", "reason": "no changes detected"}
 
-    # Step 2: push with retry
     for attempt in range(1, max_retries + 1):
-        push = subprocess.run(
-            ["smugglr", "push", "--output", "json", "--config", config_path],
-            capture_output=True, text=True
-        )
+        push = subprocess.run(base + ["push"], capture_output=True, text=True)
 
         if push.returncode == 0:
             result = json.loads(push.stdout)
-            pushed = sum(t.get("rows_pushed", 0) for t in result.get("tables", []))
-            if pushed < total:
-                # push never exits non-zero for this: an unresolvable conflict
-                # (e.g. two rows with identical uuid_v7_wins timestamps) is
-                # logged to stderr and the row is skipped, not an error.
+            pushed = sum(t.get("rows_pushed", 0) for t in result["tables"])
+            if pushed < expected:
+                # Skipped conflicts exit 0; the warning is on push.stderr.
                 return {
                     "action": "escalate",
-                    "reason": "fewer rows pushed than the dry-run predicted; check stderr for skipped-conflict warnings",
+                    "reason": "fewer rows pushed than the dry-run predicted",
+                    "stderr": push.stderr,
                     "result": result,
                 }
             return {"action": "ok", "result": result}
 
         error = json.loads(push.stdout) if push.stdout else {}
-
         if push.returncode == 3 and attempt < max_retries:
-            # Transient error. Back off and retry.
             time.sleep(2 ** attempt)
             continue
-
         return {"action": "abort", "reason": error.get("error", "unknown"), "exit_code": push.returncode}
 
     return {"action": "abort", "reason": f"failed after {max_retries} retries"}
 ```
 
-**Claude Code tool use pattern:**
-
-When a Claude Code agent needs to sync data, the call sequence looks like this:
-
-```
-Agent thinks: "I need to push analysis results to production D1."
-
-Tool call: Bash
-  command: smugglr push --dry-run --output json
-  -> Parses JSON. Sees 31 operations. Reasonable.
-
-Tool call: Bash
-  command: smugglr push --output json
-  -> Exit code 0. Parses JSON. 31 operations completed.
-  -> Agent continues with its task.
-```
-
-If the push fails:
-
-```
-Tool call: Bash
-  command: smugglr push --output json
-  -> Exit code 3. Transient error.
-
-Agent thinks: "Exit code 3 means transient. Wait and retry."
-
-Tool call: Bash
-  command: sleep 4 && smugglr push --output json
-  -> Exit code 0. Success on retry.
-```
-
-If rows are unresolvable under the current conflict strategy, that is not an error. `push` still exits 0; the unresolvable rows are skipped and named in a stderr warning, not in the JSON on stdout:
-
-```
-Tool call: Bash
-  command: smugglr push --output json
-  -> Exit code 0. stdout: {"command":"push","status":"ok","tables":[{"name":"tasks","rows_pushed":3}]}
-  -> stderr: 2 row(s) in 'tasks' have different content but same PK with
-     identical UUIDv7 timestamp (skipped under uuid_v7_wins). Use local_wins
-     or remote_wins to resolve.
-
-Agent thinks: "Exit 0, but stderr names 2 skipped rows. The pushed count
-  is lower than expected. Report to human rather than assume convergence."
-  -> Agent outputs: "Push to D1 succeeded (3 rows) but skipped 2 rows in
-     the tasks table: uuid_v7_wins can't pick a winner when both sides
-     have the identical timestamp. Manual resolution needed."
-```
-
 ### Watch for
 
-- Always parse stdout, not stderr. Smugglr writes JSON results to stdout and diagnostic messages to stderr. In `--output json` mode, stdout is always valid JSON (even on error).
-- Retryability is determined by exit code, not by a field in the JSON. Exit code 3 is transient (retry with backoff). Exit code 2 is config (do not retry). Exit code 4 is a relay conflict, only from `stash`/`retrieve` (escalate or re-run after re-reading state).
-- Agents should always dry-run first. The cost is one extra API call. The benefit is catching surprises (unexpected row counts, conflicts) before committing.
-- For long-running agent workflows, combine `watch` with JSON output: `smugglr watch --output json` emits one JSON object per tick to stdout (JSONL format). The agent can monitor the stream for anomalies.
-- There is no dedicated plugin exit code. If the target's HTTP API changed or the profile is misconfigured, the adapter error surfaces as exit code 1 (general error) or, for a rejected request, exit code 5. Agents cannot fix either. Escalate immediately.
+Parse stdout, never stderr. In `--output json` mode stdout is one valid object, on success and on error, and stderr is empty except for the skipped-conflict warning described in pattern 3.
+
+Retryability is the exit code, not a field. Exit 3 is retry; 2 is fix the config; 4 is a human decision (a relay ETag conflict from `stash`, or a duplicate primary key); 1 and 5 are abort. In 0.5.0 a plugin failure of any kind, including a backend 429 or 5xx, is exit 1 (smugglr#432), so an agent driving a hosted backend sees exit 1 where it would expect 3.
+
+For a long-running loop, `smugglr --output json watch` (pattern 4) prints one object per tick on stdout, and the agent reads the stream instead of polling.

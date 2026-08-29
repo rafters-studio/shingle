@@ -1,31 +1,89 @@
 ---
 layout: '@/src/layouts/Docs.astro'
 title: Concepts
-description: "Short essays on the ideas behind smugglr: content is truth, adapters and portability, agent-first design, the watch pattern, encryption as membership."
+description: "The ideas behind smugglr, each checked against the 0.5.0 binary: content is truth, one plugin and eight profiles, agent-first output, the watch pattern, the key as membership."
 ---
 
 # Concepts
 
-The mental model behind smugglr. Short essays on the ideas that shape the tool.
-
-Work in progress. Draft content below; full essays land with the next content pass.
+Five ideas shape the tool. Each one below is stated, then shown with a block copied from `docs/examples/` in the smugglr repository, captured from smugglr 0.5.0 on 2026-08-28, with the limit that goes with it.
 
 ## Content is truth
 
-Timestamps lie. Sequence numbers need a coordinator. Content hashing needs neither. Hash the row, compare, move the ones that differ. The same answer falls out whether you run the sync once, twice, or on an interval with packet loss. The hash of the row is the identity of the row.
+Timestamps drift and sequence numbers need a coordinator. A content hash needs neither. smugglr hashes every row from a type tag and the canonical bytes of each column, so `NULL` and `""` differ, `1` and `1.0` do not, and a BLOB hashes the same whether the driver handed it over as bytes or as base64. `updated_at`, `created_at`, and the configured `timestamp_column` stay out of the hash, so a touched timestamp on unchanged content is not a change. Two sides compare hashes per primary key and move the rows whose hashes differ. Run the sync once, twice, or every thirty seconds with packet loss, and the same answer falls out.
 
-## Adapters and portability
+The visible consequence is that a second push moves nothing. From `cli-sqlite-to-sqlite`, after the push on the [Configuration Reference](/docs/configuration/#quick-start):
 
-Vendor lock-in is usually a data problem, not a product problem. If your data is in SQLite, you have infinite portability: SQLite reads on every platform. smugglr's target adapters push that same portability outward: D1 today, Turso tomorrow, rqlite the week after. Same config shape, same conflict strategy, same exit codes.
+```
+$ smugglr push
 
-## Agent-first design
+--- Push Summary ---
+  No changes to push
+```
 
-Pretty terminal output costs an AI agent parseability. Structured JSON costs a human nothing they can't recover with a pipe. smugglr defaults to human output and upgrades to JSON on `--output json`. Exit codes are typed: an agent knows whether to retry, fix config, or escalate.
+The hash is also the diff's skip condition, which is why `exclude_columns` and `converge_columns` exist as two lists and not one. A column out of the hash and off the wire is `exclude_columns`; a column out of the hash but still sent, with the row selected on its timestamp instead, is `converge_columns`. Every peer must hash the same column set, or rows read as divergent forever.
+
+## One plugin, eight profiles
+
+Portability is a data problem before it is a product problem, and rows in SQLite already read on every platform. smugglr pushes that outward one step: every hosted backend is reached through the same plugin, `smugglr-http-sql`, and a profile that names the backend's request shape. `d1`, `turso`, `rqlite`, `datasette`, `sqlite-cloud`, `starbasedb`, `generic`, `http-sql`. Changing the vendor is a profile name and a URL; the config shape, the conflict policy, the summary block, and the exit codes do not change. From `cli-http-sql-turso`:
+
+```toml
+[target]
+type = "plugin"
+name = "http-sql"
+
+[target.config]
+profile = "turso"
+url = "https://my-db.turso.io"
+auth_token = "${TURSO_TOKEN}"
+```
+
+Two limits in the same breath. The plugin is a second binary, `cargo install smugglr-http-sql`, and the 0.5.0 archive does not carry it ([smugglr#430](https://github.com/rafters-studio/smugglr/issues/430)). And the `d1` profile does not reach D1 today ([smugglr#429](https://github.com/rafters-studio/smugglr/issues/429), [#436](https://github.com/rafters-studio/smugglr/issues/436)); the [Plugin Guide](/docs/plugin-guide/) has the detail.
+
+## Agent-first
+
+The primary caller is a program. Text mode prints a summary block on stdout and timestamped `INFO` tracing on stderr, for a human watching. `--output json`, a global flag placed before the subcommand, silences the tracing and prints one JSON object. From `cli-sqlite-to-sqlite`, after six local edits:
+
+```
+$ smugglr --output json push
+{"command":"push","status":"ok","tables":[{"name":"orders","rows_pushed":6}]}
+```
+
+The dry-run object carries every table and every diff bucket; the push object carries only the tables that moved, so an empty `tables` is a no-op. The exit code is the scripting contract, and it maps from the error, not the command.
+
+| Code | Meaning | What a caller does |
+|------|---------|--------------------|
+| 0 | success | continue |
+| 1 | general error | inspect |
+| 2 | configuration error | fix the config, do not retry |
+| 3 | connection error | retry |
+| 4 | conflict | pick a `conflict_resolution` |
+| 5 | target not found | check the path or the endpoint |
+
+One limit: an empty intersection of tables between the two sides reports `status: ok` with an empty `tables` and exit 0, so pointing at the wrong target looks like success ([smugglr#438](https://github.com/rafters-studio/smugglr/issues/438)).
 
 ## The watch pattern
 
-Background sync without a server. `smugglr watch` polls, syncs, logs, repeats. No shared state, no coordinator, no daemon registry. If the process dies, restart it. Content hashing makes the restart a no-op when nothing changed.
+Background sync without a server. `smugglr watch` runs a full sync every interval (`-i`, default 30 seconds), writes a `last_sync` line into `config.toml`, and repeats. There is no cursor: every tick reads both sides and hashes every row, and content hashing makes a tick with no changes a no-op. It writes a PID lock, `.smugglr.pid`, beside the config file, so a second instance on the same config refuses to start, and it stops on SIGINT. A transient error, a connection failure for instance, waits for the next tick; any other error ends the daemon with that error's exit code. If the process dies, restart it; there is no state to recover.
 
-## Encryption as membership
+```sh
+smugglr watch --dry-run
+smugglr watch
+```
 
-LAN broadcast has no authentication handshake. The encryption key is the membership token. If you have the key, you are on the network. Key rotation is how you remove a machine. This is the simplest trust model that holds up under packet loss and replay.
+Two limits. A locked local database is one of the errors that ends the daemon rather than waiting for the next tick, and `last_sync` is informational; nothing reads it back.
+
+## The key is the membership
+
+LAN broadcast has no handshake and no coordinator. With `[broadcast].secret` set, every datagram is sealed with XChaCha20-Poly1305 under that key, a node with a different key sees only ciphertext, and rotating the key is how a machine is removed. From `cli-lan-broadcast`:
+
+```toml
+[broadcast]
+secret = "REPLACE_WITH_OUTPUT_OF_openssl_rand_-hex_32"
+port = 31337
+interval_secs = 5
+conflict_resolution = "newer_wins"
+ordering_columns = ["updated_at"]
+```
+
+The key is optional, and that is the limit. Leave `secret` out and the node still runs, in the clear, accepting any well-formed datagram from the subnet; it warns once at start and never again. A keyed node and a keyless node cannot sync. The other half of the trust model is the conflict policy: `remote_wins`, the default, is last-received-wins and can leave two nodes holding different rows for one key; `newer_wins` is the only policy under which the mesh converges, and every peer must set it. Deletes do not replicate on any path in 0.5.0 ([smugglr#311](https://github.com/rafters-studio/smugglr/issues/311)).

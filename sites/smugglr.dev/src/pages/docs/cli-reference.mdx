@@ -1,347 +1,275 @@
 ---
 layout: '@/src/layouts/Docs.astro'
 title: CLI Reference
-description: "Every smugglr command: push, pull, sync, diff, watch, stash, retrieve, snapshot, broadcast, status. Flags, examples, exit codes, JSON output."
+description: "Every smugglr 0.5.0 command: push, pull, sync, diff, status, stash, retrieve, snapshot, snapshots, restore, watch, broadcast, migrate new, migrate apply. Usage lines from --help, flags with short forms, captured output, exit codes, JSON shapes."
 ---
 
 
-Every command. Every flag. Every exit code. Real output.
+smugglr 0.5.0. Every usage line below is from `smugglr <command> --help`. Every output block was captured by running that binary against the [Westwind](https://github.com/rafters-studio/smugglr/tree/main/docs/examples/westwind) sample (`docs/examples/westwind/make.sh ./local.db` for the source, `make.sh --empty ./backup.db` for the target), or copied from an example README under `docs/examples/`, which says the same thing about its own blocks. The command sits above each block. Blocks marked stdout omit the tracing on stderr; the split is described under [Output modes](#output-modes).
 
 ```
-smugglr [GLOBAL FLAGS] <COMMAND> [FLAGS]
+smugglr [OPTIONS] <COMMAND>
 ```
 
-## Global Flags
+## Global flags
+
+Global flags go before the subcommand. `smugglr push --dry-run --output json` is an error, and so are `smugglr push -c other.toml` and `smugglr push -v`.
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--config <PATH>` | `config.toml` | Path to configuration file. |
-| `--verbose`, `-v` | off | Print detailed sync operations to stderr. |
-| `--output <FORMAT>` | `text` | Output format: `text` or `json`. |
-
----
-
-## Sync Commands
-
-### push
-
-Push local rows to the remote target. Only sends rows that actually changed (content-hashed delta).
+| `-c`, `--config <CONFIG>` | `config.toml` | Path to config file. |
+| `-v`, `--verbose` | off | Raise the tracing level on stderr from INFO to DEBUG. |
+| `-o`, `--output <OUTPUT>` | `text` | Output format: `text` or `json`. |
+| `-h`, `--help` | | Print help. |
+| `-V`, `--version` | | Print version. |
 
 ```
-smugglr push [--table NAME] [--dry-run]
+$ smugglr push --dry-run --output json
+error: unexpected argument '--output' found
+
+Usage: smugglr push --dry-run
+
+For more information, try '--help'.
 ```
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--table <NAME>` | all tables | Sync a single table. |
-| `--dry-run` | off | Show what would be pushed without writing. |
+Exit code 2. The order that works is `smugglr --output json push --dry-run`.
+
+## Output modes
+
+In text mode, stdout carries a summary block and stderr carries timestamped tracing lines, whether or not `-v` is given. The first three stderr lines of a dry-run, from `docs/examples/cli-sqlite-to-sqlite`:
 
 ```
-$ smugglr push --table users
-smugglr: pushing users
-  3 rows pushed (2 new, 1 updated)
-
-Done. 3 rows pushed in 1.2s.
+2026-08-28T22:08:11.303157Z  INFO Opening local database (read-only): ./local.db
+2026-08-28T22:08:11.303347Z  INFO Push mode: local -> SQLite (./backup.db)
+2026-08-28T22:08:11.303356Z  INFO Opening local database: ./backup.db
 ```
 
-Dry-run output includes row counts per table without writing anything to the target.
-
-```
-$ smugglr push --dry-run
-smugglr: dry run (no changes will be written)
-
-  users:    3 rows to push (2 new, 1 updated)
-  sessions: 0 rows to push
-
-Total: 3 rows to push across 1 table.
-```
-
----
-
-### pull
-
-Pull remote rows to the local database. Only fetches rows that differ from what you already have.
-
-```
-smugglr pull [--table NAME] [--dry-run]
-```
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--table <NAME>` | all tables | Sync a single table. |
-| `--dry-run` | off | Show what would be pulled without writing. |
-
-```
-$ smugglr pull --table users
-smugglr: pulling users
-  12 rows pulled (12 new, 0 updated)
-
-Done. 12 rows pulled in 0.8s.
-```
-
----
-
-### sync
-
-Bidirectional sync. Pushes local changes to remote, pulls remote changes to local. Conflict resolution is controlled by the `[sync]` strategy in your config file, not by a CLI flag.
-
-```
-smugglr sync [--table NAME] [--dry-run]
-```
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--table <NAME>` | all tables | Sync a single table. |
-| `--dry-run` | off | Show what would happen in both directions. |
-
-```
-$ smugglr sync
-smugglr: syncing all tables
-  users:    2 rows pushed, 5 rows pulled
-  sessions: 0 rows pushed, 3 rows pulled
-
-Done. 2 pushed, 8 pulled in 2.1s.
-```
-
-Note: conflict strategy (local_wins, remote_wins, newer_wins, uuid_v7_wins) is set in `config.toml` under `[sync]`. There is no `--strategy` flag.
-
----
-
-### diff
-
-Read-only comparison between local and remote. Moves nothing. Shows what push, pull, or sync would do.
-
-```
-smugglr diff [--table NAME]
-```
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--table <NAME>` | all tables | Compare a single table. |
-
-```
-$ smugglr diff
-smugglr: comparing local <-> remote
-
-  users:
-    local-only:  2 rows
-    remote-only: 5 rows
-    modified:    1 row
-
-  sessions:
-    local-only:  0 rows
-    remote-only: 3 rows
-    modified:    0 rows
-```
-
-This is a safe command. It reads both sides, hashes, and reports. Nothing is written anywhere.
-
----
-
-## Relay Commands
-
-Stash and retrieve move data through S3-compatible storage (R2, MinIO, any S3 endpoint). The relay is a staging area for machines that cannot reach each other directly.
-
-### stash
-
-Upload local database state to the S3 relay.
-
-```
-smugglr stash [--table NAME] [--dry-run]
-```
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--table <NAME>` | all tables | Stash a single table. |
-| `--dry-run` | off | Show what would be uploaded without writing. |
-
-```
-$ smugglr stash
-smugglr: stashing to relay (s3://smugglr-relay/default)
-  users:    142 rows stashed
-  sessions: 89 rows stashed
-
-Done. 231 rows stashed in 3.4s.
-```
-
-Stash uses ETag-based concurrency protection. If another machine stashes the same table while you are uploading, the operation fails with exit code 4.
-
----
-
-### retrieve
-
-Download from the S3 relay to the local database.
-
-```
-smugglr retrieve [--table NAME] [--dry-run]
-```
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--table <NAME>` | all tables | Retrieve a single table. |
-| `--dry-run` | off | Show what would be downloaded without writing. |
-
-```
-$ smugglr retrieve --table users
-smugglr: retrieving from relay (s3://smugglr-relay/default)
-  users: 142 rows retrieved (12 new, 3 updated)
-
-Done. 142 rows retrieved in 1.9s.
-```
-
----
-
-## Snapshot Commands
-
-### snapshot
-
-Create a point-in-time backup of the local database state. Writes to the configured relay with a timestamped key.
-
-```
-smugglr snapshot [--dry-run]
-```
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--dry-run` | off | Show snapshot metadata without writing. |
+`-v` adds DEBUG lines to the same stream. A failure in text mode is one `ERROR` line on stderr and nothing on stdout:
 
 ```
 $ smugglr snapshot
-smugglr: creating snapshot
-  timestamp: 2026-04-04T14:32:01Z
-  tables:    3 (users, sessions, events)
-  size:      2.4 MB
-
-Snapshot saved to relay.
+2026-08-29T02:22:23.141057Z ERROR Error: Configuration error: No [stash] section in config
 ```
 
-Snapshots are portable. Snapshot from D1, restore to Turso, or vice versa.
+`--output json` silences the tracing and prints one JSON object on stdout, except for `watch`, which prints one object per tick, and `broadcast`, which prints nothing. The shapes are under [JSON output](#json-output).
 
 ---
 
-### snapshots
+## push
 
-List all available snapshots on the relay.
-
-```
-smugglr snapshots
-```
-
-No flags. Read-only.
+Push local changes to the remote target (local -> remote). Rows whose content hash already matches the target are not sent.
 
 ```
-$ smugglr snapshots
-smugglr: 4 snapshots available
-
-  2026-04-04T14:32:01Z  2.4 MB  3 tables
-  2026-04-03T09:15:44Z  2.3 MB  3 tables
-  2026-04-01T18:00:02Z  2.1 MB  2 tables
-  2026-03-28T12:00:00Z  1.8 MB  2 tables
-```
-
----
-
-### restore
-
-Restore the local database from a snapshot. Requires the snapshot timestamp as an argument.
-
-```
-smugglr restore <TIMESTAMP> [--dry-run]
+smugglr push [OPTIONS]
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--dry-run` | off | Show what the restore would do without writing. |
+| `-t`, `--table <TABLE>` | all configured tables | Specific table to push. |
+| `--dry-run` | off | Show what would be pushed without actually pushing. |
 
-The timestamp must match one returned by `smugglr snapshots`.
+Against a target built with `make.sh --empty`, stdout:
 
 ```
-$ smugglr restore 2026-04-03T09:15:44Z
-smugglr: restoring from snapshot 2026-04-03T09:15:44Z
-  users:    134 rows restored
-  sessions: 87 rows restored
-  events:   412 rows restored
+$ smugglr push --dry-run
 
-Done. 633 rows restored in 4.1s.
+--- Push Summary ---
+  customers: 40 rows
+  categories: 8 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
+
+  (dry run - no actual changes made)
 ```
 
-This overwrites local data. Use `--dry-run` first.
+```
+$ smugglr push
+
+--- Push Summary ---
+  categories: 8 rows
+  suppliers: 8 rows
+  shippers: 3 rows
+  customers: 40 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+```
+
+Same counts. The lines come out in a different order because the summary iterates a map, so compare counts, not line positions. A second push has nothing to move:
+
+```
+$ smugglr push
+
+--- Push Summary ---
+  No changes to push
+```
+
+With `-t`, only that table is diffed. Captured after touching six orders locally:
+
+```
+$ smugglr push -t orders --dry-run
+
+--- Push Summary ---
+  orders: 6 rows
+
+  (dry run - no actual changes made)
+```
+
+```
+$ smugglr push -t orders
+
+--- Push Summary ---
+  orders: 6 rows
+```
+
+A table name that is not in the local database is a configuration error, exit 2. The message lists what is there, including the migration ledger, which sync excludes by default:
+
+```
+$ smugglr --output json push --table nope
+{"command":"push","status":"error","error":"Invalid table name 'nope'. Available tables: [_smugglr_migrations, categories, customers, employees, order_details, orders, products, shippers, suppliers]","exit_code":2}
+```
 
 ---
 
-## Daemon Commands
+## pull
 
-### watch
-
-Run smugglr as a background daemon. Syncs on a fixed interval until stopped.
+Pull changes from the remote target to local (remote -> local).
 
 ```
-smugglr watch [--interval SECS] [--dry-run]
+smugglr pull [OPTIONS]
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--interval <SECS>` | `30` | Seconds between sync cycles. |
-| `--dry-run` | off | Log what each cycle would do without writing. |
+| `-t`, `--table <TABLE>` | all configured tables | Specific table to pull. |
+| `--dry-run` | off | Show what would be pulled without actually pulling. |
+
+Captured after updating one product on the target:
 
 ```
-$ smugglr watch --interval 60
-smugglr: watching (interval: 30s, strategy: local_wins)
+$ smugglr pull --dry-run
 
-[2026-04-04T14:32:01Z] users: 0 pushed, 2 pulled
-[2026-04-04T14:33:01Z] no changes
-[2026-04-04T14:34:01Z] users: 1 pushed, 0 pulled
-^C
-smugglr: stopped. 3 cycles completed.
+--- Pull Summary ---
+  products: 1 rows
+
+  (dry run - no actual changes made)
 ```
 
-Watch writes JSONL to stdout when `--output json` is set. Each tick is one JSON line. Useful for piping into log aggregators or agent workflows.
+```
+$ smugglr pull
 
-`--dry-run` opens the local database read-only for the life of the daemon, not just per tick: no write connection is ever acquired, so a `--dry-run` watch cannot write to the local database even if a bug elsewhere tried. Text-mode tick summaries append `(dry run - no actual changes made)` so a log line with row counts is never mistaken for an applied sync.
+--- Pull Summary ---
+  products: 1 rows
+```
 
-Stop with SIGINT (Ctrl+C) or SIGTERM. The daemon finishes the current cycle before exiting.
+```
+$ smugglr pull
+
+--- Pull Summary ---
+  No changes to pull
+```
 
 ---
 
-## Network Commands
+## sync
 
-### broadcast
-
-Sync over the local network using encrypted UDP datagrams. No coordinator, no relay, no server. Machines with the shared encryption key receive and apply changes.
+Bidirectional sync (push + pull in one operation). The conflict policy is `[sync] conflict_resolution` in the config file; there is no flag for it.
 
 ```
-smugglr broadcast [--port PORT] [--interval SECS] [--once] [--dry-run]
+smugglr sync [OPTIONS]
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--port <PORT>` | config value | UDP port for broadcast. |
-| `--interval <SECS>` | config value | Seconds between broadcast cycles. |
-| `--once` | off | Broadcast once and exit. |
-| `--dry-run` | off | Show what would be broadcast without sending. |
+| `-t`, `--table <TABLE>` | all configured tables | Specific table to sync. |
+| `--dry-run` | off | Show what would be synced without actually syncing. |
+
+Captured with six orders edited locally and one shipper edited on the target:
 
 ```
-$ smugglr broadcast --once
-smugglr: broadcasting to 192.168.1.0/24:9847
-  users:    142 rows (2 changed)
-  sessions: 89 rows (0 changed)
+$ smugglr sync --dry-run
 
-Broadcast sent. 2 datagrams, 4.2 KB.
+--- Sync Summary ---
+  orders: 6 pushed, 0 pulled
+  shippers: 0 pushed, 1 pulled
+
+  (dry run - no actual changes made)
 ```
 
-The encryption key is configured in `[broadcast]` in your config file. The key is the trust boundary: if you have the key, you are on the network. There is no authentication handshake.
+```
+$ smugglr sync
 
-Content hashing makes missed packets safe. If a machine misses a broadcast, the next one covers it. Idempotent by design.
+--- Sync Summary ---
+  orders: 6 pushed, 0 pulled
+  shippers: 0 pushed, 1 pulled
+```
 
-For cross-network broadcast (machines not on the same LAN), bring your own tunnel: Tailscale, WireGuard, ZeroTier. Smugglr broadcasts to whatever subnet it sees.
+```
+$ smugglr sync
+
+--- Sync Summary ---
+  No changes to sync
+```
+
+Tables with nothing in either direction are left out of the text summary.
 
 ---
 
-## Info Commands
+## diff
 
-### status
+Show differences between local and remote. Reads both sides, hashes every row, writes nothing.
 
-Print configuration and connection status. Verifies that the config file is valid, the local database is readable, and the remote target is reachable.
+```
+smugglr diff [OPTIONS]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-t`, `--table <TABLE>` | all configured tables | Specific table to diff. |
+
+Each row lands in one of six buckets: `local_only`, `remote_only`, `local_newer`, `remote_newer`, `content_differs`, `identical`. Captured with six orders edited locally, one shipper edited on the target, and one customer inserted on the target:
+
+```
+$ smugglr diff
+
+--- Differences ---
+
+shippers
+  1 remote newer, 2 identical
+    Remote newer: 019438ea-9036-7221-933c-951305c6e3c1
+
+employees: in sync (9 rows)
+
+customers
+  +1 remote only, 40 identical
+    Remote only: 019906f0-0000-7000-8000-000000000001
+
+orders
+  6 local newer, 314 identical
+    Local newer: 019438f2-9941-76b7-a349-38b80ebeedc4, 019438f4-2629-734b-b94a-862cbabaff3c, 019438f0-7f24-7598-8741-725482e34619, 019438f7-0e5c-74f0-9dd5-8e3a657e884d, 019438f0-2b2e-7cbd-9bdc-66548b665d03
+      ... and 1 more
+
+products: in sync (20 rows)
+
+suppliers: in sync (8 rows)
+
+categories: in sync (8 rows)
+
+order_details: in sync (788 rows)
+```
+
+Text mode prints the first five primary keys per bucket. When nothing differs, every table reports `in sync` and the block ends with `All tables are in sync!`.
+
+---
+
+## status
+
+Show configuration and connection status.
 
 ```
 smugglr status
@@ -354,153 +282,663 @@ $ smugglr status
 --- Configuration ---
   Config file: loaded
   Local DB: ./local.db
-  Target: Plugin (http-sql)
-  Plugin path: /Users/you/.smugglr/plugins/smuggler-http-sql
+  Target: SQLite (./backup.db)
   Timestamp column: updated_at
   Conflict resolution: LocalWins
+  Excluded tables: sqlite_sequence, _cf_KV, __drizzle_migrations, _smugglr_migrations
 
 --- Local Database ---
   Connection: OK
-  Tables: 3
-    users: 142 rows
-    posts: 488 rows
-    settings: 3 rows
+  Tables: 8
+    categories: 8 rows
+    customers: 40 rows
+    employees: 9 rows
+    order_details: 788 rows
+    orders: 320 rows
+    products: 20 rows
+    shippers: 3 rows
+    suppliers: 8 rows
 
---- Target Plugin (http-sql) ---
+--- Target SQLite ---
   Connection: OK
-  Tables: 3
-    users: 142 rows
-    posts: 488 rows
-    settings: 3 rows
+  Tables: 8
+    categories: 8 rows
+    customers: 40 rows
+    employees: 9 rows
+    order_details: 788 rows
+    orders: 320 rows
+    products: 20 rows
+    shippers: 3 rows
+    suppliers: 8 rows
 ```
 
-There is no `relay:` line and no top-level `strategy:` line: the relay is not part of status, and the conflict strategy is reported as `Conflict resolution`. If the target cannot be reached, that section reports the failure (the process still exits non-zero):
+A target that cannot be opened is reported in its section, and the process still exits 0. A script that wants to gate on the target must read `target.connected` from the JSON shape, not the exit code. Captured with `database` pointing into a directory that does not exist:
 
 ```
 $ smugglr status
 --- Configuration ---
   Config file: loaded
   Local DB: ./local.db
-  Target: Plugin (http-sql)
-  Plugin path: /Users/you/.smugglr/plugins/smuggler-http-sql
+  Target: SQLite (./missing-dir/backup.db)
   Timestamp column: updated_at
   Conflict resolution: LocalWins
+  Excluded tables: sqlite_sequence, _cf_KV, __drizzle_migrations, _smugglr_migrations
 
 --- Local Database ---
   Connection: OK
-  Tables: 3
-    users: 142 rows
-    posts: 488 rows
-    settings: 3 rows
+  Tables: 8
+    categories: 8 rows
+    customers: 41 rows
+    employees: 9 rows
+    order_details: 788 rows
+    orders: 320 rows
+    products: 20 rows
+    shippers: 3 rows
+    suppliers: 8 rows
 
---- Target Plugin (http-sql) ---
-  Connection: FAILED - 401 Unauthorized. Check your API token.
+--- Target SQLite ---
+  Connection: FAILED - Local database error: unable to open database file: ./missing-dir/backup.db
+```
+
+The same target under `push` is exit 1, because there the failure is an error, not a report.
+
+---
+
+## stash
+
+Stash local state to an S3-compatible relay (local -> S3). The relay is a SQLite file at `[stash] url`; `stash` downloads it, upserts local rows into it through the same diff engine as `push`, and uploads it back. On S3 the upload is conditional on the ETag read at download, so two machines stashing at once cannot overwrite each other: the loser exits 4. On a `file://` URL there is no ETag, the put is unconditional, and smugglr warns once.
+
+```
+smugglr stash [OPTIONS]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-t`, `--table <TABLE>` | all configured tables | Specific table to stash. |
+| `--dry-run` | off | Show what would be stashed without actually uploading. |
+
+From `docs/examples/cli-stash-file-relay`, first stash into a relay that does not exist yet:
+
+```
+$ smugglr -c config-a.toml stash
+
+--- Stash Summary ---
+  categories: 8 rows
+  customers: 40 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
+```
+
+A second stash with no local edits:
+
+```
+$ smugglr stash --dry-run
+
+--- Stash Summary ---
+  No changes to stash
+```
+
+`exclude_columns` is not applied on this path in 0.5.0, so an excluded column still reaches the relay ([smugglr#322](https://github.com/rafters-studio/smugglr/issues/322)).
+
+---
+
+## retrieve
+
+Retrieve state from an S3-compatible relay (S3 -> local). Downloads the relay file and upserts its rows into the local database; the local file is never replaced wholesale.
+
+```
+smugglr retrieve [OPTIONS]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-t`, `--table <TABLE>` | all configured tables | Specific table to retrieve. |
+| `--dry-run` | off | Show what would be retrieved without actually applying. |
+
+From `docs/examples/cli-stash-file-relay`, machine B retrieving into an empty schema, then again:
+
+```
+$ smugglr -c config-b.toml retrieve
+
+--- Retrieve Summary ---
+  categories: 8 rows
+  customers: 40 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
+```
+
+```
+$ smugglr -c config-b.toml retrieve
+
+--- Retrieve Summary ---
+  No changes to retrieve
 ```
 
 ---
 
-## Exit Codes
+## snapshot
 
-Every command returns a typed exit code. Use these for scripting, CI/CD gates, and agent workflows.
+Create a point-in-time snapshot of the local database. The file is copied to `[stash] url` under `snapshots/<timestamp>-<8 hex>.sqlite` with a `.meta.json` beside it. It is the local file that is copied, never a hosted target, and the copy includes `_smugglr_migrations`. Without a `[stash]` section the command is a configuration error, exit 2. In 0.5.0 the copy is a plain file read, so content still in the WAL is missed ([smugglr#433](https://github.com/rafters-studio/smugglr/issues/433)).
 
-| Code | Name | Meaning | Retry? |
-|------|------|---------|--------|
-| `0` | Success | Operation completed. | No. |
-| `1` | General error | Something unexpected broke, including a plugin/adapter failure. There is no dedicated plugin exit code; adapter errors fold into this bucket. | Maybe. |
-| `2` | Config error | Bad config file, missing fields, invalid values. | No. Fix the config. |
-| `3` | Network/transient | Connection failed, timeout, HTTP 5xx, retries exhausted. | Yes, with backoff. |
-| `4` | Conflict | `stash`/`retrieve` hit a concurrent write on the relay (S3 ETag mismatch). Not used for `push`/`pull`/`sync` row conflicts -- those are resolved by your conflict strategy or, if unresolvable, logged as a warning and skipped, not an error. | Yes, after re-reading state. |
-| `5` | Not found | Table, snapshot, or resource does not exist; also covers a rejected D1/target request (bad statement, bad request). | No. Check the name or the request. |
+```
+smugglr snapshot [OPTIONS]
+```
 
-The CLI's exit codes are 0 through 5. There is no `6`.
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--dry-run` | off | Show what would be snapshotted without uploading. |
 
-In shell scripts:
+```
+$ smugglr snapshot --dry-run
+
+--- Snapshot ---
+  Timestamp: 2026-08-29T02:25:34.211Z-c9b1ad78
+  Size: 417792 bytes
+  _smugglr_migrations: 8 rows
+  categories: 8 rows
+  customers: 41 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
+
+  (dry run - no snapshot created)
+```
+
+```
+$ smugglr snapshot
+
+--- Snapshot ---
+  Timestamp: 2026-08-29T02:25:34.226Z-42617419
+  Size: 417792 bytes
+  _smugglr_migrations: 8 rows
+  categories: 8 rows
+  customers: 41 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
+```
+
+The dry-run mints a timestamp it does not keep; the eight hex characters are fresh on every run.
+
+---
+
+## snapshots
+
+List available snapshots. Reads `[stash] url`, writes nothing.
+
+```
+smugglr snapshots
+```
+
+```
+$ smugglr snapshots
+
+--- Snapshots ---
+  2026-08-29T02:25:34.242Z-80262f58 (417792 bytes, 9 tables, 1205 rows)
+  2026-08-29T02:25:34.226Z-42617419 (417792 bytes, 9 tables, 1205 rows)
+
+  2 snapshot(s) available
+```
+
+Newest first.
+
+---
+
+## restore
+
+Restore local database from a snapshot. The argument is a timestamp; the snapshot restored is the one at that timestamp or, failing an exact match, the latest one before it. Restore overwrites the local file after running SQLite's `quick_check` on the snapshot. It does not touch a hosted target.
+
+```
+smugglr restore [OPTIONS] <TIMESTAMP>
+```
+
+| Argument or flag | Description |
+|------|-------------|
+| `<TIMESTAMP>` | Timestamp of snapshot to restore (exact or closest before). |
+| `--dry-run` | Show what would be restored without applying. |
+
+```
+$ smugglr restore 2026-08-29T02:25:34.226Z-42617419 --dry-run
+
+--- Restore ---
+  Restored snapshot: 2026-08-29T02:25:34.226Z-42617419
+  Size: 417792 bytes
+  _smugglr_migrations: 8 rows
+  categories: 8 rows
+  customers: 41 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
+
+  (dry run - no changes applied)
+```
+
+A timestamp between the two snapshots listed above picks the earlier one:
+
+```
+$ smugglr restore 2026-08-29T02:25:34.230Z
+
+--- Restore ---
+  Restored snapshot: 2026-08-29T02:25:34.226Z-42617419
+  Size: 417792 bytes
+  _smugglr_migrations: 8 rows
+  categories: 8 rows
+  customers: 41 rows
+  employees: 9 rows
+  order_details: 788 rows
+  orders: 320 rows
+  products: 20 rows
+  shippers: 3 rows
+  suppliers: 8 rows
+```
+
+A timestamp earlier than every snapshot is a stash error, exit 1, not 5:
+
+```
+$ smugglr --output json restore 2020-01-01T00:00:00Z
+{"command":"restore","status":"error","error":"Stash error: No snapshot found at or before 2020-01-01T00:00:00Z. Earliest available: 2026-08-29T02:25:34.226Z-42617419","exit_code":1}
+```
+
+The comparison is on the string, not a parsed date. In this session's run, `smugglr restore banana` restored the latest snapshot and exited 0, because `banana` sorts after every snapshot name. Pass a timestamp copied from `smugglr snapshots`, and run `--dry-run` first: the dry-run names the snapshot the real run would pick.
+
+---
+
+## watch
+
+Watch for changes and sync periodically (daemon mode). Every tick is a full `sync` against the configured target. The daemon takes a `.smugglr.pid` lock in the working directory, and after each tick it writes `last_sync` into the config file, where it gates nothing.
+
+```
+smugglr watch [OPTIONS]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-i`, `--interval <INTERVAL>` | `30` | Sync interval in seconds. |
+| `--dry-run` | off | Show what would be synced without actually syncing. |
+
+In text mode `watch` prints nothing to stdout. Everything it says is tracing on stderr. Captured with a one-second interval after editing three shippers locally, then stopped with Ctrl+C; the lock, open, and per-table diff lines are cut, and timestamps and ANSI color stripped:
+
+```
+$ smugglr watch -i 1
+ INFO Starting watch daemon (interval: 1s, dry_run: false)
+ INFO Pushing 3 rows to table: shippers (dry_run=false)
+ INFO Upserted 3 rows into shippers
+ INFO Tick #1: 3 pushed, 0 pulled across 8 tables
+ INFO Tick #2: no changes
+ INFO Received shutdown signal. Stopping watch daemon.
+ INFO Watch daemon stopped after 2 ticks
+ INFO Released PID lock: .smugglr.pid
+```
+
+With `--dry-run` the daemon opens both databases read-only for its whole life, so no tick can write, and each tick line says so (same cuts):
+
+```
+$ smugglr watch -i 1 --dry-run
+ INFO Starting watch daemon (interval: 1s, dry_run: true)
+ INFO Pushing 3 rows to table: shippers (dry_run=true)
+ INFO Tick #1: 3 pushed, 0 pulled across 8 tables (dry run - no actual changes made)
+ INFO Tick #2: 3 pushed, 0 pulled across 8 tables (dry run - no actual changes made)
+ INFO Received shutdown signal. Stopping watch daemon.
+ INFO Watch daemon stopped after 2 ticks
+```
+
+The daemon handles SIGINT only. Ctrl+C finishes the current tick, logs the shutdown, and releases the lock. SIGTERM is not handled: in this session's run `kill -TERM` ended the process with status 143 and no shutdown lines, and the next start logged `Removing stale PID file`. Under systemd or a supervisor, send SIGINT.
+
+With `--output json`, stderr is silent and stdout carries one line per tick; see [Watch](#watch-jsonl) under JSON output.
+
+---
+
+## broadcast
+
+LAN broadcast sync with peer discovery. Every node multicasts a `primary_key -> content_hash` digest of its tables each interval and requests the rows it lacks; every listener applies answers idempotently. Configuration is the `[broadcast]` section: `secret`, `port` (default 31337), `interval_secs` (default 30), `instance_id` (default hostname), `conflict_resolution`, `ordering_columns`. With `secret` set, every datagram is XChaCha20-Poly1305. Without it the node runs in the clear, accepts any well-formed datagram from the subnet, and warns once at start. Deletes do not replicate on any path in 0.5.0.
+
+```
+smugglr broadcast [OPTIONS]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-p`, `--port <PORT>` | `[broadcast] port` | Override broadcast port. |
+| `-i`, `--interval <INTERVAL>` | `[broadcast] interval_secs` | Sync interval in seconds. |
+| `--once` | off | Run a single sync cycle and exit. |
+| `--dry-run` | off | Show what would sync without applying. |
+
+`broadcast` writes nothing to stdout in either output mode; `--output json broadcast` prints nothing on stdout or stderr. In text mode everything it says is on stderr. From `docs/examples/cli-lan-broadcast`, one node (timestamps and ANSI color stripped):
+
+```
+$ smugglr broadcast
+ INFO Acquired PID lock: .smugglr-broadcast.pid (PID 30382)
+ INFO Starting masterless multicast sync (group 239.255.43.21, port 31999, interval 2s, instance peer-d, dry_run false)
+ INFO Opening local database: d.db
+ INFO Heartbeat #1: multicast 1 digest datagram(s)
+ INFO Heartbeat #2: multicast 1 digest datagram(s)
+```
+
+`--once` sends one heartbeat, waits briefly for answers, and exits. Captured against Westwind on one host:
+
+```
+$ smugglr broadcast --once
+ INFO Acquired PID lock: .smugglr-broadcast.pid (PID 98814)
+ INFO Starting masterless multicast sync (group 239.255.43.21, port 31998, interval 2s, instance Puck.local, dry_run false)
+ INFO Opening local database: ./node.db
+ INFO Single heartbeat sent; converging briefly...
+ INFO Single cycle complete, exiting
+ INFO Released PID lock: .smugglr-broadcast.pid
+```
+
+```
+$ smugglr broadcast --once --dry-run -p 31997
+ INFO Acquired PID lock: .smugglr-broadcast.pid (PID 99173)
+ INFO Starting masterless multicast sync (group 239.255.43.21, port 31997, interval 2s, instance Puck.local, dry_run true)
+ INFO Opening local database: ./node.db
+ INFO Dry run: would multicast 112 digest datagram(s); not sending, not applying
+ INFO Released PID lock: .smugglr-broadcast.pid
+```
+
+Two nodes on one host need distinct `instance_id` values and separate working directories, because the PID lock is per directory and a node drops datagrams carrying its own id. On macOS the application firewall silently drops inbound multicast for an unsigned binary. Multicast does not cross routers; for machines on different networks, put them on one tunnel.
+
+---
+
+## migrate new
+
+Scaffold a new migration manifest from a Rails-style column spec and print it to stdout. `migrate` runs before any config is loaded, so it neither reads nor needs `config.toml`.
+
+```
+smugglr migrate new <NAME> [COLUMN]...
+```
+
+| Argument | Description |
+|------|-------------|
+| `<NAME>` | Migration name (e.g. `create_contacts`); the table is derived from it. |
+| `[COLUMN]...` | Column specs: `name[:type][:modifier...]` (type defaults to text). |
+
+In 0.5.0 the name must be `create_<table>`; the alter form is deferred:
+
+```
+$ smugglr --output json migrate new add_x a:int
+{"command":"migrate","status":"error","error":"Configuration error: unsupported migration name 'add_x': 0.5.0 supports only the create-table form 'create_<table>' (the alter form is deferred)","exit_code":2}
+```
+
+From `docs/examples/cli-migrate`, the scaffold and the manifest it prints. Keys default to `TEXT`; `notnull` satisfies the first-run check that wants a declared key non-nullable:
+
+```
+$ smugglr migrate new create_bribes id:pk:notnull harbormaster:text amount:int paid_at:int > migrations/create_bribes.json
+```
+
+```json
+{
+  "manifest": {
+    "version": 1,
+    "target_schema": "",
+    "up": [
+      {
+        "op": {
+          "op": "create_table",
+          "table": "bribes",
+          "columns": [
+            { "name": "id", "kind": "text", "constraints": [ { "constraint": "pk" }, { "constraint": "not_null" } ] },
+            { "name": "harbormaster", "kind": "text" },
+            { "name": "amount", "kind": "int" },
+            { "name": "paid_at", "kind": "int" }
+          ],
+          "without_rowid": false
+        },
+        "op_class": "additive"
+      }
+    ],
+    "down": [
+      { "op": { "op": "drop_table", "table": "bribes" }, "op_class": "destructive" }
+    ],
+    "flags": { "destructive": false, "hash_rewriting": false }
+  },
+  "checksum": "62f1d23e0c3b34222075d7f99ed090c4971710642a5201af5ad51bdb99d90148"
+}
+```
+
+Each op carries an `op_class`, additive or destructive, and the checksum covers the whole manifest. `--output json` changes nothing here; the manifest is already the output. `migrate new` does not yet refuse an explicit `int:pk` ([smugglr#427](https://github.com/rafters-studio/smugglr/issues/427)), and there is no `int -> UUIDv7` conversion for an existing table ([smugglr#280](https://github.com/rafters-studio/smugglr/issues/280)).
+
+---
+
+## migrate apply
+
+Apply a migration manifest to a local SQLite database. The version is assigned by the ledger, `_smugglr_migrations`, inside the migrated database: the migration lands as `current_version + 1`, claimed before the first op runs and settled to `success` or `failed` after. A manifest whose checksum is already in the ledger is refused before any op runs.
+
+```
+smugglr migrate apply [OPTIONS] --db <PATH> <MANIFEST>
+```
+
+| Argument or flag | Description |
+|------|-------------|
+| `<MANIFEST>` | Path to the checksummed manifest JSON (as emitted by `migrate new`). |
+| `--db <PATH>` | The local SQLite database to apply against. Required; `migrate` never reads `config.toml`, so a migration applies where you point it. |
+| `--paranoid` | Snapshot the database before applying. In 0.5.0 this warns and applies without a snapshot ([smugglr#289](https://github.com/rafters-studio/smugglr/issues/289)). |
+
+The database must exist; `migrate apply` opens read-write without create:
+
+```
+$ smugglr --output json migrate apply migrations/create_bribes.json --db ./nope.db
+{"command":"migrate","status":"error","error":"Local database error: unable to open database file: ./nope.db","exit_code":1}
+```
+
+From `docs/examples/cli-migrate`. Westwind was built by eight applies, so this one lands as v9, and the second attempt is answered by the ledger:
+
+```
+$ smugglr migrate apply migrations/create_bribes.json --db ./westwind.db
+Applied migration v9 (1 op) -- checksum 62f1d23e0c3b34222075d7f99ed090c4971710642a5201af5ad51bdb99d90148
+```
+
+```
+$ smugglr migrate apply migrations/create_bribes.json --db ./westwind.db
+Migration v9 is already applied -- nothing to do
+```
+
+`--paranoid` on the same apply, stderr then stdout:
+
+```
+$ smugglr migrate apply migrations/create_bribes.json --db ./westwind.db --paranoid
+ WARN --paranoid requested but the pre-migration snapshot is not implemented until #289; applying without a parachute version=9
+Applied migration v9 (1 op) -- checksum 62f1d23e0c3b34222075d7f99ed090c4971710642a5201af5ad51bdb99d90148
+```
+
+What 0.5.0 does not do: there is no reverse subcommand, though the `down` list is written into every manifest; `--paranoid` warns instead of snapshotting ([#289](https://github.com/rafters-studio/smugglr/issues/289)); the D1, Turso, and rqlite dialects generate statements but refuse to execute them, so `--db` is a local SQLite file only ([#291](https://github.com/rafters-studio/smugglr/issues/291)); and `migrate new` accepts only `create_<table>` names.
+
+---
+
+## Exit codes
+
+From `smugglr --help`:
+
+| Code | Meaning |
+|------|---------|
+| `0` | success |
+| `1` | general error |
+| `2` | configuration error (fix the config, do not retry) |
+| `3` | connection/network error (transient, safe to retry) |
+| `4` | conflict (needs a human decision -- pick a conflict_resolution) |
+| `5` | target not found (database missing or API unreachable) |
+
+Codes map from the error, not from the command, so there is no per-command set. The same unreadable target file is exit 0 under `status`, which reports it, and exit 1 under `push`, which needs it. A missing config file, an unset `${VAR}` in the config, a `--table` that does not exist, a global flag after the subcommand, and a `migrate new` name that is not `create_<table>` are all exit 2. A restore with no snapshot at or before the timestamp is exit 1. An S3 ETag mismatch on `stash` is exit 4; row-level conflicts on `push`, `pull`, and `sync` are resolved by `conflict_resolution` and never raise it. A plugin failure folds into exit 1; there is no plugin-specific code, and there is no code above 5.
 
 ```bash
-smugglr push
+smugglr --output json stash
 case $? in
   0) echo "done" ;;
   2) echo "fix your config" && exit 1 ;;
-  3) echo "network issue, retrying..." && sleep 5 && smugglr push ;;
-  4) echo "conflict, pulling first" && smugglr pull && smugglr push ;;
+  3) echo "network issue, retrying" && sleep 5 && smugglr --output json stash ;;
+  4) echo "relay changed under us, retrieve first" && smugglr retrieve && smugglr stash ;;
   *) echo "unexpected: $?" && exit 1 ;;
 esac
 ```
 
 ---
 
-## JSON Output
+## JSON output
 
-Pass `--output json` to any command. Output follows a consistent `CommandOutput` structure.
+`--output json` before the subcommand. One object on stdout, tracing silenced. Every object carries `command` and `status`; `status` is `ok`, `dry_run`, or `error`. The `exit_code` field appears on `dry_run` and `error` objects only.
 
-### Structure
+### push, pull, sync, stash, retrieve
 
-```json
-{
-  "command": "push",
-  "status": "ok",
-  "dry_run": false,
-  "tables": [
-    {
-      "name": "users",
-      "rows_pushed": 3
-    }
-  ]
-}
+Counts per table, and only for tables that moved rows. A table entry carries `rows_pushed` or `rows_pulled` when non-zero; an empty `tables` is a no-op. From `docs/examples/cli-sqlite-to-sqlite`, after touching six orders locally:
+
+```
+$ smugglr --output json push
+{"command":"push","status":"ok","tables":[{"name":"orders","rows_pushed":6}]}
+
+$ smugglr --output json push
+{"command":"push","status":"ok","tables":[]}
 ```
 
-In a table entry, `rows_pushed` and `rows_pulled` are omitted when zero. A push that touches no pulled rows will not include `rows_pulled`. Only tables with changes appear in `tables`.
+Captured with six orders edited locally, one shipper edited and one customer inserted on the target:
 
-### Error output
-
-```json
-{
-  "command": "push",
-  "status": "error",
-  "error": "network timeout connecting to d1://my-database",
-  "exit_code": 3
-}
+```
+$ smugglr --output json sync
+{"command":"sync","status":"ok","tables":[{"name":"customers","rows_pulled":1},{"name":"shippers","rows_pulled":1},{"name":"orders","rows_pushed":6}]}
 ```
 
-Error output always includes `exit_code`, matching the process exit status. See [Exit Codes](#exit-codes).
-
-### Dry-run output
-
-Dry-run emits a distinct shape with `status: "dry_run"`, top-level totals, and a per-table diff breakdown. There is no `dry_run` field. `total_rows_to_push` and `total_rows_to_pull` are both always present (they are zero when a direction has no work), as is `exit_code`.
-
-```json
-{
-  "command": "push",
-  "status": "dry_run",
-  "tables": [
-    {
-      "name": "users",
-      "local_only": 2,
-      "remote_only": 0,
-      "local_newer": 1,
-      "remote_newer": 0,
-      "content_differs": 0,
-      "identical": 139,
-      "rows_to_push": 3,
-      "rows_to_pull": 0
-    }
-  ],
-  "total_rows_to_push": 3,
-  "total_rows_to_pull": 0,
-  "exit_code": 0
-}
+```
+$ smugglr --output json pull
+{"command":"pull","status":"ok","tables":[{"name":"products","rows_pulled":1}]}
 ```
 
-Every table entry carries all six diff counts (`local_only`, `remote_only`, `local_newer`, `remote_newer`, `content_differs`, `identical`) plus `rows_to_push` and `rows_to_pull`. For a pull, the push counts are zero and the pull counts carry the work; for sync, both directions are populated.
+`stash` reports its uploads as `rows_pushed` and `retrieve` its applied rows as `rows_pulled`. First stash into an empty `file://` relay:
 
-### Watch output (JSONL)
+```
+$ smugglr --output json stash
+{"command":"stash","status":"ok","tables":[{"name":"categories","rows_pushed":8},{"name":"customers","rows_pushed":41},{"name":"employees","rows_pushed":9},{"name":"order_details","rows_pushed":788},{"name":"orders","rows_pushed":320},{"name":"products","rows_pushed":20},{"name":"shippers","rows_pushed":3},{"name":"suppliers","rows_pushed":8}]}
+```
 
-When running `smugglr watch --output json`, each tick emits one JSON line to stdout:
+A stash or retrieve that finds the relay already matching reports `"tables":[]`, the same no-op shape as push.
 
-```jsonl
-{"command":"watch","tick":1,"status":"ok","tables":[{"name":"users","rows_pulled":2}]}
+### Dry-run
+
+`status` is `dry_run`. Every configured table appears, each with all six bucket counts plus `rows_to_push` and `rows_to_pull`, and the object closes with both totals and `exit_code`. The shape is the same for `push`, `pull`, `sync`, `stash`, and `retrieve`; for a push the pull counts are zero, for a pull the push counts are zero, for a sync both are populated. Captured after touching six orders locally:
+
+```
+$ smugglr --output json push --dry-run -t orders
+{"command":"push","status":"dry_run","tables":[{"name":"orders","local_only":0,"remote_only":0,"local_newer":6,"remote_newer":0,"content_differs":0,"identical":314,"rows_to_push":6,"rows_to_pull":0}],"total_rows_to_push":6,"total_rows_to_pull":0,"exit_code":0}
+```
+
+Without `-t`, all eight Westwind tables are listed, the seven unchanged ones with zeros in every bucket but `identical`; the full object is in `docs/examples/cli-sqlite-to-sqlite`. The six rows are `local_newer`, not `content_differs`, because the edit also bumped `updated_at`; an edit that leaves the timestamp alone lands in `content_differs` and is resolved by `conflict_resolution`.
+
+### diff
+
+Five buckets as arrays of primary keys, and `identical_count` as a number. Every configured table appears, including the ones in sync. Captured with six orders edited locally:
+
+```
+$ smugglr --output json diff -t orders
+{"command":"diff","status":"ok","tables":[{"name":"orders","local_only":[],"remote_only":[],"local_newer":["019438f7-0e5c-74f0-9dd5-8e3a657e884d","019438f4-2629-734b-b94a-862cbabaff3c","019438f0-7f24-7598-8741-725482e34619","019438f0-2b2e-7cbd-9bdc-66548b665d03","019438eb-c186-7bc5-ab0d-0b0e43b34cfb","019438f2-9941-76b7-a349-38b80ebeedc4"],"remote_newer":[],"content_differs":[],"identical_count":314}]}
+```
+
+```
+$ smugglr --output json diff -t customers
+{"command":"diff","status":"ok","tables":[{"name":"customers","local_only":[],"remote_only":["019906f0-0000-7000-8000-000000000001"],"local_newer":[],"remote_newer":[],"content_differs":[],"identical_count":40}]}
+```
+
+Text mode truncates each bucket after five keys; JSON does not.
+
+### status
+
+`config`, `local`, and `target`. Each side has `connected` and `tables`; a side that failed has `connected: false`, an `error` string, and an empty `tables`. The exit code is 0 either way.
+
+```
+$ smugglr --output json status
+{"command":"status","status":"ok","config":{"local_db":"./local.db","target_type":"sqlite","timestamp_column":"updated_at","conflict_resolution":"LocalWins","exclude_tables":["sqlite_sequence","_cf_KV","__drizzle_migrations","_smugglr_migrations"]},"local":{"connected":true,"tables":[{"name":"categories","rows":8},{"name":"customers","rows":40},{"name":"employees","rows":9},{"name":"order_details","rows":788},{"name":"orders","rows":320},{"name":"products","rows":20},{"name":"shippers","rows":3},{"name":"suppliers","rows":8}]},"target":{"connected":true,"tables":[{"name":"categories","rows":8},{"name":"customers","rows":40},{"name":"employees","rows":9},{"name":"order_details","rows":788},{"name":"orders","rows":320},{"name":"products","rows":20},{"name":"shippers","rows":3},{"name":"suppliers","rows":8}]}}
+```
+
+The target section from the unreadable-target run above:
+
+```
+"target":{"connected":false,"error":"Local database error: unable to open database file: ./missing-dir/backup.db","tables":[]}
+```
+
+### snapshot and restore
+
+The snapshot's `timestamp`, `size_bytes`, and `tables` with `row_count`. `restore` returns the same shape for the snapshot it applied.
+
+```
+$ smugglr --output json snapshot
+{"command":"snapshot","status":"ok","timestamp":"2026-08-29T02:25:34.242Z-80262f58","size_bytes":417792,"tables":[{"name":"_smugglr_migrations","row_count":8},{"name":"categories","row_count":8},{"name":"customers","row_count":41},{"name":"employees","row_count":9},{"name":"order_details","row_count":788},{"name":"orders","row_count":320},{"name":"products","row_count":20},{"name":"shippers","row_count":3},{"name":"suppliers","row_count":8}]}
+```
+
+```
+$ smugglr --output json restore 2026-08-29T02:25:34.242Z-80262f58
+{"command":"restore","status":"ok","timestamp":"2026-08-29T02:25:34.242Z-80262f58","size_bytes":417792,"tables":[{"name":"_smugglr_migrations","row_count":8},{"name":"categories","row_count":8},{"name":"customers","row_count":41},{"name":"employees","row_count":9},{"name":"order_details","row_count":788},{"name":"orders","row_count":320},{"name":"products","row_count":20},{"name":"shippers","row_count":3},{"name":"suppliers","row_count":8}]}
+```
+
+### snapshots
+
+An array of the same snapshot objects, newest first.
+
+```
+$ smugglr --output json snapshots
+{"command":"snapshots","status":"ok","snapshots":[{"timestamp":"2026-08-29T02:25:34.242Z-80262f58","size_bytes":417792,"tables":[{"name":"_smugglr_migrations","row_count":8},{"name":"categories","row_count":8},{"name":"customers","row_count":41},{"name":"employees","row_count":9},{"name":"order_details","row_count":788},{"name":"orders","row_count":320},{"name":"products","row_count":20},{"name":"shippers","row_count":3},{"name":"suppliers","row_count":8}]},{"timestamp":"2026-08-29T02:25:34.226Z-42617419","size_bytes":417792,"tables":[{"name":"_smugglr_migrations","row_count":8},{"name":"categories","row_count":8},{"name":"customers","row_count":41},{"name":"employees","row_count":9},{"name":"order_details","row_count":788},{"name":"orders","row_count":320},{"name":"products","row_count":20},{"name":"shippers","row_count":3},{"name":"suppliers","row_count":8}]}]}
+```
+
+### Watch (JSONL)
+
+One line per tick, each with a `tick` counter and the same `tables` shape as `sync`. Stderr is silent. Captured with a one-second interval; three shippers were edited locally between ticks 3 and 4, and the run was stopped with Ctrl+C after tick 5:
+
+```
+$ smugglr --output json watch -i 1
+{"command":"watch","tick":1,"status":"ok","tables":[]}
 {"command":"watch","tick":2,"status":"ok","tables":[]}
-{"command":"watch","tick":3,"status":"ok","tables":[{"name":"users","rows_pushed":1}]}
+{"command":"watch","tick":3,"status":"ok","tables":[]}
+{"command":"watch","tick":4,"status":"ok","tables":[{"name":"shippers","rows_pushed":3}]}
+{"command":"watch","tick":5,"status":"ok","tables":[]}
 ```
 
-Each line is a `WatchTickOutput` object with a mandatory `tick` counter. The `tables` entries omit `rows_pushed`/`rows_pulled` when they are zero. Parse line by line.
+Parse line by line. No final object is written on shutdown.
+
+### migrate apply
+
+`version` is the ledger's assignment, `election` is `won` for an apply that ran and `already_applied` for one the ledger refused, and `ops_applied` counts the ops that ran.
+
+```
+$ smugglr --output json migrate apply migrations/create_bribes.json --db ./fresh.db
+{"command":"migrate apply","status":"ok","version":9,"checksum":"62f1d23e0c3b34222075d7f99ed090c4971710642a5201af5ad51bdb99d90148","election":"won","ops_applied":1,"destructive":false,"hash_rewriting":false,"preimage_captured":false}
+```
+
+```
+$ smugglr --output json migrate apply migrations/create_bribes.json --db ./fresh.db
+{"command":"migrate apply","status":"ok","version":9,"checksum":"62f1d23e0c3b34222075d7f99ed090c4971710642a5201af5ad51bdb99d90148","election":"already_applied","ops_applied":0,"destructive":false,"hash_rewriting":false,"preimage_captured":false}
+```
+
+`preimage_captured` is false in 0.5.0 on every run; it will report the `--paranoid` snapshot once [smugglr#289](https://github.com/rafters-studio/smugglr/issues/289) lands.
+
+### Error
+
+`error` is the message, `exit_code` is the process exit status. The `command` field names the subcommand, or `migrate` for either migrate subcommand.
+
+```
+$ smugglr -c nope.toml --output json status
+{"command":"status","status":"error","error":"Config file not found: nope.toml","exit_code":2}
+```
+
+```
+$ smugglr --output json push
+{"command":"push","status":"error","error":"Local database error: unable to open database file: ./missing-dir/backup.db","exit_code":1}
+```
+
+```
+$ smugglr --output json status
+{"command":"status","status":"error","error":"Config references unset environment variable ${SMUGGLR_NOPE}","exit_code":2}
+```
+
+The exit code is the scripting contract; the object repeats it so a consumer that swallowed the status still has it.

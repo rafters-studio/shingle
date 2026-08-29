@@ -1,7 +1,7 @@
 ---
 layout: '@/src/layouts/Base.astro'
 title: compare games
-description: "smugglr for game developers. Photon, Colyseus, Mirror, Nakama, PlayFab, Firebase. Where smugglr fits as the persistent tier behind a netcode framework, and the whole backend for games without a tick rate."
+description: "smugglr for game developers. Photon, Colyseus, Mirror, Nakama, PlayFab, Firebase. Where smugglr fits as the persistent layer behind a netcode framework, and the sync layer for games without a tick rate."
 stickyTopbar: true
 ---
 import Container from "@/components/ui/container.astro";
@@ -25,7 +25,7 @@ import CardContent from "@/components/ui/card-content.astro";
 export const MATRIX_HEAD = ["Tool", "Lane", "Tick rate", "Persistent storage", "Cost floor"];
 
 export const MATRIX_ROWS = [
-    ["smugglr",                 "Persistent tier + sync",     "None (event / poll)",   "SQLite, you own",        "Your hosting bill"],
+    ["smugglr",                 "Persistent layer + sync",     "None (event / poll)",   "SQLite, you own",        "Your hosting bill"],
     ["Photon Fusion",           "Authoritative netcode",      "30 to 60 Hz",           "None, BYO backend",      "Free 100 CCU, $125 / mo at 500"],
     ["Photon Quantum",          "Deterministic netcode",      "30 to 60 Hz",           "None, BYO backend",      "Free 100 CCU, $125 / mo at 500"],
     ["Colyseus",                "Room-based netcode",         "Configurable",          "None, BYO backend",      "Free OSS, $15 / mo cloud"],
@@ -60,7 +60,7 @@ export const NOT_SMUGGLR_ROWS = [
         </H1>
 
         <P align="center" size="display-small" class="max-w-prose">
-            Half of multiplayer is turn-based, async, or once-a-second. smugglr is the whole backend for that half, and the persistent tier behind a netcode framework for the other half. CLI, Rust crate, npm package. There is no service you have to operate, it is free*.
+            Half of multiplayer is turn-based, async, or once-a-second. smugglr is the persistence and sync layer for that half, and the persistent layer behind a netcode framework for the other half; the server side is a SQLite backend you host or rent, not something smugglr ships. CLI, Rust crate, npm package. There is no service you have to operate, it is free*.
         </P>
     </Container>
 </Container>
@@ -98,7 +98,7 @@ export const NOT_SMUGGLR_ROWS = [
         <MrsTable cols={MATRIX_HEAD} rows={MATRIX_ROWS} monoCols={[1, 2]} />
 
         <P color="background" class="mt-6 max-w-prose">
-            "Lane" names what the tool actually does. Photon's lane is netcode; PlayFab's lane is the full backend; smugglr's lane is the persistent tier. A studio can stack lanes (Photon for the frames, smugglr for the rows) or pick a single tool that covers more than one. Cost floors are the entry tier as advertised; the gap between free-tier usage and a real workload is where most billing surprises happen, and that gap is steepest on per-op pricing models like Firebase and Supabase Realtime.
+            "Lane" names what the tool actually does. Photon's lane is netcode; PlayFab's lane is the full backend; smugglr's lane is the persistent layer. A studio can stack lanes (Photon for the frames, smugglr for the rows) or pick a single tool that covers more than one. Cost floors are the entry tier as advertised; the gap between free-tier usage and a real workload is where most billing surprises happen, and that gap is steepest on per-op pricing models like Firebase and Supabase Realtime.
         </P>
     </Container>
 </Container>
@@ -157,7 +157,7 @@ export const NOT_SMUGGLR_ROWS = [
 </Container>
 
 <Container as="section" gap="6">
-<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; the persistent tier shelf</div>
+<div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; the persistent layer shelf</div>
 <H2>Where the eighty percent lives. This is smugglr's shelf.</H2>
 
 <P size="display-small">Every game has accounts, inventory, currencies, leaderboards, quests, mail, settings, telemetry. The four tools below are what studios reach for. None of them are SQLite end to end. smugglr is.</P>
@@ -179,7 +179,7 @@ export const NOT_SMUGGLR_ROWS = [
             <CardDescription>Microsoft's full game backend. Accounts, inventory, leaderboards, CloudScript.</CardDescription>
         </CardHeader>
         <CardContent>
-            <P>PlayFab covers everything in the persistent tier with a REST API and a generous free MAU bucket. The cost is total platform lock-in: data, identity, server logic, anti-cheat all live inside PlayFab. Migration cost is rebuilding the entire player layer. PlayFab is the right call if you want one vendor for the whole eighty percent and you accept the lock-in. smugglr is the right call if you want SQLite end to end and the freedom to host the rest of the platform yourself.</P>
+            <P>PlayFab covers everything in the persistent layer with a REST API and a generous free MAU bucket. The cost is total platform lock-in: data, identity, server logic, anti-cheat all live inside PlayFab. Migration cost is rebuilding the entire player layer. PlayFab is the right call if you want one vendor for the whole eighty percent and you accept the lock-in. smugglr is the right call if you want SQLite end to end and the freedom to host the rest of the platform yourself.</P>
         </CardContent>
     </Card>
 
@@ -216,7 +216,7 @@ export const NOT_SMUGGLR_ROWS = [
             <CardDescription>FPS, MOBA, racing, fighting, action multiplayer. 30 to 60 Hz.</CardDescription>
         </CardHeader>
         <CardContent>
-            <P>Photon (or Mirror, Fish-Net, Colyseus) ships the netcode. smugglr ships the persistent tier behind it: accounts, inventory, currencies, leaderboards, quests, mail, settings, telemetry. The two layers do not talk to each other directly. The netcode handles the match; smugglr handles the data that survives the match. Costs: Photon's $125 / mo at 500 CCU plus your hosting bill for smugglr. The hosting bill is fixed; only Photon scales with players.</P>
+            <P>Photon (or Mirror, Fish-Net, Colyseus) ships the netcode. smugglr ships the persistent layer behind it: accounts, inventory, currencies, leaderboards, quests, mail, settings, telemetry. The two layers do not talk to each other directly. The netcode handles the match; smugglr handles the data that survives the match. Costs: Photon's $125 / mo at 500 CCU plus your hosting bill for smugglr. The hosting bill is fixed; only Photon scales with players.</P>
         </CardContent>
     </Card>
 
@@ -226,7 +226,7 @@ export const NOT_SMUGGLR_ROWS = [
             <CardDescription>Turn-based, async, idle, deckbuilder, autobattler, MMO social hub, 4X.</CardDescription>
         </CardHeader>
         <CardContent>
-            <P>smugglr is the whole backend. SQLite on the client, SQLite on the server, content-hash diff every few seconds via the <Code>watch</Code> daemon, or LAN broadcast for same-network co-op. No netcode framework. No Photon CCU bill. Costs: your hosting bill, fixed. This is the half of multiplayer that does not need a server-shaped tool, and the half where smugglr replaces the entire backend stack instead of one layer of it.</P>
+            <P>smugglr is the sync layer, not a server: it ships no accounts and no auth. SQLite on the client, SQLite on the server, content-hash diff every few seconds via the <Code>watch</Code> daemon, or LAN broadcast for same-network co-op. No netcode framework. No Photon CCU bill. Costs: your hosting bill, fixed. This is the half of multiplayer that does not need a server-shaped tool, and the half where smugglr replaces the entire backend stack instead of one layer of it.</P>
         </CardContent>
     </Card>
 </Grid>
@@ -238,7 +238,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 <MrsTable cols={["If you need", "The right tool"]} rows={NOT_SMUGGLR_ROWS} />
 
-<P size="display-small" color="muted-foreground">smugglr ships the persistent tier. The other lanes have mature tools and known costs. The honest position is: pair smugglr with a netcode framework when you need frames, or use smugglr alone when you do not.</P>
+<P size="display-small" color="muted-foreground">smugglr ships the persistent layer. The other lanes have mature tools and known costs. The honest position is: pair smugglr with a netcode framework when you need frames, or use smugglr alone when you do not.</P>
 </Container>
 
 <Container as="section" gap="6">
@@ -253,7 +253,7 @@ export const NOT_SMUGGLR_ROWS = [
         </CardHeader>
         <CardContent>
             <Codeblock>{`curl -fsSL https://smugglr.dev/install | bash`}</Codeblock>
-            <P>The curl installer covers macOS and Linux. On Windows, use <Code>cargo install smugglr</Code> or the release binary.</P>
+            <P>The curl installer covers macOS and Linux x64 and installs both binaries from 0.5.1. On Windows, use <Code>cargo install smugglr</Code> and <Code>cargo install smugglr-http-sql</Code>, or the release zip.</P>
         </CardContent>
     </Card>
 
@@ -285,7 +285,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 <Container as="section" gap="6">
     <Small color="muted-foreground">
-        * Free as in OSS, not free as in beer, even though we do ship under MIT.
+        Free as in MIT, which is also free as in beer.
     </Small>
 </Container>
 
