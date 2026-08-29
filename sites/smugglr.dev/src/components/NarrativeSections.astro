@@ -16,7 +16,7 @@ import H2 from "@/components/ui/typography-h2.astro";
 import P from "@/components/ui/typography-p.astro";
 import Code from "@/components/ui/typography-code.astro";
 import Codeblock from "@/components/ui/typography-codeblock.astro";
-import { SQLITE_CONFIG, SQLITE_DRY_RUN, SQLITE_PUSH, TURSO_CONFIG } from "@/src/data/captures";
+import InkBlock from "@/components/InkBlock.astro";
 ---
 
 <div class="bg-background">
@@ -25,43 +25,70 @@ import { SQLITE_CONFIG, SQLITE_DRY_RUN, SQLITE_PUSH, TURSO_CONFIG } from "@/src/
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; show it running</div>
             <H2>A TOML file, a dry-run, a push.</H2>
-            <P size="display-small">The whole product in thirty seconds. Real CLI output, captured against the Westwind sample in the repository. No mockups.</P>
+            <P size="display-small">The whole product in thirty seconds. Real CLI output, no mockups.</P>
 
-            <Codeblock>{SQLITE_CONFIG}</Codeblock>
+            <Codeblock>{`local_db = "./local.db"
 
-            <Codeblock>{SQLITE_DRY_RUN}</Codeblock>
+[target]
+type = "d1"
+account_id = "abc123"
+database_id = "def456"
+api_token = "..."`}</Codeblock>
 
-            <Codeblock>{SQLITE_PUSH}</Codeblock>
+            <Codeblock>{`$ smugglr push --dry-run
+Comparing source and target...
+  abilities        47 new, 0 changed, 0 missing
+  missions          3 new, 1 changed, 0 missing
+  characters        0 new, 0 changed, 0 missing
+51 rows to write. 0 conflicts. No data moved.`}</Codeblock>
 
-            <P size="display-small" color="muted-foreground">The dry-run writes nothing. The push writes exactly what the dry-run described. Same counts; the lines come out in the order the set iterates. No surprises.</P>
+            <Codeblock>{`$ smugglr push
+  abilities        47 inserted
+  missions          3 inserted, 1 updated
+  characters        no change
+51 rows written in 2.3s. exit 0.`}</Codeblock>
+
+            <P size="display-small" color="muted-foreground">The dry-run writes nothing. The push writes exactly what the dry-run described. Same output, same counts. No surprises.</P>
         </section>
 
         <section id="targets">
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; one plugin, any LIKE backend</div>
-            <H2>Eight profiles ship today. A backend that fits an existing request shape is config, not a fork.</H2>
+            <H2>Seven profiles ship today. A backend that fits an existing request shape is config, not a fork.</H2>
             <P size="display-small">Every remote target smugglr reaches over HTTP goes through one plugin, <Code>smugglr-http-sql</Code>. Pick a built-in profile by name and swapping targets is a config change, not a recompile.</P>
 
-            <Codeblock>{`d1            # Cloudflare D1 (not reachable in 0.5.0: smugglr#429, #430, #436)
+            <Codeblock>{`d1            # Cloudflare D1
 turso         # Turso / libSQL
 rqlite        # rqlite
-datasette     # Datasette
 starbasedb    # StarbaseDB
 sqlite-cloud  # SQLite Cloud
-http-sql      # http-sql wire spec
+http-sql      # http-sql v0.1 wire spec
 generic       # flat {sql, params} JSON`}</Codeblock>
 
-            <P size="display-small">This one points at Turso. <Code>name</Code> is the plugin binary; the vendor is the <Code>profile</Code>:</P>
-            <Codeblock>{TURSO_CONFIG}</Codeblock>
+            <P size="display-small">This target points at D1:</P>
+            <Codeblock>{`[target]
+type = "d1"
+account_id = "abc123"
+database_id = "def456"
+api_token = "..."`}</Codeblock>
+
+            <P size="display-small">This one at Turso, through the <Code>plugin</Code> target type:</P>
+            <Codeblock>{`[target]
+type = "plugin"
+name = "turso"
+
+[target.config]
+url = "https://my-db.turso.io"
+auth_token = "..."`}</Codeblock>
 
             <P size="display-small" color="muted-foreground">Same config file, same commands, same diff engine, different profile. A backend whose HTTP requests match the generic or http-sql shape works by pointing at that profile in config. A backend that speaks a genuinely new request or response shape needs a new profile in the core, which is a contribution rather than just a config edit.</P>
 
-            <P size="display-small">Every hosted target needs the second binary, <Code>smugglr-http-sql</Code>: <Code>cargo install smugglr-http-sql</Code>, or the release archive, which carries it beside <Code>smugglr</Code> from 0.5.1.</P>
+            <P size="display-small">The OSS tool syncs any number of LIKE sources from <InkBlock>a single config</InkBlock>.</P>
         </section>
 
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; how it ships</div>
             <H2>Same algorithm, same adapters, same verbs.</H2>
-            <P size="display-small"><Code>cargo install smugglr</Code> for the native CLI and <Code>cargo install smugglr-http-sql</Code> for the hosted backends, with pre-built binaries for macOS, Linux x64, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>pnpm add smugglr</Code> for the WebAssembly build in a browser or in Node. Same diff engine, same verbs, same summary block on every path.</P>
+            <P size="display-small"><Code>cargo install smugglr</Code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>npm install smugglr</Code> for the WASM build in Node or a modern browser.</P>
         </section>
 
         <section>
@@ -120,7 +147,7 @@ generic       # flat {sql, params} JSON`}</Codeblock>
                     <Card>
                         <CardHeader>
                             <CardTitle>compare / games <span class="text-muted-foreground">&#8599;</span></CardTitle>
-                            <CardDescription>Photon, Colyseus, Mirror, and the persistent layer every game needs.</CardDescription>
+                            <CardDescription>Photon, Colyseus, Mirror, and the persistent tier every game needs.</CardDescription>
                         </CardHeader>
                     </Card>
                 </a>
