@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.32.0. Commands are organized by category.
+This reference covers legion 0.37.0. Commands are organized by category.
 
 ---
 
@@ -230,7 +230,7 @@ Rebuild the Tantivy search index from the database.
 legion reindex
 ```
 
-Normally unnecessary. Use after manual database edits or corruption recovery.
+Rebuilds reflections and documents together, in one commit, and reports both counts. Normally unnecessary during ordinary operation -- but the search index's on-disk schema changed to add document search, so the first daemon startup after upgrading from an older version wipes the existing index and starts empty; this is what repopulates it. Also use after manual database edits or corruption recovery.
 
 ### backfill
 
@@ -464,6 +464,7 @@ legion document create --doc-type schema --owner vault --from schema.json
 legion document view <id>
 legion document list
 legion document list --doc-type requirement --surface myproject
+legion document revise <id> --from revised.json
 legion document validate --schema <schema-doc-id> --file instance.json
 legion document archive <id>
 legion document set-status <id> --to published
@@ -473,9 +474,9 @@ The storage layer is type-agnostic: payload is a validated JSON blob. Meta colum
 
 `set-status` sets the lifecycle column, bumps `updated_at`, and returns the persisted row re-fetched from the database rather than constructed in memory, so a printed status is proof of the write. There is no status-machine enforcement; the operator clicking Publish in the dashboard is the human gate, by design.
 
-Schema documents (`doc_type=schema`) are structurally validated at create: payload must include `$schema`, `title`, `type:object`, and non-empty `properties`. Other document types can be validated against a landed schema via `legion document validate --schema <id>`. A pointer reflection is stored automatically on `domain=schema` so `legion recall --domain schema` finds every landed schema.
+`create` and `revise` both validate the payload against the JSON Schema landed for its `doc_type` before writing. A schema document (`doc_type=schema`) still gets the structural gate first -- `$schema`, `title`, `type:object`, non-empty `properties`, and a top-level `x-doc-type` naming the type it governs, since that keyword is what makes a schema self-describing and portable as a file. Every other type is checked against whichever schema declares that `x-doc-type`; a `doc_type` with no landed schema, or with two schemas claiming it, is refused outright -- there is no warn-and-allow. A violation prints one `<json pointer>: <message>` line per problem to stderr and exits 1. A pointer reflection is stored automatically on every schema create or revise, on `domain=schema`, so `legion recall --domain schema` finds the current landed schema.
 
-`legion document validate` checks a JSON instance against a landed schema. One error per violation, exits non-zero on any failure.
+`legion document validate --schema <id> --file <instance>` runs the same check by hand against an arbitrary instance: the stored schema compiles through the `jsonschema` crate (draft-07 and 2020-12, `$ref` and `definitions` honored), and the instance is checked against it. One `<pointer>: <message>` line per violation, exit non-zero on any failure.
 
 For a requirement document, `legion document view` also reports which of its `verification.criteria` currently carry a clean verify verdict, so a spec author can see coverage without cross-referencing every issue that claims to trace to it.
 
