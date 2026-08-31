@@ -488,7 +488,7 @@ Generate requirement documents from service-design artifacts.
 legion spec-gen --repo myproject
 ```
 
-Reads all non-archived service-design documents whose `surface` field matches `--repo` (types: `persona`, `journey`, `blueprint`, `painmatrix`, `ecosystem`). Note: `--repo` here is the functional surface label stored on documents (e.g., `payments`, `onboarding`), not a git repository name. Derives one requirement per `moment_of_truth` and inserts new requirement documents. Re-running on unchanged input is safe: existing `(traces_to, surface)` pairs are skipped. File an issue tracing to the resulting requirement (`## Traces to`) to put it to work.
+Reads all non-archived service-design documents whose `surface` field matches `--repo` (types: `persona`, `journey`, `blueprint`, `discovery`, `ecosystem`). Note: `--repo` here is the functional surface label stored on documents (e.g., `payments`, `onboarding`), not a git repository name. Derives one requirement per `moment_of_truth` and inserts new requirement documents. Re-running on unchanged input is safe: existing `(traces_to, surface)` pairs are skipped. File an issue tracing to the resulting requirement (`## Traces to`) to put it to work.
 
 ### verify
 
