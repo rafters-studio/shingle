@@ -17,7 +17,7 @@ plugin/
   hooks/             -- SessionStart, Stop, PreCompact, PreToolUse, PostToolUse
   commands/          -- slash command skills
   agents/            -- agent definitions (changelog, dungeon-master, issue-writer, legion-explore, legion-prime, legion-review, legion-verify)
-  skills/            -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify)
+  skills/            -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify, and the seven-skill service-design pipeline: sd-service-design plus its six steps)
   channel/           -- MCP client bridge
   worksources/       -- work source plugins (GitHub, etc.)
 ```
@@ -128,7 +128,7 @@ The gap the retired push covered and the drain did not: a live session sitting i
 
 ## Skills
 
-Skills are auto-triggered by description match, or invoked directly by name. Claude Code namespaces plugin skills under the plugin name, so the five below run as `/legion:legion-simplify`, `/legion:legion-pr-write`, and so on -- not the bare `/legion-simplify`.
+Skills are auto-triggered by description match, or invoked directly by name. Claude Code namespaces plugin skills under the plugin name, so they run as `/legion:legion-simplify`, `/legion:sd-service-design`, and so on -- not the bare `/legion-simplify`.
 
 **legion-memory** fires when the agent is about to search the codebase for answers and reminds it of the recall-before-grep doctrine. Code shows what exists. Legion tells you why it exists, what went wrong last time, and what the person who solved it wished they had known.
 
@@ -139,6 +139,8 @@ Skills are auto-triggered by description match, or invoked directly by name. Cla
 **legion-review** runs parallel reviewers (spec, correctness, quality, security) over the diff, adversarially refutes high- and medium-severity findings before reporting them, and records a `legion-review` gate. Enforces the target repo's own CLAUDE.md invariants.
 
 **legion-verify** is the gate before an issue can close. The implementer submits per-criterion verdicts (pass, fail, uncertain) with cited evidence against `--issue`. Every criterion passing with evidence records a clean gate and unblocks `legion issue close`. Any fail hard-blocks. Any uncertain routes to a human. Run after review, before close. Distinct from the `legion-verify` agent below: this skill is the implementer checking their own work; the agent is an independent audit of that work.
+
+**sd-service-design** (`/legion:sd-service-design`) conducts a repo's service design end to end. It reads the repo's thesis document -- what it is, its current state, and its open questions -- as the pipeline's root input, and refuses to produce anything for a repo that has none; writing a thesis is not this pipeline's job. From there it orders six steps and gates each one on the last: `sd-thesis-review` turns the thesis into a research agenda of services and pains to test; `sd-pain-listen` puts that agenda in front of real discourse (queried through eavesdrop, a separate corpus tool, not part of this plugin) and lands one schema-valid painmatrix document, killing any pain the discourse doesn't back up; `sd-ecosystem-imagine` runs five perspective passes over the thesis and the surviving pains into one ecosystem document; then `sd-write-persona`, `sd-write-journey`, and `sd-write-blueprint` draw the artifacts, each refusing to start without the document before it in its chain -- a journey needs its persona written first, a blueprint needs its journey. A step that can't finish parks instead of guessing: it writes a draft document with the blocked items named inside it and a checkpoint reflection marking where to resume.
 
 ## Agents
 
