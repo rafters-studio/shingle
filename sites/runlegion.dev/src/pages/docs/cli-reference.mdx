@@ -417,7 +417,7 @@ legion push --repo myproject --branch feature/search
 
 Resolves the checkout that has the target branch checked out (via `git worktree list`) and pushes from that checkout, because the pre-push hook reviews the CWD's checked-out branch, not the ref being pushed -- pushing branch B from a checkout sitting on A would silently review the wrong diff. Refuses `main`/`master` and any `--branch` value shaped like a flag or a force/retarget refspec by construction; there is no `--force` flag. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
 
-A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push` and says so before running it. Anything the sanctioned command cannot express -- a force push in any spelling, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied outright, naming the flag, rather than silently dropped.
+A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push` and says so before running it. Anything the sanctioned command cannot express -- a force push in any spelling, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied outright, naming the flag, rather than silently dropped. A wrapper ahead of `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- is denied outright too, never rewritten, for the same reason: the wrapper is information `legion push` has no way to carry.
 
 Key flags:
 

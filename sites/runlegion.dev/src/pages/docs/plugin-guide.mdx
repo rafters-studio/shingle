@@ -81,6 +81,8 @@ The hook is silent on repos without a SCIP index. New repos behave as they did b
 
 **No-git-push** (#834): a plain `git push` is rewritten to `legion push --repo <r> [--branch <b>]`, and the rewrite is announced, not silent. Anything the sanctioned command cannot express -- a force push in any spelling, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied by name instead of translated, because dropping the flag and running something else anyway is worse than refusing outright.
 
+**Wrapper prefixes deny, never translate** (#1120, #1117): a wrapper in front of `gh`, `git commit`, or `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- used to walk past the guards, because each one classified on the command's first token and a wrapper isn't a shell metacharacter. It denies now instead of running unaudited, and deliberately is never rewritten: `env X=1 gh pr view 1` names a translatable verb, but folding it into `legion pr view 1` would drop the environment assignment with no way to reconstruct it. A backslash-escaped command word (`\gh`) is caught the same way.
+
 **Pre-script-search** (#838): watches Write/Edit content, and inline `python -c` / `node -e` code passed to Bash, for search primitives a script could use instead of an existing lookup -- `os.walk`, `rglob`, `fnmatch`, `re.search` and similar. It injects a pointer to the matching command (`sym tree` for a directory walk, `sym etc find-file` for a name or glob, `sym etc find-content` for a text search); it never denies, since a script that searches may also do real work that refusing it would block. Silent in an unindexed repo, same as the rest of this ladder.
 
 ### PostToolUse
