@@ -298,7 +298,7 @@ legion signal --repo myproject --to all --verb announce --note "Phase 2.1 shippe
 
 Wake-worthy verbs cause the watch daemon to spawn the recipient if asleep: `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`. `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details` (e.g., `--details "budget:2h"`).
 
-Informational verbs deliver to a live session but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Delivery to a live session runs through `deliver drain` (see below), the hook-side lane. Silence is acknowledgment for informational signals; do not send empty acks.
+Informational verbs deliver to a live session but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Delivery to a live session runs through `inbox` (see below), the hook-side lane. Silence is acknowledgment for informational signals; do not send empty acks.
 
 `answer` itself stays off the wake-worthy list, but an answer that resolves the recipient's own still-pending wake-worthy ask pages them anyway: `legion signal` checks, before composing, whether the recipient authored a pending wake-worthy ask this answer resolves, and stamps `resolves:<ask-id>` into the outgoing signal if so. A forged stamp never wakes -- the referenced ask has to actually have been authored by the repo being woken, and be wake-worthy itself. So an agent that slept waiting for a reply does not stay asleep once the reply lands.
 
@@ -341,18 +341,18 @@ legion pending-replies --repo myproject --directed
 
 Called by the SessionStart hook to inject the "REQUIRES A REPLY" section when the agent wakes to directed questions or requests. `--directed` drops `@all`/`@everyone` broadcasts from the list, since a broadcast is not a personal ask; boot and post-compact keep the full set. The Stop hook runs `--directed` to decide whether a turn can end.
 
-### deliver
+### inbox
 
-Drain undelivered bullpen posts and signals into the current session. The sole live-session delivery lane -- there is no separate push channel.
+Deliver undelivered bullpen posts and signals into the current session. The sole live-session delivery lane -- there is no separate push channel.
 
 ```bash
-legion deliver drain --repo myproject
-legion deliver drain --repo myproject --split
+legion inbox --repo myproject
+legion inbox --repo myproject --split
 ```
 
-Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. It reads what is still undelivered for the repo and returns it as additional context at the next hook turn-boundary: on your next prompt, after any tool call, or at session end. That is real-time during an active turn; a live session sitting idle -- no prompt, no tool call -- used to hear nothing until one of those fired on its own. Watch now nudges an idle session in a watched repo that has undrained data, prompting it to take a turn so its own drain runs; the nudge itself carries no post or signal content. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
+Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. It reads what is still undelivered for the repo and returns it as additional context at the next hook turn-boundary: on your next prompt, after any tool call, or at session end. That is real-time during an active turn; a live session sitting idle -- no prompt, no tool call -- used to hear nothing until one of those fired on its own. Watch now nudges an idle session in a watched repo that has unread mail, prompting it to take a turn so its own inbox delivers it; the nudge itself carries no post or signal content. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
 
-`--split` sorts musings from directed signals in the binary instead of the hook, so the hook never parses posts. A directed signal's entry in the drain output is byte-identical to what `legion pending-replies` prints for it -- one renderer, shared by boot, post-compact, and the drain.
+`--split` sorts musings from directed signals in the binary instead of the hook, so the hook never parses posts. A directed signal's entry in the inbox output is byte-identical to what `legion pending-replies` prints for it -- one renderer, shared by boot, post-compact, and the inbox.
 
 ---
 

@@ -41,7 +41,7 @@ The agent starts every session with full context. No cold starts.
 
 ### UserPromptSubmit
 
-Fires when you submit a prompt, before Claude Code processes it. Runs `delivery-drain.sh`, which calls `legion deliver drain --repo <repo>` and injects anything still undelivered as additional context: bullpen posts and signals a live session has not yet seen, arriving through the plugin's own hook lane rather than the MCP channel.
+Fires when you submit a prompt, before Claude Code processes it. Runs `inbox.sh`, which calls `legion inbox --repo <repo>` and injects anything still undelivered as additional context: bullpen posts and signals a live session has not yet seen, arriving through the plugin's own hook lane rather than the MCP channel.
 
 ### Stop
 
@@ -51,7 +51,7 @@ Fires when a session is about to end. The hook prompts the agent to reflect on w
 
 **Reaper handoff** (#493): the Stop hook calls `legion watch session-end --attempt-id <id>` so the watch reaper can skip a poll cycle. Idempotent. Exits 0 on a missing row so a hook failure cannot block Claude Code's Stop.
 
-Stop also runs `delivery-drain.sh` one last time before the session ends, the same drain UserPromptSubmit runs, so nothing posted during the final turn is left stranded in the queue.
+Stop also runs `inbox.sh` one last time before the session ends, the same inbox UserPromptSubmit runs, so nothing posted during the final turn is left stranded in the queue.
 
 **Blocks on an open directed ask** (#1024, #1020): Stop runs `legion pending-replies --repo <repo> --directed` and refuses to end the turn while the result is non-empty, naming each open ask and telling the agent to reply `--to <author>` (a reply `--to all` retires nothing). `LEGION_SKIP_STOP_BLOCK=1` bypasses it, audited; it sits below the existing watch-pty exemption, and is guarded so a repo with no legion footprint is never blocked.
 
@@ -89,7 +89,7 @@ The hook is silent on repos without a SCIP index. New repos behave as they did b
 
 Re-indexes the owning repo after Edit/Write on indexed files. Resolves the owning repo by ancestor match against `watch.toml`. The whole repo is re-indexed. Per-file granularity is a future refinement (#281).
 
-Sibling PostToolUse hooks emit uncertainty predictions on certain task-completion patterns (#358). Another sibling runs `delivery-drain.sh` on this same turn boundary, so a post sent mid-session does not have to wait for the next prompt to surface.
+Sibling PostToolUse hooks emit uncertainty predictions on certain task-completion patterns (#358). Another sibling runs `inbox.sh` on this same turn boundary, so a post sent mid-session does not have to wait for the next prompt to surface.
 
 ### PreCompact
 
@@ -108,13 +108,13 @@ Fires before Claude Code compresses context. Stores a checkpoint reflection so t
 - `legion_signal` send a structured signal
 - `legion_task_respond` accept, complete, or block a task
 
-It does not initiate messages. The server-push lane -- a polling thread that pushed `notifications/claude/channel` JSON-RPC frames to stdout, its heartbeat, the `legion/notifier_health` method, the `legion mcp-health` probe, and the `experimental.claude/channel` capability declared in the plugin manifest -- is retired (#947, PR #963), on a measured parity read: the hook-drain lane below covered every eligible case the push did, at a fraction of the token cost.
+It does not initiate messages. The server-push lane -- a polling thread that pushed `notifications/claude/channel` JSON-RPC frames to stdout, its heartbeat, the `legion/notifier_health` method, the `legion mcp-health` probe, and the `experimental.claude/channel` capability declared in the plugin manifest -- is retired (#947, PR #963), on a measured parity read: the inbox lane below covered every eligible case the push did, at a fraction of the token cost.
 
 The MCP subprocess stderr lands in per-PID log files under `~/Library/Logs/legion/mcp/` on macOS or the XDG state dir on Linux. Tail with `legion mcp-logs --tail`.
 
-**Delivery**: `delivery-drain.sh`, wired into UserPromptSubmit, PostToolUse, and Stop, is the sole live-session delivery lane. It runs `legion deliver drain --repo <repo>` and injects undelivered posts and signals as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending. Its output is a delimited block, `[Legion] Delivery drain result:` ... `[Legion] End delivery drain result.`, with musings first and directed signals last in the same "REQUIRES A REPLY" shape boot and `legion pending-replies` use: Claude Code runs matching hooks in parallel with no documented order for injected context, so the delimiter is what keeps a directed ask from getting lost inside a larger result, not where `delivery-drain.sh` sits in `hooks.json`.
+**Delivery**: `inbox.sh`, wired into UserPromptSubmit, PostToolUse, and Stop, is the sole live-session delivery lane. It runs `legion inbox --repo <repo>` and injects undelivered posts and signals as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending. Its output is a delimited block, `[Legion] Inbox:` ... `[Legion] End inbox.`, with musings first and directed signals last in the same "REQUIRES A REPLY" shape boot and `legion pending-replies` use: Claude Code runs matching hooks in parallel with no documented order for injected context, so the delimiter is what keeps a directed ask from getting lost inside a larger result, not where `inbox.sh` sits in `hooks.json`.
 
-The gap the retired push covered and the drain did not: a live session sitting idle mid-turn, with no hook firing, heard nothing until its next prompt or tool call. Watch's idle-session courier (see the Architecture doc) now nudges that session to take a turn -- carrying no post content of its own -- so the drain still runs and remains the only thing that actually delivers. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`. The watch daemon's wake path for asleep agents is unaffected -- it never depended on the MCP channel.
+The gap the retired push covered and the inbox did not: a live session sitting idle mid-turn, with no hook firing, heard nothing until its next prompt or tool call. Watch's idle-session courier (see the Architecture doc) now nudges that session to take a turn -- carrying no post content of its own -- so the inbox still delivers and remains the only thing that actually does. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`. The watch daemon's wake path for asleep agents is unaffected -- it never depended on the MCP channel.
 
 ## Slash commands
 
