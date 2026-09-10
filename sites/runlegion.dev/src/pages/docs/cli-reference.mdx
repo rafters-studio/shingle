@@ -8,7 +8,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.37.0. Commands are organized by category.
+This reference covers legion 0.39.0. Commands are organized by category.
 
 ---
 
@@ -413,16 +413,24 @@ The sanctioned in-band push path. Retires raw `git push` from agent doctrine.
 ```bash
 legion push --repo myproject
 legion push --repo myproject --branch feature/search
+legion push --repo myproject --branch feature/search --force
+legion push --repo myproject --branch feature/search --force --force-reason "base squash-merged, rebasing on main"
+legion push --repo myproject --tag v0.39.0
 ```
 
-Resolves the checkout that has the target branch checked out (via `git worktree list`) and pushes from that checkout, because the pre-push hook reviews the CWD's checked-out branch, not the ref being pushed -- pushing branch B from a checkout sitting on A would silently review the wrong diff. Refuses `main`/`master` and any `--branch` value shaped like a flag or a force/retarget refspec by construction; there is no `--force` flag. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
+Resolves the checkout that has the target branch checked out (via `git worktree list`) and pushes from that checkout, because the pre-push hook reviews the CWD's checked-out branch, not the ref being pushed -- pushing branch B from a checkout sitting on A would silently review the wrong diff. Refuses `main`/`master` and any `--branch` value shaped like a flag or a force/retarget refspec by construction. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
 
-A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push` and says so before running it. Anything the sanctioned command cannot express -- a force push in any spelling, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied outright, naming the flag, rather than silently dropped. A wrapper ahead of `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- is denied outright too, never rewritten, for the same reason: the wrapper is information `legion push` has no way to carry.
+A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push` and says so before running it. Anything the sanctioned command cannot express -- a raw force push, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied outright, naming the flag, rather than silently dropped. A wrapper ahead of `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- is denied outright too, never rewritten, for the same reason: the wrapper is information `legion push` has no way to carry.
+
+`--force` is a gated force-push, not a raw passthrough. It fetches the remote ref, computes the commits the push would discard (reachable from the remote head but not the new local head), and checks each one for survival: present in the new history already (an ordinary amend or rebase), already on `main` by sha, or already on `main` by `git patch-id` equivalence -- the squash-merge case, where a rebased stacked branch's base just squash-merged into `main`. A squash that combined multiple commits into one `main` commit cannot patch-id-match any single pre-squash commit, so a cumulative fallback compares the combined content those commits touched against the new state directly before calling any of them an orphan. If every discarded commit survives, the push proceeds with no extra ceremony. If any commit is a genuine orphan, the push is refused, each orphan named as `<sha> <subject>`, and only `--force-reason "..."` overrides it -- the same override contract as `pr merge --merge-despite-failures` and `issue close --force`. The push itself always runs with `--force-with-lease=<branch>:<fetched-sha>`, so a concurrent push from another agent or node loses the race instead of being silently clobbered. `--force` is mutually exclusive with `--tag`.
 
 Key flags:
 
 - `--repo` (required) repository name, for the audit log
 - `--branch` branch to push; defaults to the CWD's checked-out branch
+- `--tag` push a tag instead of a branch; mutually exclusive with `--branch` and `--force`
+- `--force` force-push, gated on the discarded-commit survival analysis above
+- `--force-reason` justification for overriding a force-push refusal; consulted (and required) only when the analysis finds a genuine orphan
 
 ### pr
 
@@ -472,7 +480,7 @@ legion document set-status <id> --to published
 
 The storage layer is type-agnostic: payload is a validated JSON blob. Meta columns (`type`, `surface`, `status`, `priority`, `owner`) are indexed SQL columns.
 
-`set-status` sets the lifecycle column, bumps `updated_at`, and returns the persisted row re-fetched from the database rather than constructed in memory, so a printed status is proof of the write. There is no status-machine enforcement; the operator clicking Publish in the dashboard is the human gate, by design.
+`set-status` sets the lifecycle column, bumps `updated_at`, and returns the persisted row re-fetched from the database rather than constructed in memory, so a printed status is proof of the write. There is no status-machine enforcement; the operator setting the status directly -- via this verb or the daemon's `POST /api/documents/{id}/status` route -- is the human gate, by design.
 
 `create` and `revise` both validate the payload against the JSON Schema landed for its `doc_type` before writing. A schema document (`doc_type=schema`) still gets the structural gate first -- `$schema`, `title`, `type:object`, non-empty `properties`, and a top-level `x-doc-type` naming the type it governs, since that keyword is what makes a schema self-describing and portable as a file. Every other type is checked against whichever schema declares that `x-doc-type`; a `doc_type` with no landed schema, or with two schemas claiming it, is refused outright -- there is no warn-and-allow. A violation prints one `<json pointer>: <message>` line per problem to stderr and exits 1. A pointer reflection is stored automatically on every schema create or revise, on `domain=schema`, so `legion recall --domain schema` finds the current landed schema.
 
@@ -544,16 +552,6 @@ legion quality-gate finding-ack --branch feature/search --skill legion-simplify 
 `finding-disposition` retires one PENDING finding with a required reason -- a disposition is not a fix, it is a recorded "not fixing this, and here is why." `finding-ack` batch-acknowledges every PENDING LOW-severity finding on a (branch, skill) pair with one shared reason, still writing one row per finding so the audit trail stays per-finding. `finding-list` is the audit view: filterable by branch, skill, and status (`pending`, `resolved`, `dispositioned`).
 
 `legion quality-gate void --id <id> --reason <why>` retires a known-false gate row without deleting it: a voided row drops out of the live gate lookups (`pr create`'s check, the ->Done gate) and out of `stats`, but stays visible in `list` with a VOID marker. `--superseded-by <id>` links it to the genuine replacement row once one exists.
-
-### done
-
-Announce completed work and notify blocked agents.
-
-```bash
-legion done --repo myproject --text "search endpoint shipped"
-```
-
-Posts an `announce` signal. The watch daemon auto-unblocks blocked agents whose block reason mentions the completing repo. For closing out an issue, see `legion issue close` above -- it reads the `legion verify --issue` verdict directly and refuses to close without one when the issue declares acceptance criteria.
 
 ### audit
 
@@ -808,7 +806,7 @@ legion health --json
 ```bash
 legion stats                        # reflection statistics (all repos)
 legion stats --repo myproject       # single repo
-legion status --repo myproject      # work state and team needs
+legion status --repo myproject      # team needs and what changed recently
 legion needs --repo myproject       # what the team needs help with
 legion now                          # current time, weekday, sunphase
 ```

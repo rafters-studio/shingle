@@ -88,7 +88,7 @@ LEGION_BYPASS_READ=1 cat ...
 # legion-bypass: <reason>            (Bash sentinel comment)
 ```
 
-Every bypass appends one row to `bypass.jsonl` with the tool, repo, pattern, and reason. The uncertainty engine reads it. The dashboard surfaces under-served `(tool, repo, pattern)` tuples (#440).
+Every bypass appends one row to `bypass.jsonl` with the tool, repo, pattern, and reason. The uncertainty engine reads it, and `legion telemetry summary` surfaces the top under-served `(tool, repo, pattern)` tuples.
 
 A high bypass volume on a pattern is a signal that `sym` or `recall` is missing an answer agents expected. The doctrine generates its own to-do list.
 
@@ -192,7 +192,6 @@ The watch daemon polls for unhandled wake-worthy signals. When one targets a con
 - Stagger prevents I/O storms
 - Pressure pauses spawns when system load exceeds threshold
 - Panic-stop on subscription-quota exhaustion (#484)
-- Auto-unblock: completed-work announcements trigger unblock of related agents
 - Failed-wake re-arm: an attempt that dies before its prompt submits used to leave the signals it carried marked handled forever. Now the terminal-failure transition unmarks exactly those signals, so the next poll re-surfaces them, capped at `max_redelivery_attempts` (default 3) per `(signal_id, repo_name)`. Exhaustion posts loudly to the bullpen and stderr instead of failing silently a second time
 
 ## Work sources

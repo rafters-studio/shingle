@@ -222,7 +222,7 @@ legion verify --repo myproject --issue 42 --verdicts-file /path/to/verdicts.json
 legion issue close --repo myproject --number 42
 ```
 
-`legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion push` resolves the checkout that actually has your branch and refuses `main` by construction -- there is no `--force`. `legion verify --issue` is the gate before an issue can close: every criterion must pass with cited evidence. Any uncertain result blocks the close for a human.
+`legion pr create` refuses unless both `legion-simplify` and `legion pr write-check` are clean on HEAD. `legion push` resolves the checkout that actually has your branch and refuses `main` by construction; `--force` is a gated exception for the rebased-stacked-branch case, not a raw override. `legion verify --issue` is the gate before an issue can close: every criterion must pass with cited evidence. Any uncertain result blocks the close for a human.
 
 ## Rate-limit awareness
 

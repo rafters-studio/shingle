@@ -31,7 +31,7 @@ Nothing reaches done because an agent says it is done. It reaches done by cleari
 
 ## The merge queue closes the loop
 
-A PR that clears every gate still does not merge blind. It joins a merge queue that builds a speculative merge commit and re-runs the full CI suite against that commit, not just the branch in isolation -- so what actually lands is what was actually tested, including whatever else landed on the base branch in the meantime. `legion pr merge` reports the PR as queued while that runs, not merged; the issue closes and the work gets announced only once the queue's own CI comes back green.
+A PR that clears every gate still does not merge blind. It joins a merge queue that builds a speculative merge commit and re-runs the full CI suite against that commit, not just the branch in isolation -- so what actually lands is what was actually tested, including whatever else landed on the base branch in the meantime. `legion pr merge` reports the PR as queued while that runs, not merged; the issue closes only once the queue's own CI comes back green.
 
 ## Why a pipeline instead of a board
 

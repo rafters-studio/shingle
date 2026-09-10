@@ -6,7 +6,7 @@ description: How Legion stores data, indexes knowledge, schedules work, and sync
 
 # Architecture
 
-Legion is a single Rust binary that stores data in SQLite, indexes prose with Tantivy, indexes code with SCIP, and computes embeddings with model2vec. No runtime dependencies. No background services required (watch, serve, and the daemon are optional).
+Legion is a single Rust binary that stores data in SQLite, indexes prose with Tantivy, indexes code with SCIP, and computes embeddings with model2vec. No runtime dependencies. No background services required (watch and the daemon are optional).
 
 ## Storage
 
@@ -52,7 +52,7 @@ Tables (grouped by concern):
 - `predictions` claims with confidence, surface, cohort, orphan window (#355/#356)
 - `calibration_snapshot` reliability buckets: claimed vs actual, count, Brier score (#357/#358)
 
-All IDs are UUIDv7 (time-ordered). Migrations are idempotent and run on every DB open. Syncable tables (`reflections`, `tasks`, `schedules`, `documents`) carry `deleted_at` and `updated_at` for soft-delete replication and last-write-wins conflict resolution.
+All IDs are UUIDv7 (time-ordered). Migrations are idempotent and run on every DB open. Syncable tables (`reflections`, `schedules`, `documents`) carry `deleted_at` and `updated_at` for soft-delete replication and last-write-wins conflict resolution. The `tasks` table carries the same columns but does not replicate -- its row type left the wire, and the table stays inert rather than syncing.
 
 **Identity-root guard** (#785): a repo holds at most one live, unparented `domain=identity` reflection. `insert_reflection_with_meta` refuses a second one unconditionally -- bootstrap and `--follows` chaining are unaffected, only a second orphan root is blocked. The one sanctioned replace path is `swap_identity_root`, consumed by `legion whoami --generate --apply`: a single transaction that deletes every live identity root for the repo, including any previously leaked duplicates, and inserts the new root plus optional chained children, rolling back atomically on failure. `reflect retag` carries the same guard from the UPDATE side: it refuses to retag the last live root of a protected domain (`identity` or `workflow`) off that domain.
 
@@ -62,7 +62,7 @@ All IDs are UUIDv7 (time-ordered). Migrations are idempotent and run on every DB
 
 Incremental index sync detects reflections in SQLite missing from Tantivy and adds them automatically. No manual reindex needed after sync.
 
-**Documents share the index.** A `kind` field (`reflection` or `document`) partitions the two corpora on every read, so a document with text identical to a reflection's never surfaces in `legion recall` -- recall always passes the reflection kind. Every document write path re-indexes after its DB write: CLI create, revise, set-status, and archive, plus the daemon's own write endpoints. The daemon serves `GET /api/search?q=&repo=`, document-scoped, returning full `Document` rows in rank order (`repo` required, `limit` defaults to 20 and caps at 50, `q` caps at 512 characters, parenthesis nesting bounded at 8); it registers only on the daemon, since `legion serve` already owns `/api/search` for reflection search. Adding `kind` changed the index's on-disk schema, so the first open after upgrading from a pre-0.37.0 index wipes it and starts empty -- `legion reindex`, which now rebuilds reflections and documents together, is the one-time fix.
+**Documents share the index.** A `kind` field (`reflection` or `document`) partitions the two corpora on every read, so a document with text identical to a reflection's never surfaces in `legion recall` -- recall always passes the reflection kind. Every document write path re-indexes after its DB write: CLI create, revise, set-status, and archive, plus the daemon's own write endpoints. The daemon serves `GET /api/search?q=&repo=`, document-scoped, returning full `Document` rows in rank order (`repo` required, `limit` defaults to 20 and caps at 50, `q` caps at 512 characters, parenthesis nesting bounded at 8); it registers directly on the daemon's `channel::router`. Adding `kind` changed the index's on-disk schema, so the first open after upgrading from a pre-0.37.0 index wipes it and starts empty -- `legion reindex`, which now rebuilds reflections and documents together, is the one-time fix.
 
 ## Embeddings
 
@@ -80,7 +80,7 @@ Incremental index sync detects reflections in SQLite missing from Tantivy and ad
 
 **Enforcement hooks** (#438/#439, #713): on indexed repos, raw `Grep` and `Read` are blocked at PreToolUse. The redirect names the exact `sym etc` command for a non-symbol query shape, not just `sym`/`recall`: a literal string routes to `find-content`, a listing to `tree`, a config value to `extract`, "which repo has X" to `find-file`. Bypass via env var (`LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`) or `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl`. This wording lives in the plugin (`plugin/hooks/`), not the daemon, so a session running an older plugin against a newer daemon can still show stale redirect text until the plugin itself is updated.
 
-**The feedback loop**: `bypass.jsonl` is the signal that `sym` or `recall` missed an answer agents expected. The uncertainty engine reads it. The dashboard surfaces top under-served `(tool, repo, pattern)` tuples (#440). Doctrine becomes mechanism: the rule is enforced, the violations are counted, the count drives what gets fixed next.
+**The feedback loop**: `bypass.jsonl` is the signal that `sym` or `recall` missed an answer agents expected. The uncertainty engine reads it, and `legion telemetry summary` surfaces the top under-served `(tool, repo, pattern)` tuples (#440). Doctrine becomes mechanism: the rule is enforced, the violations are counted, the count drives what gets fixed next.
 
 ## Work sources
 
@@ -102,7 +102,7 @@ Work sources are plugins: executables that speak a documented protocol (`list`, 
 
 **Issue-requirement tracing** (#933): an issue can point at a requirement without a card in between. Its body carries a `## Traces to` section: a requirement id, an optional set of criteria ids, and prose, or an explicit `None` with a reason. `legion issue create` validates the trace at filing time, refusing a line that names a requirement that does not exist, is cancelled, or is malformed -- a bad trace fails at the point it is written, not the point verify runs. `legion verify --issue` then judges the work against the traced requirement's own `verification.criteria` rather than the issue's restatement of them, and the recorded verdict pins the requirement document's id and revision. `legion document view` surfaces which of a requirement's criteria currently carry a clean verdict, and `pr write-check` renders the traced criteria beside the PR body's mapping, flagging any the PR re-authors instead of citing. Untraced issues verify exactly as before, straight from the issue body.
 
-Documents replicate across the cluster like reflections and cards.
+Documents replicate across the cluster like reflections.
 
 ## Communication
 
@@ -141,7 +141,6 @@ Long-lived daemon that polls SQLite for unhandled wake-worthy signals. When one 
 - Stagger between spawns prevents I/O storms
 - System health monitoring pauses spawns under pressure
 - Panic-stop on subscription-quota exhaustion (#484)
-- Auto-unblock: when an agent announces completed work, blocked agents referencing that repo are automatically unblocked
 - Failed-wake re-arm (#948): an attempt that dies before its prompt submits unmarks the signals it carried instead of leaving them permanently marked handled, so the next poll re-surfaces them -- subject to that poll's own lookback and expiry windows. Capped at `max_redelivery_attempts` (default 3) per `(signal_id, repo_name)`; exhaustion posts loudly to the bullpen and stderr rather than failing silently a second time
 
 ## Uncertainty engine (Pillar 2)
@@ -209,24 +208,21 @@ legion cluster disable             # stop broadcasting (key preserved)
 legion cluster status              # peers, sync state, last sync time
 ```
 
-## Dashboard
+## Daemon HTTP API
 
-Axum web server with rust-embed for static assets. SSE for live updates. Tabs: Feed, Signals, Stats, Chat, plus code-intelligence views fed by `scip_indexes` and observability views fed by `rate_limit_samples` and `usage_samples`.
+The daemon (`legion daemon`) mounts an Axum router, `channel::router`, over `/health`, `/sse`, `/api/feed`, `/api/post`, `/api/search`, and the `/api/documents` routes. SSE gives live updates to any connected client; agents themselves interact via CLI, not this surface.
 
-**Document endpoints** (#702): `GET /api/documents`, `GET /api/documents/{id}`, and `POST /api/documents/{id}/status` land in `channel::router`, the surface the daemon mounts, so the dashboard can list, view, and publish documents. The status route backs `legion document set-status`: the dashboard's Publish/Approve button flips a document's lifecycle status directly, with the localhost operator session as the human gate rather than a status-machine.
+**Document endpoints** (#702): `GET /api/documents`, `GET /api/documents/{id}`, and `POST /api/documents/{id}/status` list, view, and change a document's lifecycle status. The status route backs `legion document set-status`: a caller flips a document's status directly, with the human issuing the request as the gate rather than a status-machine.
 
-**Document editor endpoints** (#1038, #1036): `POST /api/documents` mirrors `legion document create` field for field, including the schema-write gate above. `PUT /api/documents/{id}/body` is a debounced working-copy save -- it merges new text under the payload's top-level `body` key through a single read-then-`json_set` update and never touches `revision`, so a user typing does not spin the counter; a `revise` landing between two body saves is kept. `POST /api/documents/{id}/revise` is the only one of the three that actually bumps a revision: it replaces the whole payload and increments `revision` by exactly one, the same as the CLI verb. All three validate against the `doc_type`'s schema before writing and share one `load_editable_document` preamble -- 404 for an unknown id, 400 for an archived one. `owner` and a caller-supplied `id` are constrained to `[A-Za-z0-9._-]` and 128 characters, since here they arrive as network input rather than argv; request bodies cap at 4 MiB. There is still no authentication on any of this -- what a LAN peer can do with these endpoints is tracked separately (#1034).
-
-The dashboard is the human control surface. Agents interact via CLI.
+**Document editor endpoints** (#1038, #1036): `POST /api/documents` mirrors `legion document create` field for field, including the schema-write gate above. `PUT /api/documents/{id}/body` is a debounced working-copy save -- it merges new text under the payload's top-level `body` key through a single read-then-`json_set` update and never touches `revision`, so a caller typing does not spin the counter; a `revise` landing between two body saves is kept. `POST /api/documents/{id}/revise` is the only one of the three that actually bumps a revision: it replaces the whole payload and increments `revision` by exactly one, the same as the CLI verb. All three validate against the `doc_type`'s schema before writing and share one `load_editable_document` preamble -- 404 for an unknown id, 400 for an archived one. `owner` and a caller-supplied `id` are constrained to `[A-Za-z0-9._-]` and 128 characters, since here they arrive as network input rather than argv; request bodies cap at 4 MiB. There is still no authentication on any of this -- what a LAN peer can do with these endpoints is tracked separately (#1034).
 
 ## Project layout
 
 ```
 src/
   main.rs              -- CLI entry point (clap); the only process::exit site
-  cli/                 -- subcommand handlers (kanban, pr, document, verify, spec_gen, watch, etc.)
+  cli/                 -- subcommand handlers (pr, document, verify, spec_gen, watch, etc.)
   db/                  -- SQLite init, migrations, domain CRUD modules (reflections, kanban, documents, audit, etc.)
-  kanban/              -- CardStatus state machine and formatting
   uncertainty/         -- emit, witness, calibration, orphans
   mcp/                 -- MCP stdio server (tools, log)
   search.rs            -- Tantivy index management
@@ -245,7 +241,6 @@ src/
   spec_gen.rs          -- requirement derivation from service-design artifacts
   cluster.rs           -- cluster.toml, key management, `legion cluster`
   sync_actor.rs        -- background thread that drives delta sync
-  serve.rs             -- web dashboard
   health.rs            -- system health sampling
   statusline.rs        -- statusLine ingest + chip render
   mesh.rs              -- mesh-aware task placement

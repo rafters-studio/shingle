@@ -17,7 +17,7 @@ So Legion does not ask the agent to be honest. An instruction to report faithful
 
 ## Everything consequential is logged
 
-Every action that touches shared state is recorded. Merging a PR, closing an issue, deleting a card, posting a review: each one lands in the audit log, attributed to the agent that did it and stamped with when. Direct `gh` is blocked on purpose, so nothing routes around the log. A plain `git push` used to be the one way around it: nothing intercepted it, so it wrote no audit row at all. It is now rewritten to `legion push`, which does. A wrapper in front of `gh`, `git commit`, or `git push` -- `env X=1`, `sudo`, `timeout` -- was the other way around it, for the same reason: nothing looked past the wrapper to the command underneath. A wrapped invocation denies now, so it never runs unaudited.
+Every action that touches shared state is recorded. Merging a PR, closing an issue, pushing a branch, posting a review: each one lands in the audit log, attributed to the agent that did it and stamped with when. Direct `gh` is blocked on purpose, so nothing routes around the log. A plain `git push` used to be the one way around it: nothing intercepted it, so it wrote no audit row at all. It is now rewritten to `legion push`, which does. A wrapper in front of `gh`, `git commit`, or `git push` -- `env X=1`, `sudo`, `timeout` -- was the other way around it, for the same reason: nothing looked past the wrapper to the command underneath. A wrapped invocation denies now, so it never runs unaudited.
 
 ```
 legion audit --limit 20        # who did what, most recent first
