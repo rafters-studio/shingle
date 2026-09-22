@@ -99,7 +99,7 @@ Work sources are plugins: executables that speak a documented protocol (`list`, 
 
 **Schema registry**: schemas are documents with `doc_type=schema`, structurally validated at insert (`$schema`, `title`, `type:object`, non-empty `properties`) and self-describing via a top-level `x-doc-type` keyword naming the type each one governs. Every write to the `documents` table -- `Database::insert_document`, `revise_document`, and `update_document_body`, so CLI and daemon alike -- validates its payload against the schema landed for that `doc_type` through the `jsonschema` crate (draft-07 and 2020-12, `$ref`/`definitions` honored); a `doc_type` with no schema, or with two schemas claiming it, is refused, no warn-and-allow. A violation raises `LegionError::SchemaViolation`, one `<pointer>: <message>` line per problem -- the CLI prints the lines and exits 1, the daemon answers 422 with a `violations` array. The crate builds with `default-features = false`: its defaults resolve a remote `$ref` over HTTP or `file://`, which would turn a caller-supplied schema on the daemon's create endpoint into an SSRF and file-disclosure primitive and panic a blocking fetch inside an axum handler, so an external `$ref` now fails to compile instead. A second bound counts every reference keyword (`$ref`, `$dynamicRef`, `$recursiveRef`) anywhere in a schema and refuses past 64, alongside a matching nesting cap, closing a stack-overflow path a chained-ref schema could otherwise trigger. Each schema write dual-writes a pointer reflection on `domain=schema` so `legion recall --domain schema` surfaces every landed schema with its document id. `legion document validate --schema <id>` runs the same compiled validator by hand against an arbitrary instance.
 
-**Spec-gen**: `legion spec-gen --repo <surface>` reads non-archived service-design documents (types: `persona`, `journey`, `blueprint`, `discovery`, `ecosystem`), derives one requirement per `moment_of_truth`, validates each against the requirement schema, and inserts new requirement documents. Idempotent on `(traces_to, surface)` pairs.
+**Spec-gen is retired**: the Rust `legion spec-gen` command -- and `src/spec_gen.rs` with it -- was removed in 0.34.0 (#821). Deriving a requirement from a service-design document's `moment_of_truth` is judgment work legion carries through the uncertainty engine and the audit log, not a deterministic field-concatenation, so it now runs as an instrumented skill rather than compiled Rust. `/legion:sd-write-spec` is the current path: two input modes (intent alone, or a landed service design), every `traces_to` naming what earned it from an exhaustive list of grounds, and every gap escalated rather than resolved in the body. The requirement JSON schema in the registry is unchanged, so a derived requirement still validates the same way either path produced it.
 
 **Issue-requirement tracing** (#933): an issue can point at a requirement without a card in between. Its body carries a `## Traces to` section: a requirement id, an optional set of criteria ids, and prose, or an explicit `None` with a reason. `legion issue create` validates the trace at filing time, refusing a line that names a requirement that does not exist, is cancelled, or is malformed -- a bad trace fails at the point it is written, not the point verify runs. `legion verify --issue` then judges the work against the traced requirement's own `verification.criteria` rather than the issue's restatement of them, and the recorded verdict pins the requirement document's id and revision. `legion document view` surfaces which of a requirement's criteria currently carry a clean verdict, and `pr write-check` renders the traced criteria beside the PR body's mapping, flagging any the PR re-authors instead of citing. Untraced issues verify exactly as before, straight from the issue body.
 
@@ -109,11 +109,11 @@ Documents replicate across the cluster like reflections.
 
 **Bullpen**: shared message board. Posts are reflections with `audience = 'team'`. Discoverable via `consult`.
 
-**Signals**: structured bullpen posts for coordination. Format: `@recipient verb:status {details}`. Filtered separately from natural-language posts. Wake-worthy verbs (`question`, `request`, `help`, `blocker`) spawn an asleep recipient via watch. Informational verbs (`announce`, `ack`, `info`, `answer`, `review`) deliver to live sessions only.
+**Signals**: structured bullpen posts for coordination. Format: `@recipient verb:status {details}`. Filtered separately from natural-language posts. Wake-worthy verbs (`question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`) spawn an asleep recipient via watch; `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details`. Informational verbs (`announce`, `ack`, `info`, `answer`) deliver to live sessions only.
 
 **Resolve** (#362): `legion resolve --id <post-id>` marks a converged thread so it stops resurfacing in the bullpen and the wake-loop signal feed. Optional `--reflection <id>` links the team's decision so future recall surfaces them together.
 
-**MCP server**: `legion mcp` exposes four tools agents call in-conversation -- `legion_post`, `legion_reply`, `legion_signal`, `legion_task_respond` -- plus `serverInfo.name`. It no longer initiates messages: the polling thread that pushed `notifications/claude/channel` frames, its heartbeat, the `legion/notifier_health` method, the `legion mcp-health` probe, and the `experimental.claude/channel` capability are all retired (#947, PR #963). A poisoned stdout lock used to drop a JSON-RPC response silently; flattening the writer to plain ownership when the notifier thread went away made that failure mode structurally impossible rather than merely unobserved.
+**The MCP server is retired.** 0.32.0 (#947) retired only the push half -- the notification channel that pushed `notifications/claude/channel` frames -- and left `legion mcp` and its four write tools (`legion_post`, `legion_reply`, `legion_signal`, `legion_task_respond`) standing. 0.35.0 (#952, PR #982) finished the job: the MCP server itself, `legion mcp` and `legion mcp-logs`, `src/mcp/` in full, and `plugin.json`'s `mcpServers` registration are all gone. The CLI is now the single write surface for board and signal writes: `legion post` and `legion signal` are the direct replacements, each running the embed backfill, self-signal refusal, and the resolves-stamp the MCP tools never inherited. `legion_task_respond` has no replacement -- `legion task` and the card/task system it wrote to were themselves removed in 0.39.0 (see Storage above, on the inert `tasks` table).
 
 **Delivery**: `legion inbox --repo <repo>` is the sole live-session delivery lane, wired into the plugin's UserPromptSubmit, PostToolUse, and Stop hooks. It reads the undelivered set and returns it as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending, whichever fires first. Its output is a delimited result block (#1024, #1020): `[Legion] Inbox:` ... `[Legion] End inbox.`, musings first, then directed signals last in the same `REQUIRES A REPLY` shape boot and `legion pending-replies` use -- Claude Code runs matching hooks in parallel with no documented ordering of injected context, so the delimiter is the mechanism, not hook placement in `hooks.json`. `legion inbox --split` does the sorting in the binary so the hook never parses posts.
 
@@ -222,10 +222,9 @@ The daemon (`legion daemon`) mounts an Axum router, `channel::router`, over `/he
 ```
 src/
   main.rs              -- CLI entry point (clap); the only process::exit site
-  cli/                 -- subcommand handlers (pr, document, verify, spec_gen, watch, etc.)
-  db/                  -- SQLite init, migrations, domain CRUD modules (reflections, kanban, documents, audit, etc.)
+  cli/                 -- subcommand handlers (pr, document, verify, watch, push, commit, etc.)
+  db/                  -- SQLite init, migrations, domain CRUD modules (reflections, documents, audit, wake, etc.; kanban.rs is an inert legacy remnant)
   uncertainty/         -- emit, witness, calibration, orphans
-  mcp/                 -- MCP stdio server (tools, log)
   search.rs            -- Tantivy index management
   scip.rs              -- SCIP index build, store, query (sym engine)
   sym.rs               -- sym subcommand: def, refs, impl, hover, impact, list, tree, etc
@@ -239,7 +238,6 @@ src/
   surface.rs           -- cross-repo highlights
   status.rs            -- agent work status
   documents.rs         -- coordination substrate documents, schema registry, validation
-  spec_gen.rs          -- requirement derivation from service-design artifacts
   cluster.rs           -- cluster.toml, key management, `legion cluster`
   sync_actor.rs        -- background thread that drives delta sync
   health.rs            -- system health sampling
@@ -254,8 +252,7 @@ plugin/
   bin/legion           -- wrapper script
   hooks/               -- Claude Code hooks
   commands/            -- slash commands
-  agents/              -- agent definitions (changelog, dungeon-master, issue-writer, legion-explore, legion-prime, legion-review, legion-verify)
-  skills/              -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify)
-  channel/             -- MCP client bridge
+  agents/              -- agent definitions (changelog, dungeon-master, issue-writer, legion-explore, legion-review, legion-verify)
+  skills/              -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify, legion-distill, and the sd-* service-design/spec skills)
   worksources/         -- work source plugins
 ```

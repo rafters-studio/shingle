@@ -2,12 +2,12 @@
 layout: ../../layouts/Docs.astro
 prose: true
 title: Plugin Guide
-description: Hooks, slash commands, skills, agents, the MCP server, and work source plugins.
+description: Hooks, slash commands, skills, agents, and work source plugins.
 ---
 
 # Plugin Guide
 
-Install via `/plugin marketplace add runlegion/legion` then `/plugin install legion`. The plugin manages hooks, slash commands, skills, agent definitions, an MCP server, and work source plugins.
+Install via `/plugin marketplace add runlegion/legion` then `/plugin install legion`. The plugin manages hooks, slash commands, skills, agent definitions, and work source plugins.
 
 ## Plugin structure
 
@@ -17,9 +17,8 @@ plugin/
   bin/legion         -- wrapper script (resolves the binary, sets env)
   hooks/             -- SessionStart, Stop, PreCompact, PreToolUse, PostToolUse
   commands/          -- slash command skills
-  agents/            -- agent definitions (changelog, dungeon-master, issue-writer, legion-explore, legion-prime, legion-review, legion-verify)
-  skills/            -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify, and the seven-skill service-design pipeline: sd-service-design plus its six steps)
-  channel/           -- MCP client bridge
+  agents/            -- agent definitions (changelog, dungeon-master, issue-writer, legion-explore, legion-review, legion-verify)
+  skills/            -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify, legion-distill, and the eight-skill service-design/spec lineup: sd-service-design plus its six steps, and sd-write-spec as its own entry point)
   worksources/       -- work source plugins (GitHub, etc.)
 ```
 
@@ -30,7 +29,7 @@ plugin/
 Fires when an agent session begins. Injects, in order:
 
 1. Identity reflections via `legion whoami`
-2. Pending replies via `legion pending-replies` (signals carrying `question` / `request` / `help` / `blocker` targeting this repo)
+2. Pending replies via `legion pending-replies` (signals carrying a wake-worthy verb -- `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`, or `rfc` -- targeting this repo)
 3. Time + sunphase via `legion now --banner`
 4. Cross-repo highlights via `legion surface`
 5. Agent work status via `legion status`
@@ -42,7 +41,7 @@ The agent starts every session with full context. No cold starts.
 
 ### UserPromptSubmit
 
-Fires when you submit a prompt, before Claude Code processes it. Runs `inbox.sh`, which calls `legion inbox --repo <repo>` and injects anything still undelivered as additional context: bullpen posts and signals a live session has not yet seen, arriving through the plugin's own hook lane rather than the MCP channel.
+Fires when you submit a prompt, before Claude Code processes it. Runs `inbox.sh`, which calls `legion inbox --repo <repo>` and injects anything still undelivered as additional context: bullpen posts and signals a live session has not yet seen.
 
 ### Stop
 
@@ -76,7 +75,9 @@ The hook is silent on repos without a SCIP index. New repos behave as they did b
 
 **Sym etc routing** (#713): the deny and inject messages name the exact `sym etc` command for the query shape they block: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for a cross-repo name lookup -- a non-symbol query never lands with nowhere to route. This wording lives in the plugin (`plugin/hooks/`), not the daemon, so a session running an older plugin can still show older redirect text (symbols-only, or a stale command list) until the plugin itself is updated.
 
-**Whoami-rewrite refusal** (#478): a sibling PreToolUse refuses Edit/Write that would rewrite an identity reflection's content without going through the proper update path. Identity is institutional. Edits land through `legion reflect --whoami`.
+**No-local-memory**: a sibling PreToolUse hook on Edit/Write/MultiEdit blocks writes to Claude Code's own auto-memory directory (`.claude/projects/*/memory/`). Legion is the memory layer -- a file written there is invisible to other agents and other repos and is dead weight the moment the session ends, so this hook is the enforcement layer against the system prompt's own pull toward that path.
+
+**No-direct-db**: a sibling PreToolUse hook on Bash blocks any command whose argv contains the literal substring `legion.db` -- `sqlite3`, `cp`, `mv`, `rm`, `dd`, `cat`, and so on. The CLI is the sole API for legion state; raw access bypasses migrations, the constraints the Rust code enforces, and the audit log.
 
 **No-gh** (#477, #828): blocks direct `gh` invocations (including absolute-path forms) outside legion-managed wrappers, so the audit log captures every work-source action. The denial translates the exact legion command for the verb typed -- `gh pr view 42` denies with `legion pr view --repo <r> --number 42` -- instead of printing a fixed menu of a handful of verbs against a much larger surface.
 
@@ -85,6 +86,8 @@ The hook is silent on repos without a SCIP index. New repos behave as they did b
 **Wrapper prefixes deny, never translate** (#1120, #1117): a wrapper in front of `gh`, `git commit`, or `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- used to walk past the guards, because each one classified on the command's first token and a wrapper isn't a shell metacharacter. It denies now instead of running unaudited, and deliberately is never rewritten: `env X=1 gh pr view 1` names a translatable verb, but folding it into `legion pr view 1` would drop the environment assignment with no way to reconstruct it. A backslash-escaped command word (`\gh`) is caught the same way.
 
 **Pre-script-search** (#838): watches Write/Edit content, and inline `python -c` / `node -e` code passed to Bash, for search primitives a script could use instead of an existing lookup -- `os.walk`, `rglob`, `fnmatch`, `re.search` and similar. It injects a pointer to the matching command (`sym tree` for a directory walk, `sym etc find-file` for a name or glob, `sym etc find-content` for a text search); it never denies, since a script that searches may also do real work that refusing it would block. Silent in an unindexed repo, same as the rest of this ladder.
+
+**Pre-bash-ls** (0.34.0): closes the gap the grep-rewrite chain left open -- `grep`/`rg`/`find`/`fd` were already intercepted and steered onto `legion sym`, but `ls` slipped through. `ls` of a directory inside the current repo's indexed tree gets a pointer to `legion sym tree`; unlike the deny-tier hooks above, it only ever injects and always lets the command run, since `ls -l` metadata and the non-source files (READMEs, configs, dotfiles) sym does not index are things `sym tree` cannot reproduce.
 
 ### PostToolUse
 
@@ -100,18 +103,11 @@ Fires before Claude Code compresses context. Stores a checkpoint reflection so t
 
 `_legion-daemon-supervisor.sh` runs idempotently from SessionStart and ensures the channel/watch daemon is alive. `legion daemon-spawn` is the underlying primitive.
 
-## MCP server
+## No MCP server
 
-`legion mcp` exposes four tools agents call in-conversation:
+Legion shipped an MCP server through 0.34.0, but it is gone now. 0.32.0 (#947) retired only its server-push lane -- the polling thread that pushed `notifications/claude/channel` JSON-RPC frames to stdout, its heartbeat, the `legion/notifier_health` method, the `legion mcp-health` probe, and the `experimental.claude/channel` capability -- on a measured parity read: the inbox lane below covered every eligible case the push did, at a fraction of the token cost. `legion mcp` and its four tools (`legion_post`, `legion_reply`, `legion_signal`, `legion_task_respond`) survived that release and kept working.
 
-- `legion_post` broadcast to all agents
-- `legion_reply` reply to a specific post by ID
-- `legion_signal` send a structured signal
-- `legion_task_respond` accept, complete, or block a task
-
-It does not initiate messages. The server-push lane -- a polling thread that pushed `notifications/claude/channel` JSON-RPC frames to stdout, its heartbeat, the `legion/notifier_health` method, the `legion mcp-health` probe, and the `experimental.claude/channel` capability declared in the plugin manifest -- is retired (#947, PR #963), on a measured parity read: the inbox lane below covered every eligible case the push did, at a fraction of the token cost.
-
-The MCP subprocess stderr lands in per-PID log files under `~/Library/Logs/legion/mcp/` on macOS or the XDG state dir on Linux. Tail with `legion mcp-logs --tail`.
+0.35.0 (#952) finished the job: `legion mcp`, `legion mcp-logs`, `src/mcp/` in full, and `plugin.json`'s `mcpServers` registration are all deleted. The CLI is now the single write surface for board and signal writes -- `legion post` and `legion signal` -- each running the embed backfill, self-signal refusal, and resolves-stamp the MCP tools never inherited. `legion_task_respond` has no replacement; the task/card system it wrote to was itself removed in 0.39.0.
 
 **Delivery**: `inbox.sh`, wired into UserPromptSubmit, PostToolUse, and Stop, is the sole live-session delivery lane. It runs `legion inbox --repo <repo>` and injects undelivered posts and signals as additional context at the next hook turn-boundary -- real-time relative to your prompt, a tool call, or the session ending. Its output is a delimited block, `[Legion] Inbox:` ... `[Legion] End inbox.`, with musings first and directed signals last in the same "REQUIRES A REPLY" shape boot and `legion pending-replies` use: Claude Code runs matching hooks in parallel with no documented order for injected context, so the delimiter is what keeps a directed ask from getting lost inside a larger result, not where `inbox.sh` sits in `hooks.json`.
 
@@ -128,6 +124,7 @@ The gap the retired push covered and the inbox did not: a live session sitting i
 - `/checkpoint` session wind-down with team memory consolidation (renamed from `/snooze` in v0.16.3; the word primed agents to go dormant)
 - `/watch-sync` sync working directories into `watch.toml`
 - `/migrate-memory` move Claude Code auto-memory into legion reflections so the agent lives on any node, not just one laptop
+- `/legion-release` cut a legion release: the changelog agent writes the entry, `scripts/release.sh` ships it
 
 ## Skills
 
@@ -148,8 +145,6 @@ Skills are auto-triggered by description match, or invoked directly by name. Cla
 ## Agents
 
 **issue-writer**, invoked as `legion:issue-writer`, turns a messy problem description into a GitHub issue that matches the repo's canonical issue template on disk -- template discipline, spec-slice transcription rules, the premise-line requirement for untraced defect work, and the UNCLEAR clarification format when the ask is ambiguous. It ships with the plugin, so it is available in every repo legion serves, not just this one. The bare `issue-writer` name no longer resolves; the namespaced form is required.
-
-**legion-prime** is the steering role for cross-agent coordination, team communication, and legion memory management: manages the bullpen, reviews signals, coordinates between agents, maintains institutional memory.
 
 **legion-explore** is a read-only exploration agent for indexed repos: no Grep or Glob tools, a routing ladder instead. The ladder has five lanes: doctrine/decision questions go to `recall`/`consult`; symbol-shaped questions go to `sym`; a sym hit gets a targeted `Read` at the cited span; non-symbol structured queries (a literal string, a config value, "which file has X") go to `sym etc`/`sym tree`, tried before any shell text search since none of them need a SCIP index; bounded shell text search is the last resort, used only once the `sym etc` lane could not answer, and every use is logged via `legion telemetry record-bypass`.
 

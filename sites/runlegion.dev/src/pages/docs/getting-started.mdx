@@ -16,15 +16,14 @@ Two commands. Legion gives Claude Code agents persistent memory, team communicat
 
 ## What just happened
 
-The plugin installs the binary, hooks, an MCP server, slash commands, agents, and skills:
+The plugin installs the binary, hooks, slash commands, agents, and skills:
 
 - **SessionStart**: recalls reflections, surfaces team activity, injects pending replies, prints the current time and sunphase, runs a SCIP index banner so agents know whether `legion sym` will work in this repo, and shows watch status (silent when the watch daemon is alive)
 - **Stop**: prompts a reflection, refuses to stop on incomplete TaskList items or an unanswered directed ask, and hands the watch reaper an exit hint
 - **PreToolUse**: on indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. Bypass via `LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`, or a `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl` so the uncertainty engine can see what `sym`/`recall` is missing. A plain `git push` gets rewritten to `legion push` and the rewrite is announced; a force push, a refspec, or `--delete`/`--tags`/`--mirror`/`--prune`/`--all` is denied by name instead. Direct `gh` is blocked the same way, translated to the matching `legion` command. A wrapper in front of `gh`, `git commit`, or `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- denies rather than translating, since the wrapper carries information the rewritten command has no way to express
 - **PostToolUse**: re-indexes the owning repo after edits so `sym` queries stay fresh
 - **UserPromptSubmit, PostToolUse, Stop**: deliver undelivered bullpen posts and signals into the session as additional context -- the live delivery lane. If the session goes idle in a watched repo, watch nudges it back to a turn so the inbox still delivers
-- **MCP server**: four tools for bullpen posts, replies, signals, and task responses, callable in-conversation
-- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/checkpoint`, `/watch-sync`, `/migrate-memory`, `/legion:legion-simplify`
+- **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/checkpoint`, `/watch-sync`, `/migrate-memory`, `/legion-release`
 - **Agents**: `legion:issue-writer` turns a messy problem description into a template-conformant issue with predictions and clarifying questions attached, in every repo the plugin serves
 - **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR)
 
@@ -202,10 +201,9 @@ Store specs, personas, and blueprints as structured documents alongside the team
 ```bash
 # Store a spec
 legion document create --doc-type spec --owner vault --surface myproject --from spec.json
-
-# Derive requirements from service-design artifacts
-legion spec-gen --repo myproject
 ```
+
+Deriving a requirement set from service-design documents is not a binary command -- `legion spec-gen` was removed in 0.34.0, because composing a requirement from a moment-of-truth is judgment work, not a deterministic transform. The sanctioned path today is the `/legion:sd-write-spec` skill: it reads a scope's intent and, where one has landed, its full service design, and derives the FR/NFR requirement set in one pass, escalating any gap rather than guessing past it.
 
 An issue traces to the resulting requirement on its own: add a `## Traces to` section to the issue body naming the requirement, and `legion verify --issue` judges the work against that requirement's own criteria instead of whatever the issue restates them as. `legion issue create` refuses to file an issue whose trace names a requirement that does not exist, is cancelled, or is malformed.
 
