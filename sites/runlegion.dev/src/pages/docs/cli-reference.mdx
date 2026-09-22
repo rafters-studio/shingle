@@ -397,6 +397,16 @@ Each line either names a requirement id (`FR-2044-003` above), with an optional 
 
 The close path fails closed when it cannot read the issue at all: a work source that will not answer means the gate could not be evaluated, which is not the same as passing it. `view-issue` is a hard requirement of the close path -- a plugin implementing only `close` needs it too.
 
+### work
+
+Get the next candidate work item: the highest-priority open issue on the repo's configured work source.
+
+```bash
+legion work --repo myproject
+```
+
+Sourced live from the work source's issues (#931) -- there is no local queue or board to fall out of sync with. `--peek` is present for CLI compatibility but is a no-op: there is no local "accepted" state left to claim against, so picking never claims anything.
+
 ### comment
 
 Post a comment on an issue or PR via the work source plugin.
