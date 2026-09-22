@@ -2,47 +2,37 @@
 layout: ../../layouts/Docs.astro
 prose: true
 title: Work
-description: "The kanban is agent-shaped, not timeboxed. No estimates, no sprints, no standups. States that match an agent's lifecycle, work pulled instead of pushed, and time modeled as a scheduled wake instead of a deadline."
+description: "Work runs as a pipeline, not a board: plan to issue, build in a worktree, then a chain of earned gates -- simplify, pr-write, review, verify -- before a merge queue re-certifies the change against full CI."
 ---
 
 # Work
 
-Human work tools assume a continuous person on a calendar. Sprints, story points, velocity, standups, due dates. An agent has none of that. It does not have a velocity. It has a session that starts and ends, and then a different instance picks up where it left off. Measuring its work in days is a category error.
+An agent does not have a desk, a calendar, or a manager checking in on Tuesday. It has a session that starts, runs, and ends, and then a different instance picks up whatever it left behind. A work model built for a continuous person -- sprints, story points, a board someone walks past every morning -- does not fit that. What fits is a pipeline: one path from a problem to a merged, verified change, with a gate at every step that has to be earned rather than asserted.
 
-So the board drops the calendar and models what is real for an agent: where the work is, and who is doing it.
+## Plan becomes issue
 
-## States that match a lifecycle
+Work starts as a GitHub issue, filed and closed through legion's own verbs so every action lands in the audit log rather than going around it. Turning a rough problem description into a real spec is not left to whoever happens to be filing it: the `legion:issue-writer` agent reads the repo's own issue template and writes a body that matches it exactly -- section order, acceptance criteria, and where the ask is genuinely unclear, a named UNCLEAR instead of a guessed answer. It also records uncertainty predictions about the work before anyone starts, so what the team expected going in is on the record before it is confirmed or contradicted.
 
-A card moves through the states an agent actually passes through, not the ones a schedule imposes.
+## Build
 
-- **Pending**: proposed, not yet taken.
-- **Accepted**: an agent owns it and is working it.
-- **Blocked**: a real technical blocker, named.
-- **Review**: implementation done, waiting on a check.
-- **NeedsInput**: the agent hit something only a human can decide, and stopped instead of guessing.
-- **Delegated**: handed to another agent's live session.
-- **Deferred**: put down until a set time.
-- **Done**: verified against its acceptance criteria, not eyeballed.
+An implementer takes the issue up in an isolated worktree -- one change, one branch, nothing bleeding in from whatever else is in flight. Which model builds it is not arbitrary: a vague spec routes to more capability, because the ambiguity has to get resolved in the agent's head instead of on the page; a tight one can route to less.
 
-`NeedsInput` is the state a human work tool does not have, and it is the important one. An agent that is unsure does not improvise. It stops and routes the card to a person. That is [Trust](/docs/trust/) showing up on the board: uncertain is not rounded up to done.
+## Gates, not a board state
 
-## Pull, not push
+Nothing reaches done because an agent says it is done. It reaches done by clearing a chain of gates, each one recorded against the exact commit it was run on -- HEAD-keyed, not repo-keyed, so a gate cannot quietly stay clean while the code underneath it moves on without it.
 
-Work is not assigned to a desk that will be occupied on Monday. A booting agent reads the board and takes the next card. The board is the durable state it wakes into, which is [Memory](/docs/memory/). Nobody schedules the fleet. The fleet pulls.
+**legion-simplify**, first: a per-file articulation of what was checked and why the diff holds up, not a bare verdict. `legion quality-gate check` validates the articulation itself before recording it -- a boilerplate "looks fine" does not clear the gate, only a substantive one does. Findings raised here land in a ledger, not a comment that scrolls away: each one resolves, gets dispositioned with a reason, or is batch-acknowledged, but it is never silently dropped.
 
-## Time as an event, not a box
+**legion-pr-write**, second: before the PR opens, its body maps every acceptance criterion to the diff that satisfies it, in prose, with evidence, and says plainly what was deliberately left undone. `pr write-check` validates that mapping and refuses an empty or boilerplate one. Writing the mapping is itself a check: it makes the implementer re-read their own diff as a reader would, which is usually where the thing they talked past while coding gets caught.
 
-Time still exists on the board, but as a wake, not a deadline. `legion kanban defer` puts a card down until a set time and takes it out of the working set until then. When the time passes, the card wakes its owner on its own.
+**Review**, third: dimension reviewers run over the diff -- fanned out separately or combined into one pass, depending on how much risk the change carries -- and every HIGH-severity finding gets adversarially refuted before it is allowed to stand. A finding that does not survive scrutiny does not get to block anything either.
 
-```
-legion kanban defer --id <card> --until 3d     # put it down; it wakes itself later
-legion kanban undefer --id <card>              # wake it now, ahead of time
-```
+**legion-verify**, fourth: the issue's acceptance criteria each get a verdict -- pass, fail, or uncertain -- and a pass needs cited evidence or the system downgrades it to uncertain automatically. Any fail blocks the close. Any uncertain routes to a human instead of getting rounded up to done.
 
-"Wake me on this in three days" replaces "due Friday," because there is no Friday for an agent, only the next time it is running.
+## The merge queue closes the loop
 
-## Done means verified
+A PR that clears every gate still does not merge blind. It joins a merge queue that builds a speculative merge commit and re-runs the full CI suite against that commit, not just the branch in isolation -- so what actually lands is what was actually tested, including whatever else landed on the base branch in the meantime. `legion pr merge` reports the PR as queued while that runs, not merged; the issue closes only once the queue's own CI comes back green.
 
-A card reaches Done through the verify gate, not an agent's say-so. It carries acceptance criteria, bound to it as a spec, and `legion verify` checks the work against them one criterion at a time. If the agent decides the criteria themselves are wrong, it does not quietly build something else. It files a replan request and stops, and a human re-ratifies the criteria before the work goes on. The plan is not something an agent gets to edit on its own while claiming it followed it.
+## Why a pipeline instead of a board
 
-Not all work has a card. A repo running straight off issues verifies the same way, minus the card: `legion verify --issue <n>` reads acceptance criteria from the issue body instead of a bound document, unless the issue traces to a requirement, in which case it judges the work against that requirement's own criteria instead of the issue's restatement of them. An issue traces to a requirement through a `## Traces to` section in its body, and `legion issue create` refuses to file one that names a requirement that does not exist, is cancelled, or is malformed -- so a bad trace never gets the chance to become a false verdict later. `legion issue close` refuses to close an issue that declares criteria until that verdict is clean. If a card does exist, close the work with `legion done` -- it resolves the linked issue on its own, and `legion issue close` will not find the card's verdict.
+A board tells you where a thing is. A pipeline tells you what has been proven about it. [Trust](/docs/trust/) already puts the failure mode on the table: an autonomous agent's default move under pressure is to declare victory. A status column an agent can drag itself into does nothing to stop that. A gate that has to be earned -- an articulation, a citation, a re-run CI result -- does. The pipeline is not process for its own sake. It is where Trust's abstract rule, verify instead of assert, becomes the actual sequence a change has to survive before it ships.
