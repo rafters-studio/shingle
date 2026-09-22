@@ -12,10 +12,9 @@ interface Props {
   description?: string;
   /**
    * Opt into article typography (prose measure, heading rhythm, underlined
-   * links). Running prose wants it; the reference pages do not. cli-reference's
-   * wide tables and the /docs/ card grid both need the full column, and the
-   * cards set `no-underline`, which article mode's `[&_a]:underline` would
-   * outrank on specificity.
+   * links). Running prose wants it; the /docs/ card grid does not: it needs
+   * the full column, and its cards set `no-underline`, which article mode's
+   * `[&_a]:underline` would outrank on specificity.
    */
   prose?: boolean;
 }
