@@ -397,6 +397,17 @@ Each line either names a requirement id (`FR-2044-003` above), with an optional 
 
 The close path fails closed when it cannot read the issue at all: a work source that will not answer means the gate could not be evaluated, which is not the same as passing it. `view-issue` is a hard requirement of the close path -- a plugin implementing only `close` needs it too.
 
+### comment
+
+Post a comment on an issue or PR via the work source plugin.
+
+```bash
+legion comment --repo myproject --number 42 --body "..."
+echo "..." | legion comment --repo myproject --number 42
+```
+
+`--body` is optional; omit it to read the comment from stdin, the only shell-safe way to pass a body containing backticks or `$(...)`.
+
 ### sub-issue
 
 Link a child issue to a parent via GitHub's native sub-issue relationship.
@@ -431,6 +442,18 @@ Key flags:
 - `--tag` push a tag instead of a branch; mutually exclusive with `--branch` and `--force`
 - `--force` force-push, gated on the discarded-commit survival analysis above
 - `--force-reason` justification for overriding a force-push refusal; consulted (and required) only when the analysis finds a genuine orphan
+
+### commit
+
+The sanctioned in-band commit path (#854). Closes the last unaudited hop in the mutation path -- `legion push` routes pushes and the no-gh hook fences `gh`, but the commit itself, where authorship, trailers, and signing happen, used to be raw `git`.
+
+```bash
+legion commit --repo myproject --message "fix(auth): reject expired tokens before rate limiting"
+legion commit --repo myproject --message-file commit-msg.txt
+echo "..." | legion commit --repo myproject
+```
+
+Preflights the configured signer before touching anything, by signing a throwaway commit object -- a locked or absent signer fails once, by name. Validates the message and refuses violations by name: the subject must be `<type>(<scope>): <summary>` with a scope, a body must be separated from the subject by a blank line, and no emoji anywhere. Since #1136, a subject-only message validates; a `Co-Authored-By` trailer is no longer required. Commits only the staged index -- no `-a`, nothing is staged for you -- and audit-logs every attempt, refusals included.
 
 ### pr
 
@@ -488,15 +511,9 @@ The storage layer is type-agnostic: payload is a validated JSON blob. Meta colum
 
 For a requirement document, `legion document view` also reports which of its `verification.criteria` currently carry a clean verify verdict, so a spec author can see coverage without cross-referencing every issue that claims to trace to it.
 
-### spec-gen
+### spec-gen (removed)
 
-Generate requirement documents from service-design artifacts.
-
-```bash
-legion spec-gen --repo myproject
-```
-
-Reads all non-archived service-design documents whose `surface` field matches `--repo` (types: `persona`, `journey`, `blueprint`, `discovery`, `ecosystem`). Note: `--repo` here is the functional surface label stored on documents (e.g., `payments`, `onboarding`), not a git repository name. Derives one requirement per `moment_of_truth` and inserts new requirement documents. Re-running on unchanged input is safe: existing `(traces_to, surface)` pairs are skipped. File an issue tracing to the resulting requirement (`## Traces to`) to put it to work.
+`legion spec-gen` is not a command in 0.40.0. It was removed in 0.34.0 (#821): deriving a requirement from a service-design document's `moment_of_truth` is judgment work, not a deterministic field-concatenation, so it was pulled from the binary rather than kept as compiled Rust. The requirement JSON schema in the registry is unchanged. The current path for deriving a scope's requirement set is the `/legion:sd-write-spec` skill, not a CLI verb -- see the Plugin Guide's skills section.
 
 ### verify
 
@@ -634,6 +651,7 @@ legion sym etc find-content 'TODO' --repo myproject
 legion sym etc find-content '--spacing-0\.5' --repo myproject --fixed-strings
 legion sym etc find-content 'fn main' --ext rs --json
 legion sym etc find-content 'API_KEY' --repo myproject --no-ignore --hidden
+legion sym etc find-content 'TODO' --repo myproject --text
 
 # One field out of a config file or doc frontmatter, without reading the whole file
 legion sym etc extract package.json --field scripts.build
@@ -646,7 +664,11 @@ legion sym etc find-file components.json --role config
 
 `find-content` runs the same ripgrep engine as the shell tool it replaces, directly against the working tree: literal mode (`--fixed-strings`) matches conflict markers and punctuation-heavy patterns verbatim, regex is the default. `--hidden` reaches hidden files and dotfiles (`.git/` stays excluded regardless). `--no-ignore` disables gitignore/`.ignore`/parent-ignore/git-exclude checks; it is independent of `--hidden`, so reaching a gitignored dot-directory (a generated `.rafters/` workspace, for instance) needs both flags together. Gitignored files commonly hold secrets, and anything matched under `--no-ignore` is printed to stdout/JSON -- treat it with the same care as `--hidden`.
 
+As of 0.39.2, default output is locations only -- `path:line` (or `repo/path:line` when the scan spans repos) -- not the matched text, so a caller is not billed context for source it usually does not read. Pass `--text` to restore the old `path:line: text` shape; `--json` always includes the text regardless of `--text`. Default output also ends with a count line: `N matches printed`, or `N matches printed (truncated at cap 500; M more suppressed)` when the scan hits the cap. A successful zero-hit scan prints `0 matches printed` rather than nothing -- empty output is no longer the zero-hit signal.
+
 `extract` reads JSON, TOML, YAML, or the YAML frontmatter of a `.md`/`.mdx`/`.astro` file and walks a dotted `--field` path; numeric segments index arrays. `find-file` matches basenames or glob patterns against the file inventory, cross-repo by default, with an optional `--role` filter (`config`, `test`, `doc`, `entry`). Every invocation of all three, success or failure, lands a row in `etc-usage.jsonl`.
+
+`sym def`, `refs`, `impl`, `list`, and `hover` each print a per-repo freshness line to stderr -- up to date, a re-index hint, or a HEAD-drift warning naming both SHAs -- the same read `sym tree` gives on stdout. `--json` on these five stays a bare array/object, so the freshness read never reaches a `--json` consumer capturing stdout alone.
 
 ---
 
@@ -672,6 +694,18 @@ legion watch session-end --attempt-id <id>
 The daemon samples health every 5 seconds and checks for wake-worthy signals every 30 seconds. Spawn is gated by pressure, cooldown (default 5 minutes), stagger (default 15 seconds between spawns), and a wake cap (default 4 in-flight).
 
 `watch status --json` prints exactly one line: `{"status":"alive|stale|absent","last_beat_age":"<text>"|null}`. Clock skew between the daemon and the caller reads as `stale`. The prose form of `watch status` is unchanged; the boot banner's watch line is rendered from this JSON form, so the two cannot drift apart silently.
+
+### defer / undefer
+
+Defer a work item until a future time (#934) -- legion's own wake-me-up-at-time-T state, keyed on an opaque work-item id rather than a card row, since no work source has a field for this.
+
+```bash
+legion defer --work-item 42 --repo myproject --until 3d
+legion defer --work-item 42 --repo myproject --until 2026-10-01 --note "waiting on upstream fix"
+legion undefer --work-item 42
+```
+
+`--until` accepts `YYYY-MM-DD`, `<N>d`, `<N>w`, or `today`, parsed forward from now; it must resolve to a future time. `undefer` is a no-op, not an error, if the work item was not deferred.
 
 ### daemon
 
@@ -820,13 +854,6 @@ legion init
 legion init --force
 ```
 
-### mcp-logs
-
-```bash
-legion mcp-logs
-legion mcp-logs --tail
-```
-
 ### cluster
 
 ```bash
@@ -852,6 +879,7 @@ legion schedule list
 legion schedule enable --id <id>
 legion schedule disable --id <id>
 legion schedule delete --id <id>
+legion schedule update --id <id> --cron "10:00"
 ```
 
 Cron formats: `HH:MM` daily at that UTC time. `*/Nm` every N minutes. Active windows support overnight ranges (e.g., 23:00-07:00).
@@ -873,7 +901,7 @@ legion cleanup
 | `LEGION_AUTO_WAKE` | Set to `1` by the watch daemon when spawning agents |
 | `LEGION_SPAWN_SOURCE` | Set to `watch-pty` on PTY-spawned wakes; the Stop hook early-exits when set |
 | `LEGION_SKIP_STOP_BLOCK` | Set to `1` to bypass the Stop hook's block on an open directed ask; the bypass is audited |
-| `LEGION_REPO` | Override repo name detection in the MCP channel |
+| `LEGION_REPO` | Override repo name detection; takes precedence over `basename($CWD)` in every hook |
 | `LEGION_PORT` | Override the channel server port (default: 3131) |
 | `LEGION_BYPASS_GREP` | Set to `1` to bypass the grep enforcement hook |
 | `LEGION_BYPASS_READ` | Set to `1` to bypass the Read enforcement hook |
