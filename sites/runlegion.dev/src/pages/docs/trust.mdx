@@ -33,9 +33,12 @@ An agent does not just make claims. It emits predictions, and the predictions ge
 legion uncertainty emit --surface <surface> --claimed-confidence <0-1> ...  # record a claim
 legion uncertainty witness <prediction-id> --outcome-label <label> ...     # record the outcome
 legion uncertainty calibration                                             # claimed vs actual, Brier scored
+legion uncertainty predictions --issue <owner>/<repo>#<n>                  # the raw rows, not a summary
 ```
 
 The Brier score is the teeth. An agent that says it is ninety percent sure and is right half the time does not get to keep saying ninety percent. The gap between claimed and actual is a measured number. Chronic overconfidence, which is the quiet everyday form of lying, stops being a vibe and becomes a metric. A prediction no one ever witnesses is an orphan, and orphans are counted too, because a claim that was never checked against reality is its own kind of risk.
+
+`legion uncertainty predictions` is the read behind the score: id, state, claimed confidence, and outcome, not a derived average. A prediction can carry the issue it belongs to (`emit --issue <owner>/<repo>#<n>`), and `predictions --issue <ref>` scopes the read to one piece of work -- the key the `legion-verify` skill and agent use to find the predictions that work made, so a claim can be checked against what actually happened.
 
 ## Done has to be shown, not asserted
 

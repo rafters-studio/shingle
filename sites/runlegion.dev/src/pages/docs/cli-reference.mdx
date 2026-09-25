@@ -9,7 +9,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.40.0. Commands are organized by category.
+This reference covers legion 0.41.0. Commands are organized by category.
 
 ---
 
@@ -524,7 +524,7 @@ For a requirement document, `legion document view` also reports which of its `ve
 
 ### spec-gen (removed)
 
-`legion spec-gen` is not a command in 0.40.0. It was removed in 0.34.0 (#821): deriving a requirement from a service-design document's `moment_of_truth` is judgment work, not a deterministic field-concatenation, so it was pulled from the binary rather than kept as compiled Rust. The requirement JSON schema in the registry is unchanged. The current path for deriving a scope's requirement set is the `/legion:sd-write-spec` skill, not a CLI verb -- see the Plugin Guide's skills section.
+`legion spec-gen` is not a command in 0.41.0. It was removed in 0.34.0 (#821): deriving a requirement from a service-design document's `moment_of_truth` is judgment work, not a deterministic field-concatenation, so it was pulled from the binary rather than kept as compiled Rust. The requirement JSON schema in the registry is unchanged. The current path for deriving a scope's requirement set is the `/legion:sd-write-spec` skill, not a CLI verb -- see the Plugin Guide's skills section.
 
 ### verify
 
@@ -798,9 +798,22 @@ legion telemetry etc-summary --command find-content --since 7d
 
 `etc-summary` reads the sibling `etc-usage.jsonl` log and reports count, zero-result rate, and error count per `sym etc` / `sym tree` query shape (`find-content`, `tree`, `extract`, `find-file`). `summary` above is the bypass count; `etc-summary` is the adoption count, the number that answers whether the sanctioned replacement for grep/find actually gets used and actually answers.
 
+### cmd-check
+
+A PreToolUse policy adapter for Bash and tool-field calls, present in the binary but not wired into a session yet.
+
+```bash
+legion cmd-check --hook   # reads one PreToolUse payload on stdin, writes one hook response
+legion cmd-check          # not implemented
+```
+
+`--hook` reads a PreToolUse payload on stdin and writes one hook response on stdout: it loads the policy file, runs the lookups the matched rule requires, and decides under a deadline that fails closed. Every failure -- a deadline overrun, a lookup or replacement failure, an unreadable payload or policy, a panic -- becomes a deny that names the error and the command to run instead; nothing falls through to running the raw command. Without `--hook`, `cmd-check` returns a not-implemented error.
+
+`cmd-check` is not registered in `hooks.json`. The existing shell command hooks -- the grep/Read enforcement above, the `git`/`gh` rewrites in `push` -- still make every decision; nothing in a session routes through `cmd-check` today.
+
 ### uncertainty
 
-Emit and witness predictions; read calibration metrics.
+Emit and witness predictions; read the raw rows or calibration metrics.
 
 ```bash
 legion uncertainty emit \
@@ -813,8 +826,16 @@ legion uncertainty emit \
 # Resolve the model from the session instead of naming it
 legion uncertainty emit --session-id <session-id> ...
 
+# Tie the claim to the issue it belongs to
+legion uncertainty emit --issue owner/repo#1258 ...
+
 legion uncertainty witness <prediction-id> --outcome-label shipped --outcome-correctness 1.0
 legion uncertainty witness-gate --skill legion-simplify --commit <sha> --correct true
+
+legion uncertainty predictions
+legion uncertainty predictions --surface legion.task --state emitted
+legion uncertainty predictions --issue owner/repo#1258 --json
+legion uncertainty predictions --limit 200 --json
 
 legion uncertainty calibration --surface legion.task
 legion uncertainty orphans --json
@@ -824,11 +845,13 @@ legion uncertainty sweep-now --json
 legion uncertainty calibrate-now --json
 ```
 
-`emit` requires five flags: `--surface`, `--feature-key`, `--input-fingerprint`, `--claimed-confidence`, and `--payload`. `--orphan-ttl-days` defaults to 30, and `0` disables the orphan sweep for that row.
+`emit` requires five flags: `--surface`, `--feature-key`, `--input-fingerprint`, `--claimed-confidence`, and `--payload`. `--orphan-ttl-days` defaults to 30, and `0` disables the orphan sweep for that row. `--issue <owner>/<repo>#<n>` is optional and ties the prediction to the issue it belongs to, in the same key form `legion verify` records its gate under. A clap value parser validates the ref, so a malformed one is a usage error with a non-zero exit -- unlike the rest of `emit`, which is non-blocking. Leave it off and the row stores a NULL `issue_ref`, same as every prediction emitted before 0.41.0.
 
 `witness` takes the prediction id as a positional argument, not a flag, plus `--outcome-label` (`shipped`, `scoped-down`, `escalated`, or `abandoned`) and `--outcome-correctness` in `[0.0, 1.0]`. An optional `--payload` carries the actuals.
 
 `witness-gate` is the decorrelated path for quality-gate predictions specifically. It looks the prediction up by the same `(skill, commit)` fingerprint `legion quality-gate list` prints, so you never handle an opaque id, and `--correct` takes an explicit `true` or `false` rather than being a bare flag, which is what makes a negative witness as cheap to record as a positive one. Read `--correct` as relative to whichever verdict the gate recorded, not as a bare "was the diff clean": on a recorded `clean` verdict, `true` corroborates it and `false` marks a clean verdict that shipped a bug; on a recorded `issues` verdict, `true` means the catch was right and `false` means it was a false positive. It errors when no emitted `legion.gate` prediction matches, which covers never-recorded, already-witnessed, and orphaned alike.
+
+`predictions` reads raw prediction rows rather than a derived view: a `(surface, state)` summary with uncapped counts, then the most recent `--limit` rows (default 50) -- id, surface, state, claimed confidence, correctness, `created_at`, and `orphan_after`. `--json` emits the same fields as an array. `--surface` and `--state` narrow the read; `--issue <owner>/<repo>#<n>` matches the indexed `issue_ref` column exactly and returns every non-deleted prediction for that issue across every lifecycle state, newest first. An unknown `--state` is checked before any query runs and exits non-zero naming all five lifecycle states, even against an empty database. A zero-row result says which kind of empty it is: nothing stored at all, or these filters matched nothing, in which case it also gives the unfiltered total. When `--json` output is cut at `--limit`, stderr says "most recent N of M: pass --limit M to see all" and stdout stays a parseable array of unchanged shape. `predictions` never sweeps orphans or rolls calibration -- it only reads.
 
 `--model` and `--model-version` are optional. Without `--model`, resolution falls to `--session-id`: it looks up the newest model seen for that session in the statusline samples. Pass neither and the row gets an explicit `UNKNOWN_MODEL` marker instead of a guessed id -- filterable and honest, where a plausible-but-wrong default would quietly pollute a real cohort. `emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
 
