@@ -9,7 +9,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.41.0. Commands are organized by category.
+This reference covers legion 0.42.0. Commands are organized by category.
 
 ---
 
@@ -150,7 +150,7 @@ legion consult --context "cache invalidation" --tier gist
 legion consult --symbol Database --json
 ```
 
-`--context` searches reflections across every repo and returns results with repo attribution. `--symbol` searches SCIP indexes across every repo and reports `(repo, lang, def_location, refs_count)` per match. Used by the recall-first hook to inject cross-repo code intelligence before an agent spawns Explore.
+`--context` searches reflections across every repo and returns results with repo attribution. `--symbol` searches SCIP indexes across every repo and reports `(repo, lang, def_location, refs_count)` per match -- cross-repo code intelligence in one call, cheaper than spawning a subagent to go find it.
 
 `--tier card|gist|full` applies the same progressive-disclosure rendering as `recall` (default `full`); the fetch marker it prints is built from the hit's own repo, not `--cross-repo`'s synthetic `(all)`, so the printed `recall --repo <r> --id ...` command is always runnable as-is.
 
@@ -800,16 +800,34 @@ legion telemetry etc-summary --command find-content --since 7d
 
 ### cmd-check
 
-A PreToolUse policy adapter for Bash and tool-field calls, present in the binary but not wired into a session yet.
+Show what the legion-cmd router decides for a command, and why, without running it. This is the one PreToolUse hook now: as of 0.42.0, `legion-cmd.sh` (`legion cmd-check --hook`) is registered for every Bash, Grep, Glob, Read, Write, Edit, MultiEdit, Agent, Task, WebFetch, and WebSearch call, replacing the twelve command hooks that used to decide those individually.
 
 ```bash
+legion cmd-check -- 'git push origin main'
+legion cmd-check --tool Read --input '{"file_path": "src/main.rs"}'
+legion cmd-check --json -- 'rm -rf /tmp/build'
+legion cmd-check --policy /path/to/draft-policy.json -- 'gh pr merge 42'
+legion cmd-check --deny-patterns
 legion cmd-check --hook   # reads one PreToolUse payload on stdin, writes one hook response
-legion cmd-check          # not implemented
 ```
 
-`--hook` reads a PreToolUse payload on stdin and writes one hook response on stdout: it loads the policy file, runs the lookups the matched rule requires, and decides under a deadline that fails closed. Every failure -- a deadline overrun, a lookup or replacement failure, an unreadable payload or policy, a panic -- becomes a deny that names the error and the command to run instead; nothing falls through to running the raw command. Without `--hook`, `cmd-check` returns a not-implemented error.
+Operator and scripting mode: the command after `--` is one quoted argument, checked exactly as typed; more than one word is refused, because argv rebuilt into shell text cannot reliably reproduce what was typed. `--tool` defaults to Bash; for any other tool kind, pass its `tool_input` as JSON via `--input`. Prints the Decision arm and its reason (the proxy reason, or the deny's command to run instead), the facts route extracted, the built replacement for a rewrite, and the elapsed time. `--json` prints the same report as JSON. `--policy <path>` reads a policy file in place of the one shipped in the binary, to test an edit before it ships. The command is never run, and every decision -- deny included -- exits 0; an unreadable policy, a deadline overrun, or an internal error is reported as the deny it would produce, never a crash.
 
-`cmd-check` is not registered in `hooks.json`. The existing shell command hooks -- the grep/Read enforcement above, the `git`/`gh` rewrites in `push` -- still make every decision; nothing in a session routes through `cmd-check` today.
+`--deny-patterns` prints the built-in no-go list (below) as `permissions.deny` text patterns, one JSON array, and takes no other option. Plugin setup merges these into `~/.claude/settings.json`, so the harness itself refuses them too, not only the hook.
+
+`--hook` is hook mode: it reads one PreToolUse payload on stdin and writes one hook response on stdout, always exiting 0, and never runs the command either -- the harness does. It loads the shipped policy, runs the lookups the matched rule requires, and decides under a deadline that fails closed. Every failure -- a deadline overrun, a lookup or replacement failure, an unreadable payload or policy, a panic -- becomes a deny that names the error and the command to run instead; nothing falls through to running the raw command.
+
+### cmd
+
+Verbs an agent runs against its own routed decisions.
+
+```bash
+legion cmd confirm --reason "base squash-merged, rebasing on main" -- 'git push --force origin feature/x'
+```
+
+`legion cmd confirm --reason <why> -- '<command>'` answers an ask -- route's response for a command that needs a human-legible reason before it runs -- with the reason it should run. The command, after `--`, is one quoted argument taken verbatim; more than one word is a usage error (exit 2) and records nothing. `--reason` is required and non-empty. The confirmation lets exactly that command run once, in this session, within 10 minutes, keyed by the command's parsed form so whitespace and quoting differences do not change the key. A no-go command can never be confirmed: confirming one exits 1 and records the attempt as a no-go hit instead. No-go hits, asks, confirmations, and dropped asks are all appended to `cmd-incidents.jsonl`.
+
+**The no-go list** (`crates/legion-cmd/src/nogo.rs`) is checked before any policy entry and before the empty-policy deny, and it never asks: a match is a fixed deny that ignores confirmations. Seven built-in entries, matched against the parsed invocation rather than command text, so a flag-order variant or a wrapper (`sudo`, `env`, `timeout`, and the rest the policy declares) still hits the same entry: `rm -rf` of `/` or home, `mkfs` on a device, `dd` onto a disk device, the fork bomb, recursive `chmod`/`chown` of `/`, a forced `git push` to `main` or `master`, and a `+` refspec whose destination is `main` or `master`. A policy's own `no_go` array can add entries but never remove or weaken a built-in one.
 
 ### uncertainty
 

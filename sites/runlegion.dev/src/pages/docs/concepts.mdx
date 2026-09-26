@@ -18,7 +18,7 @@ Doctrine, before mechanics. When an agent needs to know something, the order is:
 5. Web search for authoritative external sources.
 6. Never grep the codebase for opinions or decisions. Code shows what exists, not what should exist.
 
-The grep enforcement hooks (#438/#439) make this mechanical. On indexed repos, raw `Grep` and `Read` are blocked at PreToolUse with a redirect to `sym`, `sym etc`, and `recall`. The mechanism is the doctrine now.
+The legion-cmd router (#438/#439, #1236) makes this mechanical. On indexed repos, raw `Grep` and `Read` are blocked at PreToolUse with a redirect to `sym`, `sym etc`, and `recall`. The mechanism is the doctrine now.
 
 ## Reflections
 
@@ -79,23 +79,13 @@ The same file inventory underlies two more engines that extend sym-style answers
 
 Every `sym etc` / `sym tree` invocation, success or failure, lands a row in `etc-usage.jsonl`. `legion telemetry etc-summary` reads it back: count, zero-result rate, and error count per query shape. That is the number that answers whether the sanctioned replacement for grep and find actually gets used.
 
-## The bypass model
+## No more bypass
 
-The grep/Read enforcement is not an absolute. Agents can escape via:
+Through 0.41.0, grep/Read enforcement had an escape hatch: `LEGION_BYPASS_GREP=1 grep ...`, `LEGION_BYPASS_READ=1 cat ...`, or a `# legion-bypass: <reason>` sentinel in Bash, each logged to `bypass.jsonl` for the uncertainty engine and `legion telemetry summary` to read back. The legion-cmd router that replaced the old command hooks in the 0.42.0 cutover reads no environment at all. None of the three still work.
 
-```
-LEGION_BYPASS_GREP=1 grep ...
-LEGION_BYPASS_READ=1 cat ...
-# legion-bypass: <reason>            (Bash sentinel comment)
-```
+A blocked `Grep`, `Glob`, or `Read` call is now a flat deny naming the sanctioned command in its place: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for "which repo has X." The router's general confirm mechanism (`legion cmd confirm --reason <why> -- '<command>'`, see the [CLI Reference](/docs/cli-reference/)) answers an `ask` elsewhere in the shipped policy -- a network-reaching `curl`, for instance -- but the shipped policy does not route a blocked search to one. There is nothing to type past this door anymore except the command it points at.
 
-Every bypass appends one row to `bypass.jsonl` with the tool, repo, pattern, and reason. The uncertainty engine reads it, and `legion telemetry summary` surfaces the top under-served `(tool, repo, pattern)` tuples.
-
-A high bypass volume on a pattern is a signal that `sym` or `recall` is missing an answer agents expected. The doctrine generates its own to-do list.
-
-The soft sym-bypass refusal (#506) refuses bypasses for patterns that look like symbol names with local SCIP hits. If the index can answer it, the bypass is the wrong move. Agents are pushed back into `sym`.
-
-The guard used to have nowhere to send a non-symbol query: a literal string or a config value got the same "use sym" message as a real symbol lookup, so agents bypassed and inferred wrong lessons from it, like "sym is Rust-only." Every deny and inject message now names the exact `sym etc` command for the query shape it blocked: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for "which repo has X." Non-symbol search stopped being a dead end.
+The doctrine point survives the mechanism change. A query shaped like a symbol name used to get its bypass refused specifically, because `sym def` could resolve it locally (#506): if the index can answer it, escaping past it is the wrong move regardless of how you spell the escape. With no bypass left at all, that distinction is moot -- every blocked search, symbol-shaped or not, gets the same answer: use `sym`.
 
 ## Bullpen
 
