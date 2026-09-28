@@ -18,7 +18,7 @@ Doctrine, before mechanics. When an agent needs to know something, the order is:
 5. Web search for authoritative external sources.
 6. Never grep the codebase for opinions or decisions. Code shows what exists, not what should exist.
 
-The legion-cmd router (#438/#439, #1236) makes this mechanical. On indexed repos, raw `Grep` and `Read` are blocked at PreToolUse with a redirect to `sym`, `sym etc`, and `recall`. The mechanism is the doctrine now.
+The legion-cmd router (#438/#439, #1236, #1343) makes this mechanical, without walling off the raw tools to force the point. On an indexed repo, a harness `Grep` or `Glob` call legion can answer fully from `sym`'s index or the file inventory gets that answer for free, folded into the same response; a call it cannot answer just runs. A typed `grep` or `rg` gets the same treatment: sym answers what it can prove equals the real tool's output, and the real tool runs for the rest. The doctrine holds because the sanctioned path is cheaper and more accurate, not because the alternative is blocked.
 
 ## Reflections
 
@@ -79,13 +79,11 @@ The same file inventory underlies two more engines that extend sym-style answers
 
 Every `sym etc` / `sym tree` invocation, success or failure, lands a row in `etc-usage.jsonl`. `legion telemetry etc-summary` reads it back: count, zero-result rate, and error count per query shape. That is the number that answers whether the sanctioned replacement for grep and find actually gets used.
 
-## No more bypass
+## Nothing left to bypass
 
-Through 0.41.0, grep/Read enforcement had an escape hatch: `LEGION_BYPASS_GREP=1 grep ...`, `LEGION_BYPASS_READ=1 cat ...`, or a `# legion-bypass: <reason>` sentinel in Bash, each logged to `bypass.jsonl` for the uncertainty engine and `legion telemetry summary` to read back. The legion-cmd router that replaced the old command hooks in the 0.42.0 cutover reads no environment at all. None of the three still work.
+Earlier releases blocked a raw `Grep` or `Read` outright on an indexed repo and pointed the agent at the matching `sym`/`sym etc` command, with an escape hatch on top: `LEGION_BYPASS_GREP=1 grep ...`, `LEGION_BYPASS_READ=1 cat ...`, or a `# legion-bypass: <reason>` sentinel in Bash, each logged to `bypass.jsonl`. Neither the block nor the escape hatch exists anymore. `policy.json` carries no rule for `Grep`, `Glob`, or `Read` at all; the router lets each one run, and offers Grep and Glob to legion's own answer path first. When sym's content scan or the file inventory can answer a Grep or Glob call fully, the hook folds that answer into the same response and caps the tool's own result at one line; when it cannot, or runs past its budget, the call goes through exactly as sent. Read carries no size rule to bypass in the first place. The router reads no environment at all, so there is nothing left for `LEGION_BYPASS_GREP`, `LEGION_BYPASS_READ`, or a sentinel comment to switch off.
 
-A blocked `Grep`, `Glob`, or `Read` call is now a flat deny naming the sanctioned command in its place: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for "which repo has X." The router's general confirm mechanism (`legion cmd confirm --reason <why> -- '<command>'`, see the [CLI Reference](/docs/cli-reference/)) answers an `ask` elsewhere in the shipped policy -- a network-reaching `curl`, for instance -- but the shipped policy does not route a blocked search to one. There is nothing to type past this door anymore except the command it points at.
-
-The doctrine point survives the mechanism change. A query shaped like a symbol name used to get its bypass refused specifically, because `sym def` could resolve it locally (#506): if the index can answer it, escaping past it is the wrong move regardless of how you spell the escape. With no bypass left at all, that distinction is moot -- every blocked search, symbol-shaped or not, gets the same answer: use `sym`.
+The doctrine point survives the mechanism change. `sym` and `sym etc` are still the cheaper, more accurate answer for a symbol question or a literal search, and `bypass.jsonl` still exists, fed now by `legion telemetry record-bypass` when the `legion-explore` agent's routing ladder falls through to a bounded shell search because nothing else could answer. What changed is the shape of the incentive: the sanctioned path used to be the only door; now it is just the fast one.
 
 ## Bullpen
 
@@ -191,7 +189,7 @@ GitHub issues are the work source, through legion's own verbs -- `issue create`,
 
 Configuration per repo in `watch.toml`.
 
-Direct `gh` usage is blocked in legion-managed environments so the audit log captures every action.
+Typing `gh` directly still works: the router hands it to `legion gh`, which runs a read straight through unaudited, translates a recognized write into the matching `legion` verb so its gates apply, and audits anything else it passes through as real `gh`.
 
 ## Uncertainty (Pillar 2)
 

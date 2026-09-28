@@ -9,7 +9,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.42.0. Commands are organized by category.
+This reference covers legion 0.43.0. Commands are organized by category.
 
 ---
 
@@ -359,7 +359,33 @@ Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so 
 
 ## Work
 
-GitHub issues are the work source, through legion's own verbs. Direct `gh` is blocked for agents -- everything below routes through the audit log instead.
+GitHub issues are the work source, through legion's own verbs. Typing `git` or `gh` directly still works: the router inserts `legion ` in front of the name you typed and hands the rest of the line, untouched, to `legion git` or `legion gh` below.
+
+### git
+
+A proxy that takes git's own arguments exactly as git would receive them.
+
+```bash
+legion git push origin feature/search
+legion git commit -m "fix(auth): reject expired tokens before rate limiting"
+legion git log --oneline -10
+legion git -C ../other-checkout status
+```
+
+Every invocation resolves to one of four routes. A `push` or `commit` that the audited path can express runs through the same code `legion push` / `legion commit` run below, so their gates and audit rows apply. A `push` the rules forbid -- any force variant, or one that would update `main` or `master` on the remote, including a bare matching refspec or a glob refspec whose destination is `main`/`master` -- is refused before anything runs; `git push --tags` from `main` is allowed, since it updates tags only, while `--follow-tags` is still refused. Any other `push` or `commit` runs as real git, unaudited arguments and all, and writes an audit row. Every other git subcommand -- `status`, `log`, `diff`, `branch`, and the rest -- runs as real git, unaudited. Git's own global options (`-C`, `-c`, `--git-dir`, `--work-tree`, and the rest, in both `-C <dir>` and `--flag=value` spellings) are read to find the subcommand, so `legion git -C <dir> push` resolves correctly.
+
+### gh
+
+A proxy that takes gh's own arguments exactly as gh would receive them.
+
+```bash
+legion gh pr view 42
+legion gh pr checks 42 --log-failed
+legion gh pr create --title "..." --body "..." -R owner/name
+legion gh issue comment 42 --body "..."
+```
+
+A read (`pr view`, `pr checks`, `issue list`, and the rest) runs the real `gh` untouched and writes no audit row. A write whose arguments translate losslessly -- `pr create`/`edit`/`merge`/`close`/`review`/`comment`, `issue create`/`edit`/`close`/`reopen`/`comment` -- runs through the same `legion pr`, `legion issue`, or `legion comment` handler documented below, so their gates still apply. A write that does not translate runs the real `gh` untouched, with no legion gate in front of it, and writes one `gh-passthrough` audit row naming the argv, the target, and the exit status. To resolve which legion repo a verb belongs to, the proxy matches gh's `-R owner/name` against a repo's `github` field in `watch.toml`, case-insensitively; a repo entry with no `workdir` never matches.
 
 ### issue
 
@@ -444,7 +470,7 @@ Resolves the checkout that has the target branch checked out (via `git worktree 
 
 `-C <dir>` runs the whole thing as if started in `<dir>`: the default branch, the worktree list, and the tag path's checkout are all read there. The tag path's checkout is made absolute, so the audit row and confirmation line look the same as a run without `-C`. A `<dir>` outside any git repository fails, naming the directory.
 
-A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push`, carrying the command's own arguments -- including a `-C <dir>` before the verb -- into the rewrite, and says so before running it. `--force` and `--repo` are refused by name outright, never rewritten. A flag `legion push` has no equivalent for -- `-u`, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is refused too, naming the flag, rather than silently dropped. A wrapper ahead of `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- is denied outright too, never rewritten, for the same reason: the wrapper is information `legion push` has no way to carry.
+A plain `git push` no longer needs to be remembered: the router inserts `legion ` in front of `git` you typed, and `legion git push ...` (see `legion git` above) resolves to this same audited path whenever the arguments allow it. A force push, or one that would update `main`/`master`, is refused before it runs rather than translated. Every other `git push` -- including one carrying a flag this command has no equivalent for, like `-u` -- runs as real git and still writes an audit row, since `legion git`'s fallback route covers what `legion push` itself does not parse.
 
 `--force` is a gated force-push, not a raw passthrough. It fetches the remote ref, computes the commits the push would discard (reachable from the remote head but not the new local head), and checks each one for survival: present in the new history already (an ordinary amend or rebase), already on `main` by sha, or already on `main` by `git patch-id` equivalence -- the squash-merge case, where a rebased stacked branch's base just squash-merged into `main`. A squash that combined multiple commits into one `main` commit cannot patch-id-match any single pre-squash commit, so a cumulative fallback compares the combined content those commits touched against the new state directly before calling any of them an orphan. If every discarded commit survives, the push proceeds with no extra ceremony. If any commit is a genuine orphan, the push is refused, each orphan named as `<sha> <subject>`, and only `--force-reason "..."` overrides it -- the same override contract as `pr merge --merge-despite-failures` and `issue close --force`. The push itself always runs with `--force-with-lease=<branch>:<fetched-sha>`, so a concurrent push from another agent or node loses the race instead of being silently clobbered. `--force` is mutually exclusive with `--tag`.
 
@@ -459,7 +485,7 @@ Key flags:
 
 ### commit
 
-The sanctioned in-band commit path (#854). Closes the last unaudited hop in the mutation path -- `legion push` routes pushes and the no-gh hook fences `gh`, but the commit itself, where authorship, trailers, and signing happen, used to be raw `git`.
+The sanctioned in-band commit path (#854). Closes the last unaudited hop in the mutation path -- `legion push` routes pushes and `legion gh` gates the writes that translate, but the commit itself, where authorship, trailers, and signing happen, used to be raw `git`.
 
 ```bash
 legion commit --repo myproject --message "fix(auth): reject expired tokens before rate limiting"
@@ -695,6 +721,18 @@ As of 0.39.2, default output is locations only -- `path:line` (or `repo/path:lin
 
 `sym def`, `refs`, `impl`, `list`, and `hover` each print a per-repo freshness line to stderr -- up to date, a re-index hint, or a HEAD-drift warning naming both SHAs -- the same read `sym tree` gives on stdout. `--json` on these five stays a bare array/object, so the freshness read never reaches a `--json` consumer capturing stdout alone.
 
+### grep / rg
+
+Two subcommands that take their tool's own arguments untouched. Typing `grep` or `rg` directly still works: the router inserts `legion ` in front of the name and hands the rest of the line to whichever of these two reads it.
+
+```bash
+legion grep -rn 'TODO' src/
+legion grep -v 'skip this line' file.txt
+legion rg 'fn main' --type rust
+```
+
+Each answers through sym when the search is recursive and line-numbered over directory operands inside a watched repo, and when sym's walk, matcher, and output provably equal the real tool's: a literal pattern for `grep` (its BRE/ERE dialects are not Rust regex), any pattern for `rg` (same regex engine underneath). A sym answer prints each matched line's path, line number, and text, the same shape `grep -n` prints. Every other form -- another flag, a file operand instead of a directory, standard input, a path outside every watched repo, or any scan that could differ from the tool's own -- runs the real `grep` or `rg`, with its stdout, stderr, and exit code (1 for no match, 2 for an error) passed through unchanged. `legion grep -v` means invert-match, the same as real grep; legion's own `-v`/`--verbose` is never read from either subcommand's arguments. Neither subcommand refuses a search.
+
 ---
 
 ## Runtime
@@ -798,7 +836,7 @@ legion usage --json
 
 ### telemetry
 
-Bypass telemetry: log and inspect when agents escape the grep/Read enforcement hooks.
+Bypass telemetry: log and inspect when an agent falls back to a shell search instead of sym.
 
 ```bash
 legion telemetry record-bypass --tool Grep --repo myproject --pattern "fn init"
@@ -814,7 +852,7 @@ legion telemetry etc-summary --command find-content --since 7d
 
 ### cmd-check
 
-Show what the legion-cmd router decides for a command, and why, without running it. This is the one PreToolUse hook now: as of 0.42.0, `legion-cmd.sh` (`legion cmd-check --hook`) is registered for every Bash, Grep, Glob, Read, Write, Edit, MultiEdit, Agent, Task, WebFetch, and WebSearch call, replacing the twelve command hooks that used to decide those individually.
+Show what the legion-cmd router decides for a command, and why, without running it. `legion-cmd.sh` (`legion cmd-check --hook`) is the one PreToolUse hook, registered for every Bash, Grep, Glob, Read, Write, Edit, MultiEdit, Agent, Task, WebFetch, and WebSearch call.
 
 ```bash
 legion cmd-check -- 'git push origin main'
@@ -825,11 +863,11 @@ legion cmd-check --deny-patterns
 legion cmd-check --hook   # reads one PreToolUse payload on stdin, writes one hook response
 ```
 
-Operator and scripting mode: the command after `--` is one quoted argument, checked exactly as typed; more than one word is refused, because argv rebuilt into shell text cannot reliably reproduce what was typed. `--tool` defaults to Bash; for any other tool kind, pass its `tool_input` as JSON via `--input`. Prints the Decision arm and its reason (the proxy reason, or the deny's command to run instead), the facts route extracted, the built replacement for a rewrite, and the elapsed time. `--json` prints the same report as JSON. `--policy <path>` reads a policy file in place of the one shipped in the binary, to test an edit before it ships. The command is never run, and every decision -- deny included -- exits 0; an unreadable policy, a deadline overrun, or an internal error is reported as the deny it would produce, never a crash.
+Operator and scripting mode: the command after `--` is one quoted argument, checked exactly as typed; more than one word is refused, because argv rebuilt into shell text cannot reliably reproduce what was typed. `--tool` defaults to Bash; for any other tool kind, pass its `tool_input` as JSON via `--input`. Prints the Decision arm and its reason, the facts route extracted, the built replacement for a proxy insertion, and the elapsed time. No Bash deny names a command to run instead of the one denied -- a denial's reason is why, not a redirect. `--json` prints the same report as JSON. `--policy <path>` reads a policy file in place of the one shipped in the binary, to test an edit before it ships. The command is never run, and every decision -- deny included -- exits 0; an unreadable policy, a deadline overrun, or an internal error is reported as the deny it would produce, never a crash.
 
-`--deny-patterns` prints the built-in no-go list (below) as `permissions.deny` text patterns, one JSON array, and takes no other option. Plugin setup merges these into `~/.claude/settings.json`, so the harness itself refuses them too, not only the hook.
+`--deny-patterns` prints the built-in never-run list (below) as `permissions.deny` text patterns, one JSON array, and takes no other option. Plugin setup merges these into `~/.claude/settings.json`, so the harness itself refuses them too, not only the hook.
 
-`--hook` is hook mode: it reads one PreToolUse payload on stdin and writes one hook response on stdout, always exiting 0, and never runs the command either -- the harness does. It loads the shipped policy, runs the lookups the matched rule requires, and decides under a deadline that fails closed. Every failure -- a deadline overrun, a lookup or replacement failure, an unreadable payload or policy, a panic -- becomes a deny that names the error and the command to run instead; nothing falls through to running the raw command.
+`--hook` is hook mode: it reads one PreToolUse payload on stdin and writes one hook response on stdout, always exiting 0, and never runs the command either -- the harness does. It loads the shipped policy and decides under a deadline (`ROUTE_DEADLINE`, 7000 ms) that fails closed for Bash: a deadline overrun, a lookup or replacement failure, an unreadable payload or policy, or a panic becomes a deny naming the error, and nothing falls through to running the raw command. A Grep, Glob, or Read call fails open instead: legion's own failure to answer it, for any reason, runs the call exactly as the agent sent it rather than denying it.
 
 ### cmd
 
@@ -839,9 +877,11 @@ Verbs an agent runs against its own routed decisions.
 legion cmd confirm --reason "base squash-merged, rebasing on main" -- 'git push --force origin feature/x'
 ```
 
-`legion cmd confirm --reason <why> -- '<command>'` answers an ask -- route's response for a command that needs a human-legible reason before it runs -- with the reason it should run. The command, after `--`, is one quoted argument taken verbatim; more than one word is a usage error (exit 2) and records nothing. `--reason` is required and non-empty. The confirmation lets exactly that command run once, in this session, within 10 minutes, keyed by the command's parsed form so whitespace and quoting differences do not change the key. A no-go command can never be confirmed: confirming one exits 1 and records the attempt as a no-go hit instead. No-go hits, asks, confirmations, and dropped asks are all appended to `cmd-incidents.jsonl`.
+`legion cmd confirm --reason <why> -- '<command>'` answers the ask list or a power switch -- route's response for a command that needs a human-legible reason before it runs -- with the reason it should run. The command, after `--`, is one quoted argument taken verbatim; more than one word is a usage error (exit 2) and records nothing. `--reason` is required and non-empty. The confirmation lets exactly that command run once, in this session, within 10 minutes, keyed by the command's parsed form so whitespace and quoting differences do not change the key. A never-run command can never be confirmed: confirming one exits 1 and records the attempt as a never-run hit instead. Never-run hits, asks, confirmations, and dropped asks are all appended to `cmd-incidents.jsonl`.
 
-**The no-go list** (`crates/legion-cmd/src/nogo.rs`) is checked before any policy entry and before the empty-policy deny, and it never asks: a match is a fixed deny that ignores confirmations. Seven built-in entries, matched against the parsed invocation rather than command text, so a flag-order variant or a wrapper (`sudo`, `env`, `timeout`, and the rest the policy declares) still hits the same entry: `rm -rf` of `/` or home, `mkfs` on a device, `dd` onto a disk device, the fork bomb, recursive `chmod`/`chown` of `/`, a forced `git push` to `main` or `master`, and a `+` refspec whose destination is `main` or `master`. A policy's own `no_go` array can add entries but never remove or weaken a built-in one.
+**The never-run list** (`crates/legion-cmd/src/nogo.rs`) is checked before any policy entry, ahead of the proxy insertion, and it never asks: a match is a fixed deny that ignores confirmations. It matches against the parsed invocation rather than command text, so a flag-order variant or a wrapper (`sudo`, `env`, `nice`, `xargs`, and the rest) still hits the same entry, and it is checked the same way inside `sh -c`, `bash -c`, `zsh -c`, and `eval` payloads. Seven entries are built into the binary: `rm -rf` of `/` or home, `mkfs` on a device, `dd` onto a disk device, the fork bomb, recursive `chmod`/`chown` of `/`, a forced `git push` to `main` or `master`, and a `+` refspec whose destination is `main` or `master`. `policy.json`'s own `never_run` array adds two more -- `sqlite3-legion-db` (opening `legion.db` directly) and `rm-recursive-force` (a combined `-r`/`-f` delete) -- and a policy's array can add entries the same way but never remove or weaken a built-in one.
+
+**The ask list and power switches** are the other two ways route stops for a reason before running something: `curl-network` is the one shipped ask entry, since reaching the network is the operator's call. The power switches -- `push-force`, `push-force-refspec`, `merge-despite-failures`, `issue-close-force` -- are matched against the command as it will run, after any proxy insertion, so `git push --force` is asked about the same as `legion push --force` would be.
 
 ### uncertainty
 
@@ -969,7 +1009,5 @@ legion cleanup
 | `LEGION_SKIP_STOP_BLOCK` | Set to `1` to bypass the Stop hook's block on an open directed ask; the bypass is audited |
 | `LEGION_REPO` | Override repo name detection; takes precedence over `basename($CWD)` in every hook |
 | `LEGION_PORT` | Override the channel server port (default: 3131) |
-| `LEGION_BYPASS_GREP` | Set to `1` to bypass the grep enforcement hook |
-| `LEGION_BYPASS_READ` | Set to `1` to bypass the Read enforcement hook |
 | `LEGION_IMPACT_HIGH_THRESHOLD` | Ref-count threshold for the `HIGH` tag in `sym impact` text output (default: 50) |
 | `WATCH_SPAWN_MODE` | `pty` (default) or `print` for the watch daemon spawn path |
