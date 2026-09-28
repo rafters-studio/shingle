@@ -442,7 +442,9 @@ legion push --repo myproject --tag v0.39.0
 
 Resolves the checkout that has the target branch checked out (via `git worktree list`) and pushes from that checkout, because the pre-push hook reviews the CWD's checked-out branch, not the ref being pushed -- pushing branch B from a checkout sitting on A would silently review the wrong diff. Refuses `main`/`master` and any `--branch` value shaped like a flag or a force/retarget refspec by construction. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
 
-A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push` and says so before running it. Anything the sanctioned command cannot express -- a raw force push, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied outright, naming the flag, rather than silently dropped. A wrapper ahead of `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- is denied outright too, never rewritten, for the same reason: the wrapper is information `legion push` has no way to carry.
+`-C <dir>` runs the whole thing as if started in `<dir>`: the default branch, the worktree list, and the tag path's checkout are all read there. The tag path's checkout is made absolute, so the audit row and confirmation line look the same as a run without `-C`. A `<dir>` outside any git repository fails, naming the directory.
+
+A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push`, carrying the command's own arguments -- including a `-C <dir>` before the verb -- into the rewrite, and says so before running it. `--force` and `--repo` are refused by name outright, never rewritten. A flag `legion push` has no equivalent for -- `-u`, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is refused too, naming the flag, rather than silently dropped. A wrapper ahead of `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- is denied outright too, never rewritten, for the same reason: the wrapper is information `legion push` has no way to carry.
 
 `--force` is a gated force-push, not a raw passthrough. It fetches the remote ref, computes the commits the push would discard (reachable from the remote head but not the new local head), and checks each one for survival: present in the new history already (an ordinary amend or rebase), already on `main` by sha, or already on `main` by `git patch-id` equivalence -- the squash-merge case, where a rebased stacked branch's base just squash-merged into `main`. A squash that combined multiple commits into one `main` commit cannot patch-id-match any single pre-squash commit, so a cumulative fallback compares the combined content those commits touched against the new state directly before calling any of them an orphan. If every discarded commit survives, the push proceeds with no extra ceremony. If any commit is a genuine orphan, the push is refused, each orphan named as `<sha> <subject>`, and only `--force-reason "..."` overrides it -- the same override contract as `pr merge --merge-despite-failures` and `issue close --force`. The push itself always runs with `--force-with-lease=<branch>:<fetched-sha>`, so a concurrent push from another agent or node loses the race instead of being silently clobbered. `--force` is mutually exclusive with `--tag`.
 
@@ -453,6 +455,7 @@ Key flags:
 - `--tag` push a tag instead of a branch; mutually exclusive with `--branch` and `--force`
 - `--force` force-push, gated on the discarded-commit survival analysis above
 - `--force-reason` justification for overriding a force-push refusal; consulted (and required) only when the analysis finds a genuine orphan
+- `-C <dir>` run as if started in `<dir>`, for a `git -C <dir> push` rewrite
 
 ### commit
 
@@ -460,11 +463,22 @@ The sanctioned in-band commit path (#854). Closes the last unaudited hop in the 
 
 ```bash
 legion commit --repo myproject --message "fix(auth): reject expired tokens before rate limiting"
+legion commit --repo myproject -m "fix(auth): reject expired tokens before rate limiting"
 legion commit --repo myproject --message-file commit-msg.txt
 echo "..." | legion commit --repo myproject
+legion commit --repo myproject -C ../other-checkout -m "fix(auth): reject expired tokens before rate limiting"
 ```
 
 Preflights the configured signer before touching anything, by signing a throwaway commit object -- a locked or absent signer fails once, by name. Validates the message and refuses violations by name: the subject must be `<type>(<scope>): <summary>` with a scope, a body must be separated from the subject by a blank line, and no emoji anywhere. Since #1136, a subject-only message validates; a `Co-Authored-By` trailer is no longer required. Commits only the staged index -- no `-a`, nothing is staged for you -- and audit-logs every attempt, refusals included.
+
+`-m` and `-F` are git's own short spellings for `--message` and `--message-file`, so a `git commit -m "..."` rewrite carries its flag through unchanged. `-C <dir>` runs against a checkout other than the CWD: the repo root is resolved with `git -C <dir> rev-parse --show-toplevel`, and a relative `--message-file` is read from `<dir>`. A `<dir>` outside any repository is refused, naming the directory.
+
+Key flags:
+
+- `--repo` (required) repository name, for the audit log
+- `--message`, `-m` the commit message
+- `--message-file`, `-F` read the message from a file
+- `-C <dir>` run as if started in `<dir>`, for a `git -C <dir> commit` rewrite
 
 ### pr
 
