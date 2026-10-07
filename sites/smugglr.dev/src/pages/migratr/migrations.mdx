@@ -2,9 +2,10 @@
 title: "Migrations"
 description: "The migration file format and its operations, the ledger, snapshots, and the rule for down."
 ---
-import Docs from '@/src/layouts/Docs.astro';
-import { migratrNav } from '@/src/migratr/nav';
-import { version } from '@/src/migratr/version';
+
+import Docs from "@/src/layouts/Docs.astro";
+import { migratrNav } from "@/src/migratr/nav";
+import { version } from "@/src/migratr/version";
 
 <Docs title="Migrations" description="The migration file format and its operations, the ledger, snapshots, and the rule for down." nav={migratrNav}>
 
@@ -55,17 +56,17 @@ created migrations/20261007235009_add_name_to_users.json
 
 ## Operations
 
-| `op` | Fields | Exact inverse |
-|------|--------|---------------|
-| `create_table` | `table`, `columns`, `without_rowid` (optional) | `DROP TABLE` |
-| `drop_table` | `table`, `definition` (a table with its `sql`) | Recreated from `definition.sql` |
-| `rename_table` | `from`, `to` | Renamed back |
-| `add_column` | `table`, `column` | `drop_column` |
-| `drop_column` | `table`, `column` | `add_column` |
-| `rename_column` | `table`, `from`, `to` | Renamed back |
-| `create_index` | `name`, `table`, `columns`, `unique` (optional) | `drop_index` |
-| `drop_index` | `definition` (an index: `name`, `table`, `columns`, `unique`, `where`) | `CREATE INDEX`, partial clause included |
-| `raw_sql` | `up`, `down` (optional) | Only when `down` is given |
+| `op`            | Fields                                                                 | Exact inverse                           |
+| --------------- | ---------------------------------------------------------------------- | --------------------------------------- |
+| `create_table`  | `table`, `columns`, `without_rowid` (optional)                         | `DROP TABLE`                            |
+| `drop_table`    | `table`, `definition` (a table with its `sql`)                         | Recreated from `definition.sql`         |
+| `rename_table`  | `from`, `to`                                                           | Renamed back                            |
+| `add_column`    | `table`, `column`                                                      | `drop_column`                           |
+| `drop_column`   | `table`, `column`                                                      | `add_column`                            |
+| `rename_column` | `table`, `from`, `to`                                                  | Renamed back                            |
+| `create_index`  | `name`, `table`, `columns`, `unique` (optional)                        | `drop_index`                            |
+| `drop_index`    | `definition` (an index: `name`, `table`, `columns`, `unique`, `where`) | `CREATE INDEX`, partial clause included |
+| `raw_sql`       | `up`, `down` (optional)                                                | Only when `down` is given               |
 
 A column carries `name`, `type` (verbatim), and optionally `not_null`, `primary_key` (1-based position), `unique`, `default`, `collation`, `check`, `references` (`table`, `column`, `on_update`, `on_delete`) and `generated` (`expr`, `stored`).
 

@@ -2,9 +2,10 @@
 title: "CLI"
 description: "Every migratr command, flag, --json document, error code and exit code."
 ---
-import Docs from '@/src/layouts/Docs.astro';
-import { migratrNav } from '@/src/migratr/nav';
-import { version } from '@/src/migratr/version';
+
+import Docs from "@/src/layouts/Docs.astro";
+import { migratrNav } from "@/src/migratr/nav";
+import { version } from "@/src/migratr/version";
 
 <Docs title="CLI" description="Every migratr command, flag, --json document, error code and exit code." nav={migratrNav}>
 
@@ -18,26 +19,26 @@ migratr [--db PATH] [--dir PATH] [--json] <new|up|down|status|plan|restore> ...
 
 ## Global flags
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--db <PATH>` | none | The SQLite database file. Required by every command except `new`. Without it the command fails with `usage`. |
-| `--dir <PATH>` | `migrations` | The migrations directory. |
-| `--json` | off | Write one JSON document describing the outcome to stdout. |
-| `-h`, `--help` | | Print help. |
-| `-V`, `--version` | | Print the version. |
+| Flag              | Default      | Description                                                                                                  |
+| ----------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| `--db <PATH>`     | none         | The SQLite database file. Required by every command except `new`. Without it the command fails with `usage`. |
+| `--dir <PATH>`    | `migrations` | The migrations directory.                                                                                    |
+| `--json`          | off          | Write one JSON document describing the outcome to stdout.                                                    |
+| `-h`, `--help`    |              | Print help.                                                                                                  |
+| `-V`, `--version` |              | Print the version.                                                                                           |
 
 The flags are global: they may come before or after the subcommand.
 
 ## Commands
 
-| Command | What it does |
-|---------|--------------|
-| `new <NAME> [SPECS...]` | Scaffold a migration file. |
-| `up [--to V]` | Apply pending migrations. |
-| `down [--steps N]` | Reverse the newest N applied migrations (default 1). |
-| `status` | List each migration as applied or pending. |
+| Command                                  | What it does                                               |
+| ---------------------------------------- | ---------------------------------------------------------- |
+| `new <NAME> [SPECS...]`                  | Scaffold a migration file.                                 |
+| `up [--to V]`                            | Apply pending migrations.                                  |
+| `down [--steps N]`                       | Reverse the newest N applied migrations (default 1).       |
+| `status`                                 | List each migration as applied or pending.                 |
 | `plan [up [--to V] \| down [--steps N]]` | Print the statements a run would execute. Changes nothing. |
-| `restore [--snapshot PATH] --yes` | Replace the database with a snapshot. |
+| `restore [--snapshot PATH] --yes`        | Replace the database with a snapshot.                      |
 
 After every successful `up` and `down`, migratr writes `schema.json` in the migrations directory.
 
@@ -49,13 +50,13 @@ migratr new <NAME> [SPECS...]
 
 Writes `<YYYYMMDDHHMMSS>_<NAME>.json` into `--dir`, creating the directory if needed. The name picks the operation, Rails style. Column specs are `name[:type][:modifier...]`; the modifiers are `pk`, `notnull`, `unique` and `default=<expr>`.
 
-| Name | Operation | Specs |
-|------|-----------|-------|
-| `create_<table>` | `create_table` | Required: at least one column. |
-| `add_<column>_to_<table>` | `add_column` | The column. |
-| `drop_<table or index>` | `drop_table` or `drop_index` | None. The definition is copied from `schema.json`. |
-| `remove_<column>_from_<table>` | `drop_column` | None. The definition is copied from `schema.json`. |
-| anything else | an empty `up` | None. |
+| Name                           | Operation                    | Specs                                              |
+| ------------------------------ | ---------------------------- | -------------------------------------------------- |
+| `create_<table>`               | `create_table`               | Required: at least one column.                     |
+| `add_<column>_to_<table>`      | `add_column`                 | The column.                                        |
+| `drop_<table or index>`        | `drop_table` or `drop_index` | None. The definition is copied from `schema.json`. |
+| `remove_<column>_from_<table>` | `drop_column`                | None. The definition is copied from `schema.json`. |
+| anything else                  | an empty `up`                | None.                                              |
 
 ```
 $ migratr new create_users id:integer:pk email:text:notnull:unique
@@ -83,8 +84,8 @@ $ migratr new drop_ghosts --json
 migratr --db PATH up [--to V]
 ```
 
-| Flag | Default | Description |
-|------|---------|-------------|
+| Flag       | Default     | Description              |
+| ---------- | ----------- | ------------------------ |
 | `--to <V>` | all pending | Stop after this version. |
 
 Applies each pending migration in version order. A migration and its ledger row go in one atomic run; a failure rolls it back. `up` refuses to run when an applied file was edited or a ledger row has no file.
@@ -107,9 +108,9 @@ $ migratr --db app.db up --json
 migratr --db PATH down [--steps N]
 ```
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--steps <N>` | `1` | Reverse the newest N applied migrations, newest first. |
+| Flag          | Default | Description                                            |
+| ------------- | ------- | ------------------------------------------------------ |
+| `--steps <N>` | `1`     | Reverse the newest N applied migrations, newest first. |
 
 `down` reverses structure only. Data in dropped objects is not restored. If any operation in the range has no exact inverse, the whole range is refused before anything runs; see [the rule for down](/migratr/migrations#the-rule-for-down).
 
@@ -187,10 +188,10 @@ $ migratr --db app.db plan --json
 migratr --db PATH restore [--snapshot PATH] --yes
 ```
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--snapshot <PATH>` | the newest | The snapshot to restore. |
-| `--yes` | off | Confirm the restore. Without it nothing changes. |
+| Flag                | Default    | Description                                      |
+| ------------------- | ---------- | ------------------------------------------------ |
+| `--snapshot <PATH>` | the newest | The snapshot to restore.                         |
+| `--yes`             | off        | Confirm the restore. Without it nothing changes. |
 
 Restore acts on the local database file. Without `--yes` it fails with `restore_not_confirmed` and says what it would discard.
 
@@ -216,37 +217,37 @@ $ migratr --db app.db restore --yes --json
 
 With `--json`, a command writes one JSON document to stdout and nothing else; logs go to stderr. The document carries `command` and `status` (`ok` or `error`). A success adds the outcome's fields. A failure adds `code` and `message` and the process exits non-zero.
 
-| Command | Fields on success |
-|---------|-------------------|
-| `new` | `path` |
-| `up` | `applied` (versions, in order) |
-| `down` | `reverted` (versions, newest first), `data_restored`, `snapshot` |
-| `status` | `migrations` (each with `version`, `name`, `state`, `applied_at`, `checksum_mismatch`), `missing`, `latest_snapshot` |
-| `plan` | `direction`, `database_bytes`, `steps` |
-| `restore` | `restored`, `removed`, `snapshot_time`, `snapshot_version` |
+| Command   | Fields on success                                                                                                    |
+| --------- | -------------------------------------------------------------------------------------------------------------------- |
+| `new`     | `path`                                                                                                               |
+| `up`      | `applied` (versions, in order)                                                                                       |
+| `down`    | `reverted` (versions, newest first), `data_restored`, `snapshot`                                                     |
+| `status`  | `migrations` (each with `version`, `name`, `state`, `applied_at`, `checksum_mismatch`), `missing`, `latest_snapshot` |
+| `plan`    | `direction`, `database_bytes`, `steps`                                                                               |
+| `restore` | `restored`, `removed`, `snapshot_time`, `snapshot_version`                                                           |
 
 ## Exit codes and error codes
 
 Exit 0 on success. A usage error exits 2. Every other failure exits 1. Error codes are stable across patch releases.
 
-| Code | Exit | Cause |
-|------|------|-------|
-| `usage` | 2 | Bad arguments, or a missing `--db`. |
-| `parse` | 1 | A migration file or spec could not be parsed. |
-| `duplicate_version` | 1 | Two migration files share a version. |
-| `io` | 1 | A file or directory could not be read or written. |
-| `checksum_mismatch` | 1 | An applied migration's file was edited. |
-| `missing_file` | 1 | A ledger row has no migration file. |
-| `apply_failed` | 1 | A migration failed and was rolled back. |
-| `irreversible` | 1 | A migration in the `down` range has an operation with no inverse. |
-| `unparseable_table` | 1 | A table's `CREATE TABLE` could not be parsed for a rebuild. |
-| `foreign_key_violation` | 1 | A table rebuild left rows that violate foreign keys. |
-| `column_in_use` | 1 | A dropped column is used by another object. |
-| `rebuild_not_first` | 1 | An operation that needs a table rebuild is not first in its migration. |
-| `snapshot_failed` | 1 | A snapshot could not be written, so the step did not run. |
-| `restore_not_confirmed` | 1 | `restore` ran without `--yes`. |
-| `unknown_object` | 1 | `new` named an object that is not in `schema.json`. |
-| `database` | 1 | SQLite reported an error. |
+| Code                    | Exit | Cause                                                                  |
+| ----------------------- | ---- | ---------------------------------------------------------------------- |
+| `usage`                 | 2    | Bad arguments, or a missing `--db`.                                    |
+| `parse`                 | 1    | A migration file or spec could not be parsed.                          |
+| `duplicate_version`     | 1    | Two migration files share a version.                                   |
+| `io`                    | 1    | A file or directory could not be read or written.                      |
+| `checksum_mismatch`     | 1    | An applied migration's file was edited.                                |
+| `missing_file`          | 1    | A ledger row has no migration file.                                    |
+| `apply_failed`          | 1    | A migration failed and was rolled back.                                |
+| `irreversible`          | 1    | A migration in the `down` range has an operation with no inverse.      |
+| `unparseable_table`     | 1    | A table's `CREATE TABLE` could not be parsed for a rebuild.            |
+| `foreign_key_violation` | 1    | A table rebuild left rows that violate foreign keys.                   |
+| `column_in_use`         | 1    | A dropped column is used by another object.                            |
+| `rebuild_not_first`     | 1    | An operation that needs a table rebuild is not first in its migration. |
+| `snapshot_failed`       | 1    | A snapshot could not be written, so the step did not run.              |
+| `restore_not_confirmed` | 1    | `restore` ran without `--yes`.                                         |
+| `unknown_object`        | 1    | `new` named an object that is not in `schema.json`.                    |
+| `database`              | 1    | SQLite reported an error.                                              |
 
 In text mode an error prints as `error [<code>]: <message>` on stderr.
 

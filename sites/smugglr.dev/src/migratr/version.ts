@@ -1,8 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 // Build and test both run from the site root; import.meta.url is relocated into dist/ by the bundler.
-export const CHANGELOG_PATH = resolve(process.cwd(), 'src/migratr/CHANGELOG.md');
+export const CHANGELOG_PATH = resolve(process.cwd(), "src/migratr/CHANGELOG.md");
 
 const VERSION_HEADING = /^## (\d+\.\d+\.\d+)\s*$/m;
 
@@ -21,7 +21,7 @@ export function parseVersion(changelog: string, file: string): string {
 
 /** The current migratr release, read at build time from the changelog copy. */
 export function migratrVersion(path: string = CHANGELOG_PATH): string {
-  return parseVersion(readFileSync(path, 'utf8'), path);
+  return parseVersion(readFileSync(path, "utf8"), path);
 }
 
 export const version: string = migratrVersion();

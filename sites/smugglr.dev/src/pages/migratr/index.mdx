@@ -2,9 +2,10 @@
 title: "migratr"
 description: "Schema migrations for SQLite: JSON migration files, an applied-migrations ledger, safe table rebuilds, exact-inverse downs, and snapshots before destructive steps."
 ---
-import Docs from '@/src/layouts/Docs.astro';
-import { migratrNav } from '@/src/migratr/nav';
-import { version } from '@/src/migratr/version';
+
+import Docs from "@/src/layouts/Docs.astro";
+import { migratrNav } from "@/src/migratr/nav";
+import { version } from "@/src/migratr/version";
 
 <Docs title="migratr" description="Schema migrations for SQLite: JSON migration files, an applied-migrations ledger, safe table rebuilds, exact-inverse downs, and snapshots before destructive steps." nav={migratrNav}>
 
@@ -53,11 +54,11 @@ Captured from `migratr new create_users ...` followed by `migratr --db app.db pl
 
 ## Where to go
 
-| Page | Covers |
-|------|--------|
-| [CLI](/migratr/cli) | Every command, every flag, `--json` documents, error codes, exit codes. |
+| Page                              | Covers                                                                          |
+| --------------------------------- | ------------------------------------------------------------------------------- |
+| [CLI](/migratr/cli)               | Every command, every flag, `--json` documents, error codes, exit codes.         |
 | [Migrations](/migratr/migrations) | The file format and its operations, the ledger, snapshots, the rule for `down`. |
-| [Library](/migratr/library) | `embed!`, `Migrator`, the `Executor` trait and the default `rusqlite` feature. |
-| [Changelog](/migratr/changelog) | Release notes. |
+| [Library](/migratr/library)       | `embed!`, `Migrator`, the `Executor` trait and the default `rusqlite` feature.  |
+| [Changelog](/migratr/changelog)   | Release notes.                                                                  |
 
 </Docs>
