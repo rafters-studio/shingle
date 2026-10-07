@@ -4,21 +4,20 @@ import Container from '@/components/ui/container.astro';
 import Grid from '@/components/ui/grid.astro';
 import GridItem from '@/components/ui/grid-item.astro';
 import Small from '@/components/ui/typography-small.astro';
+import type { NavGroup } from '@/src/migratr/nav';
 
 interface Props {
   title: string;
   description?: string;
+  nav?: NavGroup[];
 }
 
 const rawProps = Astro.props as Props & { frontmatter?: Partial<Props> };
 const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
-const { title = '', description } = merged;
+const { title = '', description, nav: navProp } = merged;
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
-type NavItem = { label: string; href: string };
-type NavGroup = { heading: string; items: NavItem[] };
-
-const nav: NavGroup[] = [
+const defaultNav: NavGroup[] = [
   {
     heading: 'Start',
     items: [
@@ -44,7 +43,10 @@ const nav: NavGroup[] = [
   },
 ];
 
-function isActive(href: string): boolean {
+const nav: NavGroup[] = navProp ?? defaultNav;
+
+function isActive(href: string, exact = false): boolean {
+  if (exact) return currentPath === href;
   return currentPath === href || currentPath.startsWith(href + '/');
 }
 ---
@@ -70,7 +72,7 @@ function isActive(href: string): boolean {
               {group.items.map((item) => (
                 <a
                   href={item.href + '/'}
-                  aria-current={isActive(item.href) ? 'page' : undefined}
+                  aria-current={isActive(item.href, item.exact) ? 'page' : undefined}
                 >
                   {item.label}
                 </a>

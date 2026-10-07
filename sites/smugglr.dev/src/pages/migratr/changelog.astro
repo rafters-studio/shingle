@@ -1,0 +1,15 @@
+---
+import Docs from '@/src/layouts/Docs.astro';
+import { Content } from '@/src/migratr/CHANGELOG.md';
+import { migratrNav } from '@/src/migratr/nav';
+import { version } from '@/src/migratr/version';
+---
+
+<Docs
+  title="migratr changelog"
+  description={`Every migratr release, newest first. Current version ${version}.`}
+  nav={migratrNav}
+>
+  <p>Current version: <code>{version}</code></p>
+  <Content />
+</Docs>

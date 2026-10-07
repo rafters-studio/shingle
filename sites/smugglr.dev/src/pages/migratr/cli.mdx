@@ -1,0 +1,303 @@
+---
+title: "CLI"
+description: "Every migratr command, flag, --json document, error code and exit code."
+---
+import Docs from '@/src/layouts/Docs.astro';
+import { migratrNav } from '@/src/migratr/nav';
+import { version } from '@/src/migratr/version';
+
+<Docs title="CLI" description="Every migratr command, flag, --json document, error code and exit code." nav={migratrNav}>
+
+migratr {version}
+
+Every command. Every flag. Every exit code. Output below is pasted from runs of the released `migratr` binary; the runs used a scratch directory and a throwaway database.
+
+```
+migratr [--db PATH] [--dir PATH] [--json] <new|up|down|status|plan|restore> ...
+```
+
+## Global flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--db <PATH>` | none | The SQLite database file. Required by every command except `new`. Without it the command fails with `usage`. |
+| `--dir <PATH>` | `migrations` | The migrations directory. |
+| `--json` | off | Write one JSON document describing the outcome to stdout. |
+| `-h`, `--help` | | Print help. |
+| `-V`, `--version` | | Print the version. |
+
+The flags are global: they may come before or after the subcommand.
+
+## Commands
+
+| Command | What it does |
+|---------|--------------|
+| `new <NAME> [SPECS...]` | Scaffold a migration file. |
+| `up [--to V]` | Apply pending migrations. |
+| `down [--steps N]` | Reverse the newest N applied migrations (default 1). |
+| `status` | List each migration as applied or pending. |
+| `plan [up [--to V] \| down [--steps N]]` | Print the statements a run would execute. Changes nothing. |
+| `restore [--snapshot PATH] --yes` | Replace the database with a snapshot. |
+
+After every successful `up` and `down`, migratr writes `schema.json` in the migrations directory.
+
+### new
+
+```
+migratr new <NAME> [SPECS...]
+```
+
+Writes `<YYYYMMDDHHMMSS>_<NAME>.json` into `--dir`, creating the directory if needed. The name picks the operation, Rails style. Column specs are `name[:type][:modifier...]`; the modifiers are `pk`, `notnull`, `unique` and `default=<expr>`.
+
+| Name | Operation | Specs |
+|------|-----------|-------|
+| `create_<table>` | `create_table` | Required: at least one column. |
+| `add_<column>_to_<table>` | `add_column` | The column. |
+| `drop_<table or index>` | `drop_table` or `drop_index` | None. The definition is copied from `schema.json`. |
+| `remove_<column>_from_<table>` | `drop_column` | None. The definition is copied from `schema.json`. |
+| anything else | an empty `up` | None. |
+
+```
+$ migratr new create_users id:integer:pk email:text:notnull:unique
+created migrations/20261007235008_create_users.json
+[exit 0]
+```
+
+```
+$ migratr new create_posts id:integer:pk title:text:notnull --json
+{"command":"new","path":"migrations/20261009000001_create_posts.json","status":"ok"}
+[exit 0]
+```
+
+A drop of something `schema.json` does not describe fails with `unknown_object`. `schema.json` is written by a successful `up` or `down`, so run one first.
+
+```
+$ migratr new drop_ghosts --json
+{"code":"unknown_object","command":"new","message":"table or index ghosts is not in schema.json","status":"error"}
+[exit 1]
+```
+
+### up
+
+```
+migratr --db PATH up [--to V]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--to <V>` | all pending | Stop after this version. |
+
+Applies each pending migration in version order. A migration and its ledger row go in one atomic run; a failure rolls it back. `up` refuses to run when an applied file was edited or a ledger row has no file.
+
+```
+$ migratr --db app.db up
+applied 2 migration(s): 20261007235008, 20261007235009
+[exit 0]
+```
+
+```
+$ migratr --db app.db up --json
+{"applied":[20261007235010],"command":"up","status":"ok"}
+[exit 0]
+```
+
+### down
+
+```
+migratr --db PATH down [--steps N]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--steps <N>` | `1` | Reverse the newest N applied migrations, newest first. |
+
+`down` reverses structure only. Data in dropped objects is not restored. If any operation in the range has no exact inverse, the whole range is refused before anything runs; see [the rule for down](/migratr/migrations#the-rule-for-down).
+
+```
+$ migratr --db app.db down --steps 2
+reverted 2 migration(s): 20261007235010, 20261007235009. Data in dropped objects is not restored. Latest snapshot: ./.migratr/snapshots/20261007235010_20261007235009_down.db
+[exit 0]
+```
+
+```
+$ migratr --db app.db down --json
+{"command":"down","data_restored":false,"reverted":[20261007235008],"snapshot":"./.migratr/snapshots/20261007235010_20261007235008_down.db","status":"ok"}
+[exit 0]
+```
+
+### status
+
+```
+migratr --db PATH status
+```
+
+Lists each migration file as applied (with the time) or pending. An applied migration whose file was edited is marked `CHECKSUM MISMATCH`. A ledger row with no file is reported as missing. The last line names the latest snapshot.
+
+```
+$ migratr --db app.db status
+20261007235008_create_users pending
+20261007235009_add_name_to_users pending
+latest snapshot: none
+[exit 0]
+```
+
+```
+$ migratr --db app.db status
+20261007235008_create_users applied 2026-10-07T23:50:09.749Z
+20261007235009_add_name_to_users applied 2026-10-07T23:50:17.955Z CHECKSUM MISMATCH
+20261007235010_remove_name_from_users applied 2026-10-07T23:50:17.956Z
+latest snapshot: ./.migratr/snapshots/20261007235017_20261007235010_up.db
+[exit 0]
+```
+
+```
+$ migratr --db app.db status --json
+{"command":"status","latest_snapshot":null,"migrations":[{"applied_at":"2026-10-07T23:50:09.749Z","checksum_mismatch":false,"name":"create_users","state":"applied","version":20261007235008},{"applied_at":"2026-10-07T23:50:09.749Z","checksum_mismatch":false,"name":"add_name_to_users","state":"applied","version":20261007235009}],"missing":[],"status":"ok"}
+[exit 0]
+```
+
+### plan
+
+```
+migratr --db PATH plan [--to V]
+migratr --db PATH plan up [--to V]
+migratr --db PATH plan down [--steps N]
+```
+
+`plan` with no direction plans `up`. It prints the statements a run would execute, marks destructive steps, names the snapshot each would take, and reports the database size. It changes nothing: dry-run and run print the same statements.
+
+```
+$ migratr --db app.db plan down
+plan down; database is 16384 bytes
+20261007235009_add_name_to_users DESTRUCTIVE, snapshot 20261007235009_20261007235009_down.db
+  ALTER TABLE "users" DROP COLUMN "name"
+  DELETE FROM _migratr_migrations WHERE version = 20261007235009
+[exit 0]
+```
+
+```
+$ migratr --db app.db plan --json
+{"command":"plan","database_bytes":16384,"direction":"up","status":"ok","steps":[]}
+[exit 0]
+```
+
+### restore
+
+```
+migratr --db PATH restore [--snapshot PATH] --yes
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--snapshot <PATH>` | the newest | The snapshot to restore. |
+| `--yes` | off | Confirm the restore. Without it nothing changes. |
+
+Restore acts on the local database file. Without `--yes` it fails with `restore_not_confirmed` and says what it would discard.
+
+```
+$ migratr --db app.db restore
+error [restore_not_confirmed]: restore needs confirmation; it would discard everything written since the snapshot of 20261007235010 (ledger version 20261007235008); ledger versions removed: none
+[exit 1]
+```
+
+```
+$ migratr --db app.db restore --yes
+restored; discards everything written since the snapshot of 20261007235010 (ledger version 20261007235008); ledger versions removed: none
+[exit 0]
+```
+
+```
+$ migratr --db app.db restore --yes --json
+{"command":"restore","removed":[],"restored":true,"snapshot_time":"20261007235010","snapshot_version":20261007235008,"status":"ok"}
+[exit 0]
+```
+
+## JSON output
+
+With `--json`, a command writes one JSON document to stdout and nothing else; logs go to stderr. The document carries `command` and `status` (`ok` or `error`). A success adds the outcome's fields. A failure adds `code` and `message` and the process exits non-zero.
+
+| Command | Fields on success |
+|---------|-------------------|
+| `new` | `path` |
+| `up` | `applied` (versions, in order) |
+| `down` | `reverted` (versions, newest first), `data_restored`, `snapshot` |
+| `status` | `migrations` (each with `version`, `name`, `state`, `applied_at`, `checksum_mismatch`), `missing`, `latest_snapshot` |
+| `plan` | `direction`, `database_bytes`, `steps` |
+| `restore` | `restored`, `removed`, `snapshot_time`, `snapshot_version` |
+
+## Exit codes and error codes
+
+Exit 0 on success. A usage error exits 2. Every other failure exits 1. Error codes are stable across patch releases.
+
+| Code | Exit | Cause |
+|------|------|-------|
+| `usage` | 2 | Bad arguments, or a missing `--db`. |
+| `parse` | 1 | A migration file or spec could not be parsed. |
+| `duplicate_version` | 1 | Two migration files share a version. |
+| `io` | 1 | A file or directory could not be read or written. |
+| `checksum_mismatch` | 1 | An applied migration's file was edited. |
+| `missing_file` | 1 | A ledger row has no migration file. |
+| `apply_failed` | 1 | A migration failed and was rolled back. |
+| `irreversible` | 1 | A migration in the `down` range has an operation with no inverse. |
+| `unparseable_table` | 1 | A table's `CREATE TABLE` could not be parsed for a rebuild. |
+| `foreign_key_violation` | 1 | A table rebuild left rows that violate foreign keys. |
+| `column_in_use` | 1 | A dropped column is used by another object. |
+| `rebuild_not_first` | 1 | An operation that needs a table rebuild is not first in its migration. |
+| `snapshot_failed` | 1 | A snapshot could not be written, so the step did not run. |
+| `restore_not_confirmed` | 1 | `restore` ran without `--yes`. |
+| `unknown_object` | 1 | `new` named an object that is not in `schema.json`. |
+| `database` | 1 | SQLite reported an error. |
+
+In text mode an error prints as `error [<code>]: <message>` on stderr.
+
+```
+$ migratr up
+error [usage]: --db PATH is required
+[exit 2]
+```
+
+```
+$ migratr up --json
+{"code":"usage","command":"up","message":"--db PATH is required","status":"error"}
+[exit 2]
+```
+
+```
+$ migratr --db app.db up --json
+{"code":"checksum_mismatch","command":"up","message":"migration 20261007235009_add_name_to_users was edited after it was applied. Applied migrations are not edited: restore the file to what was applied, then write a new migration for the change","status":"error"}
+[exit 1]
+```
+
+```
+$ migratr --db app.db down --json
+{"code":"irreversible","command":"down","message":"migration 20261008000000 cannot be reversed: operation 0 is raw SQL with no down","status":"error"}
+[exit 1]
+```
+
+```
+$ migratr --db app.db status --json
+{"code":"parse","command":"status","message":"20261009000000_bad.json: at up[0]: unknown variant `nope`, expected one of `create_table`, `drop_table`, `rename_table`, `add_column`, `drop_column`, `rename_column`, `create_index`, `drop_index`, `raw_sql`","status":"error"}
+[exit 1]
+```
+
+```
+$ migratr --db nodir.db --dir nonexistent status --json
+{"code":"io","command":"status","message":"nonexistent: No such file or directory (os error 2)","status":"error"}
+[exit 1]
+```
+
+Errors raised by the argument parser itself, before migratr runs (an unknown subcommand, a flag missing its value), print the parser's message as plain text, exit 2, and are not JSON documents even with `--json`.
+
+```
+$ migratr bogus
+error: unrecognized subcommand 'bogus'
+
+Usage: migratr [OPTIONS] <COMMAND>
+
+For more information, try '--help'.
+[exit 2]
+```
+
+The `[exit N]` lines are added to the blocks above to show the process exit status; the binary does not print them. All blocks were captured from the 0.1.1 binary.
+
+</Docs>

@@ -1,0 +1,143 @@
+---
+title: "Migrations"
+description: "The migration file format and its operations, the ledger, snapshots, and the rule for down."
+---
+import Docs from '@/src/layouts/Docs.astro';
+import { migratrNav } from '@/src/migratr/nav';
+import { version } from '@/src/migratr/version';
+
+<Docs title="Migrations" description="The migration file format and its operations, the ledger, snapshots, and the rule for down." nav={migratrNav}>
+
+migratr {version}
+
+## The file
+
+A migration is a JSON file named `<YYYYMMDDHHMMSS>_<snake_name>.json`: a UTC timestamp, an underscore, a lowercase name of letters, digits and underscores. The timestamp is the version. Two files with the same version are refused with `duplicate_version`.
+
+```
+$ migratr --db a.db status --json
+{"code":"duplicate_version","command":"status","message":"duplicate migration version 20261007235008: 20261007235008_create_users.json, 20261007235008_dup.json","status":"error"}
+```
+
+The body is one object with an `up` array of operations. Each operation names itself in an `op` field. Unknown fields are rejected, and a parse error names the JSON path of the bad field. This is the file `migratr new` wrote for `create_users id:integer:pk email:text:notnull:unique`:
+
+```json
+{
+  "up": [
+    {
+      "columns": [
+        {
+          "name": "id",
+          "not_null": false,
+          "primary_key": 1,
+          "type": "INTEGER",
+          "unique": false
+        },
+        {
+          "name": "email",
+          "not_null": true,
+          "type": "TEXT",
+          "unique": true
+        }
+      ],
+      "op": "create_table",
+      "table": "users",
+      "without_rowid": false
+    }
+  ]
+}
+```
+
+```
+$ migratr new add_name_to_users name:text
+created migrations/20261007235009_add_name_to_users.json
+```
+
+## Operations
+
+| `op` | Fields | Exact inverse |
+|------|--------|---------------|
+| `create_table` | `table`, `columns`, `without_rowid` (optional) | `DROP TABLE` |
+| `drop_table` | `table`, `definition` (a table with its `sql`) | Recreated from `definition.sql` |
+| `rename_table` | `from`, `to` | Renamed back |
+| `add_column` | `table`, `column` | `drop_column` |
+| `drop_column` | `table`, `column` | `add_column` |
+| `rename_column` | `table`, `from`, `to` | Renamed back |
+| `create_index` | `name`, `table`, `columns`, `unique` (optional) | `drop_index` |
+| `drop_index` | `definition` (an index: `name`, `table`, `columns`, `unique`, `where`) | `CREATE INDEX`, partial clause included |
+| `raw_sql` | `up`, `down` (optional) | Only when `down` is given |
+
+A column carries `name`, `type` (verbatim), and optionally `not_null`, `primary_key` (1-based position), `unique`, `default`, `collation`, `check`, `references` (`table`, `column`, `on_update`, `on_delete`) and `generated` (`expr`, `stored`).
+
+`drop_table`, `drop_column` and `drop_index` carry the full definition of what they drop, so that `down` can recreate the structure. `migratr new` copies that definition from `schema.json`, which is why `drop_<name>` for an object `schema.json` does not describe fails with `unknown_object`.
+
+Where SQLite cannot do an operation in place, migratr rebuilds the table by SQLite's 12-step procedure: indexes, triggers and dependent views are recreated, rowids and `sqlite_sequence` carry over, and `foreign_key_check` runs before commit. A rebuild is refused before anything runs when the table's `CREATE TABLE` does not parse (`unparseable_table`), when another object uses the dropped column (`column_in_use`), or when the rebuild is not the first operation in its migration (`rebuild_not_first`). A rebuild that leaves rows violating foreign keys fails with `foreign_key_violation`.
+
+Operations in a file run in order, and a migration with its ledger row is one atomic run. A failure rolls the run back (`apply_failed`).
+
+## The ledger
+
+Applied migrations are recorded in the table `_migratr_migrations`, created on the first `up`:
+
+```
+CREATE TABLE IF NOT EXISTS _migratr_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, checksum TEXT NOT NULL, applied_at TEXT NOT NULL)
+```
+
+The checksum is the SHA-256 of the canonical JSON of the version, the name and the `up` operations. Edit an applied file and the next `up`, `down` or `status` sees a different checksum:
+
+```
+$ migratr --db app.db status
+20261007235008_create_users applied 2026-10-07T23:50:09.749Z
+20261007235009_add_name_to_users applied 2026-10-07T23:50:17.955Z CHECKSUM MISMATCH
+20261007235010_remove_name_from_users applied 2026-10-07T23:50:17.956Z
+latest snapshot: ./.migratr/snapshots/20261007235017_20261007235010_up.db
+```
+
+```
+$ migratr --db app.db up --json
+{"code":"checksum_mismatch","command":"up","message":"migration 20261007235009_add_name_to_users was edited after it was applied. Applied migrations are not edited: restore the file to what was applied, then write a new migration for the change","status":"error"}
+```
+
+The fix is in the message: restore the file, then write a new migration. A ledger row whose file is gone is refused the same way, with `missing_file`.
+
+## Snapshots
+
+Before a destructive step in `up` or `down`, migratr copies the database into `.migratr/snapshots/` next to it. A step is destructive when it contains `drop_table`, `drop_column`, `drop_index` or `raw_sql`. `plan` marks those steps and names the snapshot:
+
+```
+$ migratr --db app.db plan down
+plan down; database is 16384 bytes
+20261007235009_add_name_to_users DESTRUCTIVE, snapshot 20261007235009_20261007235009_down.db
+  ALTER TABLE "users" DROP COLUMN "name"
+  DELETE FROM _migratr_migrations WHERE version = 20261007235009
+```
+
+Snapshot files are named `<timestamp>_<version>_<direction>.db`. Only the newest snapshot is kept. A snapshot that cannot be written stops the step (`snapshot_failed`). `restore` replaces the database with the newest snapshot, or the one named by `--snapshot`, and changes nothing without `--yes`. Snapshot and restore act on the local file.
+
+## The rule for down
+
+`down` follows the Rails rule: it reverses only what has an exact inverse. Before anything runs, every operation in the requested range is checked, last operation first. If one has no inverse, the whole range is refused with `irreversible` and nothing changes.
+
+A `raw_sql` operation with no `down` has no inverse:
+
+```
+$ migratr --db app.db down --json
+{"code":"irreversible","command":"down","message":"migration 20261008000000 cannot be reversed: operation 0 is raw SQL with no down","status":"error"}
+```
+
+Give the `raw_sql` a `down` and it reverses. A file with a rename, an index and a `raw_sql` with a `down` produced this plan:
+
+```
+$ migratr --db a.db plan down
+plan down; database is 20480 bytes
+20270101000000_misc DESTRUCTIVE, snapshot 20261007235139_20270101000000_down.db
+  SELECT 1
+  DROP INDEX "people_mail"
+  ALTER TABLE "people" RENAME COLUMN "mail" TO "email"
+  ALTER TABLE "people" RENAME TO "users"
+  DELETE FROM _migratr_migrations WHERE version = 20270101000000
+```
+
+The statements run in reverse order of the file. `down` reverses structure only: data in dropped objects is not restored, and the command says so. To get data back, use `restore`.
+
+</Docs>

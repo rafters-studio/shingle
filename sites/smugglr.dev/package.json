@@ -13,7 +13,8 @@
     "lint:fix": "oxlint ./src --fix",
     "format": "oxfmt ./src",
     "format:check": "oxfmt --check ./src",
-    "preflight": "pnpm lint && pnpm typecheck && pnpm build",
+    "test": "vitest run",
+    "preflight": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
     "astro": "astro"
   },
   "dependencies": {
@@ -34,6 +35,7 @@
     "oxlint": "^1.51.0",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
+    "vitest": "^4.1.10",
     "wrangler": "^4.98.0"
   }
 }

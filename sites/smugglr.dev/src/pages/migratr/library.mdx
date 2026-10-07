@@ -1,0 +1,83 @@
+---
+title: "Library"
+description: "Embed migratr migrations in a Rust program: embed!, Migrator, the Executor trait and the default rusqlite feature."
+---
+import Docs from '@/src/layouts/Docs.astro';
+import { migratrNav } from '@/src/migratr/nav';
+import { version } from '@/src/migratr/version';
+
+<Docs title="Library" description="Embed migratr migrations in a Rust program: embed!, Migrator, the Executor trait and the default rusqlite feature." nav={migratrNav}>
+
+migratr {version}
+
+The CLI and the library run the same code. The `migratr` crate embeds a migrations directory in your program and applies it at startup, with the same ledger, rebuilds and snapshots.
+
+```
+cargo add migratr
+```
+
+## embed!
+
+`migratr::embed!("migrations")` reads a migrations directory at compile time, relative to the crate's `CARGO_MANIFEST_DIR`, and expands to a `Migrator`. It parses every file with the library's own parser, so a malformed file or a repeated version stops the build instead of failing at startup. It takes one string literal.
+
+## Migrator
+
+| Method | What it does |
+|--------|--------------|
+| `up(&self, exec)` | Applies every pending migration. Returns an `UpReport` with `applied`. |
+| `down(&self, exec, steps)` | Reverses the newest `steps` applied migrations. Returns a `DownReport` with `reverted`; it prints as the CLI's sentence. |
+| `status(&self, exec)` | Every embedded migration with whether it is applied. Refuses, as `up` does, on a missing file or a checksum mismatch. |
+| `plan(&self, exec)` | The migrations `up` would apply, in order. |
+
+Each method takes an `&mut impl Executor` and returns `Result<_, MigrateError>`. The error variants are the CLI's error codes.
+
+## Example
+
+This program was built against `migratr = "0.1.1"` and `rusqlite = { version = "0.40", features = ["bundled"] }` with the `create_users` migration from [Migrations](/migratr/migrations) in `migrations/`.
+
+```rust
+use migratr::{Migrator, RusqliteExecutor};
+use rusqlite::Connection;
+
+static MIGRATIONS: std::sync::LazyLock<Migrator> =
+    std::sync::LazyLock::new(|| migratr::embed!("migrations"));
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut exec = RusqliteExecutor::new(Connection::open("app.db")?);
+    let report = MIGRATIONS.up(&mut exec)?;
+    println!("applied: {:?}", report.applied);
+    for m in MIGRATIONS.status(&mut exec)? {
+        println!("{} {} applied={}", m.version, m.name, m.applied);
+    }
+    let down = MIGRATIONS.down(&mut exec, 1)?;
+    println!("{down}");
+    Ok(())
+}
+```
+
+```
+$ cargo run
+applied: [20261007235008]
+20261007235008 create_users applied=true
+reverted 1 migration(s): 20261007235008. Data in dropped objects is not restored.
+```
+
+Captured from `cargo run` in a scratch project against the published 0.1.1 crates.
+
+## The executor
+
+`Executor` is the boundary between migratr and a SQLite connection. An implementation reads the schema (`read_schema`), reads the ledger (`read_ledger`), runs a list of statements in one transaction (`run_atomic`, with an option to suspend foreign keys during a rebuild), and writes a consistent copy of the database for a snapshot (`snapshot`). It returns `Ok(None)` from `snapshot` when the database is not durable and needs none.
+
+The `rusqlite` feature is on by default and provides `RusqliteExecutor`, built from a `rusqlite::Connection`, plus `restore` and `latest_snapshot`. To supply your own executor, turn the default off:
+
+```toml
+migratr = { version = "0.1.1", default-features = false }
+```
+
+That keeps the parser, `up`, `down`, `Migrator` and the `Executor` trait, and drops rusqlite. This configuration was not compiled for this page.
+
+## What it does not do
+
+`Migrator` applies and reverses migrations; it does not write `schema.json`. The CLI does that after each `up` and `down`; in a library, `migratr::write_schema` writes it on request. Local SQLite only.
+
+</Docs>
