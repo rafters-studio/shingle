@@ -34,7 +34,7 @@
     "@types/react-dom": "^19.2.3",
     "oxlint": "^1.51.0",
     "tailwindcss": "^4.2.1",
-    "typescript": "^5.9.3",
-    "wrangler": "^4.98.0"
+    "typescript": "catalog:",
+    "wrangler": "catalog:"
   }
 }

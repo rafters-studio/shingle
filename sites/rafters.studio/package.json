@@ -24,11 +24,11 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@tailwindcss/vite": "^4.2.1",
-    "@types/node": "^25.5.0",
+    "@types/node": "catalog:",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
     "tailwindcss": "^4.2.1",
-    "typescript": "^5.9.3",
-    "wrangler": "^4.98.0"
+    "typescript": "catalog:",
+    "wrangler": "catalog:"
   }
 }

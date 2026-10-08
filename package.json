@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.5.2",
+  "packageManager": "pnpm@12.9.1",
   "scripts": {
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present --workspace-concurrency=1 typecheck",
@@ -13,6 +13,7 @@
     "preflight": "pnpm lint && pnpm typecheck && pnpm build && pnpm test"
   },
   "devDependencies": {
-    "wrangler": "^4.98.0"
+    "@rafters/toolchain": "0.1.1",
+    "wrangler": "catalog:"
   }
 }
