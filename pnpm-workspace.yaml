@@ -3,8 +3,8 @@ packages:
   - packages/*
 configDependencies:
   '@rafters/toolchain': 0.1.1
-# Kept over the toolchain's typescript ^7.0.2: on 7, tsc rejects baseUrl in the shared tsconfig
-# (TS5102), and @astrojs/check peers on typescript ^5 or ^6.
+# Kept over the toolchain's typescript ^7.0.2: astro check cannot run on TypeScript 7, which does
+# not ship the programmatic API @astrojs/language-server drives.
 catalog:
   typescript: ^5.9.3
 allowBuilds:
