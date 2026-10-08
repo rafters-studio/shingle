@@ -13,7 +13,7 @@
     "preflight": "pnpm lint && pnpm typecheck && pnpm build && pnpm test"
   },
   "devDependencies": {
-    "@rafters/toolchain": "0.1.1",
+    "@rafters/toolchain": "catalog:",
     "wrangler": "catalog:"
   }
 }
