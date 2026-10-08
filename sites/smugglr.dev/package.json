@@ -13,8 +13,8 @@
     "lint:fix": "oxlint ./src --fix",
     "format": "oxfmt ./src",
     "format:check": "oxfmt --check ./src",
-    "test": "vitest run",
-    "preflight": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
+    "test": "astro build && vitest run",
+    "preflight": "pnpm lint && pnpm typecheck && pnpm test",
     "astro": "astro"
   },
   "dependencies": {
