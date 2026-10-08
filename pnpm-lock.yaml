@@ -341,6 +341,9 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@types/node@25.5.0)(happy-dom@20.8.9)(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.9.0))
       wrangler:
         specifier: ^4.98.0
         version: 4.98.0

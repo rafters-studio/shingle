@@ -1,0 +1,64 @@
+---
+title: "migratr"
+description: "Schema migrations for SQLite: JSON migration files, an applied-migrations ledger, safe table rebuilds, exact-inverse downs, and snapshots before destructive steps."
+---
+
+import Docs from "@/src/layouts/Docs.astro";
+import { migratrNav } from "@/src/migratr/nav";
+import { version } from "@/src/migratr/version";
+
+<Docs title="migratr" description="Schema migrations for SQLite: JSON migration files, an applied-migrations ledger, safe table rebuilds, exact-inverse downs, and snapshots before destructive steps." nav={migratrNav}>
+
+migratr {version}
+
+migratr changes the shape of SQLite databases. It never moves rows; that is [smugglr](/). Migrations are JSON files. A ledger table records what has been applied. `down` reverses only what has an exact inverse. A snapshot is taken before every destructive step.
+
+It works on local SQLite files only.
+
+## Install
+
+```
+curl -fsSL https://smugglr.dev/migratr/install | bash
+```
+
+```
+cargo install migratr-cli
+```
+
+The crate is `migratr-cli`; the binary is `migratr`. To embed migrations in a Rust program instead, add `migratr = "0.1"` as a dependency. See [Library](/migratr/library).
+
+```
+$ migratr --version
+migratr 0.1.1
+```
+
+Captured from the released binary: `migratr --version`.
+
+## The loop
+
+```
+$ migratr new create_users id:integer:pk email:text:notnull:unique
+created migrations/20261007235008_create_users.json
+```
+
+```
+$ migratr --db app.db plan
+plan up; database is 0 bytes
+20261007235008_create_users
+  CREATE TABLE IF NOT EXISTS _migratr_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, checksum TEXT NOT NULL, applied_at TEXT NOT NULL)
+  CREATE TABLE "users" ("id" INTEGER, "email" TEXT NOT NULL UNIQUE, PRIMARY KEY ("id"))
+  INSERT INTO _migratr_migrations (version, name, checksum, applied_at) VALUES (20261007235008, 'create_users', 'd9f68ffa791f2d87f503cfd48e8828652603de8879b15c79b6c2daa22c1dacae', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+```
+
+Captured from `migratr new create_users ...` followed by `migratr --db app.db plan` in an empty directory with a second migration, `add_name_to_users`, present; only the first migration's block is shown here. `plan` changes nothing. `up` applies the same statements.
+
+## Where to go
+
+| Page                              | Covers                                                                          |
+| --------------------------------- | ------------------------------------------------------------------------------- |
+| [CLI](/migratr/cli)               | Every command, every flag, `--json` documents, error codes, exit codes.         |
+| [Migrations](/migratr/migrations) | The file format and its operations, the ledger, snapshots, the rule for `down`. |
+| [Library](/migratr/library)       | `embed!`, `Migrator`, the `Executor` trait and the default `rusqlite` feature.  |
+| [Changelog](/migratr/changelog)   | Release notes.                                                                  |
+
+</Docs>
