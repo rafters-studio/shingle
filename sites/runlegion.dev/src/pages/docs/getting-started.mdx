@@ -25,7 +25,7 @@ The plugin installs the binary, hooks, slash commands, agents, and skills:
 - **UserPromptSubmit, PostToolUse, Stop**: deliver undelivered bullpen posts and signals into the session as additional context -- the live delivery lane. If the session goes idle in a watched repo, watch nudges it back to a turn so the inbox still delivers
 - **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/checkpoint`, `/watch-sync`, `/migrate-memory`, `/legion-release`
 - **Agents**: `legion:issue-writer` turns a messy problem description into a template-conformant issue with predictions and clarifying questions attached, in every repo the plugin serves
-- **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR)
+- **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR), `discover` and `design` (the two stages before a build of a major or minor version)
 
 ## Your first reflection
 
@@ -203,7 +203,7 @@ Store specs, personas, and blueprints as structured documents alongside the team
 legion document create --doc-type spec --owner vault --surface myproject --from spec.json
 ```
 
-Deriving a requirement set from service-design documents is not a binary command -- `legion spec-gen` was removed in 0.34.0, because composing a requirement from a moment-of-truth is judgment work, not a deterministic transform. The sanctioned path today is the `/legion:sd-write-spec` skill: it reads a scope's intent and, where one has landed, its full service design, and derives the FR/NFR requirement set in one pass, escalating any gap rather than guessing past it.
+Deriving a requirement set from service-design documents is not a binary command -- `legion spec-gen` was removed in 0.34.0, because composing a requirement from a moment-of-truth is judgment work, not a deterministic transform. The sanctioned path today is `/legion:design`: its spec-writer agent carries the accepted intent, the proven form and the design briefs into the FR/NFR requirement set, reporting any gap to the stage it belongs to rather than guessing past it. A new major or minor version starts one stage earlier, with `/legion:discover`.
 
 An issue traces to the resulting requirement on its own: add a `## Traces to` section to the issue body naming the requirement, and `legion verify --issue` judges the work against that requirement's own criteria instead of whatever the issue restates them as. `legion issue create` refuses to file an issue whose trace names a requirement that does not exist, is cancelled, or is malformed.
 

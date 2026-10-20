@@ -42,11 +42,11 @@ Tables (grouped by concern):
 **Observability**
 
 - `health_samples` system telemetry for watch pressure monitoring
-- `rate_limit_samples` Claude Code rate-limit chips ingested by `legion statusline`
+- `rate_limit_samples` Claude Code rate-limit chips sampled by `legion statusline`
 - `usage_samples` Claude Code session token usage ingested alongside the rate-limit chip
 - `audit_log` work source actions (issue/PR creation, merge, review) for traceability
 - `quality_gates` skill-run results enforced by `legion pr create` and the ->Done gate, carrying provenance (VALIDATED via a check validator, ASSERTED via `record`), a void/supersede tombstone, and the resolved `base` ref a `check` run diffed against
-- `quality_gate_findings` structured findings (file, line, severity, status, disposition reason, resolving commit) keyed to the gate row that raised them, resolved by git-log detection or retired via `finding-disposition`/`finding-ack`
+- `quality_gate_findings` structured findings (file, line, severity, status, disposition reason, resolving commit) keyed to the gate row that raised them and to the repo (a NULL repo matches every repo), resolved by git-log detection or retired via `finding-disposition`/`finding-ack`
 
 **Uncertainty (Pillar 2)**
 
@@ -99,7 +99,7 @@ Work sources are plugins: executables that speak a documented protocol (`list`, 
 
 **Schema registry**: schemas are documents with `doc_type=schema`, structurally validated at insert (`$schema`, `title`, `type:object`, non-empty `properties`) and self-describing via a top-level `x-doc-type` keyword naming the type each one governs. Every write to the `documents` table -- `Database::insert_document`, `revise_document`, and `update_document_body`, so CLI and daemon alike -- validates its payload against the schema landed for that `doc_type` through the `jsonschema` crate (draft-07 and 2020-12, `$ref`/`definitions` honored); a `doc_type` with no schema, or with two schemas claiming it, is refused, no warn-and-allow. A violation raises `LegionError::SchemaViolation`, one `<pointer>: <message>` line per problem -- the CLI prints the lines and exits 1, the daemon answers 422 with a `violations` array. The crate builds with `default-features = false`: its defaults resolve a remote `$ref` over HTTP or `file://`, which would turn a caller-supplied schema on the daemon's create endpoint into an SSRF and file-disclosure primitive and panic a blocking fetch inside an axum handler, so an external `$ref` now fails to compile instead. A second bound counts every reference keyword (`$ref`, `$dynamicRef`, `$recursiveRef`) anywhere in a schema and refuses past 64, alongside a matching nesting cap, closing a stack-overflow path a chained-ref schema could otherwise trigger. Each schema write dual-writes a pointer reflection on `domain=schema` so `legion recall --domain schema` surfaces every landed schema with its document id. `legion document validate --schema <id>` runs the same compiled validator by hand against an arbitrary instance.
 
-**Spec-gen**: retired. The Rust `legion spec-gen` command -- and `src/spec_gen.rs` with it -- was removed in 0.34.0 (#821). Deriving a requirement from a service-design document's `moment_of_truth` is judgment work legion carries through the uncertainty engine and the audit log, not a deterministic field-concatenation, so it now runs as an instrumented skill rather than compiled Rust. `/legion:sd-write-spec` is the current path: two input modes (intent alone, or a landed service design), every `traces_to` naming what earned it from an exhaustive list of grounds, and every gap escalated rather than resolved in the body. The requirement JSON schema in the registry is unchanged, so a derived requirement still validates the same way either path produced it.
+**Spec-gen**: retired. The Rust `legion spec-gen` command -- and `src/spec_gen.rs` with it -- was removed in 0.34.0 (#821). Deriving a requirement from a service-design document's `moment_of_truth` is judgment work legion carries through the uncertainty engine and the audit log, not a deterministic field-concatenation, so it now runs as an instrumented skill rather than compiled Rust. The spec-writer agent, dispatched by `/legion:design`, is the current path: it carries the final intent, the shaper's form and the briefs into FR and NFR documents, adds nothing the sources do not say, and reports every gap to the stage it belongs to rather than resolving it in the body. The requirement JSON schema in the registry is unchanged, so a derived requirement still validates the same way either path produced it.
 
 **Issue-requirement tracing** (#933): an issue can point at a requirement without a card in between. Its body carries a `## Traces to` section: a requirement id, an optional set of criteria ids, and prose, or an explicit `None` with a reason. `legion issue create` validates the trace at filing time, refusing a line that names a requirement that does not exist, is cancelled, or is malformed -- a bad trace fails at the point it is written, not the point verify runs. `legion verify --issue` then judges the work against the traced requirement's own `verification.criteria` rather than the issue's restatement of them, and the recorded verdict pins the requirement document's id and revision. `legion document view` surfaces which of a requirement's criteria currently carry a clean verdict, and `pr write-check` renders the traced criteria beside the PR body's mapping, flagging any the PR re-authors instead of citing. Untraced issues verify exactly as before, straight from the issue body.
 
@@ -170,7 +170,7 @@ Bypass telemetry (`bypass.jsonl`) feeds the same engine. A high bypass rate on a
 
 ## Rate-limit and mesh placement
 
-`legion statusline` is wired into Claude Code's `statusLine.command`. Each tick reads the rate-limit JSON on stdin, persists a `rate_limit_samples` row (and a `usage_samples` row when the transcript is readable), and prints a one-line chip.
+`legion statusline` is wired into Claude Code's `statusLine.command`. Each tick reads the rate-limit JSON on stdin, persists a `rate_limit_samples` row (and a `usage_samples` row when the transcript is readable), and prints the operator's line: model, directory, branch, `ctx:`, `s:` and `w:`, for example `Opus 5.5  legion  feat/x  ctx:42%  s:13%  w:61%`. A part with no input is left out.
 
 `legion mesh headroom` ranks every host in the cluster by remaining rate-limit headroom and recent burn rate. `legion mesh pick` prints the best host for placing a new task. `legion usage` surfaces session cost analysis for the operator.
 
@@ -246,7 +246,7 @@ src/
   cluster.rs           -- cluster.toml, key management, `legion cluster`
   sync_actor.rs        -- background thread that drives delta sync
   health.rs            -- system health sampling
-  statusline.rs        -- statusLine ingest + chip render
+  statusline.rs        -- statusLine ingest + operator line render
   mesh.rs              -- mesh-aware task placement
   telemetry.rs         -- bypass.jsonl and etc-usage.jsonl writers and readers
   embed.rs             -- model2vec embeddings
@@ -257,7 +257,7 @@ plugin/
   bin/legion           -- wrapper script
   hooks/               -- Claude Code hooks
   commands/            -- slash commands
-  agents/              -- agent definitions (changelog, dungeon-master, issue-writer, legion-explore, legion-review, legion-verify)
-  skills/              -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify, legion-distill, and the sd-* service-design/spec skills)
+  agents/              -- agent definitions (brief-writer, changelog, dungeon-master, issue-writer, legion-explore, legion-review, legion-verify, not-hotdog, rusty, shaper, spec-writer, typey)
+  skills/              -- skill definitions (legion-memory, legion-simplify, legion-pr-write, legion-review, legion-verify, legion-distill, and the Discover and Design conductors: discover, intent, design, prototype)
   worksources/         -- work source plugins
 ```
