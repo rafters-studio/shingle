@@ -22,6 +22,12 @@ plugin/
   worksources/       -- work source plugins (GitHub, etc.)
 ```
 
+## The wrapper
+
+Every `legion` call goes through `bin/legion`. It reads the version in the plugin's own manifest and compares it with the binary's. If the binary is older, it runs `setup-binary.sh`, restarts the daemon, and then runs your command. A plugin update taken mid-session, or a `/reload-plugins`, no longer leaves the old binary running until the next fresh session. The notice goes to stderr, so stdout stays clean. The common call starts no extra process.
+
+The update only goes up. A session on an older plugin copy never pulls the binary down under a session on the newer one. One installer runs at a time; a concurrent call runs the binary it has. If the update fails, say offline, the wrapper warns, runs the old binary, and waits ten minutes before it tries again. The download is staged and renamed into place, so a call sees the old binary or the new one, never half of one.
+
 ## Hooks
 
 ### SessionStart
@@ -85,6 +91,10 @@ Sibling PostToolUse hooks emit uncertainty predictions on certain task-completio
 
 Fires before Claude Code compresses context. Stores a checkpoint reflection so the agent can recover orientation after compaction.
 
+### SubagentStop
+
+Fires when a subagent finishes. It sends the restatement nudge: the subagent's final message must carry its full deliverable back to the parent. It writes nothing to legion memory. A transcript tail is not a finding, so none is stored.
+
 ### Daemon supervisor
 
 `_legion-daemon-supervisor.sh` runs idempotently from SessionStart and ensures the channel/watch daemon is alive. `legion daemon-spawn` is the underlying primitive.
@@ -122,7 +132,7 @@ Skills are auto-triggered by description match, or invoked directly by name. Cla
 
 **legion-pr-write** (`/legion:legion-pr-write`) is the PR-body forcing function. Before opening a PR, the agent maps each acceptance criterion to the diff that satisfies it, in prose with evidence, and explicitly states what was not done. `legion pr write-check` validates the mapping and records a `legion-pr-write` gate. `legion pr create` requires both the simplify and pr-write gates clean on HEAD.
 
-**legion-review** runs parallel reviewers (spec, correctness, quality, security) over the diff, adversarially refutes high- and medium-severity findings before reporting them, and records a `legion-review` gate. Enforces the target repo's own CLAUDE.md invariants.
+**legion-review** runs parallel reviewers (spec, correctness, quality, security) over the diff, adversarially refutes high- and medium-severity findings before reporting them, and records a `legion-review` gate. Enforces the target repo's own CLAUDE.md invariants. It weighs a recorded decision as evidence, on the reason it states and never on who it names, so a decision whose reason the diff shows to be wrong is a finding like any other.
 
 **legion-verify** is the gate before an issue can close. The implementer submits per-criterion verdicts (pass, fail, uncertain) with cited evidence against `--issue`. Every criterion passing with evidence records a clean gate and unblocks `legion issue close`. Any fail hard-blocks. Any uncertain routes to a human. Run after review, before close. Distinct from the `legion-verify` agent below: this skill is the implementer checking their own work; the agent is an independent audit of that work.
 
