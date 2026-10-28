@@ -14,5 +14,5 @@ allowBuilds:
   workerd: true
   lefthook: false
 minimumReleaseAgeExclude:
-  - '@rafters/astro-meta@0.3.0'
+  - '@rafters/astro-meta@0.4.0'
   - '@rafters/toolchain'
