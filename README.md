@@ -41,7 +41,7 @@ To work on one site, run its scripts from its directory, for example `pnpm dev` 
 
 Every change goes through a pull request. `main` is protected by a ruleset: commits must be signed, and a pull request merges through the merge queue only after Toolchain drift, Lint, Typecheck, Unit Tests and Build pass. Force-pushing to `main` and deleting it are blocked.
 
-Cloudflare builds and deploys each site when a change merges to `main`. There is no deploy step to run by hand.
+Cloudflare Workers Builds builds and deploys rafters.studio, runlegion.dev and smugglr.dev when a change merges to `main`. There is no deploy step to run by hand.
 
 ## Who owns what
 
