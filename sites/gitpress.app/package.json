@@ -8,18 +8,18 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "astro preview",
-    "typecheck": "astro check && tsc --noEmit",
+    "typecheck": "astro sync && astro-check && tsc --noEmit",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint ./src --fix",
     "preflight": "pnpm lint && pnpm typecheck && pnpm build",
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.6.1",
-    "@astrojs/react": "^5.0.7",
+    "@astrojs/cloudflare": "^14.4.2",
+    "@astrojs/react": "^7.1.1",
     "@shingle/shared": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",
-    "astro": "^6.4.4",
+    "astro": "^7.4.2",
     "clsx": "^2.1.1",
     "gsap": "^3.12.7",
     "lucide-react": "^0.577.0",
@@ -28,7 +28,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.12",
     "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

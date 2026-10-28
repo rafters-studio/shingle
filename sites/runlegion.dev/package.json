@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "astro preview",
-    "typecheck": "astro check && tsc --noEmit",
+    "typecheck": "astro sync && astro-check && tsc --noEmit",
     "lint": "oxlint ./src",
     "lint:fix": "oxlint ./src --fix",
     "format": "oxfmt ./src",
@@ -18,9 +18,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^6.0.2",
+    "@astrojs/mdx": "^8.1.1",
     "@shingle/shared": "workspace:*",
-    "astro": "^6.4.4",
+    "astro": "^7.4.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "react": "19.2.0",
@@ -28,9 +28,9 @@
     "wrangler": "catalog:"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.12",
     "@tailwindcss/vite": "^4.2.1",
-    "oxfmt": "^0.36.0",
+    "oxfmt": "^0.74.0",
     "oxlint": "^1.51.0",
     "shiki": "^4.0.1",
     "tailwindcss": "^4.2.1",

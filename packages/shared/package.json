@@ -20,7 +20,7 @@
     "linkedom": "^0.18.0"
   },
   "peerDependencies": {
-    "astro": "^6.0.0"
+    "astro": "^7.0.0"
   },
   "scripts": {
     "test": "vitest run",
