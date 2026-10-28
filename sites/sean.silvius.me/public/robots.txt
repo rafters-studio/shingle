@@ -1,4 +1,0 @@
-Sitemap: https://sean.silvius.me/sitemap-index.xml
-
-User-agent: *
-Disallow: /api
