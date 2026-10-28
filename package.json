@@ -12,7 +12,6 @@
     "preflight": "pnpm lint && pnpm typecheck && pnpm build && pnpm test"
   },
   "devDependencies": {
-    "@rafters/toolchain": "catalog:",
-    "wrangler": "catalog:"
+    "@rafters/toolchain": "catalog:"
   }
 }
