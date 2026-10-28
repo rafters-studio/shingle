@@ -16,3 +16,6 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@rafters/astro-meta@0.4.0'
   - '@rafters/toolchain'
+# miniflare (via @cloudflare/vite-plugin) pins undici 7.29.1 exactly (GHSA-xjj6-f33q-929c, GHSA-4w7w-5xrc-9h26, GHSA-2m5v-pch6-74hx, GHSA-qrxm-fqhp-jwvm); drop once @astrojs/cloudflare's vite-plugin ships a stable release on a miniflare with undici >=7.30.1.
+overrides:
+  undici@>=7.0.0 <7.30.1: ^7.30.1
