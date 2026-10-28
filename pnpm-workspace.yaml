@@ -2,12 +2,9 @@ packages:
   - sites/*
   - packages/*
 configDependencies:
-  '@rafters/toolchain': 0.1.2
-# Kept over the toolchain's typescript ^7.0.2: astro check cannot run on TypeScript 7, which does
-# not ship the programmatic API @astrojs/language-server drives.
+  '@rafters/toolchain': 0.1.4
 catalog:
-  '@rafters/toolchain': ^0.1.2
-  typescript: ^5.9.3
+  '@rafters/toolchain': ^0.1.4
 allowBuilds:
   '@tailwindcss/oxide': true
   bufferutil: true
