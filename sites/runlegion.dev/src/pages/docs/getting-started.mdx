@@ -20,12 +20,12 @@ The plugin installs the binary, hooks, slash commands, agents, and skills:
 
 - **SessionStart**: recalls reflections, surfaces team activity, injects pending replies, prints the current time and sunphase, runs a SCIP index banner so agents know whether `legion sym` will work in this repo, and shows watch status (silent when the watch daemon is alive)
 - **Stop**: prompts a reflection, refuses to stop on incomplete TaskList items or an unanswered directed ask, and hands the watch reaper an exit hint
-- **PreToolUse**: on indexed repos, BLOCKS raw `Grep` and `Read` with a redirect to `legion sym` and `legion recall`. Bypass via `LEGION_BYPASS_GREP=1`, `LEGION_BYPASS_READ=1`, or a `# legion-bypass: <reason>` sentinel in Bash. Every bypass writes one row to `bypass.jsonl` so the uncertainty engine can see what `sym`/`recall` is missing. A plain `git push` gets rewritten to `legion push` and the rewrite is announced; a force push, a refspec, or `--delete`/`--tags`/`--mirror`/`--prune`/`--all` is denied by name instead. Direct `gh` is blocked the same way, translated to the matching `legion` command. A wrapper in front of `gh`, `git commit`, or `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- denies rather than translating, since the wrapper carries information the rewritten command has no way to express
+- **PreToolUse**: one hook, `legion-cmd.sh`, decides every Bash, Grep, Glob, Read, Write, Edit, MultiEdit, Agent, Task, WebFetch, and WebSearch call against one policy file (`legion cmd-check --hook`). Typing `git`, `gh`, `grep`, or `rg` directly still works: the hook inserts `legion ` in front of the name you typed, and `legion git`, `legion gh`, `legion grep`, or `legion rg` take it from there -- a `push` or `commit` that the audited path can express runs through it, a `grep`/`rg` search sym can answer fully is answered from the index, and everything else runs as the real tool, audited where a write warrants it. A forced push to `main`/`master` is refused outright, never translated. On an indexed repo, a harness `Grep` or `Glob` call legion can answer fully gets that answer folded into the same response instead of costing a second round trip; `Read` carries no size limit. There is no environment-variable bypass for any of this: the router reads no environment at all. A built-in never-run list (`rm -rf /`, a forced push to `main`, the fork bomb, and four more, plus two more the shipped policy adds) is refused before anything else and can never be confirmed; anything the policy routes to a human-legible ask, or a power switch like `--force`, is answered with `legion cmd confirm --reason <why> -- '<command>'`
 - **PostToolUse**: re-indexes the owning repo after edits so `sym` queries stay fresh
 - **UserPromptSubmit, PostToolUse, Stop**: deliver undelivered bullpen posts and signals into the session as additional context -- the live delivery lane. If the session goes idle in a watched repo, watch nudges it back to a turn so the inbox still delivers
 - **Slash commands**: `/bullpen`, `/recall`, `/consult`, `/reflect`, `/boost`, `/surface`, `/checkpoint`, `/watch-sync`, `/migrate-memory`, `/legion-release`
 - **Agents**: `legion:issue-writer` turns a messy problem description into a template-conformant issue with predictions and clarifying questions attached, in every repo the plugin serves
-- **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR)
+- **Skills**: `legion-memory` (auto-triggered: recall before grep), `legion-simplify` (run before opening a PR), `discover` and `design` (the two stages before a build of a major or minor version)
 
 ## Your first reflection
 
@@ -99,7 +99,7 @@ legion resolve --id <post-id> --reflection <converged-decision-reflection-id>
 
 ## Filing work
 
-GitHub issues are the work source, through legion's own verbs -- direct `gh` is blocked for agents so every action is audited:
+GitHub issues are the work source, through legion's own verbs. Typing `gh` directly still works -- the router hands it to `legion gh`, which runs a read straight through, translates a write it recognizes into the matching verb below, and audits anything else it passes through unaudited:
 
 ```bash
 legion issue create --repo myproject --title "Implement search" --body "..."
@@ -194,6 +194,8 @@ The search index and embeddings are computed locally per node. Only SQLite rows 
 
 `cluster.toml` contains the pre-shared secret. Legion writes it with `0o600` on Unix. Do not commit it. A leaked key lets an attacker on the same subnet read and write to your database.
 
+The daemon's HTTP channel is separate from sync. It listens on `127.0.0.1` and has no authentication. To reach it from another machine, set `daemon_bind = "0.0.0.0"` in `cluster.toml` (or one interface's address) and restart the daemon. Do that only on a network you trust.
+
 ## Coordination artifacts
 
 Store specs, personas, and blueprints as structured documents alongside the team's memory. They replicate across nodes and stay queryable.
@@ -203,7 +205,7 @@ Store specs, personas, and blueprints as structured documents alongside the team
 legion document create --doc-type spec --owner vault --surface myproject --from spec.json
 ```
 
-Deriving a requirement set from service-design documents is not a binary command -- `legion spec-gen` was removed in 0.34.0, because composing a requirement from a moment-of-truth is judgment work, not a deterministic transform. The sanctioned path today is the `/legion:sd-write-spec` skill: it reads a scope's intent and, where one has landed, its full service design, and derives the FR/NFR requirement set in one pass, escalating any gap rather than guessing past it.
+Deriving a requirement set from service-design documents is not a binary command -- `legion spec-gen` was removed in 0.34.0, because composing a requirement from a moment-of-truth is judgment work, not a deterministic transform. The sanctioned path today is `/legion:design`: its spec-writer agent carries the accepted intent, the proven form and the design briefs into the FR/NFR requirement set, reporting any gap to the stage it belongs to rather than guessing past it. A new major or minor version starts one stage earlier, with `/legion:discover`.
 
 An issue traces to the resulting requirement on its own: add a `## Traces to` section to the issue body naming the requirement, and `legion verify --issue` judges the work against that requirement's own criteria instead of whatever the issue restates them as. `legion issue create` refuses to file an issue whose trace names a requirement that does not exist, is cancelled, or is malformed.
 

@@ -9,7 +9,7 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
-This reference covers legion 0.40.0. Commands are organized by category.
+This reference covers legion 0.44.0. Commands are organized by category.
 
 ---
 
@@ -150,7 +150,7 @@ legion consult --context "cache invalidation" --tier gist
 legion consult --symbol Database --json
 ```
 
-`--context` searches reflections across every repo and returns results with repo attribution. `--symbol` searches SCIP indexes across every repo and reports `(repo, lang, def_location, refs_count)` per match. Used by the recall-first hook to inject cross-repo code intelligence before an agent spawns Explore.
+`--context` searches reflections across every repo and returns results with repo attribution. `--symbol` searches SCIP indexes across every repo and reports `(repo, lang, def_location, refs_count)` per match -- cross-repo code intelligence in one call, cheaper than spawning a subagent to go find it.
 
 `--tier card|gist|full` applies the same progressive-disclosure rendering as `recall` (default `full`); the fetch marker it prints is built from the hit's own repo, not `--cross-repo`'s synthetic `(all)`, so the printed `recall --repo <r> --id ...` command is always runnable as-is.
 
@@ -359,7 +359,33 @@ Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so 
 
 ## Work
 
-GitHub issues are the work source, through legion's own verbs. Direct `gh` is blocked for agents -- everything below routes through the audit log instead.
+GitHub issues are the work source, through legion's own verbs. Typing `git` or `gh` directly still works: the router inserts `legion ` in front of the name you typed and hands the rest of the line, untouched, to `legion git` or `legion gh` below.
+
+### git
+
+A proxy that takes git's own arguments exactly as git would receive them.
+
+```bash
+legion git push origin feature/search
+legion git commit -m "fix(auth): reject expired tokens before rate limiting"
+legion git log --oneline -10
+legion git -C ../other-checkout status
+```
+
+Every invocation resolves to one of four routes. A `push` or `commit` that the audited path can express runs through the same code `legion push` / `legion commit` run below, so their gates and audit rows apply. A `push` the rules forbid -- any force variant, or one that would update `main` or `master` on the remote, including a bare matching refspec or a glob refspec whose destination is `main`/`master` -- is refused before anything runs; `git push --tags` from `main` is allowed, since it updates tags only, while `--follow-tags` is still refused. Any other `push` or `commit` runs as real git, unaudited arguments and all, and writes an audit row. Every other git subcommand -- `status`, `log`, `diff`, `branch`, and the rest -- runs as real git, unaudited. Git's own global options (`-C`, `-c`, `--git-dir`, `--work-tree`, and the rest, in both `-C <dir>` and `--flag=value` spellings) are read to find the subcommand, so `legion git -C <dir> push` resolves correctly.
+
+### gh
+
+A proxy that takes gh's own arguments exactly as gh would receive them.
+
+```bash
+legion gh pr view 42
+legion gh pr checks 42 --log-failed
+legion gh pr create --title "..." --body "..." -R owner/name
+legion gh issue comment 42 --body "..."
+```
+
+A read (`pr view`, `pr checks`, `issue list`, and the rest) runs the real `gh` untouched and writes no audit row. A write whose arguments translate losslessly -- `pr create`/`edit`/`merge`/`close`/`review`/`comment`, `issue create`/`edit`/`close`/`reopen`/`comment` -- runs through the same `legion pr`, `legion issue`, or `legion comment` handler documented below, so their gates still apply. A write that does not translate runs the real `gh` untouched, with no legion gate in front of it, and writes one `gh-passthrough` audit row naming the argv, the target, and the exit status. To resolve which legion repo a verb belongs to, the proxy matches gh's `-R owner/name` against a repo's `github` field in `watch.toml`, case-insensitively; a repo entry with no `workdir` never matches.
 
 ### issue
 
@@ -392,7 +418,7 @@ An issue body can carry a `## Traces to` section, pointing the issue at the requ
 - None -- infra chore, nothing to trace
 ```
 
-Each line either names a requirement id (`FR-2044-003` above), with an optional bracketed list of criteria ids and a line of prose explaining the link, or is `- None -- <reason>`. `legion issue create` parses this section from `--body` and refuses to file the issue outright if the trace is malformed, names a requirement that does not exist, or points at a cancelled one -- a bad trace is caught at filing time, not discovered later when verify runs against it. An issue with no `## Traces to` section, or one that traces to `None`, remains a fully legal, untraced issue; tracing is opt-in, not a requirement placed on every issue. `legion verify --issue` and `legion pr write-check --issue` both read this section to decide whether they are judging the work against the issue's own restatement of its criteria or against the traced requirement's.
+Each line either names a requirement id (`FR-2044-003` above), with an optional bracketed list of criteria ids and a line of prose explaining the link, or is `- None -- <reason>`. `legion issue create` parses this section from `--body` and refuses to file the issue outright if the trace is malformed, names a requirement that does not exist, points at a cancelled one, or writes a bullet that names criteria without the bracket (`- FR-X (criteria a, b)` is refused with the `[criteria: id, id]` form shown) -- a bad trace is caught at filing time, not discovered later when verify runs against it. An issue with no `## Traces to` section, or one that traces to `None`, remains a fully legal, untraced issue; tracing is opt-in, not a requirement placed on every issue. `legion verify --issue` and `legion pr write-check --issue` both read this section to decide whether they are judging the work against the issue's own restatement of its criteria or against the traced requirement's.
 
 `legion issue close` reads the issue body through the same parser `pr write-check --issue` uses, and refuses to close unless a clean `legion-verify:issue-<repo>#<n>` verdict exists for every declared acceptance criterion. Absent and failed refuse with different messages: absent names the `legion verify --issue` command to run; not-clean says resolve the failing or uncertain criteria first. An issue with no declared acceptance criteria closes ungated, but it says so on stdout -- an unchecked close that looks like a checked one is the exact failure the gate exists to close. The override is `--force --force-reason "..."`, with the reason required, not optional; it records to the audit log's OUTCOME field, not only the details JSON, because the default `legion audit` listing prints outcome and a bypass hidden in details sits where nobody looks.
 
@@ -442,7 +468,9 @@ legion push --repo myproject --tag v0.39.0
 
 Resolves the checkout that has the target branch checked out (via `git worktree list`) and pushes from that checkout, because the pre-push hook reviews the CWD's checked-out branch, not the ref being pushed -- pushing branch B from a checkout sitting on A would silently review the wrong diff. Refuses `main`/`master` and any `--branch` value shaped like a flag or a force/retarget refspec by construction. Sets upstream on every push (a no-op after the first) and audit-logs every attempt, success or hook-blocked failure, with the branch, resolved checkout, and head SHA.
 
-A plain `git push` no longer needs to be remembered: a PreToolUse hook rewrites it to `legion push` and says so before running it. Anything the sanctioned command cannot express -- a raw force push, a refspec, `--delete`, `--tags`, `--mirror`, `--prune`, `--all` -- is denied outright, naming the flag, rather than silently dropped. A wrapper ahead of `git push` -- `env`, `sudo`, `timeout`, `nice`, `xargs`, `command`, `exec`, `time`, or a bare `VAR=val` assignment -- is denied outright too, never rewritten, for the same reason: the wrapper is information `legion push` has no way to carry.
+`-C <dir>` runs the whole thing as if started in `<dir>`: the default branch, the worktree list, and the tag path's checkout are all read there. The tag path's checkout is made absolute, so the audit row and confirmation line look the same as a run without `-C`. A `<dir>` outside any git repository fails, naming the directory.
+
+A plain `git push` no longer needs to be remembered: the router inserts `legion ` in front of `git` you typed, and `legion git push ...` (see `legion git` above) resolves to this same audited path whenever the arguments allow it. A force push, or one that would update `main`/`master`, is refused before it runs rather than translated. Every other `git push` -- including one carrying a flag this command has no equivalent for, like `-u` -- runs as real git and still writes an audit row, since `legion git`'s fallback route covers what `legion push` itself does not parse.
 
 `--force` is a gated force-push, not a raw passthrough. It fetches the remote ref, computes the commits the push would discard (reachable from the remote head but not the new local head), and checks each one for survival: present in the new history already (an ordinary amend or rebase), already on `main` by sha, or already on `main` by `git patch-id` equivalence -- the squash-merge case, where a rebased stacked branch's base just squash-merged into `main`. A squash that combined multiple commits into one `main` commit cannot patch-id-match any single pre-squash commit, so a cumulative fallback compares the combined content those commits touched against the new state directly before calling any of them an orphan. If every discarded commit survives, the push proceeds with no extra ceremony. If any commit is a genuine orphan, the push is refused, each orphan named as `<sha> <subject>`, and only `--force-reason "..."` overrides it -- the same override contract as `pr merge --merge-despite-failures` and `issue close --force`. The push itself always runs with `--force-with-lease=<branch>:<fetched-sha>`, so a concurrent push from another agent or node loses the race instead of being silently clobbered. `--force` is mutually exclusive with `--tag`.
 
@@ -453,18 +481,30 @@ Key flags:
 - `--tag` push a tag instead of a branch; mutually exclusive with `--branch` and `--force`
 - `--force` force-push, gated on the discarded-commit survival analysis above
 - `--force-reason` justification for overriding a force-push refusal; consulted (and required) only when the analysis finds a genuine orphan
+- `-C <dir>` run as if started in `<dir>`, for a `git -C <dir> push` rewrite
 
 ### commit
 
-The sanctioned in-band commit path (#854). Closes the last unaudited hop in the mutation path -- `legion push` routes pushes and the no-gh hook fences `gh`, but the commit itself, where authorship, trailers, and signing happen, used to be raw `git`.
+The sanctioned in-band commit path (#854). Closes the last unaudited hop in the mutation path -- `legion push` routes pushes and `legion gh` gates the writes that translate, but the commit itself, where authorship, trailers, and signing happen, used to be raw `git`.
 
 ```bash
 legion commit --repo myproject --message "fix(auth): reject expired tokens before rate limiting"
+legion commit --repo myproject -m "fix(auth): reject expired tokens before rate limiting"
 legion commit --repo myproject --message-file commit-msg.txt
 echo "..." | legion commit --repo myproject
+legion commit --repo myproject -C ../other-checkout -m "fix(auth): reject expired tokens before rate limiting"
 ```
 
 Preflights the configured signer before touching anything, by signing a throwaway commit object -- a locked or absent signer fails once, by name. Validates the message and refuses violations by name: the subject must be `<type>(<scope>): <summary>` with a scope, a body must be separated from the subject by a blank line, and no emoji anywhere. Since #1136, a subject-only message validates; a `Co-Authored-By` trailer is no longer required. Commits only the staged index -- no `-a`, nothing is staged for you -- and audit-logs every attempt, refusals included.
+
+`-m` and `-F` are git's own short spellings for `--message` and `--message-file`, so a `git commit -m "..."` rewrite carries its flag through unchanged. `-C <dir>` runs against a checkout other than the CWD: the repo root is resolved with `git -C <dir> rev-parse --show-toplevel`, and a relative `--message-file` is read from `<dir>`. A `<dir>` outside any repository is refused, naming the directory.
+
+Key flags:
+
+- `--repo` (required) repository name, for the audit log
+- `--message`, `-m` the commit message
+- `--message-file`, `-F` read the message from a file
+- `-C <dir>` run as if started in `<dir>`, for a `git -C <dir> commit` rewrite
 
 ### pr
 
@@ -524,7 +564,7 @@ For a requirement document, `legion document view` also reports which of its `ve
 
 ### spec-gen (removed)
 
-`legion spec-gen` is not a command in 0.40.0. It was removed in 0.34.0 (#821): deriving a requirement from a service-design document's `moment_of_truth` is judgment work, not a deterministic field-concatenation, so it was pulled from the binary rather than kept as compiled Rust. The requirement JSON schema in the registry is unchanged. The current path for deriving a scope's requirement set is the `/legion:sd-write-spec` skill, not a CLI verb -- see the Plugin Guide's skills section.
+`legion spec-gen` is not a command in 0.44.0. It was removed in 0.34.0 (#821): deriving a requirement from a service-design document's `moment_of_truth` is judgment work, not a deterministic field-concatenation, so it was pulled from the binary rather than kept as compiled Rust. The requirement JSON schema in the registry is unchanged. The current path for deriving a scope's requirement set is the spec-writer agent, run by `/legion:design`, not a CLI verb -- see the Plugin Guide's skills section.
 
 ### verify
 
@@ -567,7 +607,7 @@ Every row carries **provenance**: VALIDATED (earned through `quality-gate check`
 
 `legion quality-gate check` parses an articulation file -- markdown with one `### <path>` heading per changed file, followed by substantive prose -- and refuses to record a gate when a changed file has no entry, or an entry is boilerplate-thin. It resolves the changed-file set from `<base>...HEAD`; `--base <ref>` overrides the default (`main`, falling back to `origin/main`) for a branch stacked on another unmerged branch, so the coverage set is scoped to what this branch actually changed rather than everything since `main`. The resolved base -- flag or default -- is recorded on the gate row either way. Pure (zero-delta) renames auto-clear from the coverage set. `--findings-json` feeds structured `{file, line, severity, summary}` findings into the finding-resolution ledger; prose in the articulation is not parsed for findings, so a skill reporting `--result issues` should pass its real findings here.
 
-**Findings ledger**: findings passed via `--findings-json` (or legion-review's `--details-json`) persist as rows keyed to the gate that raised them. Resolution is git-log-based: a commit after a finding's origin that touches the flagged file marks it RESOLVED, reconciled at the top of every `record`/`check` call. The gate refuses a `clean` verdict for a (branch, skill) while any HIGH/MED finding is pending or any LOW finding is un-acked.
+**Findings ledger**: findings are keyed on the repo as well as the branch and skill. `record` and `check` take the repo from the current directory's main checkout and save it on every finding, so a pending finding in one repo never blocks `legion pr create` in another repo on a branch with the same name. Rows written before the repo column existed have a NULL repo and match every repo. Both commands refuse a detached HEAD before they reconcile or insert anything; run `git switch <branch>`. Findings passed via `--findings-json` (or legion-review's `--details-json`) persist as rows keyed to the gate that raised them. Resolution is git-log-based: a commit after a finding's origin that touches the flagged file marks it RESOLVED, reconciled at the top of every `record`/`check` call. The gate refuses a `clean` verdict for a (branch, skill) while any HIGH/MED finding is pending or any LOW finding is un-acked.
 
 ```bash
 legion quality-gate finding-list --branch feature/search --skill legion-simplify
@@ -577,7 +617,7 @@ legion quality-gate finding-ack --branch feature/search --skill legion-simplify 
 
 `finding-list` prints the full 36-character finding id -- legion ids are UUIDv7, and two findings recorded close together can share most of a truncated prefix, so a short id is often ambiguous. `finding-disposition --id` and `quality-gate void --id` accept either the full id or an unambiguous prefix; more than one match is refused with every candidate named, never a silent pick.
 
-`finding-disposition` retires one PENDING finding with a required reason -- a disposition is not a fix, it is a recorded "not fixing this, and here is why." `finding-ack` batch-acknowledges every PENDING LOW-severity finding on a (branch, skill) pair with one shared reason, still writing one row per finding so the audit trail stays per-finding. `finding-list` is the audit view: filterable by branch, skill, and status (`pending`, `resolved`, `dispositioned`).
+`finding-disposition` retires one PENDING finding with a required reason -- a disposition is not a fix, it is a recorded "not fixing this, and here is why." `finding-ack` batch-acknowledges every PENDING LOW-severity finding on a (branch, skill) pair with one shared reason, still writing one row per finding so the audit trail stays per-finding. `finding-list` is the audit view: filterable by branch, skill, repo (`--repo`), and status (`pending`, `resolved`, `dispositioned`), and it prints a REPO column. `finding-ack` acts only on the current repo.
 
 `legion quality-gate void --id <id> --reason <why>` retires a known-false gate row without deleting it: a voided row drops out of the live gate lookups (`pr create`'s check, the ->Done gate) and out of `stats`, but stays visible in `list` with a VOID marker. `--superseded-by <id>` links it to the genuine replacement row once one exists.
 
@@ -681,6 +721,22 @@ As of 0.39.2, default output is locations only -- `path:line` (or `repo/path:lin
 
 `sym def`, `refs`, `impl`, `list`, and `hover` each print a per-repo freshness line to stderr -- up to date, a re-index hint, or a HEAD-drift warning naming both SHAs -- the same read `sym tree` gives on stdout. `--json` on these five stays a bare array/object, so the freshness read never reaches a `--json` consumer capturing stdout alone.
 
+### grep / rg
+
+Two subcommands that take their tool's own arguments untouched. Typing `grep` or `rg` directly still works: the router inserts `legion ` in front of the name and hands the rest of the line to whichever of these two reads it.
+
+```bash
+legion grep -rn 'TODO' src/
+legion grep -v 'skip this line' file.txt
+legion rg 'fn main' --type rust
+```
+
+Each answers through sym when sym's walk, matcher, and output provably equal the real tool's: a literal pattern for `grep` (its BRE/ERE dialects are not Rust regex), any pattern for `rg` (same regex engine underneath). The output shape follows the flags. `-n` prints `path:line:text`. No flag prints `path:text`, because `rg` prints no line numbers when piped. `-l` prints each matching path once. `-c` prints `path:count`; `grep -c` lists every file it searched, zero counts included, and still exits 1 when nothing matched, while `rg -c` lists only the files that matched. `-i` and `-w` are answered too: for `rg` they become the regex `rg` builds for them, and for `grep` they need an ASCII pattern and ASCII lines.
+
+The file set comes from each tool's own walk. For `rg` that is ripgrep's walk, with `-g`/`--glob` globs rooted at the working directory, `-t` types, `--hidden`, and `--no-ignore`, so a gitignored file that a glob admits is searched as `rg` would search it. For `grep` it is `-r`'s unfiltered walk, narrowed by `--include` to a literal name or a `*`-plus-literal-suffix glob. Results are printed in full, with no hit or byte cap, and paths use the platform separator.
+
+The real `grep` or `rg` runs, with its stdout, stderr, and exit code (1 for no match, 2 for an error) passed through unchanged, for every form sym cannot answer exactly: a `.git` entry the walk reaches, a symlink or special file, a skipped or binary file, a matched file with a CR or non-UTF-8 bytes, an `rg` operand outside a git work tree or with an `.rgignore` at, above, or below it, `rg -l` combined with `-c`, standard input, or a path outside every watched repo. `legion grep -v` means invert-match, the same as real grep; legion's own `-v`/`--verbose` is never read from either subcommand's arguments. Neither subcommand refuses a search.
+
 ---
 
 ## Runtime
@@ -720,7 +776,7 @@ legion undefer --work-item 42
 
 ### daemon
 
-Start the legion daemon (channel server + watch).
+Start the legion daemon (channel server + watch). The channel server listens on `127.0.0.1` unless `daemon_bind` in `cluster.toml` says otherwise, and it has no authentication.
 
 ```bash
 legion daemon
@@ -763,7 +819,7 @@ legion statusline
 legion statusline --json
 ```
 
-Wire via `statusLine.command` in `settings.json`. Persists rate-limit and usage samples each tick, then prints a one-line chip to stdout.
+Wire via `statusLine.command` in `settings.json`. Persists rate-limit and usage samples each tick, then prints the operator's line to stdout: model, directory, branch, `ctx:`, `s:` and `w:`, separated by two spaces, for example `Opus 5.5  legion  feat/x  ctx:42%  s:13%  w:61%`. A part with no input is left out. The branch comes from `git symbolic-ref` with `GIT_OPTIONAL_LOCKS=0`, so it never waits on a git lock or takes one. Every render prints its own line, including when there is no `session_id`; the per-session stamp file only limits how often samples are saved.
 
 ---
 
@@ -784,7 +840,7 @@ legion usage --json
 
 ### telemetry
 
-Bypass telemetry: log and inspect when agents escape the grep/Read enforcement hooks.
+Bypass telemetry: log and inspect when an agent falls back to a shell search instead of sym.
 
 ```bash
 legion telemetry record-bypass --tool Grep --repo myproject --pattern "fn init"
@@ -798,9 +854,42 @@ legion telemetry etc-summary --command find-content --since 7d
 
 `etc-summary` reads the sibling `etc-usage.jsonl` log and reports count, zero-result rate, and error count per `sym etc` / `sym tree` query shape (`find-content`, `tree`, `extract`, `find-file`). `summary` above is the bypass count; `etc-summary` is the adoption count, the number that answers whether the sanctioned replacement for grep/find actually gets used and actually answers.
 
+### cmd-check
+
+Show what the legion-cmd router decides for a command, and why, without running it. `legion-cmd.sh` (`legion cmd-check --hook`) is the one PreToolUse hook, registered for every Bash, Grep, Glob, Read, Write, Edit, MultiEdit, Agent, Task, WebFetch, and WebSearch call.
+
+```bash
+legion cmd-check -- 'git push origin main'
+legion cmd-check --tool Read --input '{"file_path": "src/main.rs"}'
+legion cmd-check --json -- 'rm -rf /tmp/build'
+legion cmd-check --policy /path/to/draft-policy.json -- 'gh pr merge 42'
+legion cmd-check --deny-patterns
+legion cmd-check --hook   # reads one PreToolUse payload on stdin, writes one hook response
+```
+
+Operator and scripting mode: the command after `--` is one quoted argument, checked exactly as typed; more than one word is refused, because argv rebuilt into shell text cannot reliably reproduce what was typed. `--tool` defaults to Bash; for any other tool kind, pass its `tool_input` as JSON via `--input`. Prints the Decision arm and its reason, the facts route extracted, the built replacement for a proxy insertion, and the elapsed time. No Bash deny names a command to run instead of the one denied -- a denial's reason is why, not a redirect. `--json` prints the same report as JSON. `--policy <path>` reads a policy file in place of the one shipped in the binary, to test an edit before it ships. The command is never run, and every decision -- deny included -- exits 0; an unreadable policy, a deadline overrun, or an internal error is reported as the deny it would produce, never a crash.
+
+`--deny-patterns` prints the built-in never-run list (below) as `permissions.deny` text patterns, one JSON array, and takes no other option. Plugin setup merges these into `~/.claude/settings.json`, so the harness itself refuses them too, not only the hook.
+
+`--hook` is hook mode: it reads one PreToolUse payload on stdin and writes one hook response on stdout, always exiting 0, and never runs the command either -- the harness does. It loads the shipped policy and decides under a deadline (`ROUTE_DEADLINE`, 7000 ms) that fails closed for Bash: a deadline overrun, a lookup or replacement failure, an unreadable payload or policy, or a panic becomes a deny naming the error, and nothing falls through to running the raw command. A Grep, Glob, or Read call fails open instead: legion's own failure to answer it, for any reason, runs the call exactly as the agent sent it rather than denying it.
+
+### cmd
+
+Verbs an agent runs against its own routed decisions.
+
+```bash
+legion cmd confirm --reason "base squash-merged, rebasing on main" -- 'git push --force origin feature/x'
+```
+
+`legion cmd confirm --reason <why> -- '<command>'` answers the ask list or a power switch -- route's response for a command that needs a human-legible reason before it runs -- with the reason it should run. The command, after `--`, is one quoted argument taken verbatim; more than one word is a usage error (exit 2) and records nothing. `--reason` is required and non-empty. The confirmation lets exactly that command run once, in this session, within 10 minutes, keyed by the command's parsed form so whitespace and quoting differences do not change the key. A never-run command can never be confirmed: confirming one exits 1 and records the attempt as a never-run hit instead. Never-run hits, asks, confirmations, and dropped asks are all appended to `cmd-incidents.jsonl`.
+
+**The never-run list** (`crates/legion-cmd/src/nogo.rs`) is checked before any policy entry, ahead of the proxy insertion, and it never asks: a match is a fixed deny that ignores confirmations. It matches against the parsed invocation rather than command text, so a flag-order variant or a wrapper (`sudo`, `env`, `nice`, `xargs`, and the rest) still hits the same entry, and it is checked the same way inside `sh -c`, `bash -c`, `zsh -c`, and `eval` payloads. Seven entries are built into the binary: `rm -rf` of `/` or home, `mkfs` on a device, `dd` onto a disk device, the fork bomb, recursive `chmod`/`chown` of `/`, a forced `git push` to `main` or `master`, and a `+` refspec whose destination is `main` or `master`. `policy.json`'s own `never_run` array adds two more -- `sqlite3-legion-db` (opening `legion.db` directly) and `rm-recursive-force` (a combined `-r`/`-f` delete) -- and a policy's array can add entries the same way but never remove or weaken a built-in one.
+
+**The ask list and power switches** are the other two ways route stops for a reason before running something: `curl-network` is the one shipped ask entry, since reaching the network is the operator's call. The power switches -- `push-force`, `push-force-refspec`, `merge-despite-failures`, `issue-close-force` -- are matched against the command as it will run, after any proxy insertion, so `git push --force` is asked about the same as `legion push --force` would be.
+
 ### uncertainty
 
-Emit and witness predictions; read calibration metrics.
+Emit and witness predictions; read the raw rows or calibration metrics.
 
 ```bash
 legion uncertainty emit \
@@ -813,8 +902,16 @@ legion uncertainty emit \
 # Resolve the model from the session instead of naming it
 legion uncertainty emit --session-id <session-id> ...
 
+# Tie the claim to the issue it belongs to
+legion uncertainty emit --issue owner/repo#1258 ...
+
 legion uncertainty witness <prediction-id> --outcome-label shipped --outcome-correctness 1.0
 legion uncertainty witness-gate --skill legion-simplify --commit <sha> --correct true
+
+legion uncertainty predictions
+legion uncertainty predictions --surface legion.task --state emitted
+legion uncertainty predictions --issue owner/repo#1258 --json
+legion uncertainty predictions --limit 200 --json
 
 legion uncertainty calibration --surface legion.task
 legion uncertainty orphans --json
@@ -824,11 +921,13 @@ legion uncertainty sweep-now --json
 legion uncertainty calibrate-now --json
 ```
 
-`emit` requires five flags: `--surface`, `--feature-key`, `--input-fingerprint`, `--claimed-confidence`, and `--payload`. `--orphan-ttl-days` defaults to 30, and `0` disables the orphan sweep for that row.
+`emit` requires five flags: `--surface`, `--feature-key`, `--input-fingerprint`, `--claimed-confidence`, and `--payload`. `--orphan-ttl-days` defaults to 30, and `0` disables the orphan sweep for that row. `--issue <owner>/<repo>#<n>` is optional and ties the prediction to the issue it belongs to, in the same key form `legion verify` records its gate under. A clap value parser validates the ref, so a malformed one is a usage error with a non-zero exit -- unlike the rest of `emit`, which is non-blocking. Leave it off and the row stores a NULL `issue_ref`, same as every prediction emitted before 0.41.0.
 
 `witness` takes the prediction id as a positional argument, not a flag, plus `--outcome-label` (`shipped`, `scoped-down`, `escalated`, or `abandoned`) and `--outcome-correctness` in `[0.0, 1.0]`. An optional `--payload` carries the actuals.
 
-`witness-gate` is the decorrelated path for quality-gate predictions specifically. It looks the prediction up by the same `(skill, commit)` fingerprint `legion quality-gate list` prints, so you never handle an opaque id, and `--correct` takes an explicit `true` or `false` rather than being a bare flag, which is what makes a negative witness as cheap to record as a positive one. Read `--correct` as relative to whichever verdict the gate recorded, not as a bare "was the diff clean": on a recorded `clean` verdict, `true` corroborates it and `false` marks a clean verdict that shipped a bug; on a recorded `issues` verdict, `true` means the catch was right and `false` means it was a false positive. It errors when no emitted `legion.gate` prediction matches, which covers never-recorded, already-witnessed, and orphaned alike.
+`witness-gate` is the decorrelated path for quality-gate predictions specifically. It looks the prediction up by the same `(skill, commit)` fingerprint `legion quality-gate list` prints, so you never handle an opaque id, and `--correct` takes an explicit `true` or `false` rather than being a bare flag, which is what makes a negative witness as cheap to record as a positive one. Read `--correct` as relative to whichever verdict the gate recorded, not as a bare "was the diff clean": on a recorded `clean` verdict, `true` corroborates it and `false` marks a clean verdict that shipped a bug; on a recorded `issues` verdict, `true` means the catch was right and `false` means it was a false positive. `--id <prediction-id>` witnesses one prediction directly and cannot be combined with `--skill` or `--commit`, so two predictions on the same skill and commit can each be witnessed. A short `--commit` resolves to the one recorded commit it is a prefix of; when it matches several, the error names each full sha, and when it matches none, the error asks for the full sha. It errors when no emitted `legion.gate` prediction matches, which covers never-recorded, already-witnessed, and orphaned alike.
+
+`predictions` reads raw prediction rows rather than a derived view: a `(surface, state)` summary with uncapped counts, then the most recent `--limit` rows (default 50) -- id, surface, state, claimed confidence, correctness, `created_at`, and `orphan_after` -- with each prediction's payload on a line under its row. `--json` emits the same fields as an array, with the payload as `prediction_payload`. `--surface` and `--state` narrow the read; `--issue <owner>/<repo>#<n>` matches the indexed `issue_ref` column exactly and returns every non-deleted prediction for that issue across every lifecycle state, newest first. An unknown `--state` is checked before any query runs and exits non-zero naming all five lifecycle states, even against an empty database. A zero-row result says which kind of empty it is: nothing stored at all, or these filters matched nothing, in which case it also gives the unfiltered total. When `--json` output is cut at `--limit`, stderr says "most recent N of M: pass --limit M to see all" and stdout stays a parseable array of unchanged shape. `predictions` never sweeps orphans or rolls calibration -- it only reads.
 
 `--model` and `--model-version` are optional. Without `--model`, resolution falls to `--session-id`: it looks up the newest model seen for that session in the statusline samples. Pass neither and the row gets an explicit `UNKNOWN_MODEL` marker instead of a guessed id -- filterable and honest, where a plausible-but-wrong default would quietly pollute a real cohort. `emit` is non-blocking: failures log to stderr and exit 0. `witness` is idempotent-failure: re-witnessing is an error. `calibration` shows one row per reliability bucket. `orphans` counts predictions never witnessed, grouped by surface.
 
@@ -914,7 +1013,5 @@ legion cleanup
 | `LEGION_SKIP_STOP_BLOCK` | Set to `1` to bypass the Stop hook's block on an open directed ask; the bypass is audited |
 | `LEGION_REPO` | Override repo name detection; takes precedence over `basename($CWD)` in every hook |
 | `LEGION_PORT` | Override the channel server port (default: 3131) |
-| `LEGION_BYPASS_GREP` | Set to `1` to bypass the grep enforcement hook |
-| `LEGION_BYPASS_READ` | Set to `1` to bypass the Read enforcement hook |
 | `LEGION_IMPACT_HIGH_THRESHOLD` | Ref-count threshold for the `HIGH` tag in `sym impact` text output (default: 50) |
 | `WATCH_SPAWN_MODE` | `pty` (default) or `print` for the watch daemon spawn path |

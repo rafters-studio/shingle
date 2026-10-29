@@ -18,7 +18,7 @@ Doctrine, before mechanics. When an agent needs to know something, the order is:
 5. Web search for authoritative external sources.
 6. Never grep the codebase for opinions or decisions. Code shows what exists, not what should exist.
 
-The grep enforcement hooks (#438/#439) make this mechanical. On indexed repos, raw `Grep` and `Read` are blocked at PreToolUse with a redirect to `sym`, `sym etc`, and `recall`. The mechanism is the doctrine now.
+The legion-cmd router (#438/#439, #1236, #1343) makes this mechanical, without walling off the raw tools to force the point. On an indexed repo, a harness `Grep` or `Glob` call legion can answer fully from `sym`'s index or the file inventory gets that answer for free, folded into the same response; a call it cannot answer just runs. A typed `grep` or `rg` gets the same treatment: sym answers what it can prove equals the real tool's output, and the real tool runs for the rest. The doctrine holds because the sanctioned path is cheaper and more accurate, not because the alternative is blocked.
 
 ## Reflections
 
@@ -79,23 +79,11 @@ The same file inventory underlies two more engines that extend sym-style answers
 
 Every `sym etc` / `sym tree` invocation, success or failure, lands a row in `etc-usage.jsonl`. `legion telemetry etc-summary` reads it back: count, zero-result rate, and error count per query shape. That is the number that answers whether the sanctioned replacement for grep and find actually gets used.
 
-## The bypass model
+## Nothing left to bypass
 
-The grep/Read enforcement is not an absolute. Agents can escape via:
+Earlier releases blocked a raw `Grep` or `Read` outright on an indexed repo and pointed the agent at the matching `sym`/`sym etc` command, with an escape hatch on top: `LEGION_BYPASS_GREP=1 grep ...`, `LEGION_BYPASS_READ=1 cat ...`, or a `# legion-bypass: <reason>` sentinel in Bash, each logged to `bypass.jsonl`. Neither the block nor the escape hatch exists anymore. `policy.json` carries no rule for `Grep`, `Glob`, or `Read` at all; the router lets each one run, and offers Grep and Glob to legion's own answer path first. When sym's content scan or the file inventory can answer a Grep or Glob call fully, the hook folds that answer into the same response and caps the tool's own result at one line; when it cannot, or runs past its budget, the call goes through exactly as sent. Read carries no size rule to bypass in the first place. The router reads no environment at all, so there is nothing left for `LEGION_BYPASS_GREP`, `LEGION_BYPASS_READ`, or a sentinel comment to switch off.
 
-```
-LEGION_BYPASS_GREP=1 grep ...
-LEGION_BYPASS_READ=1 cat ...
-# legion-bypass: <reason>            (Bash sentinel comment)
-```
-
-Every bypass appends one row to `bypass.jsonl` with the tool, repo, pattern, and reason. The uncertainty engine reads it, and `legion telemetry summary` surfaces the top under-served `(tool, repo, pattern)` tuples.
-
-A high bypass volume on a pattern is a signal that `sym` or `recall` is missing an answer agents expected. The doctrine generates its own to-do list.
-
-The soft sym-bypass refusal (#506) refuses bypasses for patterns that look like symbol names with local SCIP hits. If the index can answer it, the bypass is the wrong move. Agents are pushed back into `sym`.
-
-The guard used to have nowhere to send a non-symbol query: a literal string or a config value got the same "use sym" message as a real symbol lookup, so agents bypassed and inferred wrong lessons from it, like "sym is Rust-only." Every deny and inject message now names the exact `sym etc` command for the query shape it blocked: `find-content` for a literal, `tree` for a listing, `extract` for a config value, `find-file` for "which repo has X." Non-symbol search stopped being a dead end.
+The doctrine point survives the mechanism change. `sym` and `sym etc` are still the cheaper, more accurate answer for a symbol question or a literal search, and `bypass.jsonl` still exists, fed now by `legion telemetry record-bypass` when the `legion-explore` agent's routing ladder falls through to a bounded shell search because nothing else could answer. What changed is the shape of the incentive: the sanctioned path used to be the only door; now it is just the fast one.
 
 ## Bullpen
 
@@ -165,9 +153,9 @@ legion document archive <id>
 
 A spec is not a chat message that scrolls away. It is the ratified statement of what the team agreed to build. Before the substrate, legion had memory (reflections) and coordination (the bullpen) but no shared object the coordination was about.
 
-**Schema registry**: schemas are themselves documents. The requirement schema and five service-design schemas (persona, journey, blueprint, ecosystem, discovery) live as `doc_type=schema` rows, structurally validated at create and self-describing via a top-level `x-doc-type` keyword naming the type each one governs. Every document write -- `create`, `revise`, and the daemon's own write endpoints alike -- is checked against the schema landed for its `doc_type` before it lands; a type with no schema, or with two schemas claiming it, is refused outright, no warn-and-allow. A violation names its `<json pointer>` and message, one line per problem. Each schema write dual-writes a pointer reflection on `domain=schema` so `legion recall --domain schema` surfaces every landed schema with its document id. `legion document validate --schema <id>` runs the same check by hand against an arbitrary instance, `$ref`s and all.
+**Schema registry**: schemas are themselves documents. The requirement schema and the service-design schemas live as `doc_type=schema` rows, structurally validated at create and self-describing via a top-level `x-doc-type` keyword naming the type each one governs. Every document write -- `create`, `revise`, and the daemon's own write endpoints alike -- is checked against the schema landed for its `doc_type` before it lands; a type with no schema, or with two schemas claiming it, is refused outright, no warn-and-allow. A violation names its `<json pointer>` and message, one line per problem. Each schema write dual-writes a pointer reflection on `domain=schema` so `legion recall --domain schema` surfaces every landed schema with its document id. `legion document validate --schema <id>` runs the same check by hand against an arbitrary instance, `$ref`s and all.
 
-**Spec-gen**: retired. The Rust `legion spec-gen` command was removed in 0.34.0 (#821) -- deriving a requirement from a moment-of-truth is judgment work, not a deterministic field-concatenation, so it now runs as an instrumented skill instead of compiled logic. `/legion:sd-write-spec` is the sanctioned path: it reads a scope's intent (and, where one has landed, its full service design) and derives a scope's FR/NFR requirement set in one pass, with every `traces_to` naming what earned it and every gap escalated rather than resolved in the body.
+**Spec-gen**: retired. The Rust `legion spec-gen` command was removed in 0.34.0 (#821) -- deriving a requirement from a moment-of-truth is judgment work, not a deterministic field-concatenation, so it now runs as an instrumented skill instead of compiled logic. The spec-writer agent, run by `/legion:design`, is the sanctioned path: it carries the final intent, the proven form and the design briefs into the FR and NFR requirement set, adds nothing those sources do not say, and reports every gap to the stage it belongs to rather than resolving it in the body. The plugin ships the schemas for `intent`, `design-brief`, `brief`, `board`, `prototype`, `requirement`, `nfr` and `research`, and the first `legion document create` of each type adds its schema to the store.
 
 **Issue-requirement tracing**: a requirement can be traced from an issue directly. The issue body carries a `## Traces to` section naming the requirement, an optional list of criteria ids, and a line of prose, or an explicit `- None -- reason` when there is nothing to trace. `legion issue create` validates the trace at filing time. `legion verify --issue` then judges the work against the requirement's own criteria rather than the issue's paraphrase of them, and `legion document view` reports which of a requirement's criteria currently carry a clean verdict, so a spec author can see coverage without chasing down every issue that claims to trace to it.
 
@@ -201,7 +189,7 @@ GitHub issues are the work source, through legion's own verbs -- `issue create`,
 
 Configuration per repo in `watch.toml`.
 
-Direct `gh` usage is blocked in legion-managed environments so the audit log captures every action.
+Typing `gh` directly still works: the router hands it to `legion gh`, which runs a read straight through unaudited, translates a recognized write into the matching `legion` verb so its gates apply, and audits anything else it passes through as real `gh`.
 
 ## Uncertainty (Pillar 2)
 
@@ -214,9 +202,12 @@ sweep -> past-deadline predictions marked orphaned (runs hourly on its own)
 roll  -> calibration recomputed per cohort, Brier-scored (runs nightly on its own)
 orphans -> predictions still unresolved past their window
 calibration -> claimed vs actual per reliability bucket, Brier score
+predictions -> raw prediction rows, filterable by surface, state, or issue
 ```
 
 The sweep and the roll run inside the watch daemon's own poll loop, each on its own schedule and each fail-open, so a bad run never stops the poll cycle. `legion uncertainty roll`, `sweep-now`, and `calibrate-now` run the same jobs by hand, for a one-off backfill or a check between scheduled runs.
+
+`legion uncertainty predictions` (#902) reads those rows directly -- a `(surface, state)` summary with uncapped counts, then the most recent rows in full -- rather than the derived calibration view. A prediction can carry the issue it belongs to (`emit --issue <owner>/<repo>#<n>`, #1258), and `predictions --issue <ref>` reads back every prediction for that issue across every state. That indexed lookup is what the `legion-verify` skill and agent read to find the predictions for that issue to witness, by key rather than by searching emission text for a mention of it. The TaskCreate hook passes `--issue` when the task names exactly one issue (an explicit `owner/repo#N`, or a bare `#N` resolved against the working directory's GitHub origin), the `legion pr write-check` gate passes the issue it checks, and the issue-writer, spec-writer, rusty and typey agents pass it on their emits. The quality gates know only a branch and pass none, so their rows carry a NULL `issue_ref`, as does a task that names no issue or more than one, and an issue-scoped read does not return them.
 
 **Why it exists**: confidence without calibration is hand-waving. Pillar 2 makes claimed reliability checkable. An agent that says "I am 80% sure" and is right 80% of the time is doing something different from an agent that says "I am 80% sure" and is right 40% of the time. The data tells which kind you have.
 
@@ -224,7 +215,7 @@ The bypass telemetry feed (`bypass.jsonl`) merges into the same engine. A high b
 
 ## Rate-limit awareness and mesh placement
 
-`legion statusline` is wired into Claude Code's `statusLine.command`. Each tick reads the rate-limit JSON on stdin, persists samples to SQLite, prints a one-line chip.
+`legion statusline` is wired into Claude Code's `statusLine.command`. Each tick reads the rate-limit JSON on stdin, persists samples to SQLite, and prints the operator's line: model, directory, branch, `ctx:`, `s:` and `w:`.
 
 `legion mesh headroom` ranks every host in the cluster by remaining rate-limit headroom and recent burn rate. `legion mesh pick` prints the best host for placing a new task. `legion usage` surfaces session cost analysis for the operator.
 

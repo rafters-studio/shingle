@@ -39,7 +39,7 @@ legion sym list                          # the definitions in a file, the sancti
 
 ## Query, do not rebuild
 
-On an indexed repo, raw grep and Read are blocked at the point of use and redirected to `sym`. Not by policy alone, but because `sym` is cheaper and more correct. The index refreshes after edits, so it does not go stale under you.
+On an indexed repo, a harness `Grep` or `Glob` call legion can answer fully from the index gets that answer folded into the same response, and `Read` runs with no size limit either way. The mechanism does not block the raw tool and force a `sym` call instead; it makes the cheap answer arrive before the expensive one is needed. Typed `grep` and `rg` work the same way: sym answers what it can prove equals the real tool's output, and the real tool runs for everything else, so the doctrine holds because `sym` is cheaper and more correct, not because the alternative was closed off. The index refreshes after edits, so it does not go stale under you.
 
 This is the same economy as `recall` before `invent`. An agent that forgets between sessions cannot afford to reconstruct what already exists. [Memory](/docs/memory/) indexes decisions so it does not re-derive them. Code intelligence indexes code so it does not re-read it. Both are one rule: carry the index, not the thing.
 
