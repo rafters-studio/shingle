@@ -311,10 +311,6 @@
   --breakpoint-lg-max: 1023px;
   --breakpoint-xl-max: 1279px;
   --breakpoint-2xl-max: 1535px;
-  --breakpoint-motion-reduce: (prefers-reduced-motion: reduce);
-  --breakpoint-dark: (prefers-color-scheme: dark);
-  --breakpoint-high-contrast: (prefers-contrast: more);
-  --breakpoint-forced-colors: (forced-colors: active);
 
   --elevation-surface-z: var(--depth-base);
   --elevation-surface-shadow: var(--shadow-none);
