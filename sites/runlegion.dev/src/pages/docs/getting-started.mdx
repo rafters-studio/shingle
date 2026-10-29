@@ -194,6 +194,8 @@ The search index and embeddings are computed locally per node. Only SQLite rows 
 
 `cluster.toml` contains the pre-shared secret. Legion writes it with `0o600` on Unix. Do not commit it. A leaked key lets an attacker on the same subnet read and write to your database.
 
+The daemon's HTTP channel is separate from sync. It listens on `127.0.0.1` and has no authentication. To reach it from another machine, set `daemon_bind = "0.0.0.0"` in `cluster.toml` (or one interface's address) and restart the daemon. Do that only on a network you trust.
+
 ## Coordination artifacts
 
 Store specs, personas, and blueprints as structured documents alongside the team's memory. They replicate across nodes and stay queryable.

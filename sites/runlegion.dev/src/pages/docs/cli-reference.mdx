@@ -776,7 +776,7 @@ legion undefer --work-item 42
 
 ### daemon
 
-Start the legion daemon (channel server + watch).
+Start the legion daemon (channel server + watch). The channel server listens on `127.0.0.1` unless `daemon_bind` in `cluster.toml` says otherwise, and it has no authentication.
 
 ```bash
 legion daemon
