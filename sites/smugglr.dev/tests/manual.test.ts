@@ -6,7 +6,7 @@ import { ELEMENT_NODE, type ElementNode, type Node, parse, TEXT_NODE, walkSync }
 import { describe, expect, it } from "vitest";
 import { parseVersion, smugglrVersion } from "../src/smugglr/version";
 import fixture from "./fixtures/manual.json";
-import migratrBaseline from "./fixtures/migratr-html-ca23770.json";
+import migratrBaseline from "./fixtures/migratr-main-a874e3e.json";
 
 const root = process.cwd();
 const dist = join(root, "dist");
@@ -166,18 +166,14 @@ describe("version helper", () => {
   });
 });
 
-// Hashes of the /migratr/ pages built at ca23770, the commit before the manual,
-// with the content hashes in the /_astro/ asset hrefs normalized: any new class or
-// script in the site changes those hrefs on every page. A deliberate change to a
-// migratr page refreshes this fixture.
+// Hashes of the <main> of each /migratr/ page built at a874e3e, the commit before
+// the manual. The site's nav and footer sit outside <main>, so they may change. A
+// deliberate change to a migratr page refreshes this fixture.
 describe("/migratr/ pages are untouched by the manual", () => {
   for (const [page, hash] of Object.entries(migratrBaseline)) {
-    it(`/migratr/${page} matches the build of ca23770`, () => {
-      const normalized = html(join("migratr", page)).replace(
-        /(\/_astro\/[^"]+)\.[\w-]+\.(css|js)"/g,
-        '$1.$2"',
-      );
-      expect(createHash("sha256").update(normalized).digest("hex")).toBe(hash);
+    it(`/migratr/${page} keeps the main of a874e3e`, () => {
+      const main = html(join("migratr", page)).match(/<main[\s\S]*<\/main>/)?.[0] ?? "";
+      expect(createHash("sha256").update(main).digest("hex")).toBe(hash);
     });
   }
 });

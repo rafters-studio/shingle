@@ -2,12 +2,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const pages = ["index.html", "docs/index.html", "compare/index.html", "get-started/index.html"];
+const pages = ["index.html", "docs/index.html", "compare/index.html", "docs/get-started/index.html"];
 const links = [
   "/docs/",
-  "/docs/cli-reference/",
-  "/#targets",
-  "/#shapes",
+  "/docs/cli/",
   "/compare/",
   "/compare/games/",
   "https://github.com/rafters-studio/smugglr",
