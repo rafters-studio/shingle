@@ -27,10 +27,12 @@
   },
   "installed": {
     "components": [
+      "button",
       "card",
       "container",
       "grid",
       "sheet",
+      "table",
       "typography"
     ],
     "primitives": [
@@ -40,6 +42,7 @@
       "memory",
       "outside-click",
       "roving-focus",
+      "sr-announcer",
       "types"
     ],
     "composites": [],
@@ -47,7 +50,8 @@
     "substrate": [
       "compose",
       "contract",
-      "disclosable"
+      "disclosable",
+      "pressable"
     ]
   }
 }

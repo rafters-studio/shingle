@@ -1,8 +1,9 @@
 ---
 import Base from "@/src/layouts/Base.astro";
-import SiteHeader from "@/components/SiteHeader.astro";
+import DarkBand from "@/components/dark-band.astro";
 import SyncStage from "@/components/sync-stage.astro";
 import Button from "@/components/ui/button.astro";
+import Container from "@/components/ui/container.astro";
 import Table from "@/components/ui/table.astro";
 import {
   tableBodyClasses,
@@ -11,7 +12,7 @@ import {
   tableHeaderClasses,
   tableRowClasses,
 } from "@/components/ui/table.classes";
-import { Code, CodeBlock } from "@/components/ui/typography.astro";
+import { Code, CodeBlock, H1, Lead, Mark, Muted, P } from "@/components/ui/typography.astro";
 
 const LEDE =
   "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
@@ -159,43 +160,34 @@ const SECTIONS: Sec[] = [
 ];
 ---
 
-<Base title="smugglr" description={LEDE} stickyTopbar={false}>
-  <div class="topbar-scroll"><SiteHeader /></div>
-
-  <div class="gutter">
-    <div class="hero">
-      <div class="eyebrow">SQLITE SYNC ENGINE · ONE RUST BINARY · MIT</div>
-      <h1>If you’re moving SQLite, <span data-ink>smuggl</span> it.</h1>
-      <p data-lede>{LEDE}</p>
-      <div class="install dark" data-install={INSTALL}>
-        <code><span data-prompt>$ </span>{INSTALL}</code>
-        <Button id="install-copy" variant="outline" size="xs">Copy</Button>
-      </div>
-      <p data-install-note>
-        Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.
-      </p>
-    </div>
-  </div>
+<Base title="smugglr" description={LEDE}>
+  <Container as="section" size="4xl" padding="20" gap="6">
+    <P family="mono" size="xs" tracking="widest" color="muted-foreground" align="center">
+      SQLITE SYNC ENGINE · ONE RUST BINARY · MIT
+    </P>
+    <H1 size="7xl" weight="light" align="center">If you’re moving SQLite, <Mark>smuggl</Mark> it.</H1>
+    <Lead align="center" color="muted-foreground">{LEDE}</Lead>
+    <CodeBlock>$ {INSTALL}</CodeBlock>
+    <Button id="install-copy" variant="outline" size="xs">Copy</Button>
+    <Muted align="center">
+      Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.
+    </Muted>
+  </Container>
 
   <SyncStage />
 
-  <section class="band dark gutter" aria-label="Machine-readable summary">
-    <div class="band-inner">
-      <div class="band-head">
-        <b><span data-mark>»</span>MACHINE-READABLE SUMMARY</b>
-        <span>GET /llms.txt</span>
-      </div>
+  <DarkBand label="Machine-readable summary">
+    <Container as="article" size="3xl" padding="16" gap="12">
+      <P family="mono" size="xs" tracking="widest">» MACHINE-READABLE SUMMARY</P>
+      <Muted family="mono">GET /llms.txt</Muted>
 
       {
         SECTIONS.map((sec) => (
-          <section class="sec">
-            <div class="sec-head">
-              <h2>
-                <span data-num>## {sec.num}</span>
-                {sec.title}
-              </h2>
-              <span data-note># {sec.note}</span>
-            </div>
+          <section>
+            <h2>
+              ## {sec.num} {sec.title}
+            </h2>
+            <Muted family="mono"># {sec.note}</Muted>
             {sec.blocks.map((block) => {
               if (block.kind === "p") {
                 return (
@@ -232,16 +224,12 @@ const SECTIONS: Sec[] = [
           </section>
         ))
       }
-    </div>
-  </section>
+    </Container>
+  </DarkBand>
 </Base>
 
-<script>
-  const pill = document.querySelector<HTMLElement>("[data-install]");
-  const command = pill?.dataset["install"];
-  if (pill && command) {
-    pill.querySelector("button")?.addEventListener("click", () => {
-      navigator.clipboard.writeText(command).catch(() => {});
-    });
-  }
+<script define:vars={{ command: INSTALL }}>
+  document.getElementById("install-copy-root")?.addEventListener("click", () => {
+    navigator.clipboard.writeText(command).catch(() => {});
+  });
 </script>
