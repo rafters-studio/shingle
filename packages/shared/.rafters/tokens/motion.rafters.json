@@ -1,218 +1,318 @@
 {
-  "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "motion",
-  "version": "1.0.0",
-  "generatedAt": "2026-05-27T14:48:46.315Z",
+  "generatedAt": "2026-11-03T06:53:52.334Z",
   "tokens": [
     {
       "name": "motion-duration-base",
       "value": "150ms",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Base transition duration - all motion timing derives from this",
+      "semanticMeaning": "Legacy base transition duration. Nothing derives from this any more: the perceptual duration scale never did, and the ratio-stepped delay tokens that did were removed in #1991. Retained as a reference value only.",
       "usageContext": [
         "calculation-reference"
       ],
-      "progressionSystem": "minor-third",
-      "description": "Base duration (150ms). Motion uses minor-third progression (ratio 1.2).",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
-          "Reference as the calculation base"
+          "Reference as the delay-progression base"
         ],
         "never": [
-          "Change without understanding full motion scale impact"
+          "Assume the perceptual duration tiers derive from this -- they are ranges a designer sets within, bounded by perception, not computed from this base"
         ]
-      }
+      },
+      "userOverride": null,
+      "progressionSystem": "minor-third",
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "Base duration (150ms). A reference value with no dependents: duration tiers are perceptual RANGES a designer sets within, and the delay namespace holds relationships rather than ratio steps.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-duration-instant",
+      "name": "rafters-duration-instant",
       "value": "0ms",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Instant - no animation",
+      "semanticMeaning": "No perceptible transition. Cursor changes, text selection, badge counts. Below all perception -- there is nothing to track, so nothing is communicated.",
       "usageContext": [
         "disabled-motion",
-        "prefers-reduced-motion"
+        "prefers-reduced-motion",
+        "cursor",
+        "badge-count"
       ],
-      "scalePosition": 0,
-      "progressionSystem": "minor-third",
-      "motionIntent": "transition",
-      "motionDuration": 0,
-      "mathRelationship": "0",
-      "dependsOn": [],
-      "description": "Duration instant: 0ms. Instant - no animation",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
-          "Use for prefers-reduced-motion",
-          "Use for disabled animations"
+          "Use the generated utility `duration-instant`"
         ],
         "never": [
-          "Ignore prefers-reduced-motion",
-          "Use slow animations for frequent actions"
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
         ]
-      }
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "duration-instant: 0ms [provenance: baseline] Efficient baseline. Fixed at 0ms. No perceptible transition. Cursor changes, text selection, badge counts. Below all perception -- there is nothing to track, so nothing is communicated.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-duration-fast",
-      "value": "125ms",
+      "name": "rafters-duration-micro",
+      "value": "100ms",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Fast - micro-interactions, hover states",
+      "semanticMeaning": "Immediate but visible. Focus rings and press feedback. At the instantaneous threshold -- acknowledgment that input landed, not communication of a change.",
       "usageContext": [
-        "hover",
         "focus",
-        "active",
+        "press",
         "micro-feedback"
       ],
-      "scalePosition": 1,
-      "progressionSystem": "minor-third",
-      "motionIntent": "transition",
-      "motionDuration": 125,
-      "mathRelationship": "150 × 1.2^-1",
-      "dependsOn": [
-        "motion-duration-base"
-      ],
-      "description": "Duration fast: 125ms. Fast - micro-interactions, hover states",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
-          "Use for hover/focus states",
-          "Use for micro-interactions"
+          "Use the generated utility `duration-micro`"
         ],
         "never": [
-          "Ignore prefers-reduced-motion",
-          "Use slow animations for frequent actions"
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
         ]
-      }
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "duration-micro: 100ms [provenance: baseline] Efficient baseline. 100ms within the at the instantaneous threshold (Nielsen 0.1s) band (50-120ms). Immediate but visible. Focus rings and press feedback. At the instantaneous threshold -- acknowledgment that input landed, not communication of a change.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-duration-normal",
+      "name": "rafters-duration-fast",
       "value": "150ms",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Normal - standard UI transitions",
+      "semanticMeaning": "Hover states. The cursor is already there, so the response must match its speed. Below the communicative window -- acknowledgment, not communication.",
       "usageContext": [
-        "buttons",
+        "hover",
+        "micro-feedback"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `duration-fast`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "duration-fast: 150ms [provenance: baseline] Efficient baseline. 150ms within the below the communicative window band (120-200ms). Hover states. The cursor is already there, so the response must match its speed. Below the communicative window -- acknowledgment, not communication.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-duration-moderate",
+      "value": "250ms",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Dropdowns, tab switches, small reveals. The communicative window: fast enough to feel responsive, slow enough for the eye to track a trajectory and build a spatial model.",
+      "usageContext": [
+        "dropdowns",
+        "tab-switches",
+        "small-reveals"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `duration-moderate`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "duration-moderate: 250ms [provenance: baseline] Efficient baseline. 250ms within the communicative (~200-300ms) band (200-300ms). Dropdowns, tab switches, small reveals. The communicative window: fast enough to feel responsive, slow enough for the eye to track a trajectory and build a spatial model.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-duration-normal",
+      "value": "350ms",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The workhorse -- modal entrances, toggles, standard state transitions. The communicative window for larger movement.",
+      "usageContext": [
+        "modals",
         "toggles",
         "state-changes"
       ],
-      "scalePosition": 2,
-      "progressionSystem": "minor-third",
-      "motionIntent": "transition",
-      "motionDuration": 150,
-      "mathRelationship": "150ms (base)",
-      "dependsOn": [
-        "motion-duration-base"
-      ],
-      "description": "Duration normal: 150ms. Normal - standard UI transitions",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
-          "Use for most UI transitions",
-          "Use for state changes"
+          "Use the generated utility `duration-normal`"
         ],
         "never": [
-          "Ignore prefers-reduced-motion",
-          "Use slow animations for frequent actions"
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
         ]
-      }
-    },
-    {
-      "name": "motion-duration-slow",
-      "value": "180ms",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Slow - enter/exit animations",
-      "usageContext": [
-        "modals",
-        "dialogs",
-        "panels",
-        "enter-exit"
-      ],
-      "scalePosition": 3,
-      "progressionSystem": "minor-third",
-      "motionIntent": "enter",
-      "motionDuration": 180,
-      "mathRelationship": "150 × 1.2^1",
-      "dependsOn": [
-        "motion-duration-base"
-      ],
-      "description": "Duration slow: 180ms. Slow - enter/exit animations",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      },
+      "userOverride": null,
+      "dependsOn": [],
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null,
-      "usagePatterns": {
-        "do": [
-          "Use for enter/exit animations",
-          "Use for emphasis"
-        ],
-        "never": [
-          "Ignore prefers-reduced-motion",
-          "Use slow animations for frequent actions"
-        ]
-      }
+      "description": "duration-normal: 350ms [provenance: baseline] Efficient baseline. 350ms within the communicative, larger movement band (300-400ms). The workhorse -- modal entrances, toggles, standard state transitions. The communicative window for larger movement.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-duration-slower",
-      "value": "216ms",
+      "name": "rafters-duration-slow",
+      "value": "500ms",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Slower - emphasis, large element transitions",
+      "semanticMeaning": "Sheets, page transitions, large spatial movement where the user needs orientation. At the sluggish boundary -- the ceiling for anything but full-screen spatial transitions.",
       "usageContext": [
+        "sheets",
         "page-transitions",
-        "hero-animations",
-        "emphasis"
+        "large-spatial-movement"
       ],
-      "scalePosition": 4,
-      "progressionSystem": "minor-third",
-      "motionIntent": "emphasis",
-      "motionDuration": 216,
-      "mathRelationship": "150 × 1.2^2",
-      "dependsOn": [
-        "motion-duration-base"
-      ],
-      "description": "Duration slower: 216ms. Slower - emphasis, large element transitions",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
-          "Use for enter/exit animations",
-          "Use for emphasis"
+          "Use the generated utility `duration-slow`"
         ],
         "never": [
-          "Ignore prefers-reduced-motion",
-          "Use slow animations for frequent actions"
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
         ]
-      }
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "duration-slow: 500ms [provenance: baseline] Efficient baseline. 500ms within the at the sluggish boundary band (400-500ms). Sheets, page transitions, large spatial movement where the user needs orientation. At the sluggish boundary -- the ceiling for anything but full-screen spatial transitions.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-easing-linear",
+      "name": "rafters-ease-standard",
+      "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Precision -- a responsive start that decelerates into place, engineered rather than thrown. The general-purpose workhorse for state transitions and hover: the fast start matches a cursor already on target, where a symmetric ease would drag.",
+      "usageContext": [
+        "state-changes",
+        "hover",
+        "general-purpose"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `ease-standard`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "easingCurve": [
+        0.4,
+        0,
+        0.2,
+        1
+      ],
+      "easingName": "standard",
+      "description": "ease-standard: cubic-bezier(0.4, 0, 0.2, 1) [provenance: baseline] Efficient baseline curve. Precision -- a responsive start that decelerates into place, engineered rather than thrown. The general-purpose workhorse for state transitions and hover: the fast start matches a cursor already on target, where a symmetric ease would drag.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-ease-enter",
+      "value": "cubic-bezier(0, 0, 0.2, 1)",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Arrival, welcome, settling into place. The fast start communicates responsiveness; the slow finish communicates care. Anything entering the viewport. Paired with `exit` as a deliberately asymmetric couple. (Dragicevic 2011: slow-in/slow-out outperforms constant speed for tracking.)",
+      "usageContext": [
+        "enter-animations",
+        "elements-appearing"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `ease-enter`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "easingCurve": [
+        0,
+        0,
+        0.2,
+        1
+      ],
+      "easingName": "enter",
+      "description": "ease-enter: cubic-bezier(0, 0, 0.2, 1) [provenance: baseline] Efficient baseline curve. Arrival, welcome, settling into place. The fast start communicates responsiveness; the slow finish communicates care. Anything entering the viewport. Paired with `exit` as a deliberately asymmetric couple. (Dragicevic 2011: slow-in/slow-out outperforms constant speed for tracking.)",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-ease-exit",
+      "value": "cubic-bezier(0.4, 0, 1, 1)",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Withdrawal, giving space. The brief hesitation acknowledges the user; the fast departure avoids lingering. Anything leaving the viewport. Paired with `enter` as a deliberately asymmetric couple -- exits are faster than entrances by design.",
+      "usageContext": [
+        "exit-animations",
+        "elements-leaving"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `ease-exit`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "easingCurve": [
+        0.4,
+        0,
+        1,
+        1
+      ],
+      "easingName": "exit",
+      "description": "ease-exit: cubic-bezier(0.4, 0, 1, 1) [provenance: baseline] Efficient baseline curve. Withdrawal, giving space. The brief hesitation acknowledges the user; the fast departure avoids lingering. Anything leaving the viewport. Paired with `enter` as a deliberately asymmetric couple -- exits are faster than entrances by design.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-ease-linear",
       "value": "linear",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Linear - constant speed, mechanical feel",
+      "semanticMeaning": "Mechanical, procedural, without personality -- a process, not a gesture. Progress and loading, where the system is working rather than interacting. Never for interactive spatial transitions.",
       "usageContext": [
         "progress-bars",
         "loading-spinners",
-        "opacity-fades"
+        "opacity-fades",
+        "focus-ring-fade"
       ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `ease-linear`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
       "easingCurve": [
         0,
         0,
@@ -220,306 +320,395 @@
         1
       ],
       "easingName": "linear",
-      "description": "Easing linear: linear. Linear - constant speed, mechanical feel",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
-      "usagePatterns": {
-        "do": [
-          "Use for opacity fades",
-          "Use for progress indicators"
-        ],
-        "never": [
-          "Use ease-in for entering (feels sluggish)",
-          "Use ease-out for exiting (feels abrupt)"
-        ]
-      }
+      "description": "ease-linear: linear [provenance: baseline] Efficient baseline curve. Mechanical, procedural, without personality -- a process, not a gesture. Progress and loading, where the system is working rather than interacting. Never for interactive spatial transitions.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-easing-ease-in",
-      "value": "cubic-bezier(0.42, 0, 1, 1)",
+      "name": "rafters-ease-spring-smooth",
+      "value": "cubic-bezier(0.2, 0.9, 0.3, 1)",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Ease in - starts slow, accelerates (exiting)",
+      "semanticMeaning": "Alive, coming physically to rest -- a critically-damped spring with no overshoot. Page transitions, sheets, large tracked spatial movement. (Johansson 1973 / Pratt 2010: animate motion is perceived as alive and captures attention.)",
       "usageContext": [
-        "exit-animations",
-        "elements-leaving"
+        "page-transitions",
+        "sheets",
+        "large-spatial-movement"
       ],
-      "easingCurve": [
-        0.42,
-        0,
-        1,
-        1
-      ],
-      "easingName": "ease-in",
-      "description": "Easing ease-in: cubic-bezier(0.42, 0, 1, 1). Ease in - starts slow, accelerates (exiting)",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
-          "Use for exiting elements",
-          "Use for disappearing content"
+          "Use the generated utility `ease-spring-smooth`"
         ],
         "never": [
-          "Use ease-in for entering (feels sluggish)",
-          "Use ease-out for exiting (feels abrupt)"
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
         ]
-      }
-    },
-    {
-      "name": "motion-easing-ease-out",
-      "value": "cubic-bezier(0, 0, 0.58, 1)",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Ease out - starts fast, decelerates (entering)",
-      "usageContext": [
-        "enter-animations",
-        "elements-appearing"
-      ],
-      "easingCurve": [
-        0,
-        0,
-        0.58,
-        1
-      ],
-      "easingName": "ease-out",
-      "description": "Easing ease-out: cubic-bezier(0, 0, 0.58, 1). Ease out - starts fast, decelerates (entering)",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
+      },
       "userOverride": null,
-      "usagePatterns": {
-        "do": [
-          "Use for entering elements",
-          "Use for appearing content"
-        ],
-        "never": [
-          "Use ease-in for entering (feels sluggish)",
-          "Use ease-out for exiting (feels abrupt)"
-        ]
-      }
-    },
-    {
-      "name": "motion-easing-ease-in-out",
-      "value": "cubic-bezier(0.42, 0, 0.58, 1)",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Ease in-out - symmetric acceleration/deceleration",
-      "usageContext": [
-        "state-changes",
-        "transforms",
-        "general-purpose"
-      ],
-      "easingCurve": [
-        0.42,
-        0,
-        0.58,
-        1
-      ],
-      "easingName": "ease-in-out",
-      "description": "Easing ease-in-out: cubic-bezier(0.42, 0, 0.58, 1). Ease in-out - symmetric acceleration/deceleration",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "dependsOn": [],
       "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
-      "usagePatterns": {
-        "do": [
-          "Use for general transitions",
-          "Match context to curve feel"
-        ],
-        "never": [
-          "Use ease-in for entering (feels sluggish)",
-          "Use ease-out for exiting (feels abrupt)"
-        ]
-      }
-    },
-    {
-      "name": "motion-easing-productive",
-      "value": "cubic-bezier(0.2, 0, 0.38, 0.9)",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Productive - quick, efficient, minimal overshoot",
-      "usageContext": [
-        "work-ui",
-        "data-displays",
-        "business-apps"
-      ],
+      "reducedMotionAware": false,
       "easingCurve": [
         0.2,
-        0,
-        0.38,
-        0.9
-      ],
-      "easingName": "productive",
-      "description": "Easing productive: cubic-bezier(0.2, 0, 0.38, 0.9). Productive - quick, efficient, minimal overshoot",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
-      "usagePatterns": {
-        "do": [
-          "Use for general transitions",
-          "Match context to curve feel"
-        ],
-        "never": [
-          "Use ease-in for entering (feels sluggish)",
-          "Use ease-out for exiting (feels abrupt)"
-        ]
-      }
-    },
-    {
-      "name": "motion-easing-expressive",
-      "value": "cubic-bezier(0.4, 0.14, 0.3, 1)",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Expressive - dramatic, attention-grabbing",
-      "usageContext": [
-        "marketing",
-        "onboarding",
-        "celebrations",
-        "emphasis"
-      ],
-      "easingCurve": [
-        0.4,
-        0.14,
+        0.9,
         0.3,
         1
       ],
-      "easingName": "expressive",
-      "description": "Easing expressive: cubic-bezier(0.4, 0.14, 0.3, 1). Expressive - dramatic, attention-grabbing",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
-      "usagePatterns": {
-        "do": [
-          "Use for general transitions",
-          "Match context to curve feel"
-        ],
-        "never": [
-          "Use ease-in for entering (feels sluggish)",
-          "Use ease-out for exiting (feels abrupt)"
-        ]
-      }
+      "easingName": "spring-smooth",
+      "description": "ease-spring-smooth: cubic-bezier(0.2, 0.9, 0.3, 1) [provenance: baseline] Efficient baseline curve. Alive, coming physically to rest -- a critically-damped spring with no overshoot. Page transitions, sheets, large tracked spatial movement. (Johansson 1973 / Pratt 2010: animate motion is perceived as alive and captures attention.)",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-easing-spring",
-      "value": "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+      "name": "rafters-ease-spring-snappy",
+      "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Spring - bouncy overshoot for playful feel",
+      "semanticMeaning": "Alive, tight, following input closely -- a tighter spring with less settle and no overshoot. Toggles, presses, interactions that track input.",
       "usageContext": [
-        "buttons",
-        "icons",
-        "playful-ui",
-        "celebrations"
+        "toggles",
+        "presses",
+        "input-tracking"
       ],
-      "easingCurve": [
-        0.175,
-        0.885,
-        0.32,
-        1.275
-      ],
-      "easingName": "spring",
-      "description": "Easing spring: cubic-bezier(0.175, 0.885, 0.32, 1.275). Spring - bouncy overshoot for playful feel",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
-          "Use for general transitions",
-          "Match context to curve feel"
+          "Use the generated utility `ease-spring-snappy`"
         ],
         "never": [
-          "Use ease-in for entering (feels sluggish)",
-          "Use ease-out for exiting (feels abrupt)"
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
         ]
-      }
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "easingCurve": [
+        0.2,
+        0.8,
+        0.2,
+        1
+      ],
+      "easingName": "spring-snappy",
+      "description": "ease-spring-snappy: cubic-bezier(0.2, 0.8, 0.2, 1) [provenance: baseline] Efficient baseline curve. Alive, tight, following input closely -- a tighter spring with less settle and no overshoot. Toggles, presses, interactions that track input.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-delay-none",
+      "name": "rafters-delay-hover-intent",
+      "value": "200ms",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "How long a pointer must rest before the system believes the hover was meant. Long enough to survive a pass-through, short enough that a deliberate hover does not feel ignored.",
+      "usageContext": [
+        "tooltip",
+        "hover-card",
+        "navigation-menu"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `delay-hover-intent`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "delay-hover-intent: 200ms [provenance: observed] Observed in navigation-menu, which hardcoded it before #1995 routed both it and tooltip through the runtime accessor. Observed in working code, not tuned. How long a pointer must rest before the system believes the hover was meant. Long enough to survive a pass-through, short enough that a deliberate hover does not feel ignored.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-delay-linger",
+      "value": "300ms",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "How long a surface stays after the pointer leaves, so a near-miss is forgiven.",
+      "usageContext": [
+        "hover-card",
+        "navigation-menu",
+        "submenu"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `delay-linger`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "delay-linger: 300ms [provenance: proposed] PROPOSED. The grace window before a hovered surface closes, so a diagonal cursor path to a submenu does not dismiss it. How long a surface stays after the pointer leaves, so a near-miss is forgiven.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-delay-choreo-step",
+      "value": "50ms",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The beat between choreographed parts of a single surface.",
+      "usageContext": [
+        "modal-content",
+        "panel-content",
+        "sequenced-parts"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `delay-choreo-step`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "description": "delay-choreo-step: 50ms [provenance: proposed] PROPOSED. The offset between two parts of ONE surface moving together (panel then its content). The beat between choreographed parts of a single surface.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-delay-stagger-step",
       "value": "0ms",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "None animation delay",
-      "usageContext": [
-        "immediate-response"
-      ],
-      "delayMs": 0,
-      "mathRelationship": "0",
-      "dependsOn": [],
-      "description": "Delay none: 0ms. Based on duration progression.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
-    },
-    {
-      "name": "motion-delay-short",
-      "value": "125ms",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Short animation delay",
+      "semanticMeaning": "The per-item offset when a list animates in.",
       "usageContext": [
         "staggered-lists",
         "sequential-elements"
       ],
-      "delayMs": 125,
-      "mathRelationship": "150 × 1.2^-1",
-      "dependsOn": [
-        "motion-duration-base"
-      ],
-      "description": "Delay short: 125ms. Based on duration progression.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `delay-stagger-step`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "description": "delay-stagger-step: 0ms [provenance: proposed] PROPOSED, and zero is a value: efficient does not stagger lists. A non-zero stagger is a character choice a designer makes, not a default. The per-item offset when a list animates in.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-delay-medium",
-      "value": "150ms",
+      "name": "rafters-delay-skip",
+      "value": "300ms",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Medium animation delay",
+      "semanticMeaning": "How long a just-closed surface stays warm enough to reopen without ceremony.",
       "usageContext": [
-        "modal-content",
-        "after-transition"
+        "tooltip-reopen",
+        "menu-reopen"
       ],
-      "delayMs": 150,
-      "mathRelationship": "150ms (base)",
-      "dependsOn": [
-        "motion-duration-base"
-      ],
-      "description": "Delay medium: 150ms. Based on duration progression.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `delay-skip`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "description": "delay-skip: 300ms [provenance: proposed] PROPOSED. The warm-reopen window: reopen inside it and the entrance delay is skipped, because the user is already oriented. How long a just-closed surface stays warm enough to reopen without ceremony.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
-      "name": "motion-delay-long",
-      "value": "180ms",
+      "name": "rafters-extent-pop",
+      "value": "0.95",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Long animation delay",
+      "semanticMeaning": "How far a surface scales up as it arrives.",
       "usageContext": [
-        "emphasis",
-        "dramatic-reveals"
+        "modal",
+        "popover",
+        "dialog"
       ],
-      "delayMs": 180,
-      "mathRelationship": "150 × 1.2^1",
-      "dependsOn": [
-        "motion-duration-base"
-      ],
-      "description": "Delay long: 180ms. Based on duration progression.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `extent-pop`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
       "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
+      "reducedMotionAware": false,
+      "description": "extent-pop: 0.95 [provenance: proposed] PROPOSED. The scale a surface enters from. Close to 1 so the entrance reads as arrival rather than as a zoom. How far a surface scales up as it arrives.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-extent-press",
+      "value": "0.97",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "How far a control depresses when pressed.",
+      "usageContext": [
+        "button",
+        "toggle",
+        "press-feedback"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `extent-press`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "description": "extent-press: 0.97 [provenance: proposed] PROPOSED. Depression under a press. Smaller than `pop` because the finger is the evidence -- the motion only confirms it. How far a control depresses when pressed.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-extent-draw",
+      "value": "1",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "How far an indicator draws along its track.",
+      "usageContext": [
+        "tabs-indicator",
+        "underline",
+        "progress-stroke"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `extent-draw`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "description": "extent-draw: 1 [provenance: proposed] PROPOSED. The completed fraction of a drawn indicator. 1 is full travel; a value below it is a deliberately incomplete stroke. How far an indicator draws along its track.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-period-spin",
+      "value": "1s",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "One full rotation of a working indicator.",
+      "usageContext": [
+        "loading",
+        "spinner",
+        "refresh"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `period-spin`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "description": "period-spin: 1s [provenance: baseline] The shipped loop period of the spin animation. One full rotation of a working indicator.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-period-pulse",
+      "value": "2s",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "One breath of a skeleton or placeholder.",
+      "usageContext": [
+        "skeleton",
+        "loading-placeholder"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `period-pulse`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "description": "period-pulse: 2s [provenance: baseline] The shipped loop period of the pulse animation. One breath of a skeleton or placeholder.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-period-blink",
+      "value": "1.25s",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "One blink of a text caret.",
+      "usageContext": [
+        "input-caret",
+        "text-cursor"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `period-blink`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "description": "period-blink: 1.25s [provenance: baseline] The shipped loop period of the caret-blink animation. One blink of a text caret.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "rafters-period-shimmer",
+      "value": "2s",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "One sweep of a shimmer across a loading surface.",
+      "usageContext": [
+        "skeleton",
+        "loading-placeholder"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Use the generated utility `period-shimmer`"
+        ],
+        "never": [
+          "Hardcode this value in a component",
+          "Add a second name for the same idea -- one fast, everywhere, always"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "description": "period-shimmer: 2s [provenance: proposed] PROPOSED. No shimmer animation ships yet; the period is here because the namespace is a vocabulary, not a list of what happens to exist. One sweep of a shimmer across a loading surface.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-fade-in",
@@ -532,12 +721,12 @@
         "appear",
         "show"
       ],
-      "keyframeName": "fade-in",
-      "description": "Keyframe fade-in: Fade from transparent to opaque",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "fade-in",
+      "description": "Keyframe fade-in: Fade from transparent to opaque",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-fade-out",
@@ -550,12 +739,12 @@
         "disappear",
         "hide"
       ],
-      "keyframeName": "fade-out",
-      "description": "Keyframe fade-out: Fade from opaque to transparent",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "fade-out",
+      "description": "Keyframe fade-out: Fade from opaque to transparent",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-slide-in-from-top",
@@ -568,12 +757,12 @@
         "notification",
         "toast"
       ],
-      "keyframeName": "slide-in-from-top",
-      "description": "Keyframe slide-in-from-top: Slide in from above",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-in-from-top",
+      "description": "Keyframe slide-in-from-top: Slide in from above",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-slide-in-from-bottom",
@@ -586,12 +775,12 @@
         "drawer",
         "mobile-menu"
       ],
-      "keyframeName": "slide-in-from-bottom",
-      "description": "Keyframe slide-in-from-bottom: Slide in from below",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-in-from-bottom",
+      "description": "Keyframe slide-in-from-bottom: Slide in from below",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-slide-in-from-left",
@@ -604,12 +793,12 @@
         "panel",
         "drawer"
       ],
-      "keyframeName": "slide-in-from-left",
-      "description": "Keyframe slide-in-from-left: Slide in from left",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-in-from-left",
+      "description": "Keyframe slide-in-from-left: Slide in from left",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-slide-in-from-right",
@@ -622,12 +811,12 @@
         "panel",
         "drawer"
       ],
-      "keyframeName": "slide-in-from-right",
-      "description": "Keyframe slide-in-from-right: Slide in from right",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-in-from-right",
+      "description": "Keyframe slide-in-from-right: Slide in from right",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-slide-out-to-top",
@@ -639,12 +828,12 @@
         "dropdown-exit",
         "notification-dismiss"
       ],
-      "keyframeName": "slide-out-to-top",
-      "description": "Keyframe slide-out-to-top: Slide out upward",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-out-to-top",
+      "description": "Keyframe slide-out-to-top: Slide out upward",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-slide-out-to-bottom",
@@ -656,12 +845,12 @@
         "sheet-exit",
         "drawer-close"
       ],
-      "keyframeName": "slide-out-to-bottom",
-      "description": "Keyframe slide-out-to-bottom: Slide out downward",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-out-to-bottom",
+      "description": "Keyframe slide-out-to-bottom: Slide out downward",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-slide-out-to-left",
@@ -673,12 +862,12 @@
         "sidebar-close",
         "panel-exit"
       ],
-      "keyframeName": "slide-out-to-left",
-      "description": "Keyframe slide-out-to-left: Slide out to left",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-out-to-left",
+      "description": "Keyframe slide-out-to-left: Slide out to left",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-slide-out-to-right",
@@ -690,16 +879,16 @@
         "sidebar-close",
         "panel-exit"
       ],
-      "keyframeName": "slide-out-to-right",
-      "description": "Keyframe slide-out-to-right: Slide out to right",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-out-to-right",
+      "description": "Keyframe slide-out-to-right: Slide out to right",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-scale-in",
-      "value": "from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; }",
+      "value": "from { transform: scale(var(--rafters-extent-pop)); opacity: 0; } to { transform: scale(1); opacity: 1; }",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Scale up while fading in",
@@ -708,16 +897,16 @@
         "popover",
         "dialog"
       ],
-      "keyframeName": "scale-in",
-      "description": "Keyframe scale-in: Scale up while fading in",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "scale-in",
+      "description": "Keyframe scale-in: Scale up while fading in",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-scale-out",
-      "value": "from { transform: scale(1); opacity: 1; } to { transform: scale(0.96); opacity: 0; }",
+      "value": "from { transform: scale(1); opacity: 1; } to { transform: scale(var(--rafters-extent-pop)); opacity: 0; }",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Scale down while fading out",
@@ -725,12 +914,46 @@
         "modal-exit",
         "popover-close"
       ],
-      "keyframeName": "scale-out",
-      "description": "Keyframe scale-out: Scale down while fading out",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "scale-out",
+      "description": "Keyframe scale-out: Scale down while fading out",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-keyframe-grow-in",
+      "value": "from { transform: scaleY(0); } to { transform: scaleY(1); }",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Grow from zero to full height, anchored at the baseline (caller-set transform-origin)",
+      "usageContext": [
+        "bar-chart",
+        "value-display"
+      ],
+      "userOverride": null,
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "grow-in",
+      "description": "Keyframe grow-in: Grow from zero to full height, anchored at the baseline (caller-set transform-origin)",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-keyframe-grow-in-x",
+      "value": "from { transform: scaleX(0); } to { transform: scaleX(1); }",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Grow from zero to full width, anchored at the baseline (caller-set transform-origin)",
+      "usageContext": [
+        "bar-chart",
+        "value-display"
+      ],
+      "userOverride": null,
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "grow-in-x",
+      "description": "Keyframe grow-in-x: Grow from zero to full width, anchored at the baseline (caller-set transform-origin)",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-spin",
@@ -743,12 +966,12 @@
         "spinner",
         "refresh"
       ],
-      "keyframeName": "spin",
-      "description": "Keyframe spin: Continuous rotation",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "spin",
+      "description": "Keyframe spin: Continuous rotation",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-ping",
@@ -761,12 +984,12 @@
         "attention",
         "pulse"
       ],
-      "keyframeName": "ping",
-      "description": "Keyframe ping: Expanding pulse that fades out",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "ping",
+      "description": "Keyframe ping: Expanding pulse that fades out",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-pulse",
@@ -778,12 +1001,12 @@
         "skeleton",
         "loading-placeholder"
       ],
-      "keyframeName": "pulse",
-      "description": "Keyframe pulse: Gentle opacity pulse",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "pulse",
+      "description": "Keyframe pulse: Gentle opacity pulse",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-bounce",
@@ -795,48 +1018,12 @@
         "attention",
         "scroll-indicator"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
       "keyframeName": "bounce",
       "description": "Keyframe bounce: Bouncing motion",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
-    },
-    {
-      "name": "motion-keyframe-accordion-down",
-      "value": "from { height: 0; } to { height: var(--radix-accordion-content-height); }",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Expand accordion content",
-      "usageContext": [
-        "accordion",
-        "collapsible",
-        "expand"
-      ],
-      "keyframeName": "accordion-down",
-      "description": "Keyframe accordion-down: Expand accordion content",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
-    },
-    {
-      "name": "motion-keyframe-accordion-up",
-      "value": "from { height: var(--radix-accordion-content-height); } to { height: 0; }",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Collapse accordion content",
-      "usageContext": [
-        "accordion",
-        "collapsible",
-        "collapse"
-      ],
-      "keyframeName": "accordion-up",
-      "description": "Keyframe accordion-up: Collapse accordion content",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-keyframe-caret-blink",
@@ -848,16 +1035,16 @@
         "input-caret",
         "text-cursor"
       ],
-      "keyframeName": "caret-blink",
-      "description": "Keyframe caret-blink: Text cursor blinking",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "userOverride": null,
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "caret-blink",
+      "description": "Keyframe caret-blink: Text cursor blinking",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-fade-in",
-      "value": "fade-in var(--motion-duration-fast) var(--motion-easing-ease-out)",
+      "value": "fade-in var(--rafters-duration-fast) var(--rafters-ease-enter)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Fade in animation",
@@ -865,25 +1052,25 @@
         "enter",
         "appear"
       ],
-      "animationName": "fade-in",
-      "keyframeName": "fade-in",
-      "animationDuration": "125ms",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-fade-in",
-        "motion-duration-fast",
-        "motion-easing-ease-out"
+        "rafters-duration-fast",
+        "rafters-ease-enter"
       ],
-      "description": "Animation fade-in: Fade in animation",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "fade-in",
+      "animationName": "fade-in",
+      "animationDuration": "150ms",
+      "animationEasing": "cubic-bezier(0, 0, 0.2, 1)",
+      "animationIterations": "1",
+      "description": "Animation fade-in: Fade in animation",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-fade-out",
-      "value": "fade-out var(--motion-duration-fast) var(--motion-easing-ease-in)",
+      "value": "fade-out var(--rafters-duration-fast) var(--rafters-ease-exit)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Fade out animation",
@@ -891,25 +1078,25 @@
         "exit",
         "disappear"
       ],
-      "animationName": "fade-out",
-      "keyframeName": "fade-out",
-      "animationDuration": "125ms",
-      "animationEasing": "cubic-bezier(0.42, 0, 1, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-fade-out",
-        "motion-duration-fast",
-        "motion-easing-ease-in"
+        "rafters-duration-fast",
+        "rafters-ease-exit"
       ],
-      "description": "Animation fade-out: Fade out animation",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "fade-out",
+      "animationName": "fade-out",
+      "animationDuration": "150ms",
+      "animationEasing": "cubic-bezier(0.4, 0, 1, 1)",
+      "animationIterations": "1",
+      "description": "Animation fade-out: Fade out animation",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-slide-in-from-top",
-      "value": "slide-in-from-top var(--motion-duration-normal) var(--motion-easing-ease-out)",
+      "value": "slide-in-from-top var(--rafters-duration-normal) var(--rafters-ease-enter)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide in from top",
@@ -917,25 +1104,25 @@
         "dropdown",
         "notification"
       ],
-      "animationName": "slide-in-from-top",
-      "keyframeName": "slide-in-from-top",
-      "animationDuration": "150ms",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-slide-in-from-top",
-        "motion-duration-normal",
-        "motion-easing-ease-out"
+        "rafters-duration-normal",
+        "rafters-ease-enter"
       ],
-      "description": "Animation slide-in-from-top: Slide in from top",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-in-from-top",
+      "animationName": "slide-in-from-top",
+      "animationDuration": "350ms",
+      "animationEasing": "cubic-bezier(0, 0, 0.2, 1)",
+      "animationIterations": "1",
+      "description": "Animation slide-in-from-top: Slide in from top",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-slide-in-from-bottom",
-      "value": "slide-in-from-bottom var(--motion-duration-normal) var(--motion-easing-ease-out)",
+      "value": "slide-in-from-bottom var(--rafters-duration-normal) var(--rafters-ease-enter)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide in from bottom",
@@ -943,25 +1130,25 @@
         "sheet",
         "drawer"
       ],
-      "animationName": "slide-in-from-bottom",
-      "keyframeName": "slide-in-from-bottom",
-      "animationDuration": "150ms",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-slide-in-from-bottom",
-        "motion-duration-normal",
-        "motion-easing-ease-out"
+        "rafters-duration-normal",
+        "rafters-ease-enter"
       ],
-      "description": "Animation slide-in-from-bottom: Slide in from bottom",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-in-from-bottom",
+      "animationName": "slide-in-from-bottom",
+      "animationDuration": "350ms",
+      "animationEasing": "cubic-bezier(0, 0, 0.2, 1)",
+      "animationIterations": "1",
+      "description": "Animation slide-in-from-bottom: Slide in from bottom",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-slide-in-from-left",
-      "value": "slide-in-from-left var(--motion-duration-normal) var(--motion-easing-ease-out)",
+      "value": "slide-in-from-left var(--rafters-duration-normal) var(--rafters-ease-enter)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide in from left",
@@ -969,25 +1156,25 @@
         "sidebar",
         "panel"
       ],
-      "animationName": "slide-in-from-left",
-      "keyframeName": "slide-in-from-left",
-      "animationDuration": "150ms",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-slide-in-from-left",
-        "motion-duration-normal",
-        "motion-easing-ease-out"
+        "rafters-duration-normal",
+        "rafters-ease-enter"
       ],
-      "description": "Animation slide-in-from-left: Slide in from left",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-in-from-left",
+      "animationName": "slide-in-from-left",
+      "animationDuration": "350ms",
+      "animationEasing": "cubic-bezier(0, 0, 0.2, 1)",
+      "animationIterations": "1",
+      "description": "Animation slide-in-from-left: Slide in from left",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-slide-in-from-right",
-      "value": "slide-in-from-right var(--motion-duration-normal) var(--motion-easing-ease-out)",
+      "value": "slide-in-from-right var(--rafters-duration-normal) var(--rafters-ease-enter)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide in from right",
@@ -995,125 +1182,125 @@
         "sidebar",
         "panel"
       ],
-      "animationName": "slide-in-from-right",
-      "keyframeName": "slide-in-from-right",
-      "animationDuration": "150ms",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-slide-in-from-right",
-        "motion-duration-normal",
-        "motion-easing-ease-out"
+        "rafters-duration-normal",
+        "rafters-ease-enter"
       ],
-      "description": "Animation slide-in-from-right: Slide in from right",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-in-from-right",
+      "animationName": "slide-in-from-right",
+      "animationDuration": "350ms",
+      "animationEasing": "cubic-bezier(0, 0, 0.2, 1)",
+      "animationIterations": "1",
+      "description": "Animation slide-in-from-right: Slide in from right",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-slide-out-to-top",
-      "value": "slide-out-to-top var(--motion-duration-fast) var(--motion-easing-ease-in)",
+      "value": "slide-out-to-top var(--rafters-duration-fast) var(--rafters-ease-exit)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide out to top",
       "usageContext": [
         "dropdown-exit"
       ],
-      "animationName": "slide-out-to-top",
-      "keyframeName": "slide-out-to-top",
-      "animationDuration": "125ms",
-      "animationEasing": "cubic-bezier(0.42, 0, 1, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-slide-out-to-top",
-        "motion-duration-fast",
-        "motion-easing-ease-in"
+        "rafters-duration-fast",
+        "rafters-ease-exit"
       ],
-      "description": "Animation slide-out-to-top: Slide out to top",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-out-to-top",
+      "animationName": "slide-out-to-top",
+      "animationDuration": "150ms",
+      "animationEasing": "cubic-bezier(0.4, 0, 1, 1)",
+      "animationIterations": "1",
+      "description": "Animation slide-out-to-top: Slide out to top",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-slide-out-to-bottom",
-      "value": "slide-out-to-bottom var(--motion-duration-fast) var(--motion-easing-ease-in)",
+      "value": "slide-out-to-bottom var(--rafters-duration-fast) var(--rafters-ease-exit)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide out to bottom",
       "usageContext": [
         "sheet-exit"
       ],
-      "animationName": "slide-out-to-bottom",
-      "keyframeName": "slide-out-to-bottom",
-      "animationDuration": "125ms",
-      "animationEasing": "cubic-bezier(0.42, 0, 1, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-slide-out-to-bottom",
-        "motion-duration-fast",
-        "motion-easing-ease-in"
+        "rafters-duration-fast",
+        "rafters-ease-exit"
       ],
-      "description": "Animation slide-out-to-bottom: Slide out to bottom",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-out-to-bottom",
+      "animationName": "slide-out-to-bottom",
+      "animationDuration": "150ms",
+      "animationEasing": "cubic-bezier(0.4, 0, 1, 1)",
+      "animationIterations": "1",
+      "description": "Animation slide-out-to-bottom: Slide out to bottom",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-slide-out-to-left",
-      "value": "slide-out-to-left var(--motion-duration-fast) var(--motion-easing-ease-in)",
+      "value": "slide-out-to-left var(--rafters-duration-fast) var(--rafters-ease-exit)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide out to left",
       "usageContext": [
         "sidebar-close"
       ],
-      "animationName": "slide-out-to-left",
-      "keyframeName": "slide-out-to-left",
-      "animationDuration": "125ms",
-      "animationEasing": "cubic-bezier(0.42, 0, 1, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-slide-out-to-left",
-        "motion-duration-fast",
-        "motion-easing-ease-in"
+        "rafters-duration-fast",
+        "rafters-ease-exit"
       ],
-      "description": "Animation slide-out-to-left: Slide out to left",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-out-to-left",
+      "animationName": "slide-out-to-left",
+      "animationDuration": "150ms",
+      "animationEasing": "cubic-bezier(0.4, 0, 1, 1)",
+      "animationIterations": "1",
+      "description": "Animation slide-out-to-left: Slide out to left",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-slide-out-to-right",
-      "value": "slide-out-to-right var(--motion-duration-fast) var(--motion-easing-ease-in)",
+      "value": "slide-out-to-right var(--rafters-duration-fast) var(--rafters-ease-exit)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide out to right",
       "usageContext": [
         "sidebar-close"
       ],
-      "animationName": "slide-out-to-right",
-      "keyframeName": "slide-out-to-right",
-      "animationDuration": "125ms",
-      "animationEasing": "cubic-bezier(0.42, 0, 1, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-slide-out-to-right",
-        "motion-duration-fast",
-        "motion-easing-ease-in"
+        "rafters-duration-fast",
+        "rafters-ease-exit"
       ],
-      "description": "Animation slide-out-to-right: Slide out to right",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "slide-out-to-right",
+      "animationName": "slide-out-to-right",
+      "animationDuration": "150ms",
+      "animationEasing": "cubic-bezier(0.4, 0, 1, 1)",
+      "animationIterations": "1",
+      "description": "Animation slide-out-to-right: Slide out to right",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-scale-in",
-      "value": "scale-in var(--motion-duration-normal) var(--motion-easing-spring)",
+      "value": "scale-in var(--rafters-duration-normal) var(--rafters-ease-spring-snappy)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Scale in with spring",
@@ -1121,50 +1308,50 @@
         "modal",
         "popover"
       ],
-      "animationName": "scale-in",
-      "keyframeName": "scale-in",
-      "animationDuration": "150ms",
-      "animationEasing": "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-scale-in",
-        "motion-duration-normal",
-        "motion-easing-spring"
+        "rafters-duration-normal",
+        "rafters-ease-spring-snappy"
       ],
-      "description": "Animation scale-in: Scale in with spring",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "scale-in",
+      "animationName": "scale-in",
+      "animationDuration": "350ms",
+      "animationEasing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      "animationIterations": "1",
+      "description": "Animation scale-in: Scale in with spring",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-scale-out",
-      "value": "scale-out var(--motion-duration-fast) var(--motion-easing-ease-in)",
+      "value": "scale-out var(--rafters-duration-fast) var(--rafters-ease-exit)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Scale out",
       "usageContext": [
         "modal-exit"
       ],
-      "animationName": "scale-out",
-      "keyframeName": "scale-out",
-      "animationDuration": "125ms",
-      "animationEasing": "cubic-bezier(0.42, 0, 1, 1)",
-      "animationIterations": "1",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-scale-out",
-        "motion-duration-fast",
-        "motion-easing-ease-in"
+        "rafters-duration-fast",
+        "rafters-ease-exit"
       ],
-      "description": "Animation scale-out: Scale out",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "scale-out",
+      "animationName": "scale-out",
+      "animationDuration": "150ms",
+      "animationEasing": "cubic-bezier(0.4, 0, 1, 1)",
+      "animationIterations": "1",
+      "description": "Animation scale-out: Scale out",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-spin",
-      "value": "spin 1s var(--motion-easing-linear) infinite",
+      "value": "spin 1s var(--rafters-ease-linear) infinite",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Continuous spin",
@@ -1172,48 +1359,48 @@
         "loading",
         "spinner"
       ],
-      "animationName": "spin",
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-spin",
+        "rafters-ease-linear"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
       "keyframeName": "spin",
+      "animationName": "spin",
       "animationDuration": "1s",
       "animationEasing": "linear",
       "animationIterations": "infinite",
-      "dependsOn": [
-        "motion-keyframe-spin",
-        "motion-easing-linear"
-      ],
       "description": "Animation spin: Continuous spin",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-ping",
-      "value": "ping 1s var(--motion-easing-ease-out) infinite",
+      "value": "ping 1s var(--rafters-ease-enter) infinite",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Pinging pulse",
       "usageContext": [
         "notification"
       ],
-      "animationName": "ping",
-      "keyframeName": "ping",
-      "animationDuration": "1s",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "infinite",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-ping",
-        "motion-easing-ease-out"
+        "rafters-ease-enter"
       ],
-      "description": "Animation ping: Pinging pulse",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "ping",
+      "animationName": "ping",
+      "animationDuration": "1s",
+      "animationEasing": "cubic-bezier(0, 0, 0.2, 1)",
+      "animationIterations": "infinite",
+      "description": "Animation ping: Pinging pulse",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-pulse",
-      "value": "pulse 2s var(--motion-easing-ease-in-out) infinite",
+      "value": "pulse 2s var(--rafters-ease-standard) infinite",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Gentle pulse",
@@ -1221,124 +1408,1784 @@
         "skeleton",
         "loading"
       ],
-      "animationName": "pulse",
-      "keyframeName": "pulse",
-      "animationDuration": "2s",
-      "animationEasing": "cubic-bezier(0.42, 0, 0.58, 1)",
-      "animationIterations": "infinite",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-pulse",
-        "motion-easing-ease-in-out"
+        "rafters-ease-standard"
       ],
-      "description": "Animation pulse: Gentle pulse",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "pulse",
+      "animationName": "pulse",
+      "animationDuration": "2s",
+      "animationEasing": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "animationIterations": "infinite",
+      "description": "Animation pulse: Gentle pulse",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-bounce",
-      "value": "bounce 1s var(--motion-easing-ease-in-out) infinite",
+      "value": "bounce 1s var(--rafters-ease-standard) infinite",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Bouncing",
       "usageContext": [
         "attention"
       ],
-      "animationName": "bounce",
-      "keyframeName": "bounce",
-      "animationDuration": "1s",
-      "animationEasing": "cubic-bezier(0.42, 0, 0.58, 1)",
-      "animationIterations": "infinite",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-bounce",
-        "motion-easing-ease-in-out"
+        "rafters-ease-standard"
       ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "bounce",
+      "animationName": "bounce",
+      "animationDuration": "1s",
+      "animationEasing": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "animationIterations": "infinite",
       "description": "Animation bounce: Bouncing",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
-    },
-    {
-      "name": "motion-animation-accordion-down",
-      "value": "accordion-down var(--motion-duration-normal) var(--motion-easing-ease-out)",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Accordion expand",
-      "usageContext": [
-        "accordion",
-        "collapsible"
-      ],
-      "animationName": "accordion-down",
-      "keyframeName": "accordion-down",
-      "animationDuration": "150ms",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "1",
-      "dependsOn": [
-        "motion-keyframe-accordion-down",
-        "motion-duration-normal",
-        "motion-easing-ease-out"
-      ],
-      "description": "Animation accordion-down: Accordion expand",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
-    },
-    {
-      "name": "motion-animation-accordion-up",
-      "value": "accordion-up var(--motion-duration-normal) var(--motion-easing-ease-out)",
-      "category": "motion",
-      "namespace": "motion",
-      "semanticMeaning": "Accordion collapse",
-      "usageContext": [
-        "accordion",
-        "collapsible"
-      ],
-      "animationName": "accordion-up",
-      "keyframeName": "accordion-up",
-      "animationDuration": "150ms",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "1",
-      "dependsOn": [
-        "motion-keyframe-accordion-up",
-        "motion-duration-normal",
-        "motion-easing-ease-out"
-      ],
-      "description": "Animation accordion-up: Accordion collapse",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-animation-caret-blink",
-      "value": "caret-blink 1.25s var(--motion-easing-ease-out) infinite",
+      "value": "caret-blink 1.25s var(--rafters-ease-enter) infinite",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Caret blinking",
       "usageContext": [
         "input"
       ],
-      "animationName": "caret-blink",
-      "keyframeName": "caret-blink",
-      "animationDuration": "1.25s",
-      "animationEasing": "cubic-bezier(0, 0, 0.58, 1)",
-      "animationIterations": "infinite",
+      "userOverride": null,
       "dependsOn": [
         "motion-keyframe-caret-blink",
-        "motion-easing-ease-out"
+        "rafters-ease-enter"
       ],
-      "description": "Animation caret-blink: Caret blinking",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "keyframeName": "caret-blink",
+      "animationName": "caret-blink",
+      "animationDuration": "1.25s",
+      "animationEasing": "cubic-bezier(0, 0, 0.2, 1)",
+      "animationIterations": "infinite",
+      "description": "Animation caret-blink: Caret blinking",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-dialog-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A dialog arriving: fade + zoom from the pop extent, on the arrival curve.",
+      "usageContext": [
+        "dialog",
+        "modal",
+        "alert-dialog"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-dialog-content-open on the dialog content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "dialog-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell dialog / content / closed -> open: scale-in over normal with enter. A dialog arriving: fade + zoom from the pop extent, on the arrival curve.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-dialog-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A dialog leaving: fade + zoom back to the pop extent, on the departure curve.",
+      "usageContext": [
+        "dialog",
+        "modal",
+        "alert-dialog"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-dialog-content-close on the dialog content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "dialog-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell dialog / content / open -> closed: scale-out over moderate with exit. A dialog leaving: fade + zoom back to the pop extent, on the departure curve.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-dialog-overlay-open",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The scrim behind a dialog, arriving with the surface it dims for.",
+      "usageContext": [
+        "dialog",
+        "overlay",
+        "scrim"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-dialog-overlay-open on the dialog overlay for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "dialog-overlay-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell dialog / overlay / closed -> open: fade-in over normal with enter. The scrim behind a dialog, arriving with the surface it dims for.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-dialog-overlay-close",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The scrim behind a dialog, leaving with it.",
+      "usageContext": [
+        "dialog",
+        "overlay",
+        "scrim"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-dialog-overlay-close on the dialog overlay for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "dialog-overlay-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell dialog / overlay / open -> closed: fade-out over moderate with exit. The scrim behind a dialog, leaving with it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-alert-dialog-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "An alert dialog arriving: the dialog moment, declared on its own row.",
+      "usageContext": [
+        "alert-dialog",
+        "modal"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-alert-dialog-content-open on the alert-dialog content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "alert-dialog-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell alert-dialog / content / closed -> open: scale-in over normal with enter. An alert dialog arriving: the dialog moment, declared on its own row.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-alert-dialog-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "An alert dialog leaving, once the choice it demanded has been made.",
+      "usageContext": [
+        "alert-dialog",
+        "modal"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-alert-dialog-content-close on the alert-dialog content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "alert-dialog-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell alert-dialog / content / open -> closed: scale-out over moderate with exit. An alert dialog leaving, once the choice it demanded has been made.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-alert-dialog-overlay-open",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The scrim behind an alert dialog, arriving with the surface it dims for.",
+      "usageContext": [
+        "alert-dialog",
+        "overlay",
+        "scrim"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-alert-dialog-overlay-open on the alert-dialog overlay for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "alert-dialog-overlay-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell alert-dialog / overlay / closed -> open: fade-in over normal with enter. The scrim behind an alert dialog, arriving with the surface it dims for.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-alert-dialog-overlay-close",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The scrim behind an alert dialog, leaving with it.",
+      "usageContext": [
+        "alert-dialog",
+        "overlay",
+        "scrim"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-alert-dialog-overlay-close on the alert-dialog overlay for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "alert-dialog-overlay-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell alert-dialog / overlay / open -> closed: fade-out over moderate with exit. The scrim behind an alert dialog, leaving with it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-sheet-content-open",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"spring-smooth\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A sheet arriving. The row declares slide (per side) + fade; the fade is emitted and the per-side slide is not, because the vocabulary has no side-agnostic slide shape and the matrix calls a physical side a defect.",
+      "usageContext": [
+        "sheet",
+        "panel",
+        "edge-anchored"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-sheet-content-open on the sheet content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-normal",
+        "rafters-ease-spring-smooth"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "sheet-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell sheet / content / closed -> open: fade-in over normal with spring-smooth. A sheet arriving. The row declares slide (per side) + fade; the fade is emitted and the per-side slide is not, because the vocabulary has no side-agnostic slide shape and the matrix calls a physical side a defect.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-sheet-content-close",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A sheet leaving. The fade half of slide (per side) + fade, on the departure curve.",
+      "usageContext": [
+        "sheet",
+        "panel",
+        "edge-anchored"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-sheet-content-close on the sheet content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "sheet-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell sheet / content / open -> closed: fade-out over moderate with exit. A sheet leaving. The fade half of slide (per side) + fade, on the departure curve.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-sheet-overlay-open",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The scrim behind a sheet, arriving with it.",
+      "usageContext": [
+        "sheet",
+        "overlay",
+        "scrim"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-sheet-overlay-open on the sheet overlay for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "sheet-overlay-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell sheet / overlay / closed -> open: fade-in over normal with enter. The scrim behind a sheet, arriving with it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-sheet-overlay-close",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The scrim behind a sheet, leaving with it.",
+      "usageContext": [
+        "sheet",
+        "overlay",
+        "scrim"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-sheet-overlay-close on the sheet overlay for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "sheet-overlay-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell sheet / overlay / open -> closed: fade-out over moderate with exit. The scrim behind a sheet, leaving with it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-drawer-overlay-open",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The scrim behind a drawer, arriving with it.",
+      "usageContext": [
+        "drawer",
+        "overlay",
+        "scrim"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-drawer-overlay-open on the drawer overlay for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "drawer-overlay-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell drawer / overlay / closed -> open: fade-in over normal with enter. The scrim behind a drawer, arriving with it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-drawer-overlay-close",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The scrim behind a drawer, leaving with it.",
+      "usageContext": [
+        "drawer",
+        "overlay",
+        "scrim"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-drawer-overlay-close on the drawer overlay for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "drawer-overlay-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell drawer / overlay / open -> closed: fade-out over moderate with exit. The scrim behind a drawer, leaving with it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-sidebar-overlay-mobile-open",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"spring-smooth\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A sidebar arriving as a mobile overlay. The row declares fade + slide; the fade is emitted and the slide is not, for the reason the sheet row gives -- no side-agnostic slide shape.",
+      "usageContext": [
+        "sidebar",
+        "overlay",
+        "mobile"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-sidebar-overlay-mobile-open on the sidebar overlay (mobile) for \"open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-normal",
+        "rafters-ease-spring-smooth"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "sidebar-overlay-mobile-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell sidebar / overlay (mobile) / open: fade-in over normal with spring-smooth. A sidebar arriving as a mobile overlay. The row declares fade + slide; the fade is emitted and the slide is not, for the reason the sheet row gives -- no side-agnostic slide shape.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-sidebar-overlay-mobile-close",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A mobile sidebar overlay leaving. The fade half of fade + slide, on the departure curve.",
+      "usageContext": [
+        "sidebar",
+        "overlay",
+        "mobile"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-sidebar-overlay-mobile-close on the sidebar overlay (mobile) for \"close\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "sidebar-overlay-mobile-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell sidebar / overlay (mobile) / close: fade-out over moderate with exit. A mobile sidebar overlay leaving. The fade half of fade + slide, on the departure curve.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-popover-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A popover arriving: smaller and nearer than a dialog, so one tier quicker.",
+      "usageContext": [
+        "popover",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-popover-content-open on the popover content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "popover-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell popover / content / closed -> open: scale-in over moderate with enter. A popover arriving: smaller and nearer than a dialog, so one tier quicker.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-popover-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A popover leaving: the user already chose to dismiss it.",
+      "usageContext": [
+        "popover",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-popover-content-close on the popover content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "popover-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell popover / content / open -> closed: scale-out over fast with exit. A popover leaving: the user already chose to dismiss it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-dropdown-menu-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A menu arriving: same anchored-popup moment as popover, declared separately.",
+      "usageContext": [
+        "dropdown-menu",
+        "menu",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-dropdown-menu-content-open on the dropdown-menu content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "dropdown-menu-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell dropdown-menu / content / closed -> open: scale-in over moderate with enter. A menu arriving: same anchored-popup moment as popover, declared separately.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-dropdown-menu-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A menu leaving, after a choice or a dismissal.",
+      "usageContext": [
+        "dropdown-menu",
+        "menu",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-dropdown-menu-content-close on the dropdown-menu content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "dropdown-menu-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell dropdown-menu / content / open -> closed: scale-out over fast with exit. A menu leaving, after a choice or a dismissal.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-context-menu-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A context menu arriving at the pointer that summoned it.",
+      "usageContext": [
+        "context-menu",
+        "menu",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-context-menu-content-open on the context-menu content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "context-menu-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell context-menu / content / closed -> open: scale-in over moderate with enter. A context menu arriving at the pointer that summoned it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-context-menu-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A context menu leaving, after a choice or a dismissal.",
+      "usageContext": [
+        "context-menu",
+        "menu",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-context-menu-content-close on the context-menu content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "context-menu-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell context-menu / content / open -> closed: scale-out over fast with exit. A context menu leaving, after a choice or a dismissal.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-select-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A select list arriving over its trigger.",
+      "usageContext": [
+        "select",
+        "listbox",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-select-content-open on the select content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "select-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell select / content / closed -> open: scale-in over moderate with enter. A select list arriving over its trigger.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-select-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A select list leaving, once a value is chosen or the list is dismissed.",
+      "usageContext": [
+        "select",
+        "listbox",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-select-content-close on the select content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "select-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell select / content / open -> closed: scale-out over fast with exit. A select list leaving, once a value is chosen or the list is dismissed.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-combobox-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A combobox list arriving under the field being typed into.",
+      "usageContext": [
+        "combobox",
+        "listbox",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-combobox-content-open on the combobox content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "combobox-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell combobox / content / closed -> open: scale-in over moderate with enter. A combobox list arriving under the field being typed into.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-combobox-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A combobox list leaving, once a value is chosen or the field is left.",
+      "usageContext": [
+        "combobox",
+        "listbox",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-combobox-content-close on the combobox content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "combobox-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell combobox / content / open -> closed: scale-out over fast with exit. A combobox list leaving, once a value is chosen or the field is left.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-command-content-open",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A command palette arriving. The row declares fade alone -- no zoom, unlike its anchored-popup siblings.",
+      "usageContext": [
+        "command",
+        "palette"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-command-content-open on the command content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "command-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell command / content / closed -> open: fade-in over moderate with enter. A command palette arriving. The row declares fade alone -- no zoom, unlike its anchored-popup siblings.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-command-content-close",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A command palette leaving, after a command is run or the palette is dismissed.",
+      "usageContext": [
+        "command",
+        "palette"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-command-content-close on the command content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "command-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell command / content / open -> closed: fade-out over fast with exit. A command palette leaving, after a command is run or the palette is dismissed.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-tooltip-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A tooltip arriving. The hover-intent delay its row also assigns is behaviour-owned, not part of this shape.",
+      "usageContext": [
+        "tooltip",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-tooltip-content-open on the tooltip content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "tooltip-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell tooltip / content / closed -> open: scale-in over moderate with enter. A tooltip arriving. The hover-intent delay its row also assigns is behaviour-owned, not part of this shape.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-tooltip-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A tooltip leaving as soon as the pointer does.",
+      "usageContext": [
+        "tooltip",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-tooltip-content-close on the tooltip content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "tooltip-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell tooltip / content / open -> closed: scale-out over fast with exit. A tooltip leaving as soon as the pointer does.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-hover-card-content-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A hover card arriving: the tooltip moment at card weight, declared separately.",
+      "usageContext": [
+        "hover-card",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-hover-card-content-open on the hover-card content for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "hover-card-content-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell hover-card / content / closed -> open: scale-in over moderate with enter. A hover card arriving: the tooltip moment at card weight, declared separately.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-hover-card-content-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A hover card leaving, after the linger grace its row assigns.",
+      "usageContext": [
+        "hover-card",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-hover-card-content-close on the hover-card content for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "hover-card-content-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell hover-card / content / open -> closed: scale-out over fast with exit. A hover card leaving, after the linger grace its row assigns.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-navigation-menu-panel-open",
+      "value": "{\"keyframe\":\"scale-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A navigation panel arriving under its trigger.",
+      "usageContext": [
+        "navigation-menu",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-navigation-menu-panel-open on the navigation-menu panel for \"closed -> open\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-in",
+      "animationName": "navigation-menu-panel-open",
+      "generateUtilityClass": true,
+      "description": "Motion cell navigation-menu / panel / closed -> open: scale-in over moderate with enter. A navigation panel arriving under its trigger.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-navigation-menu-panel-close",
+      "value": "{\"keyframe\":\"scale-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A navigation panel leaving when the pointer goes elsewhere.",
+      "usageContext": [
+        "navigation-menu",
+        "anchored-popup"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-navigation-menu-panel-close on the navigation-menu panel for \"open -> closed\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-scale-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "scale-out",
+      "animationName": "navigation-menu-panel-close",
+      "generateUtilityClass": true,
+      "description": "Motion cell navigation-menu / panel / open -> closed: scale-out over fast with exit. A navigation panel leaving when the pointer goes elsewhere.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-calendar-grid-month-change",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"standard\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The incoming month grid. The row declares fade or slide (x) crossfade; the fade is emitted, the optional slide is not, because its distance is a grid width nothing names.",
+      "usageContext": [
+        "calendar",
+        "date-picker"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-calendar-grid-month-change on the calendar grid for \"month change\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-moderate",
+        "rafters-ease-standard"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "calendar-grid-month-change",
+      "generateUtilityClass": true,
+      "description": "Motion cell calendar / grid / month change: fade-in over moderate with standard. The incoming month grid. The row declares fade or slide (x) crossfade; the fade is emitted, the optional slide is not, because its distance is a grid width nothing names.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-tabs-panel-active-change",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"standard\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The incoming tab panel as the selection moves: the calendar month-change moment on a panel instead of a grid, one tier quicker because a panel swap covers no distance.",
+      "usageContext": [
+        "tabs",
+        "panel",
+        "crossfade"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-tabs-panel-active-change on the tabs panel for \"active change\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-fast",
+        "rafters-ease-standard"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "tabs-panel-active-change",
+      "generateUtilityClass": true,
+      "description": "Motion cell tabs / panel / active change: fade-in over fast with standard. The incoming tab panel as the selection moves: the calendar month-change moment on a panel instead of a grid, one tier quicker because a panel swap covers no distance.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-bar-chart-bar-enter",
+      "value": "{\"keyframe\":\"grow-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A bar arriving: grows from zero at the value-axis baseline (bar-chart.behavior.ts sets the transform-origin), on the arrival curve. Vertical layout, the default -- see bar-chart-bar-enter-x for the horizontal counterpart.",
+      "usageContext": [
+        "bar-chart",
+        "chart",
+        "value-display"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-bar-chart-bar-enter on the bar-chart bar for \"enter\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-grow-in",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "grow-in",
+      "animationName": "bar-chart-bar-enter",
+      "generateUtilityClass": true,
+      "description": "Motion cell bar-chart / bar / enter: grow-in over normal with enter. A bar arriving: grows from zero at the value-axis baseline (bar-chart.behavior.ts sets the transform-origin), on the arrival curve. Vertical layout, the default -- see bar-chart-bar-enter-x for the horizontal counterpart.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-bar-chart-bar-enter-x",
+      "value": "{\"keyframe\":\"grow-in-x\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A bar arriving under layout: \"horizontal\": grows from zero at the value-axis baseline, now the left edge (bar-chart.behavior.ts sets the transform-origin), on the same arrival curve as the vertical bar-chart-bar-enter cell -- only the transform property (scaleX, not scaleY) changes with the swapped axis.",
+      "usageContext": [
+        "bar-chart",
+        "chart",
+        "value-display"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-bar-chart-bar-enter-x on the bar-chart bar for \"enter-horizontal\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-grow-in-x",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "grow-in-x",
+      "animationName": "bar-chart-bar-enter-x",
+      "generateUtilityClass": true,
+      "description": "Motion cell bar-chart / bar / enter-horizontal: grow-in-x over normal with enter. A bar arriving under layout: \"horizontal\": grows from zero at the value-axis baseline, now the left edge (bar-chart.behavior.ts sets the transform-origin), on the same arrival curve as the vertical bar-chart-bar-enter cell -- only the transform property (scaleX, not scaleY) changes with the swapped axis.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-area-chart-area-enter",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A filled area arriving on mount: fade, not scale -- unlike bar-chart-bar-enter, a stacked area series has no single baseline edge to grow from (its baseline is the previous series own top curve, area-chart.behavior.ts computeAreas), so opacity is the one property every area shares whether overlaid or stacked.",
+      "usageContext": [
+        "area-chart",
+        "chart",
+        "value-display"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-area-chart-area-enter on the area-chart area for \"enter\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "area-chart-area-enter",
+      "generateUtilityClass": true,
+      "description": "Motion cell area-chart / area / enter: fade-in over moderate with enter. A filled area arriving on mount: fade, not scale -- unlike bar-chart-bar-enter, a stacked area series has no single baseline edge to grow from (its baseline is the previous series own top curve, area-chart.behavior.ts computeAreas), so opacity is the one property every area shares whether overlaid or stacked.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-line-chart-line-enter",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A line series arriving on mount: fades in rather than snapping into place. The matrix assigns opacity over a stroke-dashoffset reveal for this cell -- a dashoffset keyframe needs a per-instance path-length value nothing here names, where a fade needs none.",
+      "usageContext": [
+        "line-chart",
+        "chart",
+        "value-display"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-line-chart-line-enter on the line-chart line for \"enter\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "line-chart-line-enter",
+      "generateUtilityClass": true,
+      "description": "Motion cell line-chart / line / enter: fade-in over moderate with enter. A line series arriving on mount: fades in rather than snapping into place. The matrix assigns opacity over a stroke-dashoffset reveal for this cell -- a dashoffset keyframe needs a per-instance path-length value nothing here names, where a fade needs none.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-avatar-image-load",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "An avatar image arriving once it has decoded, rather than snapping in.",
+      "usageContext": [
+        "avatar",
+        "image",
+        "load"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-avatar-image-load on the avatar image for \"load\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "avatar-image-load",
+      "generateUtilityClass": true,
+      "description": "Motion cell avatar / image / load: fade-in over moderate with enter. An avatar image arriving once it has decoded, rather than snapping in.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-image-img-load",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "An image arriving once it has decoded: the avatar moment, declared on its own row.",
+      "usageContext": [
+        "image",
+        "load"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-image-img-load on the image img for \"load\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "image-img-load",
+      "generateUtilityClass": true,
+      "description": "Motion cell image / img / load: fade-in over moderate with enter. An image arriving once it has decoded: the avatar moment, declared on its own row.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-embed-frame-load",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"moderate\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "An embedded frame arriving once the thing inside it has loaded.",
+      "usageContext": [
+        "embed",
+        "iframe",
+        "load"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-embed-frame-load on the embed frame for \"load\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "embed-frame-load",
+      "generateUtilityClass": true,
+      "description": "Motion cell embed / frame / load: fade-in over moderate with enter. An embedded frame arriving once the thing inside it has loaded.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-alert-root-appear",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"normal\"},\"curve\":\"enter\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "An alert arriving in the flow. The row declares fade + a short translate; the fade is emitted and the translate is not, for the reason the sheet row gives.",
+      "usageContext": [
+        "alert",
+        "notice",
+        "appear"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-alert-root-appear on the alert root for \"appear\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "alert-root-appear",
+      "generateUtilityClass": true,
+      "description": "Motion cell alert / root / appear: fade-in over normal with enter. An alert arriving in the flow. The row declares fade + a short translate; the fade is emitted and the translate is not, for the reason the sheet row gives.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-scroll-area-scrollbar-show",
+      "value": "{\"keyframe\":\"fade-in\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"standard\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A scrollbar surfacing when the pointer or a scroll says it is wanted.",
+      "usageContext": [
+        "scroll-area",
+        "scrollbar"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-scroll-area-scrollbar-show on the scroll-area scrollbar for \"show\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-in",
+        "rafters-duration-fast",
+        "rafters-ease-standard"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-in",
+      "animationName": "scroll-area-scrollbar-show",
+      "generateUtilityClass": true,
+      "description": "Motion cell scroll-area / scrollbar / show: fade-in over fast with standard. A scrollbar surfacing when the pointer or a scroll says it is wanted.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-scroll-area-scrollbar-hide",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"standard\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A scrollbar standing down once the scrolling that summoned it stops.",
+      "usageContext": [
+        "scroll-area",
+        "scrollbar"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-scroll-area-scrollbar-hide on the scroll-area scrollbar for \"hide\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-fast",
+        "rafters-ease-standard"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "scroll-area-scrollbar-hide",
+      "generateUtilityClass": true,
+      "description": "Motion cell scroll-area / scrollbar / hide: fade-out over fast with standard. A scrollbar standing down once the scrolling that summoned it stops.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-skeleton-root-waiting",
+      "value": "{\"keyframe\":\"pulse\",\"duration\":{\"kind\":\"period\",\"period\":\"shimmer\"}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A skeleton breathing while its content loads. A loop, so it takes a period rather than a tier -- and reduced motion may slow it but never stops it.",
+      "usageContext": [
+        "skeleton",
+        "loading-placeholder"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-skeleton-root-waiting on the skeleton root for \"waiting\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Stop this loop under prefers-reduced-motion -- loops slow, they never stop, and a stopped spinner says the work stopped"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-pulse",
+        "rafters-period-shimmer"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "keyframeName": "pulse",
+      "animationName": "skeleton-root-waiting",
+      "generateUtilityClass": true,
+      "description": "Motion cell skeleton / root / waiting: pulse looping on period shimmer. A skeleton breathing while its content loads. A loop, so it takes a period rather than a tier -- and reduced motion may slow it but never stops it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-skeleton-root-content-ready",
+      "value": "{\"keyframe\":\"fade-out\",\"duration\":{\"kind\":\"tier\",\"tier\":\"fast\"},\"curve\":\"exit\"}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A skeleton standing down once the real content has arrived.",
+      "usageContext": [
+        "skeleton",
+        "loading-placeholder"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-skeleton-root-content-ready on the skeleton root for \"content ready\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Add motion-reduce:animate-none alongside it -- animation:none resets the shorthand and discards the zeroed duration"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-fade-out",
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "keyframeName": "fade-out",
+      "animationName": "skeleton-root-content-ready",
+      "generateUtilityClass": true,
+      "description": "Motion cell skeleton / root / content ready: fade-out over fast with exit. A skeleton standing down once the real content has arrived.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-spinner-root-busy",
+      "value": "{\"keyframe\":\"spin\",\"duration\":{\"kind\":\"period\",\"period\":\"spin\"}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A spinner turning while the system works. A stopped spinner says the work stopped, so this loop is exempt from the reduced-motion zeroing.",
+      "usageContext": [
+        "spinner",
+        "loading",
+        "busy"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-spinner-root-busy on the spinner root for \"busy\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Stop this loop under prefers-reduced-motion -- loops slow, they never stop, and a stopped spinner says the work stopped"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-spin",
+        "rafters-period-spin"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "keyframeName": "spin",
+      "animationName": "spinner-root-busy",
+      "generateUtilityClass": true,
+      "description": "Motion cell spinner / root / busy: spin looping on period spin. A spinner turning while the system works. A stopped spinner says the work stopped, so this loop is exempt from the reduced-motion zeroing.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-progress-root-indeterminate",
+      "value": "{\"keyframe\":\"pulse\",\"duration\":{\"kind\":\"period\",\"period\":\"shimmer\"}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "A progress bar with no known end, pulsing to say work continues. Exempt from the reduced-motion zeroing for the same reason as the spinner.",
+      "usageContext": [
+        "progress",
+        "indeterminate",
+        "loading"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-progress-root-indeterminate on the progress root for \"indeterminate\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Stop this loop under prefers-reduced-motion -- loops slow, they never stop, and a stopped spinner says the work stopped"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-pulse",
+        "rafters-period-shimmer"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "keyframeName": "pulse",
+      "animationName": "progress-root-indeterminate",
+      "generateUtilityClass": true,
+      "description": "Motion cell progress / root / indeterminate: pulse looping on period shimmer. A progress bar with no known end, pulsing to say work continues. Exempt from the reduced-motion zeroing for the same reason as the spinner.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-cell-input-otp-caret-idle",
+      "value": "{\"keyframe\":\"caret-blink\",\"duration\":{\"kind\":\"period\",\"period\":\"blink\"}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "The caret in an empty OTP slot, blinking to say the field is waiting for a key.",
+      "usageContext": [
+        "input-otp",
+        "input-caret",
+        "text-cursor"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class animate-input-otp-caret-idle on the input-otp caret for \"idle\""
+        ],
+        "never": [
+          "Reuse this cell on a different component -- assignments come from motion.jsonl, one cell at a time",
+          "Stop this loop under prefers-reduced-motion -- loops slow, they never stop, and a stopped spinner says the work stopped"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "motion-keyframe-caret-blink",
+        "rafters-period-blink"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": false,
+      "keyframeName": "caret-blink",
+      "animationName": "input-otp-caret-idle",
+      "generateUtilityClass": true,
+      "description": "Motion cell input-otp / caret / idle: caret-blink looping on period blink. The caret in an empty OTP slot, blinking to say the field is waiting for a key.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-fade-in",
-      "value": "125ms cubic-bezier(0, 0, 0.58, 1)",
+      "value": "var(--rafters-duration-fast) var(--rafters-ease-enter)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Fade in animation preset",
@@ -1346,27 +3193,27 @@
         "fade-in",
         "appear"
       ],
-      "motionDuration": 125,
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-fast",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
       "easingCurve": [
         0,
         0,
-        0.58,
+        0.2,
         1
       ],
-      "easingName": "ease-out",
-      "dependsOn": [
-        "motion-duration-fast",
-        "motion-easing-ease-out"
-      ],
-      "description": "Fade in animation preset. Combines fast duration with ease-out easing.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
+      "easingName": "enter",
+      "motionDuration": 150,
+      "description": "Fade in animation preset. Combines fast duration with enter easing.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-fade-out",
-      "value": "125ms cubic-bezier(0.42, 0, 1, 1)",
+      "value": "var(--rafters-duration-fast) var(--rafters-ease-exit)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Fade out animation preset",
@@ -1374,27 +3221,27 @@
         "fade-out",
         "disappear"
       ],
-      "motionDuration": 125,
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
       "easingCurve": [
-        0.42,
+        0.4,
         0,
         1,
         1
       ],
-      "easingName": "ease-in",
-      "dependsOn": [
-        "motion-duration-fast",
-        "motion-easing-ease-in"
-      ],
-      "description": "Fade out animation preset. Combines fast duration with ease-in easing.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
+      "easingName": "exit",
+      "motionDuration": 150,
+      "description": "Fade out animation preset. Combines fast duration with exit easing.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-slide-in",
-      "value": "150ms cubic-bezier(0, 0, 0.58, 1)",
+      "value": "var(--rafters-duration-normal) var(--rafters-ease-enter)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide in animation preset",
@@ -1403,27 +3250,27 @@
         "panel-enter",
         "modal-enter"
       ],
-      "motionDuration": 150,
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
       "easingCurve": [
         0,
         0,
-        0.58,
+        0.2,
         1
       ],
-      "easingName": "ease-out",
-      "dependsOn": [
-        "motion-duration-normal",
-        "motion-easing-ease-out"
-      ],
-      "description": "Slide in animation preset. Combines normal duration with ease-out easing.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
+      "easingName": "enter",
+      "motionDuration": 350,
+      "description": "Slide in animation preset. Combines normal duration with enter easing.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-slide-out",
-      "value": "125ms cubic-bezier(0.42, 0, 1, 1)",
+      "value": "var(--rafters-duration-fast) var(--rafters-ease-exit)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Slide out animation preset",
@@ -1432,27 +3279,27 @@
         "panel-exit",
         "modal-exit"
       ],
-      "motionDuration": 125,
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
       "easingCurve": [
-        0.42,
+        0.4,
         0,
         1,
         1
       ],
-      "easingName": "ease-in",
-      "dependsOn": [
-        "motion-duration-fast",
-        "motion-easing-ease-in"
-      ],
-      "description": "Slide out animation preset. Combines fast duration with ease-in easing.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
-      "containerQueryAware": false,
-      "reducedMotionAware": true,
-      "userOverride": null
+      "easingName": "exit",
+      "motionDuration": 150,
+      "description": "Slide out animation preset. Combines fast duration with exit easing.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-scale-in",
-      "value": "150ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+      "value": "var(--rafters-duration-normal) var(--rafters-ease-spring-snappy)",
       "category": "motion",
       "namespace": "motion",
       "semanticMeaning": "Scale in with spring animation",
@@ -1461,34 +3308,438 @@
         "button-press",
         "emphasis"
       ],
-      "motionDuration": 150,
-      "easingCurve": [
-        0.175,
-        0.885,
-        0.32,
-        1.275
-      ],
-      "easingName": "spring",
+      "userOverride": null,
       "dependsOn": [
-        "motion-duration-normal",
-        "motion-easing-spring"
+        "rafters-duration-normal",
+        "rafters-ease-spring-snappy"
       ],
-      "description": "Scale in with spring animation. Combines normal duration with spring easing.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
       "containerQueryAware": false,
       "reducedMotionAware": true,
-      "userOverride": null
+      "easingCurve": [
+        0.2,
+        0.8,
+        0.2,
+        1
+      ],
+      "easingName": "spring-snappy",
+      "motionDuration": 350,
+      "description": "Scale in with spring animation. Combines normal duration with spring-snappy easing.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-hover",
+      "value": "{\"properties\":[\"color\",\"background-color\",\"border-color\"],\"durationTier\":\"fast\",\"curve\":\"standard\",\"reducedMotion\":null}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Hover-state colour transition. Acknowledges pointer presence. Colour only, no movement -- the cursor is already on target, so the response matches its speed at the fast tier.",
+      "usageContext": [
+        "hover",
+        "links",
+        "interactive-surfaces"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-hover and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-fast",
+        "rafters-ease-standard"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "transition",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-hover: color, background-color, border-color over fast with standard. Colour only, no movement -- the cursor is already on target, so the response matches its speed at the fast tier.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-focus",
+      "value": "{\"properties\":[\"box-shadow\",\"outline-color\"],\"durationTier\":\"micro\",\"curve\":\"linear\",\"reducedMotion\":null}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Focus-ring transition. Marks the focused element. A ring appearing, not moving -- micro tier at linear velocity reads as the system marking focus, not a gesture. (Tailwind ring is box-shadow.)",
+      "usageContext": [
+        "focus-visible",
+        "keyboard-navigation"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-focus and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-micro",
+        "rafters-ease-linear"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "transition",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-focus: box-shadow, outline-color over micro with linear. A ring appearing, not moving -- micro tier at linear velocity reads as the system marking focus, not a gesture. (Tailwind ring is box-shadow.)",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-press",
+      "value": "{\"properties\":[\"transform\",\"color\",\"background-color\"],\"durationTier\":\"micro\",\"curve\":\"spring-snappy\",\"reducedMotion\":{\"properties\":[\"color\",\"background-color\"]}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Press/active feedback. Confirms the input was received. The fastest, tightest feedback -- micro tier with a snappy spring follows the finger. Under reduced motion the transform drops; the colour change survives.",
+      "usageContext": [
+        "press",
+        "active",
+        "buttons"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-press and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-micro",
+        "rafters-ease-spring-snappy"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "transition",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-press: transform, color, background-color over micro with spring-snappy. The fastest, tightest feedback -- micro tier with a snappy spring follows the finger. Under reduced motion the transform drops; the colour change survives.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-toggle",
+      "value": "{\"properties\":[\"color\",\"background-color\",\"transform\"],\"durationTier\":\"moderate\",\"curve\":\"standard\",\"reducedMotion\":{\"properties\":[\"color\",\"background-color\"]}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Toggle/switch state change. Shows the new state. A thumb travelling a track is a small, tracked movement -- moderate tier at the standard curve. Reduced motion drops the transform to a colour cross-fade.",
+      "usageContext": [
+        "switch",
+        "toggle",
+        "checkbox"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-toggle and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-moderate",
+        "rafters-ease-standard"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "transition",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-toggle: color, background-color, transform over moderate with standard. A thumb travelling a track is a small, tracked movement -- moderate tier at the standard curve. Reduced motion drops the transform to a colour cross-fade.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-dropdown-in",
+      "value": "{\"properties\":[\"opacity\",\"transform\"],\"durationTier\":\"moderate\",\"curve\":\"enter\",\"reducedMotion\":{\"properties\":[\"opacity\"],\"ms\":100}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Dropdown/menu entrance. A dropdown is small and travels a short distance -- moderate tier, one step below the modal, with the arrival curve.",
+      "usageContext": [
+        "dropdown",
+        "menu",
+        "select",
+        "popover"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-dropdown-in and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-moderate",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "enter",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-dropdown-in: opacity, transform over moderate with enter. A dropdown is small and travels a short distance -- moderate tier, one step below the modal, with the arrival curve.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-dropdown-out",
+      "value": "{\"properties\":[\"opacity\",\"transform\"],\"durationTier\":\"fast\",\"curve\":\"exit\",\"reducedMotion\":{\"properties\":[\"opacity\"],\"ms\":100}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Dropdown/menu exit. The exit of a small element -- fast tier (shorter than its moderate entrance) with the departure curve. The user already chose to dismiss it.",
+      "usageContext": [
+        "dropdown",
+        "menu",
+        "select",
+        "popover"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-dropdown-out and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-fast",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "exit",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-dropdown-out: opacity, transform over fast with exit. The exit of a small element -- fast tier (shorter than its moderate entrance) with the departure curve. The user already chose to dismiss it.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-modal-in",
+      "value": "{\"properties\":[\"opacity\",\"transform\"],\"durationTier\":\"normal\",\"curve\":\"enter\",\"reducedMotion\":{\"properties\":[\"opacity\"],\"ms\":150}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Modal/dialog entrance. A modal is larger and travels farther than a dropdown -- normal tier, one step up, with the arrival curve. Size and distance produce the longer duration.",
+      "usageContext": [
+        "modal",
+        "dialog",
+        "alert-dialog"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-modal-in and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "enter",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-modal-in: opacity, transform over normal with enter. A modal is larger and travels farther than a dropdown -- normal tier, one step up, with the arrival curve. Size and distance produce the longer duration.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-modal-out",
+      "value": "{\"properties\":[\"opacity\",\"transform\"],\"durationTier\":\"moderate\",\"curve\":\"exit\",\"reducedMotion\":{\"properties\":[\"opacity\"],\"ms\":150}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Modal/dialog exit. The modal exit -- moderate tier (shorter than its normal entrance) with the departure curve.",
+      "usageContext": [
+        "modal",
+        "dialog",
+        "alert-dialog"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-modal-out and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "exit",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-modal-out: opacity, transform over moderate with exit. The modal exit -- moderate tier (shorter than its normal entrance) with the departure curve.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-sheet-in",
+      "value": "{\"properties\":[\"transform\"],\"durationTier\":\"normal\",\"curve\":\"spring-smooth\",\"reducedMotion\":{\"properties\":[\"opacity\"],\"ms\":250}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Sheet/drawer entrance. A sheet is a large spatial movement -- normal tier with the physical settle of a smooth spring, because the user must track it into place. Reduced motion becomes a cross-fade.",
+      "usageContext": [
+        "sheet",
+        "drawer",
+        "side-panel"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-sheet-in and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-normal",
+        "rafters-ease-spring-smooth"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "enter",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-sheet-in: transform over normal with spring-smooth. A sheet is a large spatial movement -- normal tier with the physical settle of a smooth spring, because the user must track it into place. Reduced motion becomes a cross-fade.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-sheet-out",
+      "value": "{\"properties\":[\"transform\"],\"durationTier\":\"normal\",\"curve\":\"exit\",\"reducedMotion\":{\"properties\":[\"opacity\"],\"ms\":250}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Sheet/drawer exit. The sheet exit -- normal tier (shorter than its slow entrance) with the departure curve.",
+      "usageContext": [
+        "sheet",
+        "drawer",
+        "side-panel"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-sheet-out and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-normal",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "exit",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-sheet-out: transform over normal with exit. The sheet exit -- normal tier (shorter than its slow entrance) with the departure curve.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-expand",
+      "value": "{\"properties\":[\"grid-template-rows\",\"opacity\"],\"durationTier\":\"normal\",\"curve\":\"enter\",\"reducedMotion\":{\"properties\":[\"opacity\"]}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Expand/reveal collapsible content (accordion, disclosure). Content unfolding to its natural height -- normal tier with the arrival curve. Transitions grid-template-rows (0fr->1fr), the transitionable stand-in for height:auto. Reduced motion snaps the rows and fades opacity.",
+      "usageContext": [
+        "accordion",
+        "collapsible",
+        "disclosure"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-expand and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-normal",
+        "rafters-ease-enter"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "enter",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-expand: grid-template-rows, opacity over normal with enter. Content unfolding to its natural height -- normal tier with the arrival curve. Transitions grid-template-rows (0fr->1fr), the transitionable stand-in for height:auto. Reduced motion snaps the rows and fades opacity.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-collapse",
+      "value": "{\"properties\":[\"grid-template-rows\",\"opacity\"],\"durationTier\":\"moderate\",\"curve\":\"exit\",\"reducedMotion\":{\"properties\":[\"opacity\"]}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Collapse/hide collapsible content (accordion, disclosure). Content folding away -- moderate tier (shorter than its normal expansion) with the departure curve. Reduced motion snaps the rows.",
+      "usageContext": [
+        "accordion",
+        "collapsible",
+        "disclosure"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-collapse and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-moderate",
+        "rafters-ease-exit"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "exit",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-collapse: grid-template-rows, opacity over moderate with exit. Content folding away -- moderate tier (shorter than its normal expansion) with the departure curve. Reduced motion snaps the rows.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
+    },
+    {
+      "name": "motion-semantic-page",
+      "value": "{\"properties\":[\"opacity\",\"transform\"],\"durationTier\":\"normal\",\"curve\":\"spring-smooth\",\"reducedMotion\":{\"properties\":[\"opacity\"],\"ms\":200}}",
+      "category": "motion",
+      "namespace": "motion",
+      "semanticMeaning": "Page/route transition. A whole-view transition -- normal tier with the physical settle of a smooth spring, because the user reorients across a large distance.",
+      "usageContext": [
+        "page-transition",
+        "route-change",
+        "view-switch"
+      ],
+      "usagePatterns": {
+        "do": [
+          "Apply class motion-page and let a state/presence change trigger the transition"
+        ],
+        "never": [
+          "Hardcode a raw numeric duration in place of this token"
+        ]
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "rafters-duration-normal",
+        "rafters-ease-spring-smooth"
+      ],
+      "containerQueryAware": false,
+      "reducedMotionAware": true,
+      "motionIntent": "enter",
+      "generateUtilityClass": true,
+      "description": "Semantic motion motion-page: opacity, transform over normal with spring-smooth. A whole-view transition -- normal tier with the physical settle of a smooth spring, because the user reorients across a large distance.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "motion-progression",
-      "value": "{\"ratio\":\"minor-third\",\"ratioValue\":1.2,\"baseDuration\":150,\"note\":\"Motion timing uses step-based progression (base * ratio^step) for unified feel\"}",
+      "value": "{\"ratio\":\"minor-third\",\"ratioValue\":1.2,\"baseDuration\":150,\"note\":\"Duration tiers are perceptually derived literals (docs/MOTION.md) and the five motion namespaces are authored leaves. The ratio reaches exactly one place: the loop keyframes ping, pulse and bounce, whose shapes are computed from it.\",\"ratioDrivenKeyframes\":[\"ping\",\"pulse\",\"bounce\"]}",
       "category": "motion",
       "namespace": "motion",
-      "semanticMeaning": "Metadata about the motion progression system",
-      "description": "Motion uses minor-third progression from 150ms base.",
-      "generatedAt": "2026-05-27T14:48:46.284Z",
+      "semanticMeaning": "Metadata about the motion system",
+      "userOverride": null,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Duration tiers are perceptual literals; the five motion namespaces (duration, ease, delay, extent, period) are authored leaves. The minor-third progression drives the loop keyframes ping, pulse and bounce, and nothing else -- the 150ms base is recorded for reference and drives no value.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     }
   ]
 }

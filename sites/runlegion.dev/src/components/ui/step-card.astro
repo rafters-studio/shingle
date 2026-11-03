@@ -25,11 +25,11 @@ const barColorClass = `step-bar-${color}`;
   <div class={classy('step-badge', badgeColorClass)}>
     {number}
   </div>
-  <Card class="step-card-inner overflow-hidden">
+  <Card>
     <div class="step-card-grid">
       <div class="step-visual-area">
         <Container size="full">
-          <Grid preset="linear" columns={1} gap="4" padding="6">
+          <Grid id={`step-${number}-terminal`}preset="linear" columns={1} gap="4" padding="6">
             <slot name="terminal" />
           </Grid>
         </Container>
@@ -37,11 +37,11 @@ const barColorClass = `step-bar-${color}`;
       <div class={classy('step-bar', barColorClass)}></div>
       <div>
         <Container size="full">
-          <Grid preset="linear" columns={1} gap="3" padding="6">
+          <Grid id={`step-${number}-content`}preset="linear" columns={1} gap="3" padding="6">
             <Typography as="h2" variant="h2">{title}</Typography>
-            {subtitle && <Typography as="h3" variant="h4" class="text-muted-foreground">{subtitle}</Typography>}
+            {subtitle && <Typography as="h3" variant="h4" color="muted-foreground">{subtitle}</Typography>}
             {quote && (
-              <Typography as="p" variant="muted" class="border-l-2 border-border pl-4">
+              <Typography as="p" variant="muted">
                 <em>{quote}</em>
               </Typography>
             )}

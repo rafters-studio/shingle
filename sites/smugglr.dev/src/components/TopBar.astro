@@ -9,11 +9,11 @@ import Grid from "@/components/ui/grid.astro";
   style="position:fixed;top:0;left:0;right:0;z-index:50;opacity:0;pointer-events:none;transition:opacity 0.2s ease"
 >
   <Container size="7xl" padding="8">
-    <Grid columns={2} gap="4">
+    <Grid id="topbar-grid-1" columns={2} gap="4">
       <a href="/">
         <img src="/logo.webp" alt="smugglr" class="w-24 h-auto" />
       </a>
-      <Grid columns={2} gap="8" class="justify-self-end w-fit">
+      <Grid id="topbar-grid-2" columns={2} gap="8">
         <a href="/docs/">Docs</a>
         <a href="https://github.com/rafters-studio/smugglr">GitHub</a>
       </Grid>

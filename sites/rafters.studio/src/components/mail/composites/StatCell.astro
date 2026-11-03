@@ -1,6 +1,7 @@
 ---
 import Card from '@/components/ui/card.astro';
-import P from '@/components/ui/typography-p.astro';
+import Container from '@/components/ui/container.astro';
+import { P } from '@/components/ui/typography.astro';
 
 interface Props {
   label: string;
@@ -11,10 +12,12 @@ interface Props {
 const { label, value, unit } = Astro.props;
 ---
 
-<Card class="flex flex-col gap-4 p-6">
+<Card>
+<Container padding="6" gap="4">
   <span class="font-mono text-label-small uppercase tracking-wide text-muted-foreground">{label}</span>
   <div class="font-mono text-display-medium tracking-tight text-foreground leading-none">
     {value}{unit && <span class="text-body-large text-muted-foreground ml-1">{unit}</span>}
   </div>
-  <P size="body-small" color="muted-foreground" class="m-0"><slot /></P>
+  <P size="sm" color="muted-foreground"><slot /></P>
+</Container>
 </Card>

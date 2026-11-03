@@ -1,43 +1,82 @@
 /**
- * Shared card class definitions
+ * @primitives classy
+ */
+import classy from '@/lib/primitives/classy';
+import type { CardConfig, CardState } from '@/components/ui/card.behavior';
+
+export interface CardClassSet {
+  root: string;
+}
+
+/**
+ * Structure the surface always carries: an elevated, bordered, rounded
+ * panel. Colour is kept separate so a `fill` can replace the default
+ * card surface without leaving a competing `bg-*` behind.
  *
- * Imported by both card.tsx (React) and card.astro (Astro)
- * to ensure visual parity across framework targets.
+ * NO MOTION, AND THE ROW SAYS WHY IT IS MISSING RATHER THAN THIS FILE FAKING
+ * ONE. `card / root / hover (when interactive)` in
+ * `packages/ui/docs/spec/matrix/motion.jsonl` assigns tier `fast` and curve
+ * role `standard` (provenance `baseline`) to an elevation change
+ * (`box-shadow`) -- but Card has no interactive variant for that moment to
+ * belong to. `CardConfig` is `as` + `fill`, `CardElement` is
+ * `div | article | section | aside` (never `a` or `button`), and no hover
+ * elevation exists anywhere in the component: the shadow is the constant
+ * `shadow-sm` above. A shadow transition at the fast tier on the standard curve here
+ * would time a property that never changes -- the same dead emission the
+ * chart-tooltip cells were excluded for. The disagreement between the row and
+ * the component is the finding, reported here and not resolved.
+ */
+const cardStructureClasses = 'flex flex-col gap-6 rounded-xl border py-6 shadow-sm';
+
+/** Base surface -- card's identity when no fill wins. */
+const cardSurfaceClasses = 'bg-surface-card';
+
+/**
+ * Sub-part classes are config-independent literals, so the framework files
+ * import them directly (no context/provider needed for a flat static).
+ *
+ * Spacing follows shadcn v4: the ROOT owns the vertical rhythm (`flex flex-col
+ * gap-6 py-6`) and each part owns only its horizontal inset (`px-6`). That is
+ * what lets an arbitrary child dropped straight into a Card -- not wrapped in
+ * CardContent -- pick up the same rhythm as the declared parts, which the old
+ * per-part padding with the top inset zeroed could not do.
+ *
+ * `text-title-medium ts-title-medium` / `text-body-small ts-body-small` are OURS, not shadcn's raw
+ * semibold weight and small size: the semantic typography role tokens are the
+ * product, and they are invisible to a swap (same element, same slot, same
+ * rendered role).
  */
 
-export const cardBaseClasses =
-  'bg-card text-card-foreground border border-card-border rounded-lg shadow-sm';
+/**
+ * The header is a GRID, per shadcn v4. `auto-rows-min` with
+ * `grid-rows-[auto_auto]` stacks title over description; the
+ * `has-data-[slot=card-action]:grid-cols-[1fr_auto]` variant opens a second
+ * column ONLY when a CardAction is present, which is what makes
+ * `cardActionClasses` place instead of no-op.
+ */
+export const cardHeaderClasses =
+  'grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto]';
 
-export const cardInteractiveClasses =
-  'hover:bg-card-hover hover:shadow-md transition-shadow duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+export const cardTitleClasses = 'text-title-medium ts-title-medium leading-none';
 
-export const cardEditableClasses =
-  'outline-2 outline-dashed outline-muted-foreground/30 outline-offset-2';
+export const cardDescriptionClasses = 'text-body-small ts-body-small text-muted-foreground';
 
-export const cardHeaderClasses = 'flex flex-col gap-1.5 p-6';
-export const cardHeaderFlushClasses =
-  'flex flex-col gap-1.5 p-0 [&_img]:w-full [&_img]:object-cover';
+export const cardContentClasses = 'px-6';
 
-export const cardTitleClasses = 'text-title-medium leading-none';
+export const cardFooterClasses = 'flex items-center px-6';
 
-export const cardDescriptionClasses = 'text-body-small text-muted-foreground';
-
+/**
+ * Trailing action, positioned into the header grid (shadcn v4 surface). These
+ * utilities were inert while the header was `flex flex-col`; the grid header
+ * above is the parent they always needed.
+ */
 export const cardActionClasses = 'col-start-2 row-span-2 row-start-1 self-start justify-self-end';
 
-export const cardContentClasses = 'p-6 pt-0';
-
-export const cardFooterClasses = 'flex items-center p-6 pt-0';
-
-export const cardEditableFocusClasses =
-  'outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded';
-
-export type CardBackground = 'none' | 'muted' | 'accent' | 'card' | 'primary' | 'secondary';
-
-export const cardBackgroundClasses: Record<CardBackground, string> = {
-  none: '',
-  muted: 'bg-muted text-muted-foreground',
-  accent: 'bg-accent text-accent-foreground',
-  card: 'bg-card text-card-foreground',
-  primary: 'bg-primary text-primary-foreground',
-  secondary: 'bg-secondary text-secondary-foreground',
-};
+export function cardClasses(config: CardConfig, _state: CardState): CardClassSet {
+  // A fill REPLACES the base surface (bg, foreground and border colour), so
+  // the two never coexist -- no reliance on compiled source order to pick a
+  // winner. Anything but one bg-fill-* token is dropped and the base stands.
+  return {
+    root: `${classy.fill(config.fill, classy.surface(config.surface, cardSurfaceClasses))} ${cardStructureClasses}`,
+  };
+}

@@ -6,11 +6,7 @@ stickyTopbar: true
 ---
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
-import H1 from "@/components/ui/typography-h1.astro";
-import H2 from "@/components/ui/typography-h2.astro";
-import P from "@/components/ui/typography-p.astro";
-import Small from "@/components/ui/typography-small.astro";
-import Codeblock from "@/components/ui/typography-codeblock.astro";
+import { H1, H2, P, Small, CodeBlock } from "@/components/ui/typography.astro";
 
 import Hero from "@/components/Hero.astro";
 import Section from "@/components/Section.astro";
@@ -21,7 +17,7 @@ import FeatureBlock from "@/components/FeatureBlock.astro";
 
     <H1 slot="title">Five minutes to your first push.</H1>
 
-    <P slot="tagline" size="display-medium" color="muted-foreground">Four steps. Real commands. Nothing hidden.</P>
+    <P slot="tagline" size="4xl" color="muted-foreground">Four steps. Real commands. Nothing hidden.</P>
 
     <P slot="description">Install smugglr, point it at a local SQLite file and a Cloudflare D1 target, dry-run the push to see what would change, then push. If you already know Workers, the Cloudflare quickstart is even shorter.</P>
 </Hero>
@@ -29,23 +25,23 @@ import FeatureBlock from "@/components/FeatureBlock.astro";
 <Section id="install" title="1. Install.">
     <P>Cargo is the recommended install. Pre-built binaries and a one-line installer script are on the GitHub releases page.</P>
 
-    <Codeblock>{`cargo install smugglr`}</Codeblock>
+    <CodeBlock>{`cargo install smugglr`}</CodeBlock>
 
     <P>Confirm it works:</P>
 
-    <Codeblock>{`smugglr --version`}</Codeblock>
+    <CodeBlock>{`smugglr --version`}</CodeBlock>
 </Section>
 
 <Section id="configure" title="2. Configure." tint>
     <P>Create a <code>config.toml</code> in your project directory: where the local SQLite lives, what the target is, and the target's connection details.</P>
 
-    <Codeblock>{`local_db = "./local.db"
+    <CodeBlock>{`local_db = "./local.db"
 
 [target]
 type = "d1"
 account_id = "your-cloudflare-account-id"
 database_id = "your-d1-database-id"
-api_token = "your-d1-api-token"`}</Codeblock>
+api_token = "your-d1-api-token"`}</CodeBlock>
 
     <P>Any SQLite file works for <code>local_db</code>. <code>type</code> is <code>d1</code>, <code>sqlite</code>, or <code>plugin</code>; turso, rqlite, starbasedb, and sqlite-cloud all go through <code>type = "plugin"</code> with a profile <code>name</code>. See the <a href="/docs/configuration/">Configuration reference</a> for every option.</P>
 </Section>
@@ -53,7 +49,7 @@ api_token = "your-d1-api-token"`}</Codeblock>
 <Section id="dry-run" title="3. Dry-run.">
     <P>See what the push would do before doing it. Dry-run reads both sides, hashes, diffs, and reports. Nothing is written.</P>
 
-    <Codeblock>{`smugglr push --dry-run`}</Codeblock>
+    <CodeBlock>{`smugglr push --dry-run`}</CodeBlock>
 
     <P>The output tells you how many rows would push per table and whether they are new or updated. Run this as many times as you like. It is safe.</P>
 </Section>
@@ -61,13 +57,13 @@ api_token = "your-d1-api-token"`}</Codeblock>
 <Section id="push" title="4. Push." tint>
     <P>When the dry-run looks right, drop the flag.</P>
 
-    <Codeblock>{`smugglr push`}</Codeblock>
+    <CodeBlock>{`smugglr push`}</CodeBlock>
 
     <P>smugglr pushes only the rows that actually changed, batched to respect the target's per-request SQL parameter limit. Transient HTTP failures retry with exponential backoff. Exit code 0 means success.</P>
 </Section>
 
 <Section id="next" title="What Next.">
-    <Grid columns={3} gap="6">
+    <Grid id="get-started-grid-1" columns={3} gap="6">
         <FeatureBlock title="Watch daemon.">
             <P>Background sync on a fixed interval. Set it and forget it.</P>
             <P><a href="/docs/cli-reference/#watch">watch reference</a></P>

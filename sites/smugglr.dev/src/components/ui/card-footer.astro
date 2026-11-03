@@ -1,17 +1,21 @@
 ---
+/**
+ * CardFooter -- trailing controls row. Horizontal inset only; the
+ * root owns the vertical rhythm.
+ *
+ * `class` is NOT a prop; design travels through token props only.
+ *
+ * @parent card
+ * @dependencies astro
+ */
 import type { HTMLAttributes } from 'astro/types';
-import classy from '@/lib/primitives/classy';
-import { type CardBackground, cardBackgroundClasses, cardFooterClasses } from '@/components/ui/card.classes';
+import { cardFooterClasses } from '@/components/ui/card.classes';
 
-interface Props extends HTMLAttributes<'div'> {
-  background?: CardBackground;
-}
+type Props = Omit<HTMLAttributes<'div'>, 'class'>;
 
-const { background, class: className, ...attrs } = Astro.props;
-const bgStyles = background ? cardBackgroundClasses[background] : '';
-const cls = classy(cardFooterClasses, bgStyles, className);
+const { class: _discardedClass, ...attrs } = Astro.props as Props & { class?: string };
 ---
 
-<div class={cls} {...attrs}>
+<div data-slot="card-footer" class={cardFooterClasses} {...attrs}>
   <slot />
 </div>

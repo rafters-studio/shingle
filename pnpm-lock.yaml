@@ -206,6 +206,9 @@ importers:
 
   packages/shared:
     dependencies:
+      '@fontsource-variable/noto-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@rafters/astro-meta':
         specifier: ^0.4.0
         version: 0.4.0(astro@7.4.2(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(linkedom@0.18.14)
@@ -218,7 +221,13 @@ importers:
       linkedom:
         specifier: ^0.18.0
         version: 0.18.14
+      nanostores:
+        specifier: ^1.5.5
+        version: 1.5.5
     devDependencies:
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
@@ -234,6 +243,9 @@ importers:
       '@astrojs/react':
         specifier: ^7.1.1
         version: 7.1.1(@types/node@24.19.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(yaml@2.9.1)
+      '@fontsource-variable/noto-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@shingle/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -292,12 +304,18 @@ importers:
       '@astrojs/mdx':
         specifier: ^8.1.1
         version: 8.1.1(@astrojs/markdown-satteri@0.4.5)(astro@7.4.2(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      '@fontsource-variable/noto-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@shingle/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       astro:
         specifier: ^7.4.2
         version: 7.4.2(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
+      nanostores:
+        specifier: ^1.5.5
+        version: 1.5.5
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.12
@@ -329,6 +347,9 @@ importers:
       '@astrojs/mdx':
         specifier: ^8.1.1
         version: 8.1.1(@astrojs/markdown-satteri@0.4.5)(astro@7.4.2(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      '@fontsource-variable/noto-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@shingle/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -341,6 +362,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      nanostores:
+        specifier: ^1.5.5
+        version: 1.5.5
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -378,6 +402,9 @@ importers:
       '@astrojs/mdx':
         specifier: ^8.1.1
         version: 8.1.1(@astrojs/markdown-satteri@0.4.5)(astro@7.4.2(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      '@fontsource-variable/noto-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@shingle/install':
         specifier: workspace:*
         version: link:../../packages/install
@@ -995,6 +1022,9 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fontsource-variable/noto-sans@5.3.0':
+    resolution: {integrity: sha512-e3ZuxzY9AL2psXPZlhwhnYrHUHv6PMoyK9MQ7croF0CUgURLqu9EMjW7q2FgVLwij1tjLsIHQrnwQ8aUcg4BiA==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -4259,6 +4289,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@fontsource-variable/noto-sans@5.3.0': {}
 
   '@img/colour@1.1.0': {}
 

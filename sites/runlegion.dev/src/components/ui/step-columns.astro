@@ -13,19 +13,20 @@ interface Props extends HTMLAttributes<'div'> {
   rightItems: string[];
 }
 
-const { leftLabel, rightLabel, leftColor = 'text-primary', leftItems, rightItems, class: className, ...attrs } = Astro.props;
+const { leftLabel, rightLabel, leftColor = 'primary', leftItems, rightItems, class: className, ...attrs } = Astro.props;
+const gridId = `step-columns-${leftLabel.toLowerCase().replace(/\W+/g, '-')}`;
 ---
 
 <div class={classy('border-t border-border', className)} {...attrs}>
-  <Grid preset="linear" columns={2} gap="6" padding="4">
+  <Grid id={gridId}preset="linear" columns={2} gap="6" padding="4">
     <Container gap="2">
-      <Typography as="span" variant="muted" class={classy('font-mono uppercase tracking-widest font-semibold', leftColor)}>{leftLabel}</Typography>
+      <Typography as="span" variant="muted" family="mono" transform="uppercase" tracking="widest" weight="semibold" color={leftColor}>{leftLabel}</Typography>
       {leftItems.map((item) => (
         <Typography as="p" variant="muted">{item}</Typography>
       ))}
     </Container>
     <Container gap="2">
-      <Typography as="span" variant="muted" class="font-mono uppercase tracking-widest font-semibold">{rightLabel}</Typography>
+      <Typography as="span" variant="muted" family="mono" transform="uppercase" tracking="widest" weight="semibold">{rightLabel}</Typography>
       {rightItems.map((item) => (
         <Typography as="p" variant="muted">{item}</Typography>
       ))}

@@ -9,13 +9,7 @@
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
 import Card from "@/components/ui/card.astro";
-import CardHeader from "@/components/ui/card-header.astro";
-import CardTitle from "@/components/ui/card-title.astro";
-import CardDescription from "@/components/ui/card-description.astro";
-import H2 from "@/components/ui/typography-h2.astro";
-import P from "@/components/ui/typography-p.astro";
-import Code from "@/components/ui/typography-code.astro";
-import Codeblock from "@/components/ui/typography-codeblock.astro";
+import { H2, P, Code, CodeBlock } from "@/components/ui/typography.astro";
 import InkBlock from "@/components/InkBlock.astro";
 ---
 
@@ -25,106 +19,98 @@ import InkBlock from "@/components/InkBlock.astro";
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; show it running</div>
             <H2>A TOML file, a dry-run, a push.</H2>
-            <P size="display-small">The whole product in thirty seconds. Real CLI output, no mockups.</P>
+            <P size="3xl">The whole product in thirty seconds. Real CLI output, no mockups.</P>
 
-            <Codeblock>{`local_db = "./local.db"
+            <CodeBlock>{`local_db = "./local.db"
 
 [target]
 type = "d1"
 account_id = "abc123"
 database_id = "def456"
-api_token = "..."`}</Codeblock>
+api_token = "..."`}</CodeBlock>
 
-            <Codeblock>{`$ smugglr push --dry-run
+            <CodeBlock>{`$ smugglr push --dry-run
 Comparing source and target...
   abilities        47 new, 0 changed, 0 missing
   missions          3 new, 1 changed, 0 missing
   characters        0 new, 0 changed, 0 missing
-51 rows to write. 0 conflicts. No data moved.`}</Codeblock>
+51 rows to write. 0 conflicts. No data moved.`}</CodeBlock>
 
-            <Codeblock>{`$ smugglr push
+            <CodeBlock>{`$ smugglr push
   abilities        47 inserted
   missions          3 inserted, 1 updated
   characters        no change
-51 rows written in 2.3s. exit 0.`}</Codeblock>
+51 rows written in 2.3s. exit 0.`}</CodeBlock>
 
-            <P size="display-small" color="muted-foreground">The dry-run writes nothing. The push writes exactly what the dry-run described. Same output, same counts. No surprises.</P>
+            <P size="3xl" color="muted-foreground">The dry-run writes nothing. The push writes exactly what the dry-run described. Same output, same counts. No surprises.</P>
         </section>
 
         <section id="targets">
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; one plugin, any LIKE backend</div>
             <H2>Seven profiles ship today. A backend that fits an existing request shape is config, not a fork.</H2>
-            <P size="display-small">Every remote target smugglr reaches over HTTP goes through one plugin, <Code>smugglr-http-sql</Code>. Pick a built-in profile by name and swapping targets is a config change, not a recompile.</P>
+            <P size="3xl">Every remote target smugglr reaches over HTTP goes through one plugin, <Code>smugglr-http-sql</Code>. Pick a built-in profile by name and swapping targets is a config change, not a recompile.</P>
 
-            <Codeblock>{`d1            # Cloudflare D1
+            <CodeBlock>{`d1            # Cloudflare D1
 turso         # Turso / libSQL
 rqlite        # rqlite
 starbasedb    # StarbaseDB
 sqlite-cloud  # SQLite Cloud
 http-sql      # http-sql v0.1 wire spec
-generic       # flat {sql, params} JSON`}</Codeblock>
+generic       # flat {sql, params} JSON`}</CodeBlock>
 
-            <P size="display-small">This target points at D1:</P>
-            <Codeblock>{`[target]
+            <P size="3xl">This target points at D1:</P>
+            <CodeBlock>{`[target]
 type = "d1"
 account_id = "abc123"
 database_id = "def456"
-api_token = "..."`}</Codeblock>
+api_token = "..."`}</CodeBlock>
 
-            <P size="display-small">This one at Turso, through the <Code>plugin</Code> target type:</P>
-            <Codeblock>{`[target]
+            <P size="3xl">This one at Turso, through the <Code>plugin</Code> target type:</P>
+            <CodeBlock>{`[target]
 type = "plugin"
 name = "turso"
 
 [target.config]
 url = "https://my-db.turso.io"
-auth_token = "..."`}</Codeblock>
+auth_token = "..."`}</CodeBlock>
 
-            <P size="display-small" color="muted-foreground">Same config file, same commands, same diff engine, different profile. A backend whose HTTP requests match the generic or http-sql shape works by pointing at that profile in config. A backend that speaks a genuinely new request or response shape needs a new profile in the core, which is a contribution rather than just a config edit.</P>
+            <P size="3xl" color="muted-foreground">Same config file, same commands, same diff engine, different profile. A backend whose HTTP requests match the generic or http-sql shape works by pointing at that profile in config. A backend that speaks a genuinely new request or response shape needs a new profile in the core, which is a contribution rather than just a config edit.</P>
 
-            <P size="display-small">The OSS tool syncs any number of LIKE sources from <InkBlock>a single config</InkBlock>.</P>
+            <P size="3xl">The OSS tool syncs any number of LIKE sources from <InkBlock>a single config</InkBlock>.</P>
         </section>
 
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; how it ships</div>
             <H2>Same algorithm, same adapters, same verbs.</H2>
-            <P size="display-small"><Code>cargo install smugglr</Code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>npm install smugglr</Code> for the WASM build in Node or a modern browser.</P>
+            <P size="3xl"><Code>cargo install smugglr</Code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>npm install smugglr</Code> for the WASM build in Node or a modern browser.</P>
         </section>
 
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">04 &middot; learn</div>
             <H2>Four entry points for the 10% reading this as a human.</H2>
-            <Grid columns={2} gap="4">
+            <Grid id="narrativesections-grid-1" columns={2} gap="4">
                 <a href="/get-started/" class="group hover:bg-muted transition-colors">
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Get Started <span class="text-muted-foreground">&#8599;</span></CardTitle>
-                            <CardDescription>Five minutes to your first push.</CardDescription>
-                        </CardHeader>
+                        <h3 slot="title">Get Started <span class="text-muted-foreground">&#8599;</span></h3>
+                        <p slot="description">Five minutes to your first push.</p>
                     </Card>
                 </a>
                 <a href="/docs/cli-reference/" class="group hover:bg-muted transition-colors">
                     <Card>
-                        <CardHeader>
-                            <CardTitle>CLI Reference <span class="text-muted-foreground">&#8599;</span></CardTitle>
-                            <CardDescription>Every command, every flag, every exit code.</CardDescription>
-                        </CardHeader>
+                        <h3 slot="title">CLI Reference <span class="text-muted-foreground">&#8599;</span></h3>
+                        <p slot="description">Every command, every flag, every exit code.</p>
                     </Card>
                 </a>
                 <a href="/docs/configuration/" class="group hover:bg-muted transition-colors">
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Configuration <span class="text-muted-foreground">&#8599;</span></CardTitle>
-                            <CardDescription>The complete config.toml.</CardDescription>
-                        </CardHeader>
+                        <h3 slot="title">Configuration <span class="text-muted-foreground">&#8599;</span></h3>
+                        <p slot="description">The complete config.toml.</p>
                     </Card>
                 </a>
                 <a href="/docs/how-it-works/" class="group hover:bg-muted transition-colors">
                     <Card>
-                        <CardHeader>
-                            <CardTitle>How It Works <span class="text-muted-foreground">&#8599;</span></CardTitle>
-                            <CardDescription>Content hashing, the sync algorithm, the relay.</CardDescription>
-                        </CardHeader>
+                        <h3 slot="title">How It Works <span class="text-muted-foreground">&#8599;</span></h3>
+                        <p slot="description">Content hashing, the sync algorithm, the relay.</p>
                     </Card>
                 </a>
             </Grid>
@@ -133,22 +119,18 @@ auth_token = "..."`}</Codeblock>
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">05 &middot; compare</div>
             <H2>Two reads of the same comparison.</H2>
-            <P size="display-small">Honest, falsifiable, no marketing. Where smugglr fits next to Litestream, rqlite, ElectricSQL, PowerSync, Firebase, Supabase Realtime, and the rest. Game devs get a separate page that names Photon, Colyseus, Mirror, and the persistent tier behind a netcode framework.</P>
-            <Grid columns={2} gap="4">
+            <P size="3xl">Honest, falsifiable, no marketing. Where smugglr fits next to Litestream, rqlite, ElectricSQL, PowerSync, Firebase, Supabase Realtime, and the rest. Game devs get a separate page that names Photon, Colyseus, Mirror, and the persistent tier behind a netcode framework.</P>
+            <Grid id="narrativesections-grid-2" columns={2} gap="4">
                 <a href="/compare/" class="group hover:bg-muted transition-colors">
                     <Card>
-                        <CardHeader>
-                            <CardTitle>compare <span class="text-muted-foreground">&#8599;</span></CardTitle>
-                            <CardDescription>Sync engines, hosted services, the client-cache layer. The general read.</CardDescription>
-                        </CardHeader>
+                        <h3 slot="title">compare <span class="text-muted-foreground">&#8599;</span></h3>
+                        <p slot="description">Sync engines, hosted services, the client-cache layer. The general read.</p>
                     </Card>
                 </a>
                 <a href="/compare/games/" class="group hover:bg-muted transition-colors">
                     <Card>
-                        <CardHeader>
-                            <CardTitle>compare / games <span class="text-muted-foreground">&#8599;</span></CardTitle>
-                            <CardDescription>Photon, Colyseus, Mirror, and the persistent tier every game needs.</CardDescription>
-                        </CardHeader>
+                        <h3 slot="title">compare / games <span class="text-muted-foreground">&#8599;</span></h3>
+                        <p slot="description">Photon, Colyseus, Mirror, and the persistent tier every game needs.</p>
                     </Card>
                 </a>
             </Grid>
@@ -157,7 +139,7 @@ auth_token = "..."`}</Codeblock>
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">06 &middot; open source</div>
             <H2>MIT licensed. All of it.</H2>
-            <P size="display-small">The CLI, the core engine, the plugin system. On <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>.</P>
+            <P size="3xl">The CLI, the core engine, the plugin system. On <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>.</P>
         </section>
 
     </Container>

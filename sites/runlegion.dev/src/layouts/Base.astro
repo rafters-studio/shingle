@@ -1,7 +1,7 @@
 ---
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
-import Small from "@/components/ui/typography-small.astro";
+import { Small } from "@/components/ui/typography.astro";
 import MegaFooter from "@/components/MegaFooter.astro";
 import SiteHead from "@shingle/shared/SiteHead.astro";
 import { softwareApplication, RAFTERS_STUDIO } from "@shingle/shared/meta";
@@ -129,7 +129,7 @@ const extraSchema: JsonLdObject[] = [...(isHome ? [softwareApp] : []), ...extraJ
             style="position:fixed;top:0;left:0;right:0;z-index:50;opacity:0;pointer-events:none;transition:opacity 0.2s ease"
         >
             <Container size="6xl" padding="4">
-                <Grid preset="linear" columns={2} gap="6">
+                <Grid id="base-grid-1" preset="linear" columns={2} gap="6">
                     <a href="/" aria-label="Legion home" class="no-underline">
                         <img
                             src="/logo.svg"
@@ -138,11 +138,10 @@ const extraSchema: JsonLdObject[] = [...(isHome ? [softwareApp] : []), ...extraJ
                             height="24"
                         />
                     </a>
-                    <Grid
+                    <Grid id="base-grid-2"
                         preset="linear"
                         columns={6}
                         gap="6"
-                        class="text-end"
                     >
                         {
                             navLinks.map((link) => (

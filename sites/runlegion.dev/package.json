@@ -19,10 +19,12 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^8.1.1",
+    "@fontsource-variable/noto-sans": "^5.3.0",
     "@shingle/shared": "workspace:*",
     "astro": "^7.4.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "nanostores": "^1.5.5",
     "react": "19.2.0",
     "tailwind-merge": "^3.5.0",
     "wrangler": "catalog:"

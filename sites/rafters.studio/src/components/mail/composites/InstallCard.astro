@@ -1,10 +1,10 @@
 ---
 import Card from '@/components/ui/card.astro';
-import Tabs from '@/components/ui/tabs.astro';
-import TabsContent from '@/components/ui/tabs-content.astro';
-import TabsList from '@/components/ui/tabs-list.astro';
-import TabsTrigger from '@/components/ui/tabs-trigger.astro';
 import Button from '@/components/ui/button.astro';
+import classy from '@/lib/primitives/classy';
+import { tabs, tabsIds, tabsInstanceAria, type TabsConfig, type TabsPart } from '@/components/ui/tabs.behavior';
+import { tabsClasses } from '@/components/ui/tabs.classes';
+import type { PartIds } from '@/lib/contract';
 
 interface Cmd {
   pkg: 'npm' | 'pnpm' | 'bun' | 'deno';
@@ -20,30 +20,58 @@ interface Props {
 const { primary, followUps, footline = [] } = Astro.props;
 const tabsId = 'install';
 const defaultPkg = primary[0]?.pkg ?? 'pnpm';
+
+// The panels hold markup, which the Tabs component's string `content` cannot, so
+// this is Tabs' own markup written out and bound by the same controller.
+const config: TabsConfig = { defaultValue: defaultPkg, orientation: 'horizontal' };
+const state = tabs.initialState(config);
+const classes = tabsClasses(config, state);
+const ids = {} as PartIds<TabsPart>;
+for (const part of Object.keys(tabs.parts) as TabsPart[]) {
+  ids[part] = `${tabsId}-${part}`;
+}
+const rootAria = tabs.aria(state, config, ids);
 ---
 
-<Card class="overflow-hidden p-0">
-  <Tabs id={tabsId} defaultValue={defaultPkg}>
+<Card>
+  <div data-part="root" id={ids.root} class={classes.root} {...rootAria.root}>
     <div class="flex items-center border-b border-border bg-card px-3 py-2">
-      <TabsList>
-        {primary.map((c) => (
-          <TabsTrigger tabsId={tabsId} value={c.pkg} defaultChecked={c.pkg === defaultPkg}>
-            {c.pkg}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      <div data-part="list" id={ids.list} role="tablist" class={classes.list} {...rootAria.list}>
+        {primary.map((c) => {
+          const { triggerId, panelId } = tabsIds(tabsId, c.pkg);
+          return (
+            <button
+              type="button"
+              role="tab"
+              id={triggerId}
+              data-part="trigger"
+              data-value={c.pkg}
+              tabindex={c.pkg === defaultPkg ? 0 : -1}
+              class={classes.trigger}
+              {...tabsInstanceAria('trigger', c.pkg, state, config, { trigger: triggerId, panel: panelId })}
+            >
+              {c.pkg}
+            </button>
+          );
+        })}
+      </div>
     </div>
 
     {primary.map((c) => {
       const targetId = `install-cmd-${c.pkg}`;
+      const { triggerId, panelId } = tabsIds(tabsId, c.pkg);
       return (
-        <TabsContent
-          tabsId={tabsId}
-          value={c.pkg}
-          defaultActive={c.pkg === defaultPkg}
-          class="relative bg-neutral-950 text-neutral-100 p-6 font-mono text-body-small leading-loose"
+        <div
+          role="tabpanel"
+          id={panelId}
+          data-part="panel"
+          data-value={c.pkg}
+          data-copy-target={`#${targetId}`}
+          tabindex="0"
+          class={classy(classes.panel, 'relative bg-neutral-950 text-neutral-100 p-6 font-mono text-body-small leading-loose')}
+          {...tabsInstanceAria('panel', c.pkg, state, config, { trigger: triggerId, panel: panelId })}
         >
-          <Button variant="outline" size="sm" class="absolute top-4 right-4" data-copy-target={`#${targetId}`}>
+          <Button id={`install-copy-${c.pkg}`} variant="outline" size="sm">
             COPY
           </Button>
 
@@ -64,10 +92,10 @@ const defaultPkg = primary[0]?.pkg ?? 'pnpm';
               </div>
             </div>
           ))}
-        </TabsContent>
+        </div>
       );
     })}
-  </Tabs>
+  </div>
 
   {footline.length > 0 && (
     <div class="flex flex-wrap gap-6 border-t border-border bg-card px-6 py-3 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
@@ -78,10 +106,23 @@ const defaultPkg = primary[0]?.pkg ?? 'pnpm';
   )}
 </Card>
 
+<script>
+  import { bindTabs } from '@/components/ui/tabs.behavior';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-part="root"]')) {
+    if (!root.querySelector('[data-part="list"][role="tablist"]')) continue;
+    if (root.dataset['bound'] === 'true') continue;
+    root.dataset['bound'] = 'true';
+    bindTabs(root);
+  }
+</script>
+
 <script is:inline>
-  document.querySelectorAll('[data-copy-target]').forEach(function (btn) {
+  document.querySelectorAll('[data-copy-target]').forEach(function (panel) {
+    var btn = panel.querySelector('button');
+    if (!btn) return;
     btn.addEventListener('click', function () {
-      var sel = btn.getAttribute('data-copy-target');
+      var sel = panel.getAttribute('data-copy-target');
       var el = sel ? document.querySelector(sel) : null;
       if (!el || !navigator.clipboard) return;
       navigator.clipboard.writeText(el.textContent || '').then(function () {

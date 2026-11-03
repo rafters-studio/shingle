@@ -1,5 +1,4 @@
 @import "../../.rafters/output/rafters.css";
-@import "../../.rafters/output/rafters.vars.css";
 
 /*
  * Scan the shared workspace package (@shingle/shared) so Tailwind emits the
@@ -9,16 +8,3 @@
  * which resolves through node_modules and is ignored by the scanner.
  */
 @source "../../../../packages/shared/src";
-
-@theme {
-  --text-6xl: 3.75rem;
-  --text-6xl--line-height: 1;
-  --text-7xl: 4.5rem;
-  --text-7xl--line-height: 1;
-  --text-8xl: 6rem;
-  --text-8xl--line-height: 1;
-  --text-9xl: 8rem;
-  --text-9xl--line-height: 1;
-}
-
-@source inline("text-6xl text-7xl text-8xl text-9xl");

@@ -1,85 +1,143 @@
 ---
 /**
- * Semantic container component for layout structure and content boundaries (Astro)
+ * Semantic container component for layout structure and content boundaries
  *
- * Zero client JavaScript. Server-rendered markup with Tailwind tokens.
- * Same variants, sizes, and accessibility as the React counterpart.
+ * @cognitive-load 0/10 - Invisible structure that reduces visual complexity
+ * @attention-economics Neutral structural element: Controls content width and breathing room without competing for attention
+ * @trust-building Predictable boundaries and consistent spacing patterns
+ * @accessibility Semantic HTML elements with proper landmark roles for screen readers
+ * @semantic-meaning Element-driven behavior: main=primary landmark, header=page/section header, footer=page/section footer, section=structural grouping, article=readable content with typography, aside=supplementary, div=no semantics
  *
- * @cognitive-load 0/10
- * @accessibility Semantic HTML elements with proper landmark roles
+ * @usage-patterns
+ * DO: Use main for the primary content area (once per page)
+ * DO: Use header with position="sticky" and depth="navigation" for site headers
+ * DO: Use footer for page or section footers
+ * DO: Use section for structural grouping within grids
+ * DO: Use article for readable content - typography is automatic
+ * DO: Use aside for supplementary content, add surface classes for depth
+ * DO: Spacing happens inside (padding), not outside (no margins)
+ * DO: Place a Container directly in a Grid and give it colSpan/rowSpan -- no Grid.Item wrapper needed
+ * NEVER: Nest containers unnecessarily
+ * NEVER: Use margins for spacing - let parent Grid handle gaps
+ * NEVER: Use a container query context without full width in flex/grid contexts (causes width collapse in Tailwind v4)
+ * NEVER: Write raw sticky/fixed/z-* utilities -- use position and depth props
+ *
+ * @example
+ * ```tsx
+ * <Container as="header" position="sticky" depth="navigation" size="full" padding="4">
+ *   <nav>Site navigation</nav>
+ * </Container>
+ * <Container as="main" size="6xl" padding="6">
+ *   <Container as="article">
+ *     <h1>Title</h1>
+ *     <p>Typography just works.</p>
+ *   </Container>
+ * </Container>
+ * <Container as="footer" padding="6">
+ *   <p>Footer content</p>
+ * </Container>
+ *
+ * // Self-placing grid children -- no Grid.Item wrappers
+ * <Grid columns={3} gap="6">
+ *   <Container as="article" size="5xl" colSpan={2} queryName="main">…</Container>
+ *   <Container as="aside" colSpan={1} queryName="rail">…</Container>
+ * </Grid>
+ * ```
+ *
+ * @dependencies astro
+ * @components grid
+ * @primitives classy
+ */
+
+/**
+ * Container -- the Astro performance of the static score (container.behavior.ts).
+ *
+ * A static score has nothing to subscribe to: this performance is pure
+ * decoration application. No client runtime, no effects (Spec 03) -- config
+ * in, classes out, semantic element chosen by `as`. `as` is rendered through
+ * Astro's dynamic-tag support (a capitalized variable bound to a native
+ * element name) so the element switch is one tag, not one branch per
+ * element -- the repetition the oracle paid
+ * for by hand.
  */
 import type { HTMLAttributes } from 'astro/types';
 import classy from '@/lib/primitives/classy';
-import { resolveFillName } from '@/lib/primitives/fill-resolver';
-import {
-  type ContainerBackground,
-  containerArticleTypography,
-  containerAutoEdgePadding,
-  containerBackgroundClasses,
-  containerGapClasses,
-  containerPaddingClasses,
-  containerSizeClasses,
-  containerSizeGapScale,
-} from '@/components/ui/container.classes';
+import type {
+  ContainerConfig,
+  ContainerDepth,
+  ContainerElement,
+  ContainerPadding,
+  ContainerPosition,
+  ContainerSize,
+} from '@/components/ui/container.behavior';
+import { containerClasses } from '@/components/ui/container.classes';
+import type { ResponsiveColumns } from '@/components/ui/grid.behavior';
 
-interface Props extends HTMLAttributes<'div'> {
-  as?: 'div' | 'main' | 'section' | 'article' | 'aside';
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'full';
-  padding?: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '8' | '10' | '12' | '16' | '20' | '24';
-  gap?: boolean | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '8' | '10' | '12' | '16' | '20' | '24';
+interface Props extends Omit<HTMLAttributes<'div'>, 'class'> {
+  as?: ContainerElement;
+  size?: ContainerSize;
+  padding?: ContainerPadding;
+  gap?: boolean | ContainerPadding;
+  /** Grid mode: define a container and a grid in one tag (linear columns,
+   *  1-12 or responsive; presets stay Grid's). */
+  columns?: ResponsiveColumns;
   query?: boolean;
   queryName?: string;
-  /** @deprecated Prefer the `fill` prop. */
-  background?: ContainerBackground;
-  /**
-   * Fill token name resolved through the fill registry in surface context.
-   * Takes precedence over `background` when both are set.
-   */
+  colSpan?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  rowSpan?: 1 | 2 | 3;
+  position?: ContainerPosition;
+  depth?: ContainerDepth;
   fill?: string;
+  /** A surface name; its `bg-surface-*` class replaces the base surface. */
+  surface?: string;
 }
 
 const {
-  as: Element = 'div',
+  as: Tag = 'div',
   size,
   padding,
   gap,
+  columns,
   query = true,
   queryName,
-  background,
+  colSpan,
+  rowSpan,
+  position,
+  depth,
   fill,
-  class: className,
+  surface,
+  class: _discardedClass,
   ...attrs
-} = Astro.props;
+} = Astro.props as Props & { class?: string };
 
-const isArticle = Element === 'article';
+const config: ContainerConfig = {
+  as: Tag,
+  size,
+  padding,
+  gap,
+  columns,
+  query,
+  queryName,
+  colSpan,
+  rowSpan,
+  position,
+  depth,
+  fill,
+  surface,
+};
 
-const resolvedGap =
-  gap === true
-    ? (size && containerSizeGapScale[size]) || '6'
-    : typeof gap === 'string'
-      ? gap
-      : undefined;
+const classes = containerClasses(config, {});
 
-const fillClasses = fill ? resolveFillName(fill, 'surface') : '';
-
-const classes = classy(
-  query && '@container w-full',
-  size && containerSizeClasses[size],
-  size && size !== 'full' && 'mx-auto',
-  padding ? containerPaddingClasses[padding] : size && size !== 'full' && containerAutoEdgePadding,
-  resolvedGap && containerGapClasses[resolvedGap],
-  fillClasses,
-  !fill && background && containerBackgroundClasses[background],
-  isArticle && containerArticleTypography,
-  className,
-);
-
+// containerName cannot be a literal class (arbitrary values are banned);
+// the one style channel, ruled narrowly for CQ naming -- matches container.tsx.
 const containerStyle = queryName ? `container-name: ${queryName}` : undefined;
-const dataFill = fill || undefined;
 ---
 
-{Element === 'div' && <div class={classes} style={containerStyle} data-fill={dataFill} {...attrs}><slot /></div>}
-{Element === 'main' && <main class={classes} style={containerStyle} data-fill={dataFill} {...attrs}><slot /></main>}
-{Element === 'section' && <section class={classes} style={containerStyle} data-fill={dataFill} {...attrs}><slot /></section>}
-{Element === 'article' && <article class={classes} style={containerStyle} data-fill={dataFill} {...attrs}><slot /></article>}
-{Element === 'aside' && <aside class={classes} style={containerStyle} data-fill={dataFill} {...attrs}><slot /></aside>}
+<Tag
+  data-part="root"
+  class={classy(classes.root)}
+  style={containerStyle}
+  {...attrs}
+>
+  <slot />
+</Tag>
