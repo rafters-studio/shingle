@@ -17,6 +17,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.2",
     "@astrojs/react": "^7.1.1",
+    "@fontsource-variable/noto-sans": "^5.3.0",
     "@shingle/shared": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",
     "astro": "^7.4.2",

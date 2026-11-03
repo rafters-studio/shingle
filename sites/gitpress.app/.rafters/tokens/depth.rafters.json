@@ -1,8 +1,6 @@
 {
-  "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "depth",
-  "version": "1.0.0",
-  "generatedAt": "2026-03-29T03:02:31.855Z",
+  "generatedAt": "2026-11-03T07:03:50.415Z",
   "tokens": [
     {
       "name": "depth-base",
@@ -25,14 +23,15 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 0,
       "containerQueryAware": false,
       "description": "Z-index 0 for base layer. In document flow.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-dropdown",
-      "value": "10",
+      "value": "50",
       "category": "depth",
       "namespace": "depth",
       "semanticMeaning": "Dropdown menus and select options",
@@ -52,10 +51,11 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 1,
       "containerQueryAware": false,
-      "description": "Z-index 10 for dropdown layer. Creates new stacking context.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "description": "Z-index 50 for dropdown layer. Creates new stacking context.",
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-sticky",
@@ -79,10 +79,11 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 2,
       "containerQueryAware": false,
       "description": "Z-index 20 for sticky layer. Creates new stacking context.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-navigation",
@@ -106,10 +107,11 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 3,
       "containerQueryAware": false,
       "description": "Z-index 25 for navigation layer. Creates new stacking context.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-fixed",
@@ -133,10 +135,11 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 4,
       "containerQueryAware": false,
       "description": "Z-index 30 for fixed layer. Creates new stacking context.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-modal",
@@ -160,10 +163,11 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 5,
       "containerQueryAware": false,
       "description": "Z-index 40 for modal layer. Creates new stacking context.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-popover",
@@ -187,10 +191,11 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 6,
       "containerQueryAware": false,
       "description": "Z-index 50 for popover layer. Creates new stacking context.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-tooltip",
@@ -213,14 +218,15 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 7,
       "containerQueryAware": false,
       "description": "Z-index 60 for tooltip layer. Creates new stacking context.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-overlay",
-      "value": "70",
+      "value": "35",
       "category": "depth",
       "namespace": "depth",
       "semanticMeaning": "Overlay backdrops - screen-dimming layers behind modals",
@@ -240,10 +246,11 @@
           "Skip levels without good reason"
         ]
       },
+      "userOverride": null,
       "scalePosition": 8,
       "containerQueryAware": false,
-      "description": "Z-index 70 for overlay layer. Creates new stacking context.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "description": "Z-index 35 for overlay layer. Creates new stacking context.",
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-below",
@@ -265,9 +272,10 @@
           "Rely on for critical content"
         ]
       },
+      "userOverride": null,
       "containerQueryAware": false,
       "description": "Z-index -1 for elements that should appear behind base content.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-max",
@@ -290,19 +298,21 @@
           "Use without questioning if the architecture is wrong"
         ]
       },
+      "userOverride": null,
       "containerQueryAware": false,
       "description": "Maximum z-index 9999 for special cases only.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     },
     {
       "name": "depth-scale",
-      "value": "{\"gap\":10,\"note\":\"Each level has 10-unit gaps for intermediate values\",\"levels\":{\"base\":0,\"dropdown\":10,\"sticky\":20,\"navigation\":25,\"fixed\":30,\"modal\":40,\"popover\":50,\"tooltip\":60,\"overlay\":70}}",
+      "value": "{\"gap\":10,\"note\":\"Each level has 10-unit gaps for intermediate values\",\"levels\":{\"base\":0,\"dropdown\":50,\"sticky\":20,\"navigation\":25,\"fixed\":30,\"modal\":40,\"popover\":50,\"tooltip\":60,\"overlay\":35}}",
       "category": "depth",
       "namespace": "depth",
       "semanticMeaning": "Depth scale reference",
+      "userOverride": null,
       "containerQueryAware": false,
       "description": "Reference for z-index scale structure. 10-unit gaps allow intermediate values.",
-      "generatedAt": "2026-03-28T19:47:21.812Z"
+      "generatedAt": "2026-11-03T07:03:49.417Z"
     }
   ]
 }

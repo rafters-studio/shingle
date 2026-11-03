@@ -14,7 +14,7 @@
  */
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
-import Small from "@/components/ui/typography-small.astro";
+import { Small } from "@/components/ui/typography.astro";
 import { PROJECTS } from "./ecosystem";
 import type { ProjectKey } from "./ecosystem";
 
@@ -52,14 +52,14 @@ const projectsColumn: FooterColumn = { heading: "Projects", links: projects };
 const columns: FooterColumn[] = [...leadingColumns, projectsColumn, siteColumn];
 ---
 
-<footer>
-  <Container fill="surface" size="full" padding="16" gap="12">
+<footer class="dark">
+  <Container surface="surface" size="full" padding="16" gap="12">
     <Container size="7xl" gap="12">
       <a href="https://rafters.studio" aria-label="Rafters Studio">
         <img src="/rafters-logo.svg" alt="Rafters Studio" class="h-8 w-auto brightness-0 invert" />
       </a>
 
-      <Grid columns={columns.length} gap="10">
+      <Grid id="megafooter-grid-1" columns={columns.length} gap="10">
         {
           columns.map((column) => (
             <Container gap="3">

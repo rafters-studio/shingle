@@ -2,10 +2,7 @@
 import Container from '@/components/ui/container.astro';
 import Card from '@/components/ui/card.astro';
 import Grid from '@/components/ui/grid.astro';
-import GridItem from '@/components/ui/grid-item.astro';
-import H3 from '@/components/ui/typography-h3.astro';
-import P from '@/components/ui/typography-p.astro';
-import Code from '@/components/ui/typography-code.astro';
+import { H3, P, Code } from '@/components/ui/typography.astro';
 import LinkButton from '@/components/mail/composites/LinkButton.astro';
 
 const repo = 'https://github.com/rafters-studio/mail';
@@ -13,22 +10,22 @@ const repo = 'https://github.com/rafters-studio/mail';
 
 <section id="oss" class="border-b border-border">
   <Container size="6xl" padding="20">
-    <Card class="p-8">
-      <Grid columns={2} gap="8" class="lg:items-center">
-        <GridItem>
+    <Card>
+      <Grid id="mail-osscallout-grid-1" columns={2} gap="8" padding="8">
+        <Container>
           <div class="flex flex-col gap-3">
-            <H3 size="title-large" tracking="tight" class="m-0">
+            <H3 size="3xl" tracking="tight">
               Open source.
               <span class="font-mono border-b-2 border-foreground pb-0.5">MIT</span>.
             </H3>
-            <P size="body-medium" color="muted-foreground" class="max-w-prose m-0">
+            <P size="base" color="muted-foreground">
               The whole thing lives at <Code>rafters-studio/mail</Code>. Issues welcome.
               RFC nitpicks especially welcome.
             </P>
           </div>
-        </GridItem>
+        </Container>
 
-        <GridItem>
+        <Container>
           <div class="flex flex-col items-start gap-3 lg:items-end">
             <LinkButton href={repo} variant="outline" external>
               <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="h-4 w-4 mr-2">
@@ -38,7 +35,7 @@ const repo = 'https://github.com/rafters-studio/mail';
             </LinkButton>
             <LinkButton href={repo} variant="outline" external>View on GitHub</LinkButton>
           </div>
-        </GridItem>
+        </Container>
       </Grid>
     </Card>
   </Container>

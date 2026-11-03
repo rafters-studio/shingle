@@ -4,27 +4,52 @@
   "componentsPath": "src/components/ui",
   "primitivesPath": "src/lib/primitives",
   "compositesPath": "src/composites",
+  "rulesPath": "src/lib/rules",
   "cssPath": "src/styles/global.css",
-  "shadcn": false,
   "exports": {
     "tailwind": true,
-    "typescript": false,
+    "typescript": true,
     "dtcg": false,
-    "compiled": false
+    "compiled": false,
+    "documentation": false
+  },
+  "intent": "efficient",
+  "fonts": {
+    "path": null,
+    "imports": [
+      "@fontsource-variable/noto-sans"
+    ],
+    "scripts": [
+      "Latn",
+      "Grek",
+      "Cyrl"
+    ]
   },
   "installed": {
     "components": [
+      "badge",
+      "button",
       "card",
       "container",
       "grid",
-      "item",
       "table",
+      "tabs",
       "typography"
     ],
     "primitives": [
+      "aria-manager",
       "classy",
-      "fill-resolver"
+      "memory",
+      "roving-focus",
+      "sr-announcer",
+      "types"
     ],
-    "composites": []
+    "composites": [],
+    "rules": [],
+    "substrate": [
+      "compose",
+      "contract",
+      "pressable"
+    ]
   }
 }

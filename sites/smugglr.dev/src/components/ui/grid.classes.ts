@@ -1,10 +1,14 @@
-/**
- * Shared class definitions for Grid component
- * Used by both grid.tsx (React) and grid.astro (Astro)
- */
+import type {
+  BentoPattern,
+  ColumnsValue,
+  GridConfig,
+  GridState,
+  ResponsiveColumns,
+} from '@/components/ui/grid.behavior';
 
-export type GridPreset = 'linear' | 'golden' | 'bento';
-export type BentoPattern = 'editorial' | 'dashboard' | 'feature' | 'portfolio';
+export interface GridClassSet {
+  root: string;
+}
 
 export const gridGapClasses: Record<string, string> = {
   '0': 'gap-0',
@@ -19,14 +23,6 @@ export const gridGapClasses: Record<string, string> = {
   '12': 'gap-12',
 };
 
-/**
- * Auto-scaling gap and padding via container queries.
- * Grid's default behavior: spacing scales with the container size.
- * Explicit gap/padding props override this.
- */
-export const gridAutoSpacingClasses =
-  'gap-3 p-3 @md:gap-4 @md:p-4 @lg:gap-6 @lg:p-6 @xl:gap-8 @xl:p-8';
-
 export const gridPaddingClasses: Record<string, string> = {
   '0': 'p-0',
   '1': 'p-1',
@@ -40,6 +36,14 @@ export const gridPaddingClasses: Record<string, string> = {
   '12': 'p-12',
 };
 
+/** Auto-scaling spacing via container queries -- Grid's default when
+ *  neither gap nor padding is explicit. */
+export const gridAutoSpacingClasses =
+  'gap-3 p-3 @md:gap-4 @md:p-4 @lg:gap-6 @lg:p-6 @xl:gap-8 @xl:p-8';
+
+/** Column classes. `auto` responds to the CONTAINER (one axis -- the
+ *  oracle also stacked viewport defaults on top of these, a live
+ *  double-axis defect, not ported). */
 export const gridColumnClasses: Record<string | number, string> = {
   1: 'grid-cols-1',
   2: 'grid-cols-2',
@@ -56,14 +60,26 @@ export const gridColumnClasses: Record<string | number, string> = {
   auto: 'grid-cols-1 @sm:grid-cols-2 @lg:grid-cols-3 @xl:grid-cols-4',
 };
 
-export const gridBentoPatterns: Record<BentoPattern, string> = {
-  editorial: 'grid-cols-3 grid-rows-2 [&>*:first-child]:col-span-2 [&>*:first-child]:row-span-2',
-  dashboard: 'grid-cols-4 grid-rows-2 [&>*:first-child]:col-span-2 [&>*:first-child]:row-span-2',
-  feature: 'grid-cols-2 [&>*:first-child]:row-span-2',
-  portfolio: 'grid-cols-3 grid-rows-3 [&>*:first-child]:col-span-2 [&>*:first-child]:row-span-2',
-};
+/**
+ * Stock layouts. Placement keys off the PROJECTED data-priority attribute
+ * (gridItemAttrs) -- the item declares what it is, the layout places it,
+ * source order is irrelevant. The oracle's first-child selectors inferred
+ * intent from position: defect-do-not-port.
+ */
+export const gridGoldenClasses = 'grid-cols-3 [&>[data-priority=primary]]:col-span-2';
 
-export const gridGoldenClasses = 'grid-cols-3 [&>*:first-child]:col-span-2';
+export const gridBentoPatterns: Record<BentoPattern, string> = {
+  editorial:
+    'grid-cols-3 grid-rows-2 ' +
+    '[&>[data-priority=primary]]:col-span-2 [&>[data-priority=primary]]:row-span-2',
+  dashboard:
+    'grid-cols-4 grid-rows-2 ' +
+    '[&>[data-priority=primary]]:col-span-2 [&>[data-priority=primary]]:row-span-2',
+  feature: 'grid-cols-2 [&>[data-priority=primary]]:row-span-2',
+  portfolio:
+    'grid-cols-3 grid-rows-3 ' +
+    '[&>[data-priority=primary]]:col-span-2 [&>[data-priority=primary]]:row-span-2',
+};
 
 export const gridColSpanClasses: Record<number, string> = {
   1: 'col-span-1',
@@ -86,43 +102,11 @@ export const gridRowSpanClasses: Record<number, string> = {
   3: 'row-span-3',
 };
 
-// ============================================================================
-// Responsive columns
-// ============================================================================
-
-/**
- * A single columns value: 1-12 or 'auto' (the existing auto-fit behavior).
- */
-export type ColumnsValue = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 'auto';
-
-/**
- * Tailwind viewport breakpoint prefix used for responsive columns.
- * Page-level marketing layouts respond to viewport, not container.
- */
 export type ColumnsBreakpoint = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
-/**
- * Responsive columns config: a base value plus optional per-breakpoint overrides.
- * Example: `{ base: 2, md: 4 }` becomes `grid-cols-2 md:grid-cols-4`.
- */
-export interface ResponsiveColumnsObject {
-  base?: ColumnsValue;
-  sm?: ColumnsValue;
-  md?: ColumnsValue;
-  lg?: ColumnsValue;
-  xl?: ColumnsValue;
-  '2xl'?: ColumnsValue;
-}
-
-/**
- * Either a single columns value or a responsive object.
- */
-export type ResponsiveColumns = ColumnsValue | ResponsiveColumnsObject;
-
-/**
- * Per-breakpoint columns class maps. Tailwind needs these as literal strings
- * for the JIT scanner.
- */
+/** Per-breakpoint columns maps -- literal strings for the JIT scanner.
+ *  VIEWPORT axis by documented intent (page-level layouts respond to the
+ *  viewport); the container axis pending ratification. */
 const gridResponsiveColumnClasses: Record<ColumnsBreakpoint, Record<string | number, string>> = {
   sm: {
     1: 'sm:grid-cols-1',
@@ -198,16 +182,8 @@ const gridResponsiveColumnClasses: Record<ColumnsBreakpoint, Record<string | num
 
 const breakpointOrder: ColumnsBreakpoint[] = ['sm', 'md', 'lg', 'xl', '2xl'];
 
-/**
- * Resolve a `columns` prop (single value or responsive object) to a class string.
- *
- * - Single value: returns the matching grid-cols class.
- * - Object: returns base + per-breakpoint classes joined by spaces.
- *
- * Returns empty string when no resolvable classes are produced.
- */
 export function resolveColumnsClasses(columns: ResponsiveColumns | undefined): string {
-  if (columns === undefined) return '';
+  if (columns === undefined) return gridColumnClasses['auto'] ?? '';
 
   if (typeof columns === 'number' || columns === 'auto') {
     return gridColumnClasses[columns] ?? '';
@@ -218,23 +194,31 @@ export function resolveColumnsClasses(columns: ResponsiveColumns | undefined): s
     const base = gridColumnClasses[columns.base];
     if (base) parts.push(base);
   }
-  for (const bp of breakpointOrder) {
-    const value = columns[bp];
+  for (const breakpoint of breakpointOrder) {
+    const value: ColumnsValue | undefined = columns[breakpoint];
     if (value !== undefined) {
-      const cls = gridResponsiveColumnClasses[bp][value];
+      const cls = gridResponsiveColumnClasses[breakpoint][value];
       if (cls) parts.push(cls);
     }
   }
   return parts.join(' ');
 }
 
-/**
- * True when the columns prop carries no useful 'auto' fallback. Used by Grid to
- * decide whether to apply its default responsive columns when the consumer
- * passes 'auto' or omits the prop entirely.
- */
-export function columnsResolvesToAuto(columns: ResponsiveColumns | undefined): boolean {
-  if (columns === undefined) return true;
-  if (columns === 'auto') return true;
-  return false;
+export function gridClasses(config: GridConfig, _state: GridState): GridClassSet {
+  const preset = config.preset ?? 'linear';
+  const autoSpacing = config.gap === undefined && config.padding === undefined;
+
+  const parts: string[] = ['grid'];
+  if (autoSpacing) {
+    parts.push(gridAutoSpacingClasses);
+  } else {
+    if (config.gap !== undefined) parts.push(gridGapClasses[config.gap] ?? '');
+    if (config.padding !== undefined) parts.push(gridPaddingClasses[config.padding] ?? '');
+  }
+
+  if (preset === 'linear') parts.push(resolveColumnsClasses(config.columns));
+  if (preset === 'golden') parts.push(gridGoldenClasses);
+  if (preset === 'bento' && config.pattern) parts.push(gridBentoPatterns[config.pattern]);
+
+  return { root: parts.filter(Boolean).join(' ') };
 }

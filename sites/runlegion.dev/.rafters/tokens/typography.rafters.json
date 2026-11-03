@@ -1,8 +1,6 @@
 {
-  "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "typography",
-  "version": "1.0.0",
-  "generatedAt": "2026-04-11T11:14:01.231Z",
+  "generatedAt": "2026-11-03T07:04:40.276Z",
   "tokens": [
     {
       "name": "font-sans",
@@ -16,10 +14,6 @@
         "buttons",
         "forms"
       ],
-      "description": "Sans-serif font family. Noto Sans Variable provides excellent language support and all weight variations.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false,
-      "localeAware": true,
       "usagePatterns": {
         "do": [
           "Use for all UI text",
@@ -29,7 +23,12 @@
           "Mix with other sans-serif fonts",
           "Use fixed font files when variable is available"
         ]
-      }
+      },
+      "userOverride": null,
+      "containerQueryAware": false,
+      "localeAware": true,
+      "description": "Sans-serif font family. The Noto stack covers the writing systems chosen at init, with all weight variations.",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-mono",
@@ -43,9 +42,6 @@
         "technical-data",
         "tabular-numbers"
       ],
-      "description": "System monospace stack for code and technical content.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Use for all code content",
@@ -55,7 +51,11 @@
           "Use for body text",
           "Use for UI elements"
         ]
-      }
+      },
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "System monospace stack for code and technical content.",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-serif",
@@ -69,9 +69,6 @@
         "articles",
         "blockquotes"
       ],
-      "description": "Serif font family. System serif stack by default. Override in global.css @theme with your imported serif font.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Override in global.css @theme to match imported serif font"
@@ -79,7 +76,11 @@
         "never": [
           "Use without importing an actual serif font for production"
         ]
-      }
+      },
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "Serif font family. System serif stack by default. Override in global.css @theme with your imported serif font.",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-heading",
@@ -92,12 +93,6 @@
         "display-text",
         "titles"
       ],
-      "dependsOn": [
-        "font-sans"
-      ],
-      "description": "Heading font family. Defaults to sans-serif. Override to change all headings to serif or another family.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Override to set all headings to a different typeface"
@@ -105,7 +100,14 @@
         "never": [
           "Reference directly in components -- use typography role utilities instead"
         ]
-      }
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "font-sans"
+      ],
+      "containerQueryAware": false,
+      "description": "Heading font family. Defaults to sans-serif. Override to change all headings to serif or another family.",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-body",
@@ -119,12 +121,6 @@
         "descriptions",
         "ui-elements"
       ],
-      "dependsOn": [
-        "font-sans"
-      ],
-      "description": "Body font family. Defaults to sans-serif. Override to change all body and UI text.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Override to set all body text to a different typeface"
@@ -132,7 +128,14 @@
         "never": [
           "Reference directly in components -- use typography role utilities instead"
         ]
-      }
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "font-sans"
+      ],
+      "containerQueryAware": false,
+      "description": "Body font family. Defaults to sans-serif. Override to change all body and UI text.",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-code",
@@ -146,12 +149,6 @@
         "kbd",
         "shortcuts"
       ],
-      "dependsOn": [
-        "font-mono"
-      ],
-      "description": "Code font family. Defaults to monospace. Override for a custom code typeface.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false,
       "usagePatterns": {
         "do": [
           "Override to set all code content to a custom monospace font"
@@ -159,7 +156,14 @@
         "never": [
           "Reference directly in components -- use typography role utilities instead"
         ]
-      }
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "font-mono"
+      ],
+      "containerQueryAware": false,
+      "description": "Code font family. Defaults to monospace. Override for a custom code typeface.",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-base",
@@ -173,15 +177,16 @@
         "paragraphs",
         "ui-text"
       ],
-      "scalePosition": 2,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 2,
+      "mathRelationship": "base",
+      "containerQueryAware": true,
       "description": "Font size base = 16px (1rem). Line height: 1.5, letter spacing: 0",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-xs",
@@ -196,15 +201,16 @@
         "helper-text",
         "metadata"
       ],
-      "scalePosition": 0,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^-2",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 0,
+      "mathRelationship": "base × 1.2^-2",
+      "containerQueryAware": true,
       "description": "Font size xs = 11.11px (0.694rem). Line height: 1.5, letter spacing: 0.025em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-xs",
@@ -212,12 +218,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for xs text size",
-      "dependsOn": [
-        "font-size-xs"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.5 for xs text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-xs",
@@ -225,12 +229,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for xs text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-xs"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing 0.025em for xs text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-sm",
@@ -245,15 +250,16 @@
         "helper-text",
         "metadata"
       ],
-      "scalePosition": 1,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^-1",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 1,
+      "mathRelationship": "base × 1.2^-1",
+      "containerQueryAware": true,
       "description": "Font size sm = 13.33px (0.833rem). Line height: 1.5, letter spacing: 0.015em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-sm",
@@ -261,12 +267,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for sm text size",
-      "dependsOn": [
-        "font-size-sm"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.5 for sm text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-sm",
@@ -274,12 +278,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for sm text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-sm"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing 0.015em for sm text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-base",
@@ -287,12 +292,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for base text size",
-      "dependsOn": [
-        "font-size-base"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.5 for base text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-base",
@@ -300,12 +303,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for base text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing 0 for base text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-lg",
@@ -319,15 +323,16 @@
         "paragraphs",
         "ui-text"
       ],
-      "scalePosition": 3,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^1",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 3,
+      "mathRelationship": "base × 1.2^1",
+      "containerQueryAware": true,
       "description": "Font size lg = 19.2px (1.2rem). Line height: 1.5, letter spacing: -0.01em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-lg",
@@ -335,12 +340,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for lg text size",
-      "dependsOn": [
-        "font-size-lg"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.5 for lg text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-lg",
@@ -348,12 +351,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for lg text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-lg"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.01em for lg text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-xl",
@@ -367,15 +371,16 @@
         "section-titles",
         "emphasis"
       ],
-      "scalePosition": 4,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^2",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 4,
+      "mathRelationship": "base × 1.2^2",
+      "containerQueryAware": true,
       "description": "Font size xl = 23.04px (1.44rem). Line height: 1.4, letter spacing: -0.015em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-xl",
@@ -383,12 +388,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for xl text size",
-      "dependsOn": [
-        "font-size-xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.4 for xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-xl",
@@ -396,12 +399,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.015em for xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-2xl",
@@ -415,15 +419,16 @@
         "section-titles",
         "emphasis"
       ],
-      "scalePosition": 5,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^3",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 5,
+      "mathRelationship": "base × 1.2^3",
+      "containerQueryAware": true,
       "description": "Font size 2xl = 27.65px (1.728rem). Line height: 1.35, letter spacing: -0.02em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-2xl",
@@ -431,12 +436,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for 2xl text size",
-      "dependsOn": [
-        "font-size-2xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.35 for 2xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-2xl",
@@ -444,12 +447,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for 2xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-2xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.02em for 2xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-3xl",
@@ -463,15 +467,16 @@
         "section-titles",
         "emphasis"
       ],
-      "scalePosition": 6,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^4",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 6,
+      "mathRelationship": "base × 1.2^4",
+      "containerQueryAware": true,
       "description": "Font size 3xl = 33.18px (2.074rem). Line height: 1.3, letter spacing: -0.025em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-3xl",
@@ -479,12 +484,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for 3xl text size",
-      "dependsOn": [
-        "font-size-3xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.3 for 3xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-3xl",
@@ -492,12 +495,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for 3xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-3xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.025em for 3xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-4xl",
@@ -511,15 +515,16 @@
         "display-headings",
         "marketing"
       ],
-      "scalePosition": 7,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^5",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 7,
+      "mathRelationship": "base × 1.2^5",
+      "containerQueryAware": true,
       "description": "Font size 4xl = 39.81px (2.488rem). Line height: 1.25, letter spacing: -0.03em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-4xl",
@@ -527,12 +532,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for 4xl text size",
-      "dependsOn": [
-        "font-size-4xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.25 for 4xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-4xl",
@@ -540,12 +543,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for 4xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-4xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.03em for 4xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-5xl",
@@ -559,15 +563,16 @@
         "display-headings",
         "marketing"
       ],
-      "scalePosition": 8,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^6",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 8,
+      "mathRelationship": "base × 1.2^6",
+      "containerQueryAware": true,
       "description": "Font size 5xl = 47.78px (2.986rem). Line height: 1.2, letter spacing: -0.035em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-5xl",
@@ -575,12 +580,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for 5xl text size",
-      "dependsOn": [
-        "font-size-5xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.2 for 5xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-5xl",
@@ -588,12 +591,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for 5xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-5xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.035em for 5xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-6xl",
@@ -607,15 +611,16 @@
         "display-headings",
         "marketing"
       ],
-      "scalePosition": 9,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^7",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 9,
+      "mathRelationship": "base × 1.2^7",
+      "containerQueryAware": true,
       "description": "Font size 6xl = 57.33px (3.583rem). Line height: 1.15, letter spacing: -0.04em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-6xl",
@@ -623,12 +628,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for 6xl text size",
-      "dependsOn": [
-        "font-size-6xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.15 for 6xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-6xl",
@@ -636,12 +639,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for 6xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-6xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.04em for 6xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-7xl",
@@ -655,15 +659,16 @@
         "display-headings",
         "marketing"
       ],
-      "scalePosition": 10,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^8",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 10,
+      "mathRelationship": "base × 1.2^8",
+      "containerQueryAware": true,
       "description": "Font size 7xl = 68.8px (4.3rem). Line height: 1.1, letter spacing: -0.045em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-7xl",
@@ -671,12 +676,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for 7xl text size",
-      "dependsOn": [
-        "font-size-7xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.1 for 7xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-7xl",
@@ -684,12 +687,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for 7xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-7xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.045em for 7xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-8xl",
@@ -703,15 +707,16 @@
         "display-headings",
         "marketing"
       ],
-      "scalePosition": 11,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^9",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 11,
+      "mathRelationship": "base × 1.2^9",
+      "containerQueryAware": true,
       "description": "Font size 8xl = 82.56px (5.16rem). Line height: 1.1, letter spacing: -0.05em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-8xl",
@@ -719,12 +724,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for 8xl text size",
-      "dependsOn": [
-        "font-size-8xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.1 for 8xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-8xl",
@@ -732,12 +735,13 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for 8xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-8xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.05em for 8xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-size-9xl",
@@ -751,15 +755,16 @@
         "display-headings",
         "marketing"
       ],
-      "scalePosition": 12,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^10",
+      "userOverride": null,
       "dependsOn": [
         "font-size-base"
       ],
+      "progressionSystem": "minor-third",
+      "scalePosition": 12,
+      "mathRelationship": "base × 1.2^10",
+      "containerQueryAware": true,
       "description": "Font size 9xl = 99.07px (6.192rem). Line height: 1.1, letter spacing: -0.05em",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": true
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "line-height-9xl",
@@ -767,12 +772,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Line height for 9xl text size",
-      "dependsOn": [
-        "font-size-9xl"
-      ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Line height 1.1 for 9xl text. Tighter for large text, looser for small.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "letter-spacing-9xl",
@@ -780,12 +783,118 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Letter spacing for 9xl text size",
+      "userOverride": null,
       "dependsOn": [
         "font-size-9xl"
       ],
+      "containerQueryAware": false,
       "description": "Letter spacing -0.05em for 9xl text. Negative for large text improves readability.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "letter-spacing-tighter",
+      "value": "-0.05em",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Named letter spacing (tighter), read by tracking-tighter",
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "Letter spacing -0.05em (tighter).",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "letter-spacing-tight",
+      "value": "-0.025em",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Named letter spacing (tight), read by tracking-tight",
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "Letter spacing -0.025em (tight).",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "letter-spacing-normal",
+      "value": "0em",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Named letter spacing (normal), read by tracking-normal",
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "Letter spacing 0em (normal).",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "letter-spacing-wide",
+      "value": "0.025em",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Named letter spacing (wide), read by tracking-wide",
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "Letter spacing 0.025em (wide).",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "letter-spacing-wider",
+      "value": "0.05em",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Named letter spacing (wider), read by tracking-wider",
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "Letter spacing 0.05em (wider).",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "line-height-7",
+      "value": "var(--rafters-spacing-7)",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Named line height (7), read by leading-7",
+      "userOverride": null,
+      "dependsOn": [
+        "spacing-7"
+      ],
+      "containerQueryAware": false,
+      "description": "Line height var(--rafters-spacing-7) (7).",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "line-height-none",
+      "value": "1",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Named line height (none), read by leading-none",
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "Line height 1 (none).",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "line-height-relaxed",
+      "value": "1.625",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Named line height (relaxed), read by leading-relaxed",
+      "userOverride": null,
+      "containerQueryAware": false,
+      "description": "Line height 1.625 (relaxed).",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
+    },
+    {
+      "name": "letter-spacing-widest",
+      "value": "0.1em",
+      "category": "typography",
+      "namespace": "typography",
+      "semanticMeaning": "Widest named letter spacing, for keyboard shortcut labels",
+      "userOverride": null,
+      "dependsOn": [
+        "font-size-xs"
+      ],
+      "containerQueryAware": false,
+      "description": "Letter spacing 0.1em (widest), used by the shortcut composite.",
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-thin",
@@ -797,9 +906,10 @@
         "display",
         "decorative"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 100 (thin)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-extralight",
@@ -810,9 +920,10 @@
       "usageContext": [
         "large-display"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 200 (extralight)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-light",
@@ -824,9 +935,10 @@
         "body-large",
         "display"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 300 (light)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-normal",
@@ -838,9 +950,10 @@
         "body-text",
         "default"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 400 (normal)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-medium",
@@ -852,9 +965,10 @@
         "emphasis",
         "labels"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 500 (medium)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-semibold",
@@ -866,9 +980,10 @@
         "headings",
         "buttons"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 600 (semibold)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-bold",
@@ -880,9 +995,10 @@
         "strong-emphasis",
         "headings"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 700 (bold)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-extrabold",
@@ -894,9 +1010,10 @@
         "display",
         "hero"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 800 (extrabold)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "font-weight-black",
@@ -908,9 +1025,10 @@
         "display",
         "impact"
       ],
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Font weight 900 (black)",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     },
     {
       "name": "typography-progression",
@@ -918,9 +1036,10 @@
       "category": "typography",
       "namespace": "typography",
       "semanticMeaning": "Metadata about the typography progression system",
+      "userOverride": null,
+      "containerQueryAware": false,
       "description": "Typography uses minor-third progression (ratio 1.2) from base 16px.",
-      "generatedAt": "2026-04-11T11:14:01.198Z",
-      "containerQueryAware": false
+      "generatedAt": "2026-11-03T07:04:39.266Z"
     }
   ]
 }

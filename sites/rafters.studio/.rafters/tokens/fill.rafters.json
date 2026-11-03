@@ -1,201 +1,723 @@
 {
-  "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "fill",
-  "version": "1.0.0",
-  "generatedAt": "2026-04-17T08:27:38.258Z",
+  "generatedAt": "2026-11-03T07:03:28.492Z",
   "tokens": [
     {
-      "name": "fill-surface",
-      "value": "{\"color\":\"neutral-900\",\"foreground\":\"neutral-100\"}",
+      "name": "surface-background",
+      "value": {
+        "background": {
+          "color": {
+            "token": "background"
+          }
+        },
+        "foreground": {
+          "token": "foreground"
+        }
+      },
       "category": "fill",
       "namespace": "fill",
-      "semanticMeaning": "Primary content surface",
-      "usageContext": [
-        "surface"
-      ],
-      "dependsOn": [
-        "neutral-900",
-        "neutral-100"
-      ],
-      "description": "Fill token \"surface\" -- solid neutral-900 (Primary content surface)",
-      "generatedAt": "2026-04-17T08:27:38.211Z",
-      "containerQueryAware": true,
-      "scalePosition": 0,
-      "usagePatterns": {
-        "do": [
-          "Use fill=\"surface\" on surface components (Container, Card) for primary content surface"
-        ],
-        "never": [
-          "Do not use raw bg-* classes when a fill token exists for the purpose",
-          "Do not hardcode opacity values -- use the fill token instead"
-        ]
-      }
+      "semanticMeaning": "The background surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
     },
     {
-      "name": "fill-panel",
-      "value": "{\"color\":\"neutral-800\",\"opacity\":0.95,\"foreground\":\"neutral-100\"}",
+      "name": "surface-card",
+      "value": {
+        "background": {
+          "color": {
+            "token": "card"
+          }
+        },
+        "foreground": {
+          "token": "card-foreground"
+        },
+        "border": {
+          "token": "card-border"
+        }
+      },
       "category": "fill",
       "namespace": "fill",
-      "semanticMeaning": "Elevated panel",
-      "usageContext": [
-        "surface"
-      ],
-      "dependsOn": [
-        "neutral-800",
-        "neutral-100"
-      ],
-      "description": "Fill token \"panel\" -- neutral-800 at 95% opacity (Elevated panel)",
-      "generatedAt": "2026-04-17T08:27:38.211Z",
-      "containerQueryAware": true,
-      "scalePosition": 1,
-      "usagePatterns": {
-        "do": [
-          "Use fill=\"panel\" on surface components (Container, Card) for elevated panel"
-        ],
-        "never": [
-          "Do not use raw bg-* classes when a fill token exists for the purpose",
-          "Do not hardcode opacity values -- use the fill token instead"
-        ]
-      }
+      "semanticMeaning": "The card surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
     },
     {
-      "name": "fill-overlay",
-      "value": "{\"color\":\"neutral-950\",\"opacity\":0.8,\"foreground\":\"neutral-50\",\"backdropBlur\":\"sm\"}",
+      "name": "surface-panel",
+      "value": {
+        "background": {
+          "color": {
+            "token": "panel"
+          }
+        },
+        "foreground": {
+          "token": "panel-foreground"
+        },
+        "border": {
+          "token": "panel-border"
+        }
+      },
       "category": "fill",
       "namespace": "fill",
-      "semanticMeaning": "Modal backdrop",
-      "usageContext": [
-        "surface"
-      ],
-      "dependsOn": [
-        "neutral-950",
-        "neutral-50"
-      ],
-      "description": "Fill token \"overlay\" -- neutral-950 at 80% opacity with backdrop-blur-sm (Modal backdrop)",
-      "generatedAt": "2026-04-17T08:27:38.211Z",
-      "containerQueryAware": true,
-      "scalePosition": 2,
-      "usagePatterns": {
-        "do": [
-          "Use fill=\"overlay\" on surface components (Container, Card) for modal backdrop"
-        ],
-        "never": [
-          "Do not use raw bg-* classes when a fill token exists for the purpose",
-          "Do not hardcode opacity values -- use the fill token instead"
-        ]
-      }
+      "semanticMeaning": "The panel surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
     },
     {
-      "name": "fill-glass",
-      "value": "{\"color\":\"neutral-900\",\"opacity\":0.6,\"foreground\":\"neutral-100\",\"backdropBlur\":\"md\"}",
+      "name": "surface-popover",
+      "value": {
+        "background": {
+          "color": {
+            "token": "popover"
+          }
+        },
+        "foreground": {
+          "token": "popover-foreground"
+        },
+        "border": {
+          "token": "popover-border"
+        }
+      },
       "category": "fill",
       "namespace": "fill",
-      "semanticMeaning": "Glass morphism",
-      "usageContext": [
-        "surface"
-      ],
-      "dependsOn": [
-        "neutral-900",
-        "neutral-100"
-      ],
-      "description": "Fill token \"glass\" -- neutral-900 at 60% opacity with backdrop-blur-md (Glass morphism)",
-      "generatedAt": "2026-04-17T08:27:38.211Z",
-      "containerQueryAware": true,
-      "scalePosition": 3,
-      "usagePatterns": {
-        "do": [
-          "Use fill=\"glass\" on surface components (Container, Card) for glass morphism"
-        ],
-        "never": [
-          "Do not use raw bg-* classes when a fill token exists for the purpose",
-          "Do not hardcode opacity values -- use the fill token instead"
-        ]
-      }
+      "semanticMeaning": "The popover surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
     },
     {
-      "name": "fill-primary",
-      "value": "{\"color\":\"primary\",\"foreground\":\"primary-foreground\"}",
+      "name": "surface-surface",
+      "value": {
+        "background": {
+          "color": {
+            "token": "surface"
+          }
+        },
+        "foreground": {
+          "token": "surface-foreground"
+        },
+        "border": {
+          "token": "surface-border"
+        }
+      },
       "category": "fill",
       "namespace": "fill",
-      "semanticMeaning": "Primary brand surface",
-      "usageContext": [
-        "surface",
-        "text"
-      ],
-      "dependsOn": [
-        "primary",
-        "primary-foreground"
-      ],
-      "description": "Fill token \"primary\" -- solid primary (Primary brand surface)",
-      "generatedAt": "2026-04-17T08:27:38.211Z",
-      "containerQueryAware": true,
-      "scalePosition": 4,
-      "usagePatterns": {
-        "do": [
-          "Use fill=\"primary\" on surface components (Container, Card) for primary brand surface"
-        ],
-        "never": [
-          "Do not use raw bg-* classes when a fill token exists for the purpose",
-          "Do not hardcode opacity values -- use the fill token instead"
-        ]
-      }
+      "semanticMeaning": "The surface surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
     },
     {
-      "name": "fill-muted",
-      "value": "{\"color\":\"muted\",\"foreground\":\"muted-foreground\"}",
+      "name": "surface-primary",
+      "value": {
+        "background": {
+          "color": {
+            "token": "primary"
+          }
+        },
+        "foreground": {
+          "token": "primary-foreground"
+        },
+        "border": {
+          "token": "primary-border"
+        }
+      },
       "category": "fill",
       "namespace": "fill",
-      "semanticMeaning": "Subdued surface for secondary content",
-      "usageContext": [
-        "surface"
-      ],
-      "dependsOn": [
-        "muted",
-        "muted-foreground"
-      ],
-      "description": "Fill token \"muted\" -- solid muted (Subdued surface for secondary content)",
-      "generatedAt": "2026-04-17T08:27:38.211Z",
-      "containerQueryAware": true,
-      "scalePosition": 5,
-      "usagePatterns": {
-        "do": [
-          "Use fill=\"muted\" on surface components (Container, Card) for subdued surface for secondary content"
-        ],
-        "never": [
-          "Do not use raw bg-* classes when a fill token exists for the purpose",
-          "Do not hardcode opacity values -- use the fill token instead"
-        ]
-      }
+      "semanticMeaning": "The primary surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
     },
     {
-      "name": "fill-hero",
-      "value": "{\"foreground\":\"primary-foreground\",\"gradient\":{\"direction\":\"to-b\",\"stops\":[{\"color\":\"primary\"},{\"color\":\"primary\",\"opacity\":0}]}}",
+      "name": "surface-primary-subtle",
+      "value": {
+        "background": {
+          "color": {
+            "token": "primary-subtle"
+          }
+        },
+        "foreground": {
+          "token": "primary-subtle-foreground"
+        }
+      },
       "category": "fill",
       "namespace": "fill",
-      "semanticMeaning": "Hero fade gradient",
-      "usageContext": [
-        "surface",
-        "text"
-      ],
-      "dependsOn": [
-        "primary-foreground",
-        "primary",
-        "primary"
-      ],
-      "description": "Fill token \"hero\" -- gradient to-b: primary to primary (Hero fade gradient)",
-      "generatedAt": "2026-04-17T08:27:38.211Z",
-      "containerQueryAware": true,
-      "scalePosition": 6,
-      "usagePatterns": {
-        "do": [
-          "Use fill=\"hero\" on surface components (Container, Card) for hero fade gradient",
-          "Use color=\"hero\" on Typography for gradient text effect"
-        ],
-        "never": [
-          "Do not use raw bg-* classes when a fill token exists for the purpose",
-          "Do not hardcode opacity values -- use the fill token instead"
-        ]
-      }
+      "semanticMeaning": "The primary-subtle surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-secondary",
+      "value": {
+        "background": {
+          "color": {
+            "token": "secondary"
+          }
+        },
+        "foreground": {
+          "token": "secondary-foreground"
+        },
+        "border": {
+          "token": "secondary-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The secondary surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-secondary-subtle",
+      "value": {
+        "background": {
+          "color": {
+            "token": "secondary-subtle"
+          }
+        },
+        "foreground": {
+          "token": "secondary-subtle-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The secondary-subtle surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-muted",
+      "value": {
+        "background": {
+          "color": {
+            "token": "muted"
+          }
+        },
+        "foreground": {
+          "token": "muted-foreground"
+        },
+        "border": {
+          "token": "muted-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The muted surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-accent",
+      "value": {
+        "background": {
+          "color": {
+            "token": "accent"
+          }
+        },
+        "foreground": {
+          "token": "accent-foreground"
+        },
+        "border": {
+          "token": "accent-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The accent surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-accent-subtle",
+      "value": {
+        "background": {
+          "color": {
+            "token": "accent-subtle"
+          }
+        },
+        "foreground": {
+          "token": "accent-subtle-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The accent-subtle surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-destructive",
+      "value": {
+        "background": {
+          "color": {
+            "token": "destructive"
+          }
+        },
+        "foreground": {
+          "token": "destructive-foreground"
+        },
+        "border": {
+          "token": "destructive-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The destructive surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-destructive-subtle",
+      "value": {
+        "background": {
+          "color": {
+            "token": "destructive-subtle"
+          }
+        },
+        "foreground": {
+          "token": "destructive-subtle-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The destructive-subtle surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-success",
+      "value": {
+        "background": {
+          "color": {
+            "token": "success"
+          }
+        },
+        "foreground": {
+          "token": "success-foreground"
+        },
+        "border": {
+          "token": "success-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The success surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-success-subtle",
+      "value": {
+        "background": {
+          "color": {
+            "token": "success-subtle"
+          }
+        },
+        "foreground": {
+          "token": "success-subtle-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The success-subtle surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-warning",
+      "value": {
+        "background": {
+          "color": {
+            "token": "warning"
+          }
+        },
+        "foreground": {
+          "token": "warning-foreground"
+        },
+        "border": {
+          "token": "warning-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The warning surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-warning-subtle",
+      "value": {
+        "background": {
+          "color": {
+            "token": "warning-subtle"
+          }
+        },
+        "foreground": {
+          "token": "warning-subtle-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The warning-subtle surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-info",
+      "value": {
+        "background": {
+          "color": {
+            "token": "info"
+          }
+        },
+        "foreground": {
+          "token": "info-foreground"
+        },
+        "border": {
+          "token": "info-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The info surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-info-subtle",
+      "value": {
+        "background": {
+          "color": {
+            "token": "info-subtle"
+          }
+        },
+        "foreground": {
+          "token": "info-subtle-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The info-subtle surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-alert",
+      "value": {
+        "background": {
+          "color": {
+            "token": "alert"
+          }
+        },
+        "foreground": {
+          "token": "alert-foreground"
+        },
+        "border": {
+          "token": "alert-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The alert surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-alert-subtle",
+      "value": {
+        "background": {
+          "color": {
+            "token": "alert-subtle"
+          }
+        },
+        "foreground": {
+          "token": "alert-subtle-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The alert-subtle surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-highlight",
+      "value": {
+        "background": {
+          "color": {
+            "token": "highlight"
+          }
+        },
+        "foreground": {
+          "token": "highlight-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The highlight surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-input",
+      "value": {
+        "background": {
+          "color": {
+            "token": "input"
+          }
+        },
+        "foreground": {
+          "token": "input-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The input surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-selection",
+      "value": {
+        "background": {
+          "color": {
+            "token": "selection"
+          }
+        },
+        "foreground": {
+          "token": "selection-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The selection surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-sidebar",
+      "value": {
+        "background": {
+          "color": {
+            "token": "sidebar"
+          }
+        },
+        "foreground": {
+          "token": "sidebar-foreground"
+        },
+        "border": {
+          "token": "sidebar-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The sidebar surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-sidebar-primary",
+      "value": {
+        "background": {
+          "color": {
+            "token": "sidebar-primary"
+          }
+        },
+        "foreground": {
+          "token": "sidebar-primary-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The sidebar-primary surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-sidebar-accent",
+      "value": {
+        "background": {
+          "color": {
+            "token": "sidebar-accent"
+          }
+        },
+        "foreground": {
+          "token": "sidebar-accent-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The sidebar-accent surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-sidebar-item",
+      "value": {
+        "background": {
+          "color": {
+            "token": "sidebar-item"
+          }
+        },
+        "foreground": {
+          "token": "sidebar-item-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The sidebar-item surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-nav",
+      "value": {
+        "background": {
+          "color": {
+            "token": "nav"
+          }
+        },
+        "foreground": {
+          "token": "nav-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The nav surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-table",
+      "value": {
+        "background": {
+          "color": {
+            "token": "table"
+          }
+        },
+        "foreground": {
+          "token": "table-foreground"
+        },
+        "border": {
+          "token": "table-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The table surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-table-header",
+      "value": {
+        "background": {
+          "color": {
+            "token": "table-header"
+          }
+        },
+        "foreground": {
+          "token": "table-header-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The table-header surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-tooltip",
+      "value": {
+        "background": {
+          "color": {
+            "token": "tooltip"
+          }
+        },
+        "foreground": {
+          "token": "tooltip-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The tooltip surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-overlay",
+      "value": {
+        "background": {
+          "color": {
+            "token": "overlay"
+          }
+        },
+        "foreground": {
+          "token": "overlay-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The overlay surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-code",
+      "value": {
+        "background": {
+          "color": {
+            "token": "code"
+          }
+        },
+        "foreground": {
+          "token": "code-foreground"
+        },
+        "border": {
+          "token": "code-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The code surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-badge",
+      "value": {
+        "background": {
+          "color": {
+            "token": "badge"
+          }
+        },
+        "foreground": {
+          "token": "badge-foreground"
+        },
+        "border": {
+          "token": "badge-border"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The badge surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
+    },
+    {
+      "name": "surface-avatar",
+      "value": {
+        "background": {
+          "color": {
+            "token": "avatar"
+          }
+        },
+        "foreground": {
+          "token": "avatar-foreground"
+        }
+      },
+      "category": "fill",
+      "namespace": "fill",
+      "semanticMeaning": "The avatar surface: its background, foreground and border tokens",
+      "userOverride": null,
+      "containerQueryAware": true
     }
   ]
 }

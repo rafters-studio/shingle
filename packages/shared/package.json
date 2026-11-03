@@ -15,9 +15,11 @@
     "src"
   ],
   "dependencies": {
+    "@fontsource-variable/noto-sans": "^5.3.0",
     "@rafters/astro-meta": "^0.4.0",
     "gray-matter": "^4.0.3",
-    "linkedom": "^0.18.0"
+    "linkedom": "^0.18.0",
+    "nanostores": "^1.5.5"
   },
   "peerDependencies": {
     "astro": "^7.0.0"
@@ -27,7 +29,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "vitest": "^4.1.0",
-    "typescript": "catalog:"
+    "tailwindcss": "^4.3.3",
+    "typescript": "catalog:",
+    "vitest": "^4.1.0"
   }
 }

@@ -7,7 +7,7 @@
  */
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
-import P from "@/components/ui/typography-p.astro";
+import { P } from "@/components/ui/typography.astro";
 import InkBlock from "@/components/InkBlock.astro";
 import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
 import MrsTable from "@/components/MrsTable.astro";
@@ -96,11 +96,11 @@ const MRS_VS: [string, string, string][] = [
 ];
 ---
 
-<section class="bg-foreground text-background">
+<section class="dark bg-background text-foreground">
 <Container size="5xl" padding="20" gap="12">
     <div class="flex items-center justify-between gap-4 pb-3 border-b border-border/50">
         <div class="flex items-center gap-3">
-            <span class="font-mono text-sm text-primary">»</span>
+            <span class="font-mono text-sm text-warning">»</span>
             <span class="font-heading font-medium text-sm uppercase tracking-widest">Machine-readable summary</span>
             <span class="text-muted-foreground">&middot;</span>
             <span class="font-heading font-light text-sm text-muted-foreground">for the 90%. dense &middot; structured &middot; decision-useful.</span>
@@ -110,7 +110,7 @@ const MRS_VS: [string, string, string][] = [
 
     <section>
         <MrsSectionHeader hash="## 01" label="scope" syn="one paragraph" />
-        <P color="background" class="max-w-prose">{MRS_SCOPE}</P>
+        <P>{MRS_SCOPE}</P>
     </section>
 
     <section>
@@ -131,7 +131,7 @@ const MRS_VS: [string, string, string][] = [
             <header class="mb-4">
                 <span class="font-heading font-medium text-xs uppercase tracking-wider">LAN broadcast semantics</span>
             </header>
-            <P color="background" class="mb-5 max-w-prose">
+            <P>
                 LAN broadcast is a <InkBlock>masterless, controllerless mesh</InkBlock>. No coordinator. No leader. No central node. Every peer broadcasts and listens on equal footing. Key possession is the membership check. Nothing else in this space works this way.
             </P>
             <dl class="grid gap-3">
@@ -150,7 +150,7 @@ const MRS_VS: [string, string, string][] = [
         <MrsTable cols={["Command", "Purpose", "Output", "Exit"]} rows={MRS_COMMANDS} monoCols={[2, 3]} />
     </section>
 
-    <Grid columns={2} gap="12">
+    <Grid id="mrsblock-grid-1" columns={2} gap="12">
         <section>
             <MrsSectionHeader hash="## 06" label="exit codes" />
             <MrsTable cols={["Code", "Meaning"]} rows={MRS_EXIT} />
@@ -164,7 +164,7 @@ const MRS_VS: [string, string, string][] = [
 
     <section>
         <MrsSectionHeader hash="## 08" label="constraints" syn="what smugglr refuses to do" />
-        <Grid columns={2} gap="0">
+        <Grid id="mrsblock-grid-2" columns={2} gap="0">
             {MRS_CONSTRAINTS.map(([rule, detail]) => (
                 <div class="py-3.5 px-5 border-b border-border/40">
                     <div class="font-heading font-medium text-sm uppercase tracking-wide mb-1">&times; {rule}</div>
@@ -177,7 +177,7 @@ const MRS_VS: [string, string, string][] = [
     <section>
         <MrsSectionHeader hash="## 09" label="vs alternatives" syn="specific, falsifiable comparisons" />
         <MrsTable cols={["Tool", "Covers", "Does not cover"]} rows={MRS_VS} />
-        <P color="background" class="mt-6 max-w-prose">
+        <P>
             Full comparison at <a href="/compare/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">/compare/</a>. Building a multiplayer game? <a href="/compare/games/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">/compare/games/</a> covers Photon, Colyseus, Mirror, and the persistent tier behind a netcode framework.
         </P>
     </section>

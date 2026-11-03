@@ -1,23 +1,16 @@
 {
-  "$schema": "https://rafters.studio/schemas/namespace-tokens.json",
   "namespace": "radius",
-  "version": "1.0.0",
-  "generatedAt": "2026-05-27T14:48:46.313Z",
+  "generatedAt": "2026-11-03T06:53:52.333Z",
   "tokens": [
     {
       "name": "radius-base",
-      "value": "0.375rem",
+      "value": "calc(var(--rafters-spacing-base) * 1.5)",
       "category": "radius",
       "namespace": "radius",
-      "semanticMeaning": "Base border radius - all other radii derive from this value",
+      "semanticMeaning": "Base border radius - derives from spacing base",
       "usageContext": [
         "calculation-reference"
       ],
-      "progressionSystem": "minor-third",
-      "description": "Base radius (0.375rem / 6px). Scale uses minor-third progression (ratio 1.2).",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
-      "containerQueryAware": false,
-      "userOverride": null,
       "usagePatterns": {
         "do": [
           "Reference as the calculation base"
@@ -25,7 +18,15 @@
         "never": [
           "Change without understanding scale impact"
         ]
-      }
+      },
+      "userOverride": null,
+      "dependsOn": [
+        "spacing-base"
+      ],
+      "progressionSystem": "minor-third",
+      "containerQueryAware": false,
+      "description": "Base radius = spacing-base * 1.5 (6px at base 4). Scale uses minor-third progression (ratio 1.2).",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-tl",
@@ -36,13 +37,13 @@
       "usageContext": [
         "designer-override"
       ],
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "top-left radius. Defaults to radius-base. Set to 0 for a sharp corner on every component.",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-left radius. Defaults to radius-base. Set to 0 for a sharp corner on every component.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-tr",
@@ -53,13 +54,13 @@
       "usageContext": [
         "designer-override"
       ],
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "top-right radius. Defaults to radius-base. Set to 0 for a sharp corner on every component.",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-right radius. Defaults to radius-base. Set to 0 for a sharp corner on every component.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-bl",
@@ -70,13 +71,13 @@
       "usageContext": [
         "designer-override"
       ],
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "bottom-left radius. Defaults to radius-base. Set to 0 for a sharp corner on every component.",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-left radius. Defaults to radius-base. Set to 0 for a sharp corner on every component.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-br",
@@ -87,13 +88,13 @@
       "usageContext": [
         "designer-override"
       ],
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "bottom-right radius. Defaults to radius-base. Set to 0 for a sharp corner on every component.",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-right radius. Defaults to radius-base. Set to 0 for a sharp corner on every component.",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-none",
@@ -106,14 +107,14 @@
         "table-cells",
         "inline-elements"
       ],
-      "scalePosition": 0,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "0",
+      "userOverride": null,
       "dependsOn": [],
-      "description": "Border radius none: 0 (0)",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 0,
+      "mathRelationship": "0",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius none: 0 (0)",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-sm",
@@ -127,16 +128,16 @@
         "small-elements",
         "inline-blocks"
       ],
-      "scalePosition": 1,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^-1 (×0.833)",
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "Border radius sm: calc(var(--rafters-radius-base) * 0.833) (base × 1.2^-1 (×0.833))",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 1,
+      "mathRelationship": "base × 1.2^-1 (×0.833)",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius sm: calc(var(--rafters-radius-base) * 0.833) (base × 1.2^-1 (×0.833))",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-sm-tl",
@@ -150,14 +151,14 @@
         "small-elements",
         "inline-blocks"
       ],
-      "scalePosition": 1,
+      "userOverride": null,
       "dependsOn": [
         "radius-tl"
       ],
-      "description": "top-left radius sm: derives from radius-tl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 1,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-left radius sm: derives from radius-tl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-sm-tr",
@@ -171,14 +172,14 @@
         "small-elements",
         "inline-blocks"
       ],
-      "scalePosition": 1,
+      "userOverride": null,
       "dependsOn": [
         "radius-tr"
       ],
-      "description": "top-right radius sm: derives from radius-tr base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 1,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-right radius sm: derives from radius-tr base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-sm-bl",
@@ -192,14 +193,14 @@
         "small-elements",
         "inline-blocks"
       ],
-      "scalePosition": 1,
+      "userOverride": null,
       "dependsOn": [
         "radius-bl"
       ],
-      "description": "bottom-left radius sm: derives from radius-bl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 1,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-left radius sm: derives from radius-bl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-sm-br",
@@ -213,14 +214,14 @@
         "small-elements",
         "inline-blocks"
       ],
-      "scalePosition": 1,
+      "userOverride": null,
       "dependsOn": [
         "radius-br"
       ],
-      "description": "bottom-right radius sm: derives from radius-br base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 1,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-right radius sm: derives from radius-br base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius",
@@ -234,16 +235,16 @@
         "cards",
         "dropdowns"
       ],
-      "scalePosition": 2,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "0.375rem (base)",
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "Border radius DEFAULT: var(--rafters-radius-base) (0.375rem (base))",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 2,
+      "mathRelationship": "spacing-base * 1.5 (base)",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius DEFAULT: var(--rafters-radius-base) (spacing-base * 1.5 (base))",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-md",
@@ -256,16 +257,16 @@
         "panels",
         "dialogs"
       ],
-      "scalePosition": 3,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^1 (×1.2)",
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "Border radius md: calc(var(--rafters-radius-base) * 1.2) (base × 1.2^1 (×1.2))",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 3,
+      "mathRelationship": "base × 1.2^1 (×1.2)",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius md: calc(var(--rafters-radius-base) * 1.2) (base × 1.2^1 (×1.2))",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-md-tl",
@@ -278,14 +279,14 @@
         "panels",
         "dialogs"
       ],
-      "scalePosition": 3,
+      "userOverride": null,
       "dependsOn": [
         "radius-tl"
       ],
-      "description": "top-left radius md: derives from radius-tl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 3,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-left radius md: derives from radius-tl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-md-tr",
@@ -298,14 +299,14 @@
         "panels",
         "dialogs"
       ],
-      "scalePosition": 3,
+      "userOverride": null,
       "dependsOn": [
         "radius-tr"
       ],
-      "description": "top-right radius md: derives from radius-tr base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 3,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-right radius md: derives from radius-tr base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-md-bl",
@@ -318,14 +319,14 @@
         "panels",
         "dialogs"
       ],
-      "scalePosition": 3,
+      "userOverride": null,
       "dependsOn": [
         "radius-bl"
       ],
-      "description": "bottom-left radius md: derives from radius-bl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 3,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-left radius md: derives from radius-bl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-md-br",
@@ -338,14 +339,14 @@
         "panels",
         "dialogs"
       ],
-      "scalePosition": 3,
+      "userOverride": null,
       "dependsOn": [
         "radius-br"
       ],
-      "description": "bottom-right radius md: derives from radius-br base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 3,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-right radius md: derives from radius-br base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-lg",
@@ -358,16 +359,16 @@
         "large-cards",
         "feature-panels"
       ],
-      "scalePosition": 4,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^2 (×1.44)",
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "Border radius lg: calc(var(--rafters-radius-base) * 1.44) (base × 1.2^2 (×1.44))",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 4,
+      "mathRelationship": "base × 1.2^2 (×1.44)",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius lg: calc(var(--rafters-radius-base) * 1.44) (base × 1.2^2 (×1.44))",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-lg-tl",
@@ -380,14 +381,14 @@
         "large-cards",
         "feature-panels"
       ],
-      "scalePosition": 4,
+      "userOverride": null,
       "dependsOn": [
         "radius-tl"
       ],
-      "description": "top-left radius lg: derives from radius-tl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 4,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-left radius lg: derives from radius-tl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-lg-tr",
@@ -400,14 +401,14 @@
         "large-cards",
         "feature-panels"
       ],
-      "scalePosition": 4,
+      "userOverride": null,
       "dependsOn": [
         "radius-tr"
       ],
-      "description": "top-right radius lg: derives from radius-tr base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 4,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-right radius lg: derives from radius-tr base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-lg-bl",
@@ -420,14 +421,14 @@
         "large-cards",
         "feature-panels"
       ],
-      "scalePosition": 4,
+      "userOverride": null,
       "dependsOn": [
         "radius-bl"
       ],
-      "description": "bottom-left radius lg: derives from radius-bl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 4,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-left radius lg: derives from radius-bl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-lg-br",
@@ -440,14 +441,14 @@
         "large-cards",
         "feature-panels"
       ],
-      "scalePosition": 4,
+      "userOverride": null,
       "dependsOn": [
         "radius-br"
       ],
-      "description": "bottom-right radius lg: derives from radius-br base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 4,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-right radius lg: derives from radius-br base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-xl",
@@ -459,16 +460,16 @@
         "hero-cards",
         "featured-sections"
       ],
-      "scalePosition": 5,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^3 (×1.728)",
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "Border radius xl: calc(var(--rafters-radius-base) * 1.728) (base × 1.2^3 (×1.728))",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 5,
+      "mathRelationship": "base × 1.2^3 (×1.728)",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius xl: calc(var(--rafters-radius-base) * 1.728) (base × 1.2^3 (×1.728))",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-xl-tl",
@@ -480,14 +481,14 @@
         "hero-cards",
         "featured-sections"
       ],
-      "scalePosition": 5,
+      "userOverride": null,
       "dependsOn": [
         "radius-tl"
       ],
-      "description": "top-left radius xl: derives from radius-tl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 5,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-left radius xl: derives from radius-tl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-xl-tr",
@@ -499,14 +500,14 @@
         "hero-cards",
         "featured-sections"
       ],
-      "scalePosition": 5,
+      "userOverride": null,
       "dependsOn": [
         "radius-tr"
       ],
-      "description": "top-right radius xl: derives from radius-tr base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 5,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-right radius xl: derives from radius-tr base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-xl-bl",
@@ -518,14 +519,14 @@
         "hero-cards",
         "featured-sections"
       ],
-      "scalePosition": 5,
+      "userOverride": null,
       "dependsOn": [
         "radius-bl"
       ],
-      "description": "bottom-left radius xl: derives from radius-bl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 5,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-left radius xl: derives from radius-bl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-xl-br",
@@ -537,14 +538,14 @@
         "hero-cards",
         "featured-sections"
       ],
-      "scalePosition": 5,
+      "userOverride": null,
       "dependsOn": [
         "radius-br"
       ],
-      "description": "bottom-right radius xl: derives from radius-br base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 5,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-right radius xl: derives from radius-br base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-2xl",
@@ -557,16 +558,16 @@
         "large-avatars",
         "emphasized-buttons"
       ],
-      "scalePosition": 6,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^4 (×2.074)",
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "Border radius 2xl: calc(var(--rafters-radius-base) * 2.074) (base × 1.2^4 (×2.074))",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 6,
+      "mathRelationship": "base × 1.2^4 (×2.074)",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius 2xl: calc(var(--rafters-radius-base) * 2.074) (base × 1.2^4 (×2.074))",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-2xl-tl",
@@ -579,14 +580,14 @@
         "large-avatars",
         "emphasized-buttons"
       ],
-      "scalePosition": 6,
+      "userOverride": null,
       "dependsOn": [
         "radius-tl"
       ],
-      "description": "top-left radius 2xl: derives from radius-tl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 6,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-left radius 2xl: derives from radius-tl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-2xl-tr",
@@ -599,14 +600,14 @@
         "large-avatars",
         "emphasized-buttons"
       ],
-      "scalePosition": 6,
+      "userOverride": null,
       "dependsOn": [
         "radius-tr"
       ],
-      "description": "top-right radius 2xl: derives from radius-tr base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 6,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-right radius 2xl: derives from radius-tr base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-2xl-bl",
@@ -619,14 +620,14 @@
         "large-avatars",
         "emphasized-buttons"
       ],
-      "scalePosition": 6,
+      "userOverride": null,
       "dependsOn": [
         "radius-bl"
       ],
-      "description": "bottom-left radius 2xl: derives from radius-bl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 6,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-left radius 2xl: derives from radius-bl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-2xl-br",
@@ -639,14 +640,14 @@
         "large-avatars",
         "emphasized-buttons"
       ],
-      "scalePosition": 6,
+      "userOverride": null,
       "dependsOn": [
         "radius-br"
       ],
-      "description": "bottom-right radius 2xl: derives from radius-br base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 6,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-right radius 2xl: derives from radius-br base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-3xl",
@@ -658,16 +659,16 @@
         "stadium-shapes",
         "special-emphasis"
       ],
-      "scalePosition": 7,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "base × 1.2^5 (×2.488)",
+      "userOverride": null,
       "dependsOn": [
         "radius-base"
       ],
-      "description": "Border radius 3xl: calc(var(--rafters-radius-base) * 2.488) (base × 1.2^5 (×2.488))",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 7,
+      "mathRelationship": "base × 1.2^5 (×2.488)",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius 3xl: calc(var(--rafters-radius-base) * 2.488) (base × 1.2^5 (×2.488))",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-3xl-tl",
@@ -679,14 +680,14 @@
         "stadium-shapes",
         "special-emphasis"
       ],
-      "scalePosition": 7,
+      "userOverride": null,
       "dependsOn": [
         "radius-tl"
       ],
-      "description": "top-left radius 3xl: derives from radius-tl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 7,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-left radius 3xl: derives from radius-tl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-3xl-tr",
@@ -698,14 +699,14 @@
         "stadium-shapes",
         "special-emphasis"
       ],
-      "scalePosition": 7,
+      "userOverride": null,
       "dependsOn": [
         "radius-tr"
       ],
-      "description": "top-right radius 3xl: derives from radius-tr base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 7,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "top-right radius 3xl: derives from radius-tr base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-3xl-bl",
@@ -717,14 +718,14 @@
         "stadium-shapes",
         "special-emphasis"
       ],
-      "scalePosition": 7,
+      "userOverride": null,
       "dependsOn": [
         "radius-bl"
       ],
-      "description": "bottom-left radius 3xl: derives from radius-bl base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 7,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-left radius 3xl: derives from radius-bl base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-3xl-br",
@@ -736,14 +737,14 @@
         "stadium-shapes",
         "special-emphasis"
       ],
-      "scalePosition": 7,
+      "userOverride": null,
       "dependsOn": [
         "radius-br"
       ],
-      "description": "bottom-right radius 3xl: derives from radius-br base",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "scalePosition": 7,
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "bottom-right radius 3xl: derives from radius-br base",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     },
     {
       "name": "radius-full",
@@ -756,14 +757,14 @@
         "pill-buttons",
         "circular-elements"
       ],
-      "scalePosition": 8,
-      "progressionSystem": "minor-third",
-      "mathRelationship": "infinite (9999px)",
+      "userOverride": null,
       "dependsOn": [],
-      "description": "Border radius full: 9999px (infinite (9999px))",
-      "generatedAt": "2026-05-27T14:48:46.283Z",
+      "progressionSystem": "minor-third",
+      "scalePosition": 8,
+      "mathRelationship": "infinite (9999px)",
       "containerQueryAware": false,
-      "userOverride": null
+      "description": "Border radius full: 9999px (infinite (9999px))",
+      "generatedAt": "2026-11-03T06:53:51.266Z"
     }
   ]
 }
