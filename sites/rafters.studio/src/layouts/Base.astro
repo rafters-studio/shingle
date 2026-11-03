@@ -1,5 +1,6 @@
 ---
-import TopBar from "@/components/TopBar.astro";
+import TopBar from "@shingle/shared/TopBar.astro";
+import type { TopBarBrand, TopBarLink } from "@shingle/shared/TopBar.astro";
 import MegaFooter from "@/components/MegaFooter.astro";
 import SiteHead from "@shingle/shared/SiteHead.astro";
 import type { JsonLdObject } from "@shingle/shared/meta";
@@ -17,8 +18,8 @@ interface Props {
     modifiedTime?: string;
     /** Additional JSON-LD nodes to merge into the sitewide graph. */
     extraJsonLd?: JsonLdObject[];
-    /** Render a fixed topbar that fades in after the user scrolls past the hero. */
-    stickyTopbar?: boolean;
+    /** A section's own bar (Kelex). Defaults to the Rafters bar. */
+    bar?: { brand: TopBarBrand; links: TopBarLink[] };
 }
 
 const rawProps = Astro.props as Props & {
@@ -33,7 +34,13 @@ const {
     publishedTime,
     modifiedTime,
     extraJsonLd = [],
-    stickyTopbar = false,
+    bar = {
+        brand: { name: "Rafters", logoSrc: "/logo.svg" },
+        links: [
+            { href: "/docs/", label: "Docs" },
+            { href: "https://github.com/rafters-studio/rafters", label: "GitHub" },
+        ],
+    },
 } = merged;
 
 const siteOrigin = Astro.site?.origin ?? "https://rafters.studio";
@@ -105,7 +112,7 @@ const extraSchema: JsonLdObject[] = [...(isHome ? [softwareApp] : []), ...extraJ
         />
     </head>
     <body class="bg-background text-foreground">
-        {stickyTopbar && <TopBar />}
+        <TopBar brand={bar.brand} links={bar.links} />
         <main>
             <slot />
         </main>

@@ -10,6 +10,14 @@ const { title, description } = Astro.props;
 const base = '/mail/';
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
+const bar = {
+  brand: { name: 'Rafters Mail', href: base },
+  links: [
+    { href: `${base}docs/`, label: 'Docs' },
+    { href: 'https://github.com/rafters-studio/mail', label: 'GitHub' },
+  ],
+};
+
 type NavItem = { label: string; href: string };
 type NavGroup = { heading: string; items: NavItem[] };
 
@@ -67,16 +75,8 @@ function isActive(href: string): boolean {
 }
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} bar={bar}>
   <div class="docs-shell">
-    <header class="docs-header">
-      <a href={base} class="docs-wordmark">Rafters Mail</a>
-      <nav class="docs-header-nav">
-        <a href={`${base}docs/`}>Docs</a>
-        <a href="https://github.com/rafters-studio/mail">GitHub</a>
-      </nav>
-    </header>
-
     <div class="docs-body">
       <aside class="docs-sidebar">
         <nav>
@@ -115,41 +115,6 @@ function isActive(href: string): boolean {
     display: flex;
     flex-direction: column;
     background-color: var(--color-background);
-    color: var(--color-foreground);
-  }
-
-  .docs-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--spacing-4) var(--spacing-6);
-    border-bottom: 1px solid var(--color-border);
-    position: sticky;
-    top: 0;
-    background-color: var(--color-background);
-    z-index: 20;
-  }
-
-  .docs-wordmark {
-    font-family: var(--font-heading);
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    color: var(--color-foreground);
-    text-decoration: none;
-  }
-
-  .docs-header-nav {
-    display: flex;
-    gap: var(--spacing-6);
-  }
-
-  .docs-header-nav a {
-    font-size: var(--font-size-sm);
-    color: var(--color-muted-foreground);
-    text-decoration: none;
-  }
-
-  .docs-header-nav a:hover {
     color: var(--color-foreground);
   }
 

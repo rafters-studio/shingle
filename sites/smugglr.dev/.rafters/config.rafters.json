@@ -30,19 +30,24 @@
       "card",
       "container",
       "grid",
+      "sheet",
       "typography"
     ],
     "primitives": [
       "aria-manager",
       "classy",
+      "focus-trap",
       "memory",
+      "outside-click",
       "roving-focus",
       "types"
     ],
     "composites": [],
     "rules": [],
     "substrate": [
-      "contract"
+      "compose",
+      "contract",
+      "disclosable"
     ]
   }
 }

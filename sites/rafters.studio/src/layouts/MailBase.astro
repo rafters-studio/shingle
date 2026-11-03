@@ -1,13 +1,17 @@
 ---
+import TopBar from '@shingle/shared/TopBar.astro';
+import type { TopBarBrand, TopBarLink } from '@shingle/shared/TopBar.astro';
 import SiteFooter from '@/components/mail/SiteFooter.astro';
 
 interface Props {
   title: string;
   description?: string;
+  bar: { brand: TopBarBrand; links: TopBarLink[] };
 }
 
 const {
   title,
+  bar,
   description = 'Edge-native email inbox framework for Cloudflare Workers. Inbound, outbound, threading, classification, and IMAP.',
 } = Astro.props;
 
@@ -36,6 +40,7 @@ const fullTitle = `${title} | @rafters/mail`;
     <link rel="canonical" href={`${siteUrl}${Astro.url.pathname}`} />
   </head>
   <body class="bg-background text-foreground">
+    <TopBar brand={bar.brand} links={bar.links} />
     <slot />
     <SiteFooter />
   </body>
