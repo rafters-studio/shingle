@@ -51,7 +51,7 @@ export const NOT_SMUGGLR_ROWS = [
             Photon ships the frames. smugglr ships the <InkBlock>rows</InkBlock>.
         </H1>
 
-        <P align="center" size="3xl">
+        <P align="center">
             Half of multiplayer is turn-based, async, or once-a-second. smugglr is the whole backend for that half, and the persistent tier behind a netcode framework for the other half. CLI, Rust crate, npm package. There is no service you have to operate, it is free*.
         </P>
     </Container>
@@ -64,11 +64,11 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; the shape of a game backend</div>
 <H2>Multiplayer is twenty percent netcode and eighty percent persistent state.</H2>
 
-<P size="3xl">Photon ships the twenty percent. The other eighty is accounts, inventory, quests, currencies, leaderboards, mail, friends, deck-builds, save slots, settings, telemetry. Every Photon shop builds and runs that tier. Every Mirror shop builds and runs that tier. Every Colyseus shop builds and runs that tier. The default answer is Firebase or a custom Express service in front of Postgres, and both eat engineering hours that have nothing to do with the game.</P>
+<P>Photon ships the twenty percent. The other eighty is accounts, inventory, quests, currencies, leaderboards, mail, friends, deck-builds, save slots, settings, telemetry. Every Photon shop builds and runs that tier. Every Mirror shop builds and runs that tier. Every Colyseus shop builds and runs that tier. The default answer is Firebase or a custom Express service in front of Postgres, and both eat engineering hours that have nothing to do with the game.</P>
 
-<P size="3xl">smugglr is the eighty percent. SQLite on the client, SQLite on the server, content-hash diff between them. The schema is yours. The rows are yours. There is no managed plan to outgrow.</P>
+<P>smugglr is the eighty percent. SQLite on the client, SQLite on the server, content-hash diff between them. The schema is yours. The rows are yours. There is no managed plan to outgrow.</P>
 
-<P size="3xl" color="muted-foreground">If you are not building a game, the <a href="/compare/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">general comparison</a> is the better landing page. The matrix below is the games-shaped read.</P>
+<P color="muted-foreground">If you are not building a game, the <a href="/compare/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">general comparison</a> is the better landing page. The matrix below is the games-shaped read.</P>
 </Container>
 
 </Container>
@@ -103,7 +103,7 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; the netcode shelf</div>
 <H2>Tools that ship the tick rate. smugglr does not compete here.</H2>
 
-<P size="3xl">If your game has frames and hitboxes, one of these is the right answer. Read this section to confirm smugglr is not on that shelf, then move on.</P>
+<P>If your game has frames and hitboxes, one of these is the right answer. Read this section to confirm smugglr is not on that shelf, then move on.</P>
 
 <Grid id="compare-games-grid-1" columns={2} gap="6">
     <Card>
@@ -144,7 +144,7 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; the persistent tier shelf</div>
 <H2>Where the eighty percent lives. This is smugglr's shelf.</H2>
 
-<P size="3xl">Every game has accounts, inventory, currencies, leaderboards, quests, mail, settings, telemetry. The four tools below are what studios reach for. None of them are SQLite end to end. smugglr is.</P>
+<P>Every game has accounts, inventory, currencies, leaderboards, quests, mail, settings, telemetry. The four tools below are what studios reach for. None of them are SQLite end to end. smugglr is.</P>
 
 <Grid id="compare-games-grid-2" columns={2} gap="6">
     <Card surface="muted">
@@ -210,7 +210,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 <MrsTable cols={["If you need", "The right tool"]} rows={NOT_SMUGGLR_ROWS} />
 
-<P size="3xl" color="muted-foreground">smugglr ships the persistent tier. The other lanes have mature tools and known costs. The honest position is: pair smugglr with a netcode framework when you need frames, or use smugglr alone when you do not.</P>
+<P color="muted-foreground">smugglr ships the persistent tier. The other lanes have mature tools and known costs. The honest position is: pair smugglr with a netcode framework when you need frames, or use smugglr alone when you do not.</P>
 </Container>
 
 <Container as="section" gap="6">
@@ -246,7 +246,7 @@ export const NOT_SMUGGLR_ROWS = [
     </Card>
 </Grid>
 
-<P size="3xl">Source on <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>. MIT licensed.</P>
+<P>Source on <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>. MIT licensed.</P>
 </Container>
 
 <Container as="section" gap="6">

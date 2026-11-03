@@ -19,7 +19,7 @@ import InkBlock from "@/components/InkBlock.astro";
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; show it running</div>
             <H2>A TOML file, a dry-run, a push.</H2>
-            <P size="3xl">The whole product in thirty seconds. Real CLI output, no mockups.</P>
+            <P>The whole product in thirty seconds. Real CLI output, no mockups.</P>
 
             <CodeBlock>{`local_db = "./local.db"
 
@@ -42,13 +42,13 @@ Comparing source and target...
   characters        no change
 51 rows written in 2.3s. exit 0.`}</CodeBlock>
 
-            <P size="3xl" color="muted-foreground">The dry-run writes nothing. The push writes exactly what the dry-run described. Same output, same counts. No surprises.</P>
+            <P color="muted-foreground">The dry-run writes nothing. The push writes exactly what the dry-run described. Same output, same counts. No surprises.</P>
         </section>
 
         <section id="targets">
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; one plugin, any LIKE backend</div>
             <H2>Seven profiles ship today. A backend that fits an existing request shape is config, not a fork.</H2>
-            <P size="3xl">Every remote target smugglr reaches over HTTP goes through one plugin, <Code>smugglr-http-sql</Code>. Pick a built-in profile by name and swapping targets is a config change, not a recompile.</P>
+            <P>Every remote target smugglr reaches over HTTP goes through one plugin, <Code>smugglr-http-sql</Code>. Pick a built-in profile by name and swapping targets is a config change, not a recompile.</P>
 
             <CodeBlock>{`d1            # Cloudflare D1
 turso         # Turso / libSQL
@@ -58,14 +58,14 @@ sqlite-cloud  # SQLite Cloud
 http-sql      # http-sql v0.1 wire spec
 generic       # flat {sql, params} JSON`}</CodeBlock>
 
-            <P size="3xl">This target points at D1:</P>
+            <P>This target points at D1:</P>
             <CodeBlock>{`[target]
 type = "d1"
 account_id = "abc123"
 database_id = "def456"
 api_token = "..."`}</CodeBlock>
 
-            <P size="3xl">This one at Turso, through the <Code>plugin</Code> target type:</P>
+            <P>This one at Turso, through the <Code>plugin</Code> target type:</P>
             <CodeBlock>{`[target]
 type = "plugin"
 name = "turso"
@@ -74,15 +74,15 @@ name = "turso"
 url = "https://my-db.turso.io"
 auth_token = "..."`}</CodeBlock>
 
-            <P size="3xl" color="muted-foreground">Same config file, same commands, same diff engine, different profile. A backend whose HTTP requests match the generic or http-sql shape works by pointing at that profile in config. A backend that speaks a genuinely new request or response shape needs a new profile in the core, which is a contribution rather than just a config edit.</P>
+            <P color="muted-foreground">Same config file, same commands, same diff engine, different profile. A backend whose HTTP requests match the generic or http-sql shape works by pointing at that profile in config. A backend that speaks a genuinely new request or response shape needs a new profile in the core, which is a contribution rather than just a config edit.</P>
 
-            <P size="3xl">The OSS tool syncs any number of LIKE sources from <InkBlock>a single config</InkBlock>.</P>
+            <P>The OSS tool syncs any number of LIKE sources from <InkBlock>a single config</InkBlock>.</P>
         </section>
 
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; how it ships</div>
             <H2>Same algorithm, same adapters, same verbs.</H2>
-            <P size="3xl"><Code>cargo install smugglr</Code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>npm install smugglr</Code> for the WASM build in Node or a modern browser.</P>
+            <P><Code>cargo install smugglr</Code> for the native CLI, with pre-built binaries for macOS, Linux, and Windows. <Code>cargo add smugglr-core</Code> to embed the engine in a Rust service. <Code>npm install smugglr</Code> for the WASM build in Node or a modern browser.</P>
         </section>
 
         <section>
@@ -119,7 +119,7 @@ auth_token = "..."`}</CodeBlock>
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">05 &middot; compare</div>
             <H2>Two reads of the same comparison.</H2>
-            <P size="3xl">Honest, falsifiable, no marketing. Where smugglr fits next to Litestream, rqlite, ElectricSQL, PowerSync, Firebase, Supabase Realtime, and the rest. Game devs get a separate page that names Photon, Colyseus, Mirror, and the persistent tier behind a netcode framework.</P>
+            <P>Honest, falsifiable, no marketing. Where smugglr fits next to Litestream, rqlite, ElectricSQL, PowerSync, Firebase, Supabase Realtime, and the rest. Game devs get a separate page that names Photon, Colyseus, Mirror, and the persistent tier behind a netcode framework.</P>
             <Grid id="narrativesections-grid-2" columns={2} gap="4">
                 <a href="/compare/" class="group hover:bg-muted transition-colors">
                     <Card>
@@ -139,7 +139,7 @@ auth_token = "..."`}</CodeBlock>
         <section>
             <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">06 &middot; open source</div>
             <H2>MIT licensed. All of it.</H2>
-            <P size="3xl">The CLI, the core engine, the plugin system. On <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>.</P>
+            <P>The CLI, the core engine, the plugin system. On <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>.</P>
         </section>
 
     </Container>

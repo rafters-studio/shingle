@@ -56,7 +56,7 @@ export const NOT_SMUGGLR_ROWS = [
             Two SQLites. <InkBlock>One wire.</InkBlock> No server.
         </H1>
 
-        <P align="center" size="3xl">
+        <P align="center">
             smugglr is a sync engine. CLI, Rust crate, npm package. It pushes, pulls, syncs, and broadcasts. There is no service you have to operate, it is free*.
         </P>
     </Container>
@@ -69,11 +69,11 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; the lay of the land</div>
 <H2>You are not building a database. You are moving rows between places that already have one.</H2>
 
-<P size="3xl">SQLite is everywhere already. The phone has it. The laptop has it. Cloudflare D1 is it. Turso is it. Datasette and rqlite and StarbaseDB run on it. The hard part of "local-first" or "multi-device" or "edge-distributed" is not picking a database; it is keeping every node holding the same rows.</P>
+<P>SQLite is everywhere already. The phone has it. The laptop has it. Cloudflare D1 is it. Turso is it. Datasette and rqlite and StarbaseDB run on it. The hard part of "local-first" or "multi-device" or "edge-distributed" is not picking a database; it is keeping every node holding the same rows.</P>
 
-<P size="3xl">smugglr is one tool that does that one job. SQLite on every node. Content-hash diff between them. Run it as a CLI, embed it as a Rust crate, install the npm package in the browser or Node. No central server. No managed cloud. No per-row pricing.</P>
+<P>smugglr is one tool that does that one job. SQLite on every node. Content-hash diff between them. Run it as a CLI, embed it as a Rust crate, install the npm package in the browser or Node. No central server. No managed cloud. No per-row pricing.</P>
 
-<P size="3xl" color="muted-foreground">The matrix below names every comparable tool and what it actually solves. Building a multiplayer game? <a href="/compare/games/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">/compare/games/</a> is the games-shaped read.</P>
+<P color="muted-foreground">The matrix below names every comparable tool and what it actually solves. Building a multiplayer game? <a href="/compare/games/" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">/compare/games/</a> is the games-shaped read.</P>
 </Container>
 
 </Container>
@@ -108,7 +108,7 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; sync engine peers</div>
 <H2>The closest neighbors. SQLite-shaped, row-shaped, on the same shelf.</H2>
 
-<P size="3xl">Six tools sit nearest smugglr. None do exactly what it does. The differences are operational, not philosophical.</P>
+<P>Six tools sit nearest smugglr. None do exactly what it does. The differences are operational, not philosophical.</P>
 
 <Grid id="compare-index-grid-1" columns={2} gap="6">
     <Card>
@@ -165,7 +165,7 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">03 &middot; hosted services that solve part of the same problem</div>
 <H2>The shortcut option. Pay per operation, accept the lock-in, ship faster.</H2>
 
-<P size="3xl">These services are real shortcuts to "users see fresh data on every device." They cost money per row and they own the schema. smugglr is the slower-to-set-up, cheaper-at-scale, lock-in-free alternative.</P>
+<P>These services are real shortcuts to "users see fresh data on every device." They cost money per row and they own the schema. smugglr is the slower-to-set-up, cheaper-at-scale, lock-in-free alternative.</P>
 
 <Grid id="compare-index-grid-2" columns={2} gap="6">
     <Card surface="muted">
@@ -206,7 +206,7 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">04 &middot; the client-cache layer</div>
 <H2>Reactive caches with mutators. Different shape from sync engines, often confused.</H2>
 
-<P size="3xl">These libraries solve the front-end half of local-first: optimistic UI, reactive queries, mutator functions. They sync against a backend you operate. smugglr does not ship a reactive cache, but the npm adapters bridge to the most common ones.</P>
+<P>These libraries solve the front-end half of local-first: optimistic UI, reactive queries, mutator functions. They sync against a backend you operate. smugglr does not ship a reactive cache, but the npm adapters bridge to the most common ones.</P>
 
 <Grid id="compare-index-grid-3" columns={2} gap="6">
     <Card surface="muted">
@@ -288,7 +288,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 <MrsTable cols={["If you need", "The right tool"]} rows={NOT_SMUGGLR_ROWS} />
 
-<P size="3xl" color="muted-foreground">smugglr moves SQLite rows between SQLite databases. Run as a CLI, embed as a Rust crate, install the npm package. The shape of the problem stays the same: a config, a diff, a write.</P>
+<P color="muted-foreground">smugglr moves SQLite rows between SQLite databases. Run as a CLI, embed as a Rust crate, install the npm package. The shape of the problem stays the same: a config, a diff, a write.</P>
 </Container>
 
 <Container as="section" gap="6">
@@ -324,7 +324,7 @@ export const NOT_SMUGGLR_ROWS = [
     </Card>
 </Grid>
 
-<P size="3xl">Source on <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>. MIT licensed.</P>
+<P>Source on <a href="https://github.com/rafters-studio/smugglr" class="underline decoration-border underline-offset-4 hover:decoration-foreground transition-colors">github.com/rafters-studio/smugglr</a>. MIT licensed.</P>
 </Container>
 
 <Container as="section" gap="6">
