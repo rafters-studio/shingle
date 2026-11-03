@@ -1,0 +1,140 @@
+---
+title: "How smugglr decides"
+description: "What smugglr compares, what it remembers, and when it stops rather than guess."
+layout: "../../layouts/Manual.astro"
+---
+
+import ManualSection from "@/src/components/ManualSection.astro";
+import ManualTable from "@/src/components/ManualTable.astro";
+import { CodeBlock } from "@/components/ui/typography.astro";
+import OUT from "@/src/smugglr/manual-output.json";
+
+<ManualSection id="hash" note="16 bytes of BLAKE3">
+
+smugglr compares rows by a 16-byte BLAKE3 hash of each row’s contents. The hash is taken over SQLite’s `quote()` text of each column, in column order, each prefixed by its length so one column cannot run into the next. A place computes the hash where the rows live and returns the key and the hash; smugglr reads a row’s values only for the keys that differ.
+
+</ManualSection>
+
+<ManualSection id="memory" note="per key, per pair of places">
+
+For each pair of places, smugglr remembers every key’s last agreed hash, saved at the end of a run that finished. Comparing each side with that hash tells it which side changed. The memory is smugglr’s own files in its config directory, one folder per pair of places, named by a hash of the two addresses and the same whichever place is named first. Nothing is written into either database. A pair with no folder has never synced, so its next sync is a first sync.
+
+</ManualSection>
+
+<ManualSection id="one-or-both" note="--sync-mode">
+
+<ManualTable
+  head={["the row","what happens"]}
+  rows={[
+    [
+      "changed on one side",
+      "It moves to the other side. An insert is copied, an edit is carried over, a delete is applied."
+    ],
+    [
+      "changed on both sides",
+      "It stops and is named, unless --sync-mode says which copy wins."
+    ]
+  ]}
+/>
+
+<CodeBlock>{OUT.moved_dry}</CodeBlock>
+
+<CodeBlock>{OUT.stop}</CodeBlock>
+
+A stopped table holds back only its own rows. Other tables move, and the run exits 4 instead of 3. The sync modes are listed in the [CLI reference](/docs/cli/).
+
+</ManualSection>
+
+<ManualSection id="conditional" note="a row that moved on is never overwritten">
+
+Each write is conditional on the row as smugglr read it. If the row has moved on since smugglr read it, the write does not happen.
+
+</ManualSection>
+
+<ManualSection id="read-back" note="the hashes must match">
+
+After writing, smugglr reads the rows back. The hash it reads must match the hash it wrote. A row that reads back different keeps its last agreed hash, the run is not done, and it exits 4.
+
+</ManualSection>
+
+<ManualSection id="cut-off" note="the journal">
+
+While a run writes, the pair’s folder holds a journal, one line per row, written and flushed before the row is. A run cut off part-way leaves it, and the next run finishes it first. Running again is safe: writing a row a second time leaves it as the first write did.
+
+Exit code `4` says a run wrote something and is not done. A crash cannot say whether it wrote, so it exits 4 as well.
+
+</ManualSection>
+
+<ManualSection id="first-sync" note="no history yet">
+
+A first sync between two places has no last agreed hash to compare with, so it cannot see deletes: a row on one side only is copied as new. It also weighs itself before sending anything. `max_wire` in the config sets the most it may send; unset, it is 100 MB. A first sync heavier than that stops with exit code `5` and names `smugglr stash` and `smugglr retrieve` as the way to move it:
+
+<CodeBlock>{OUT.too_much}</CodeBlock>
+
+A retrieve does not give the pair a history. The next `smugglr sync` between those places is still a first sync; the rows already match, so none move.
+
+</ManualSection>
+
+<ManualSection id="shapes" note="smugglr never changes a shape">
+
+Before reading any row, smugglr checks that the two places hold the same tables, and that each table has the same columns, types and order. If they differ, the run stops, names the difference, and writes nothing. smugglr never changes a shape. A table without a primary key stops the run the same way.
+
+<CodeBlock>{OUT.shape}</CodeBlock>
+
+The check covers every table both places hold, whatever `--table` names. Naming one table does not skip the others.
+
+<CodeBlock>{OUT.shape_table}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="ignored" note="sqlite_*, _cf_*, and your ignore list">
+
+SQLite’s own `sqlite_*` tables and a place’s internal tables, such as D1’s `_cf_*` tables, are always ignored. The config’s `ignore` list adds more, by name or by pattern. An ignored table is never read, hashed, written or sent, and the shape check skips it. This is how a shared database keeps tables a sync should not touch out of the sync.
+
+<CodeBlock>{OUT.ignored}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="mesh" note="smugglr mesh">
+
+The mesh uses the same rules to decide a change as a direct sync: what a row means, when it stops, and what the graveyard remembers do not change. What differs is how a change travels. Each change is one signed envelope, sealed under the shared key, and sent as it happens.
+
+<ManualTable
+  head={["step","what happens"]}
+  rows={[
+    [
+      "Find peers",
+      "A node announces itself by broadcast, and to the addresses in the peers setting on a network with no broadcast. It learns a peer’s address from where its datagrams come from."
+    ],
+    [
+      "First send",
+      "Unicast to every peer the node knows, in a window that starts at 32 changes, grows as peers acknowledge, and holds at most 1,000. It shrinks on a full send buffer or acknowledgements slowing, never because a datagram was lost."
+    ],
+    [
+      "Acknowledge",
+      "A peer acknowledges a change once it has decided it: applied, skipped as a repeat, or stopped or dropped and named. Received and decided, not applied."
+    ],
+    [
+      "Resend",
+      "A change a peer skipped while acknowledging later ones is resent at once. Otherwise a resend waits about two round trips, between 50 ms and 300 ms, and takes at most a quarter of what the node sends while first sends wait. A peer that has stopped acknowledging is resent to on a doubling interval, 10 seconds to 160."
+    ],
+    [
+      "Echo",
+      "A node that applies a change rebroadcasts it once, 2 to 4 seconds later, unless it heard it two more times meanwhile."
+    ],
+    [
+      "Backpressure",
+      "Unacknowledged changes wait in an outbox in smugglr’s own files. At the backpressure setting (6 MB) the node takes no new changes in until acknowledgements bring it down; they stay in the database to be found again by their hashes."
+    ]
+  ]}
+/>
+
+A change dies at its sunset, the sender’s clock plus the graveyard setting. A node that starts after being away longer than the sunset says so and names stash and retrieve; the changes it missed are not resent. A change a node drops is named with its change hash and kept in a dropped log; --replay decides it again. A row too large for one datagram is refused with a line naming it. Clocks should agree to within one twelfth of the sunset.
+
+</ManualSection>
+
+<ManualSection id="limits" note="said in the same breath">
+
+smugglr stores no data of its own; it moves rows between places. It sends no credentials to an HTTP-SQL place. A first sync cannot see deletes. A retrieve leaves the pair’s next sync a first sync. `--sync-type` accepts direct and mesh: hub and multi are not built yet. In a mesh, automatic catch-up past the sunset, smugglr mesh remove and a loud name clash are not built (#521), and the previous key is accepted with no end date.
+
+</ManualSection>

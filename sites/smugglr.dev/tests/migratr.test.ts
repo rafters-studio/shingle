@@ -1,6 +1,6 @@
-import { mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, relative } from "node:path";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseVersion, migratrVersion } from "../src/migratr/version";
 
@@ -10,16 +10,6 @@ const changelog = join(root, "src/migratr/CHANGELOG.md");
 const top = migratrVersion(changelog);
 
 const pages = ["", "cli/", "migrations/", "library/", "changelog/"];
-
-function walk(dir: string): string[] {
-  const out: string[] = [];
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) out.push(...walk(full));
-    else out.push(full);
-  }
-  return out;
-}
 
 describe("migratr pages", () => {
   it("reads the top version from the changelog copy", () => {
@@ -75,19 +65,4 @@ describe("version helper", () => {
     expect(() => migratrVersion(file)).toThrow(file);
     expect(() => parseVersion("# x", "CHANGELOG.md")).toThrow("CHANGELOG.md");
   });
-});
-
-const baseline = process.env["BASELINE_DIST"];
-
-describe.skipIf(baseline === undefined)("existing pages are unchanged", () => {
-  const excluded = new Set(["sitemap.xml", "llms.txt", "llms-full.txt", "_geo-audit.json"]);
-  const base = baseline ?? "";
-  const files = baseline === undefined ? [] : walk(base).filter((f) => f.endsWith(".html"));
-  for (const file of files) {
-    const rel = relative(base, file);
-    if (excluded.has(rel) || rel.startsWith("migratr/")) continue;
-    it(`${rel} is byte-identical`, () => {
-      expect(readFileSync(join(dist, rel), "utf8")).toBe(readFileSync(file, "utf8"));
-    });
-  }
 });

@@ -1,0 +1,203 @@
+---
+title: "Get started"
+description: "Install smugglr, run a first sync between two SQLite files, and read what it tells you."
+layout: "../../layouts/Manual.astro"
+---
+
+import ManualSection from "@/src/components/ManualSection.astro";
+import ManualTable from "@/src/components/ManualTable.astro";
+import { CodeBlock } from "@/components/ui/typography.astro";
+import OUT from "@/src/smugglr/manual-output.json";
+
+<ManualSection id="install" note="one binary">
+
+The GitHub release for tag v0.6.1 carries one archive per target: smugglr-\<target\>.tar.gz for x86\_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86\_64-apple-darwin and aarch64-apple-darwin, and smugglr-x86\_64-pc-windows-msvc.zip for Windows. Download the one for your machine from [the releases page](https://github.com/rafters-studio/smugglr/releases). smugglr publishes no checksum file.
+
+Or build it from source with Cargo:
+
+<CodeBlock>{"cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr"}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="first-sync" note="source first, target second">
+
+Name two places. The first is the source; the second is the target. `--dryrun` plans the run, prints the record, and writes nothing.
+
+<CodeBlock>{OUT.first_dry}</CodeBlock>
+
+The run prints the same record with the same counts. The `first sync` line says these two places have never been synced: a row on one side only is copied as new, and deletes are not seen. `weight` is what the run will carry.
+
+<CodeBlock>{OUT.first_run}</CodeBlock>
+
+Run it again. Nothing changed, so nothing moves.
+
+<CodeBlock>{OUT.in_step}</CodeBlock>
+
+Every block on this page was pasted from a run of the release binary, in a scratch directory, on local files; the mesh blocks come from two nodes on one machine.
+
+</ManualSection>
+
+<ManualSection id="change" note="edits, inserts and deletes cross both ways">
+
+Between the runs above, a row was edited and another deleted in `laptop/shop.db`, and a row was inserted in `server/shop.db`. The preview names what would move; the run, here as JSON, moves exactly that. A delete is seen now because smugglr remembers the last sync.
+
+<CodeBlock>{OUT.moved_dry}</CodeBlock>
+
+<CodeBlock>{OUT.moved_json}</CodeBlock>
+
+The next run finds the two files in step.
+
+<CodeBlock>{OUT.moved_in_step}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="record" note="in step, moved or stopped">
+
+<ManualTable
+  head={["table status","what it says"]}
+  rows={[
+    [
+      "in step",
+      "The table has nothing to move."
+    ],
+    [
+      "moved",
+      "Rows crossed. The counts say how many, each way, and each deleted or overwritten row is named."
+    ],
+    [
+      "stopped",
+      "The table names the rows it stopped on. The other tables still move."
+    ]
+  ]}
+/>
+
+<ManualTable
+  head={["run status","what it says"]}
+  rows={[
+    [
+      "preview",
+      "--dryrun. Nothing was written."
+    ],
+    [
+      "done",
+      "Every table is in step or moved."
+    ],
+    [
+      "stopped",
+      "A table stopped, or the two places have different shapes. Nothing was written."
+    ],
+    [
+      "stopped in part",
+      "A table stopped after another table moved. Exit code 4."
+    ],
+    [
+      "too much",
+      "A first sync heavier than max_wire. Nothing was sent."
+    ]
+  ]}
+/>
+
+In JSON the record carries `status`, `first_sync`, `deletes_seen`, `tables` and `ignored`. Why a row moves or stops is in [How smugglr decides](/docs/how-smugglr-decides/).
+
+</ManualSection>
+
+<ManualSection id="both" note="stop, then say which copy wins">
+
+Here `sku-0412` was edited in both files after the last sync. smugglr stops rather than choose, names the row, and exits `3`.
+
+<CodeBlock>{OUT.stop}</CodeBlock>
+
+A stop in one table does not hold the others back. When another table moved first, the run is `stopped in part` and exits `4` instead.
+
+<CodeBlock>{OUT.partial}</CodeBlock>
+
+`--sync-mode source` keeps the source’s copy and `target` the target’s. Each overwritten row is named in the preview and again in the run.
+
+<CodeBlock>{OUT.source_dry}</CodeBlock>
+
+<CodeBlock>{OUT.source_run}</CodeBlock>
+
+`--sync-mode last` keeps the copy whose steering column is further on. Name the column in the config first; without it the run is refused with exit `2` (see the [CLI reference](/docs/cli/)).
+
+</ManualSection>
+
+<ManualSection id="hosted" note="Cloudflare D1">
+
+A D1 place is `d1://<database-name>`. smugglr reads the account and token from `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`; the token needs D1 edit permission. A missing variable is refused by name, with exit `2`.
+
+<CodeBlock>{OUT.d1_missing}</CodeBlock>
+
+smugglr keeps no secrets and has no environment of its own. It runs inside the environment of the project that calls it, so each project’s `.env` holds them, or a secrets manager does. With 1Password Environments:
+
+<CodeBlock>{"op run --environment=<id> -- smugglr sync ./shop.db d1://shop --dryrun"}</CodeBlock>
+
+Tables a sync should not touch in a shared database go in the config’s `ignore` list. smugglr checks that both places have the same shape before it reads a row, and a table the two places hold differently stops the run:
+
+<CodeBlock>{OUT.shape}</CodeBlock>
+
+Ignore the table, and the check skips it. D1’s own `_cf_*` tables are ignored without being listed.
+
+<CodeBlock>{"# $XDG_CONFIG_HOME/smugglr/config.toml\nignore = [\"audit\"]"}</CodeBlock>
+
+<CodeBlock>{OUT.ignored}</CodeBlock>
+
+--table does not narrow the shape check: every table both places hold is checked, so a mismatch in a table you did not name still stops the run.
+
+</ManualSection>
+
+<ManualSection id="large" note="stash, then retrieve">
+
+A first sync moves every row. For a large one, `smugglr stash` writes the rows into a signed blob in a directory, and `smugglr retrieve` applies the blob at the other place, so the move can go by any route that carries a file. Both sides share one key file holding 64 hex digits, and each names itself with `--node`.
+
+<CodeBlock>{"openssl rand -hex 32 > shop.key"}</CodeBlock>
+
+<CodeBlock>{OUT.stash}</CodeBlock>
+
+<CodeBlock>{OUT.retrieve}</CodeBlock>
+
+Retrieving the same blob again changes nothing.
+
+<CodeBlock>{OUT.retrieve_again}</CodeBlock>
+
+A sync between those two places afterwards still counts as a first sync, so it will not see deletes, but the rows already match and none move.
+
+<CodeBlock>{OUT.sync_after_retrieve}</CodeBlock>
+
+smugglr does not decide for you when a first sync is large. Set `max_wire` in the config and a first sync heavier than that stops with exit `5` and names stash and retrieve. Here `max_wire = "10 B"` trips on two small rows; the run exits 5 and sends nothing. The command in the record needs the key file and node name from above, and a directory for the blobs.
+
+<CodeBlock>{OUT.too_much}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="mesh" note="smugglr mesh">
+
+On a local network where nobody is in charge, `smugglr mesh` keeps one database in step with every other node that holds the same key. Each change goes out as it happens, signed and sealed under the key, and is resent until each peer has decided it. One key file serves the whole mesh; `keygen` writes it, and you copy it to every node.
+
+<CodeBlock>{OUT.mesh_keygen}</CodeBlock>
+
+A node announces itself by broadcast and talks to the peers it hears by unicast. On a network with no broadcast (WireGuard, Tailscale, a cloud network) name the peers in the config instead. A node is named by its machine’s name, so every node needs its own. The nodes below share one machine, each with its own port, its own config and a one-line `hostname` script ahead of the real one on its path:
+
+<CodeBlock>{"# puck\nport = 31401\npeers = [\"127.0.0.1:31402\"]\n\n# rzr\nport = 31402\npeers = [\"127.0.0.1:31401\"]"}</CodeBlock>
+
+<CodeBlock>{OUT.mesh_start}</CodeBlock>
+
+A row written on puck, by any program, reaches rzr with no sync run. A delete crosses the same way.
+
+<CodeBlock>{OUT.mesh_insert}</CodeBlock>
+
+<CodeBlock>{OUT.mesh_delete}</CodeBlock>
+
+A node’s first run notes the rows already in its database and sends none of them. Use stash and retrieve to bring a new node up to date. A node that starts after being away longer than the sunset (the `graveyard` setting, 12 hours by default) says so and names the commands that catch it up; it does not catch up on its own in 0.6.1.
+
+<CodeBlock>{OUT.mesh_away}</CodeBlock>
+
+The [CLI reference](/docs/cli/) lists the mesh flags and settings, and [How smugglr decides](/docs/how-smugglr-decides/) says how a change travels.
+
+</ManualSection>
+
+<ManualSection id="next" note="two more pages">
+
+- [How smugglr decides](/docs/how-smugglr-decides/): what moves, what stops, and why a row that moved on is never overwritten.
+- [CLI reference](/docs/cli/): every flag, place, config key and exit code.
+
+</ManualSection>

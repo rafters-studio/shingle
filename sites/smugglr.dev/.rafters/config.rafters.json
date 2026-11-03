@@ -32,11 +32,13 @@
       "container",
       "grid",
       "sheet",
+      "sidebar",
       "table",
       "typography"
     ],
     "primitives": [
       "aria-manager",
+      "astro-as-child",
       "classy",
       "focus-trap",
       "memory",

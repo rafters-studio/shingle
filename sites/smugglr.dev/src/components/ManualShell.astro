@@ -1,0 +1,20 @@
+---
+/**
+ * Puts Sidebar and the page side by side. Astro's Sidebar root is the provider
+ * and its only default slot is the panel, so the page cannot sit inside it; a
+ * `contained` Sidebar fills the rail here instead. The page is not a SidebarInset
+ * because that renders a <main> inside Base's <main>.
+ */
+const shell = 'flex flex-col md:flex-row';
+const rail = 'shrink-0 md:sticky md:top-0 md:h-svh md:self-start';
+const page = 'min-w-0 flex-1';
+---
+
+<div class={shell}>
+  <div class={rail}>
+    <slot name="nav" />
+  </div>
+  <div class={page}>
+    <slot />
+  </div>
+</div>

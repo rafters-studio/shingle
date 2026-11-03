@@ -1,0 +1,345 @@
+---
+title: "CLI reference"
+description: "smugglr sync, mesh, stash and retrieve, their flags, the places they read and write, the config file, and the exit codes."
+layout: "../../layouts/Manual.astro"
+---
+
+import ManualSection from "@/src/components/ManualSection.astro";
+import ManualTable from "@/src/components/ManualTable.astro";
+import { CodeBlock } from "@/components/ui/typography.astro";
+import OUT from "@/src/smugglr/manual-output.json";
+
+<ManualSection id="synopsis" note="five commands">
+
+<CodeBlock>{"smugglr sync <source> <target> [flags]\nsmugglr mesh <place> --key-file <path> [--sync-mode stop|last]\nsmugglr mesh <place> --key-file <path> --replay <change hash>\nsmugglr mesh keygen --key-file <path>\nsmugglr stash <place> <dir> --key-file <path> --node <name> [--target <name>]... [--whole]\nsmugglr retrieve <place> <blob or dir> --key-file <path> --node <name> [--crossed-off <name>]... [--sync-mode stop|last] [--json]\nsmugglr retrieve <place> --key-file <path> --node <name> --replay <change hash> [--sync-mode stop|last] [--json]"}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="flags" note="smugglr sync, all optional">
+
+<ManualTable
+  head={["flag","what it does"]}
+  rows={[
+    [
+      "--dryrun",
+      "Plans the run and prints the record. Writes nothing."
+    ],
+    [
+      "--json",
+      "Prints the record as JSON."
+    ],
+    [
+      "--sync-type direct|mesh",
+      "How the places connect; direct is the default. mesh takes one place and is smugglr mesh. hub and multi are refused as not built yet."
+    ],
+    [
+      "--sync-mode <mode>",
+      "What happens to a row changed on both sides: stop (the default), source, target or last. See Sync modes."
+    ],
+    [
+      "--table <name>",
+      "Limits the run to that table. Repeat it to name more tables. The shape check still covers every table both places hold; ignore a table in the config to leave it out of the check."
+    ],
+    [
+      "--watch [seconds]",
+      "Runs again every N seconds, 60 by default, with one record per run, until stopped. --watch 0 is a usage error."
+    ]
+  ]}
+/>
+
+<CodeBlock>{OUT.watch_zero}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="sync-modes" note="--sync-mode">
+
+<ManualTable
+  head={["mode","a row changed on both sides"]}
+  rows={[
+    [
+      "stop",
+      "The default. The row stops and is named."
+    ],
+    [
+      "source",
+      "The source’s copy is kept; each overwritten row is named."
+    ],
+    [
+      "target",
+      "The target’s copy is kept; each overwritten row is named."
+    ],
+    [
+      "last",
+      "The copy whose steering column is further on is kept. Needs a steering column set in the config."
+    ]
+  ]}
+/>
+
+Without a steering column, `last` is refused before anything is read:
+
+<CodeBlock>{OUT.last_nosteer}</CodeBlock>
+
+With `steering = "updated_at"` in the config, the preview and the run agree:
+
+<CodeBlock>{OUT.last_dry}</CodeBlock>
+
+<CodeBlock>{OUT.last_run}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="places" note="where a sync reads and writes">
+
+<ManualTable
+  head={["address","place","credentials"]}
+  rows={[
+    [
+      "./shop.db",
+      "A local SQLite file, by path. file:// also works.",
+      "none"
+    ],
+    [
+      "http://…, https://…",
+      "A service that speaks HTTP-SQL.",
+      "none sent: smugglr adds no credentials of its own to the request"
+    ],
+    [
+      "d1://<database-name>",
+      "A Cloudflare D1 database.",
+      "CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN, read from the environment; a missing one is refused by name, with exit 2. The token needs D1 edit permission."
+    ]
+  ]}
+/>
+
+smugglr keeps no secrets and has no environment of its own; it runs inside the environment of the project that calls it. Put the two D1 variables in that project’s `.env` or in a secrets manager, for example with 1Password Environments:
+
+<CodeBlock>{"op run --environment=<id> -- smugglr sync ./shop.db d1://shop"}</CodeBlock>
+
+Other database engines (postgres://, for example) are refused: smugglr keeps SQLite in step with SQLite. Every table needs a primary key; a table without one stops the run with exit 3. SQLite’s `sqlite_*` tables are always ignored, and so are D1’s `_cf_*` tables.
+
+</ManualSection>
+
+<ManualSection id="stash" note="smugglr stash, smugglr retrieve">
+
+<ManualTable
+  head={["flag","what it does"]}
+  rows={[
+    [
+      "--key-file <path>",
+      "The shared key that signs and verifies changes: 64 hex digits, or 32 bytes. Required."
+    ],
+    [
+      "--node <name>",
+      "This device. Required."
+    ],
+    [
+      "--target <name>",
+      "stash only. A device the blob is for; repeatable."
+    ],
+    [
+      "--whole",
+      "stash only. Stash every row and the graveyard, not what changed since the last stash. A place’s first stash is whole."
+    ],
+    [
+      "--crossed-off <name>",
+      "retrieve only. A device the app has crossed off the blob; repeatable."
+    ],
+    [
+      "--sync-mode stop|last",
+      "retrieve only. What happens to a row changed here and in a blob: stop (the default) names it, last keeps the copy whose steering column is further on. source and target are refused."
+    ],
+    [
+      "--replay <change hash>",
+      "retrieve only. Takes no blob: decides the change the dropped log holds under that hash again, with a fresh sunset, overriding its drop. An unknown hash is a usage error, exit 2."
+    ],
+    [
+      "--json",
+      "retrieve only. Prints the record as JSON."
+    ]
+  ]}
+/>
+
+stash writes one new blob into the directory and prints its path. retrieve applies one blob, or every blob in a directory, in any order.
+
+<CodeBlock>{OUT.stash}</CodeBlock>
+
+<CodeBlock>{OUT.retrieve}</CodeBlock>
+
+A retrieve names each change it drops with its change hash. --replay decides that change again:
+
+<CodeBlock>{OUT.retrieve_drop}</CodeBlock>
+
+<CodeBlock>{OUT.retrieve_replay}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="mesh" note="smugglr mesh">
+
+<ManualTable
+  head={["command","what it does"]}
+  rows={[
+    [
+      "smugglr mesh <place> --key-file <path> [--sync-mode stop|last]",
+      "Keeps <place> in step with every node on the local network that holds the same key, until stopped. smugglr sync <place> --sync-type mesh takes the same flags and is the same command."
+    ],
+    [
+      "smugglr mesh keygen --key-file <path>",
+      "Appends a new key to the key file, making the file when there is none, and prints the key’s id."
+    ]
+  ]}
+/>
+
+<ManualTable
+  head={["flag","what it does"]}
+  rows={[
+    [
+      "--key-file <path>",
+      "The shared key: one base64 key per line, newest last; a line starting with # is a note. Required. On unix only its owner may read it (chmod 600); a looser file is refused."
+    ],
+    [
+      "--sync-mode stop|last",
+      "What happens to a row changed here and in a change. source and target are refused: they are for two places."
+    ],
+    [
+      "--replay <change hash>",
+      "Decides the change the dropped log holds under that hash again, with a fresh sunset, overriding its drop; prints what came of it and exits. An unknown hash is a usage error, exit 2."
+    ]
+  ]}
+/>
+
+<CodeBlock>{OUT.mesh_keygen}</CodeBlock>
+
+<CodeBlock>{OUT.mesh_loose}</CodeBlock>
+
+A node signs and seals with the newest key and also accepts the one before it. The previous key is not retired in 0.6.1. No key is printed anywhere; a key is named by its id.
+
+A node is named by its machine’s name (`hostname`, or `COMPUTERNAME` on Windows), and every node needs its own: a node ignores any message carrying its own name, so two machines with one name do not sync and nothing says so. It broadcasts to find peers and sends to them by unicast; on a network with no broadcast, the `peers` setting names the addresses to announce to. A change too large for one datagram is refused with a line naming the row; on macOS the limit is about 9 KB.
+
+<CodeBlock>{OUT.mesh_start}</CodeBlock>
+
+<CodeBlock>{OUT.mesh_toolarge}</CodeBlock>
+
+A change a node drops is named in the record with its change hash and kept in a dropped log. Here puck deletes a note and writes it again; rzr drops the second insert, then --replay decides it:
+
+<CodeBlock>{OUT.mesh_dropped}</CodeBlock>
+
+<CodeBlock>{OUT.mesh_replay}</CodeBlock>
+
+<ManualTable
+  head={["setting","default","what it does"]}
+  rows={[
+    [
+      "port",
+      "31337",
+      "The UDP port a node broadcasts and listens on."
+    ],
+    [
+      "peers",
+      "none",
+      "Addresses to announce to: \"host\" or \"host:port\", the mesh port when none is given."
+    ],
+    [
+      "backpressure",
+      "6 MB",
+      "The most the outbox of unacknowledged changes holds, in bytes or a size such as \"6 MB\". At the line the node takes no new changes in until acknowledgements bring it down."
+    ],
+    [
+      "graveyard",
+      "12 hours",
+      "Seconds a change is carried; sets each change’s sunset."
+    ]
+  ]}
+/>
+
+The mesh is designed and tested for up to 50 nodes. A node away longer than the sunset prints the stash and retrieve commands that catch it up and keeps running.
+
+</ManualSection>
+
+<ManualSection id="config" note="$XDG_CONFIG_HOME/smugglr/config.toml">
+
+smugglr reads `config.toml` from its config directory: `$XDG_CONFIG_HOME/smugglr`, else `$HOME/.config/smugglr`. The same directory holds smugglr’s memory of each pair of places. A setting smugglr does not read is left alone; a file that is not TOML, or a setting it cannot use, exits 2.
+
+<ManualTable
+  head={["key","what it sets"]}
+  rows={[
+    [
+      "ignore",
+      "Tables to ignore, as names or patterns with * (any run of characters) and ? (any one), matched without regard to case."
+    ],
+    [
+      "steering",
+      "The steering column, by name, for all tables. A table can set its own under [tables.<name>]. --sync-mode last needs it."
+    ],
+    [
+      "max_wire",
+      "The most a first sync may send, in bytes or in units such as \"250 MB\" (decimal). 100 MB when unset."
+    ],
+    [
+      "graveyard",
+      "Seconds a change is carried and a delete’s tombstone kept, for stash and retrieve. 12 hours by default."
+    ]
+  ]}
+/>
+
+<CodeBlock>{"steering = \"updated_at\"\nignore = [\"audit\", \"cache_*\"]\nmax_wire = \"250 MB\"\n\n[tables.orders]\nsteering = \"modified\""}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="exit-codes" note="scripts branch on these">
+
+<ManualTable
+  head={["code","meaning"]}
+  rows={[
+    [
+      "0",
+      "Done, or a preview."
+    ],
+    [
+      "2",
+      "Usage error: a bad flag or place, a missing D1 variable, a config smugglr cannot read, a table without a steering column under --sync-mode last, or a key file or --node that stash or retrieve needs, a key file the mesh refuses, or a mesh given more than one place."
+    ],
+    [
+      "3",
+      "Stopped before writing anything: a row changed in both places, a shape that differs, or a table without a primary key."
+    ],
+    [
+      "4",
+      "Wrote something and is not done: a table stopped after another moved, a row read back different, or the run was cut off. Run it again; a stopped table stops again until its rows are settled."
+    ],
+    [
+      "5",
+      "Too much for the wire. Nothing was sent."
+    ]
+  ]}
+/>
+
+<CodeBlock>{OUT.too_much}</CodeBlock>
+
+Exit 5 above: the record names the stash and retrieve commands to move the rows, with the flags they need. The code comes from what the run did. A crash cannot say whether it wrote, so it exits 4: running again is the next step either way.
+
+</ManualSection>
+
+<ManualSection id="record" note="printed by every run">
+
+Every run prints a record of what it did; `--json` prints it as JSON. [Get started](/docs/get-started/) shows how to read it. A stopped table names its rows in the record:
+
+<CodeBlock>{OUT.stop_json}</CodeBlock>
+
+A shape difference is carried under `shape`:
+
+<CodeBlock>{OUT.shape_json}</CodeBlock>
+
+</ManualSection>
+
+<ManualSection id="not-built" note="refused, not built">
+
+--sync-type hub and multi are not built. The CLI says so and exits 2; do not plan around them.
+
+<CodeBlock>{OUT.unknown_type}</CodeBlock>
+
+- Automatic catch-up past the sunset (#521). A mesh node away that long prints the stash and retrieve commands instead.
+- smugglr mesh remove (#521). A node gone for good stops being a target when the sunset passes.
+- Retiring the previous mesh key. It is accepted with no end date.
+- A loud mesh name clash (#521). Two machines with one name ignore each other.
+- The mesh\_wire setting, which belongs to the automatic catch-up.
+
+</ManualSection>

@@ -24,7 +24,8 @@
     "@shingle/shared": "workspace:*",
     "astro": "^7.4.2",
     "nanostores": "^1.2.0",
-    "react": "19.2.0"
+    "react": "19.2.0",
+    "ultrahtml": "^1.7.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",

@@ -16,33 +16,7 @@ const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
 const { title = '', description, nav: navProp } = merged;
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
-const defaultNav: NavGroup[] = [
-  {
-    heading: 'Start',
-    items: [
-      { label: 'Get Started', href: '/get-started' },
-      { label: 'CLI Reference', href: '/docs/cli-reference' },
-      { label: 'Configuration', href: '/docs/configuration' },
-    ],
-  },
-  {
-    heading: 'Internals',
-    items: [
-      { label: 'How It Works', href: '/docs/how-it-works' },
-      { label: 'Usage Patterns', href: '/docs/patterns' },
-      { label: 'Plugin Guide', href: '/docs/plugin-guide' },
-      { label: 'Concepts', href: '/docs/concepts' },
-    ],
-  },
-  {
-    heading: 'Browser',
-    items: [
-      { label: 'Browser Client', href: '/docs/browser-client' },
-    ],
-  },
-];
-
-const nav: NavGroup[] = navProp ?? defaultNav;
+const nav: NavGroup[] = navProp ?? [];
 
 function isActive(href: string, exact = false): boolean {
   if (exact) return currentPath === href;

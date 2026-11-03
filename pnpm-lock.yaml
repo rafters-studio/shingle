@@ -420,6 +420,9 @@ importers:
       react:
         specifier: 19.2.0
         version: 19.2.0
+      ultrahtml:
+        specifier: ^1.7.0
+        version: 1.7.0
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.12
