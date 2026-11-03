@@ -32,6 +32,7 @@
       "card",
       "container",
       "grid",
+      "sheet",
       "table",
       "tabs",
       "typography"
@@ -39,7 +40,9 @@
     "primitives": [
       "aria-manager",
       "classy",
+      "focus-trap",
       "memory",
+      "outside-click",
       "roving-focus",
       "sr-announcer",
       "types"
@@ -49,6 +52,7 @@
     "substrate": [
       "compose",
       "contract",
+      "disclosable",
       "pressable"
     ]
   }

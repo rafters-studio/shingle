@@ -1,27 +1,142 @@
 ---
+/**
+ * Site-shared top bar. Sites pass only data: a brand and a list of links.
+ *
+ * Mobile first: the base is the brand and a hamburger that opens Rafters' sheet
+ * with every link stacked; from `md` up the links sit inline and the sheet is
+ * gone. Sticky at every width.
+ *
+ * The header and its Container stay out of container-query context
+ * (`query={false}`): `@container` applies layout containment, which would make
+ * the sheet's `position: fixed` resolve against the bar instead of the viewport.
+ *
+ * The sheet's own motion is a fade; it has no slide keyframe to name. The slide
+ * is applied from here through `@starting-style`, which runs when `hidden`
+ * lifts, using the same duration and easing tokens.
+ */
 import Container from "@/components/ui/container.astro";
+import Sheet from "@/components/ui/sheet.astro";
 
-interface Props {
+export interface TopBarBrand {
   name: string;
   logoSrc?: string;
   href?: string;
 }
 
-const { name, logoSrc, href = "/" } = Astro.props;
+export interface TopBarLink {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  brand: TopBarBrand;
+  links: TopBarLink[];
+}
+
+const { brand, links } = Astro.props;
+const { name, logoSrc, href = "/" } = brand;
+
+const linkClass = "no-underline text-muted-foreground hover:text-foreground transition-colors";
 ---
 
-<header class="border-b border-border">
-  <Container size="full" padding="4">
-    <a href={href} aria-label={`${name} home`} class="no-underline">
-      {
-        logoSrc ? (
-          <img src={logoSrc} alt={name} height="24" />
-        ) : (
-          <span class="font-heading font-semibold text-xl tracking-tight text-foreground">
-            {name}
+<header class="sticky top-0 z-depth-navigation border-b border-border bg-background">
+  <Container size="7xl" query={false}>
+    <div class="flex min-h-14 items-center justify-between gap-6">
+      <a href={href} aria-label={`${name} home`} class="no-underline">
+        {
+          logoSrc ? (
+            <img src={logoSrc} alt={name} class="h-6 w-auto" />
+          ) : (
+            <span class="font-heading font-semibold text-xl tracking-tight text-foreground">
+              {name}
+            </span>
+          )
+        }
+      </a>
+
+      <nav aria-label="Main" class="hidden items-center gap-6 md:flex">
+        {links.map((link) => <a href={link.href} class={linkClass}>{link.label}</a>)}
+      </nav>
+
+      <div
+        data-topbar-menu
+        class="md:hidden [&_[data-part=content]]:transition-transform [&_[data-part=content]]:duration-moderate [&_[data-part=content]]:ease-standard [&_[data-part=content]]:starting:-translate-x-full"
+      >
+        <Sheet id="topbar-sheet" side="left" title="Menu">
+          <span slot="trigger" class="inline-flex size-11 items-center justify-center">
+            <span class="sr-only">Open menu</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              class="size-6"
+              aria-hidden="true"
+            >
+              <path d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
           </span>
-        )
-      }
-    </a>
+          <nav aria-label="Main">
+            <Container gap="0" query={false}>
+              {
+                links.map((link) => (
+                  <a href={link.href} class={`flex min-h-11 items-center ${linkClass}`}>
+                    {link.label}
+                  </a>
+                ))
+              }
+            </Container>
+          </nav>
+          <svg
+            slot="close"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            class="size-5"
+            aria-hidden="true"
+          >
+            <path d="M6 6l12 12M18 6L6 18"></path>
+          </svg>
+        </Sheet>
+      </div>
+    </div>
   </Container>
 </header>
+
+<script>
+  // The sheet closes on its close part, Escape and an outside tap; choosing a
+  // link is this bar's rule. It has to close here, before the default action,
+  // because a same-page hash link never unloads the page.
+  for (const menu of document.querySelectorAll<HTMLElement>("[data-topbar-menu]")) {
+    const trigger = menu.querySelector<HTMLElement>('[data-part="trigger"]');
+    const close = menu.querySelector<HTMLElement>('[data-part="close"]');
+    const content = menu.querySelector<HTMLElement>('[data-part="content"]');
+
+    // Safari does not focus a tapped button, and the sheet restores focus to
+    // whatever held it at open, so focus the button before the sheet opens.
+    trigger?.addEventListener("click", () => trigger.focus());
+
+    // An outside tap closes on pointerdown and restores focus, then the same
+    // tap's mousedown takes it away again, so it is returned once the tap ends.
+    let tappedOutside = false;
+    document.addEventListener(
+      "pointerdown",
+      ({ target }) => {
+        const inside = target instanceof Node && (content?.contains(target) || trigger?.contains(target));
+        tappedOutside = content?.hidden === false && !inside;
+      },
+      true,
+    );
+    document.addEventListener("click", () => {
+      if (tappedOutside) trigger?.focus();
+      tappedOutside = false;
+    });
+
+    for (const link of menu.querySelectorAll("nav a")) {
+      link.addEventListener("click", () => close?.click());
+    }
+  }
+</script>

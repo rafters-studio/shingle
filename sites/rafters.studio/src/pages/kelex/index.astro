@@ -1,22 +1,12 @@
 ---
 import Base from '@/src/layouts/Base.astro';
 import Container from '@/components/ui/container.astro';
-import Grid from '@/components/ui/grid.astro';
 import { H1, P } from '@/components/ui/typography.astro';
-
-const githubUrl = 'https://github.com/rafters-studio/kelex';
+import { kelexBar } from '@/src/kelex-bar';
 ---
 
-<Base title="Kelex" description="Kelex is a schema-first code generator in the Rafters Studio ecosystem.">
+<Base title="Kelex" description="Kelex is a schema-first code generator in the Rafters Studio ecosystem." bar={kelexBar}>
   <Container size="6xl" padding="16" gap="12">
-    <Grid id="kelex-index-grid-1" columns={2} gap="4">
-      <a href="/kelex/">Kelex</a>
-      <Grid id="kelex-index-grid-2" columns={2} gap="8">
-        <a href="/kelex/docs/">Docs</a>
-        <a href={githubUrl}>GitHub</a>
-      </Grid>
-    </Grid>
-
     <Container gap="8">
       <H1 size="5xl" tracking="tight">
         Kelex

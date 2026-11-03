@@ -3,6 +3,7 @@ import Base from './Base.astro';
 import Container from '@/components/ui/container.astro';
 import Grid from '@/components/ui/grid.astro';
 import { Small } from '@/components/ui/typography.astro';
+import { kelexBar } from '@/src/kelex-bar';
 
 interface Props {
   title: string;
@@ -37,16 +38,8 @@ function isActive(href: string): boolean {
 }
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} bar={kelexBar}>
   <Container size="7xl" padding="8" gap="10">
-    <Grid id="kelexdocs-grid-1" columns={2} gap="4">
-      <a href={base}>Kelex</a>
-      <Grid id="kelexdocs-grid-2" columns={2} gap="8">
-        <a href={`${base}docs/`}>Docs</a>
-        <a href="https://github.com/rafters-studio/kelex">GitHub</a>
-      </Grid>
-    </Grid>
-
     <Grid id="kelexdocs-grid-3" columns={4} gap="8">
       <Container colSpan={1}>
         <Container as="aside" gap="8">
