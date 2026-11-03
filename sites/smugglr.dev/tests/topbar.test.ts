@@ -15,7 +15,8 @@ describe.each(pages)("top bar on %s", (page) => {
   const html = readFileSync(join(process.cwd(), "dist", page), "utf8");
 
   it("renders one bar, with no fade-in bar", () => {
-    expect(html.match(/z-depth-navigation/g)).toHaveLength(1);
+    // The manual's sidebar and its trigger sit at the same depth; the bar is the header.
+    expect(html.match(/<header[^>]*z-depth-navigation/g)).toHaveLength(1);
     expect(html).not.toContain("site-topbar");
   });
 
