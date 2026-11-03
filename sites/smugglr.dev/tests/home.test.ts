@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import fixture from "./fixtures/home-out.json";
@@ -23,7 +23,7 @@ const text = textOf(html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/sty
 describe("home page, built", () => {
   it("has the hero copy", () => {
     expect(text).toContain("SQLITE SYNC ENGINE · ONE RUST BINARY · MIT");
-    expect(html).toContain('If you’re moving SQLite, <span data-ink>smuggl</span> it.');
+    expect(text).toContain("If you’re moving SQLite, smuggl it.");
     expect(text).toContain(
       "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.",
     );
@@ -32,17 +32,16 @@ describe("home page, built", () => {
     );
   });
 
-  it("shows the install command in the pill", () => {
-    const pill = html.match(/class="install dark"[^>]*>([\s\S]*?)<\/code>/);
-    expect(textOf(pill?.[1] ?? "")).toContain(
+  it("shows the install command", () => {
+    expect(text).toContain(
       "$ cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr",
     );
   });
 
   it("orders hero, stage and band", () => {
-    const hero = html.indexOf('class="hero"');
+    const hero = html.indexOf("<h1");
     const stage = html.indexOf("data-sync-stage");
-    const band = html.indexOf('class="band dark gutter"');
+    const band = html.indexOf('aria-label="Machine-readable summary"');
     expect(hero).toBeGreaterThan(-1);
     expect(stage).toBeGreaterThan(hero);
     expect(band).toBeGreaterThan(stage);
@@ -68,6 +67,17 @@ describe("home page, built", () => {
     const blocks = [...html.matchAll(/<pre[^>]*data-out="([^"]+)"[^>]*><code>([\s\S]*?)<\/code><\/pre>/g)];
     const found = Object.fromEntries(blocks.map((m) => [m[1], decode(m[2] ?? "")]));
     expect(found).toEqual(fixture);
+  });
+
+  it("is rafters: no hand styling on the page, no stylesheet but the stage's", () => {
+    const source = readFileSync(join(process.cwd(), "src/pages/index.astro"), "utf8");
+    const markup = source
+      .slice(source.lastIndexOf("---"))
+      // The Astro Table's documented surface: class strings on real table elements.
+      .replace(/class=\{table\w+Classes\}/g, "");
+    expect(markup).not.toMatch(/\bclass(:list)?=|\bstyle=|<style/);
+    expect(markup).not.toMatch(/<(div|span|b|h1)[\s>]/);
+    expect(readdirSync(join(process.cwd(), "src/styles"))).toEqual(["global.css"]);
   });
 
   it("has no React island and no old copy", () => {
