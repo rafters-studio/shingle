@@ -1,0 +1,19 @@
+/**
+ * Sync stage view: class strings, no logic. The rules live in
+ * src/styles/home.css, built from rafters tokens.
+ */
+export const syncStageClasses = {
+  live: "ss-stage ss-live gutter",
+  still: "ss-stage ss-still gutter",
+  stillDark: "ss-stage ss-still dark gutter",
+  verb: "ss-verb",
+  closing: "ss-closing",
+  field: "ss-field",
+  wire: "ss-wire",
+  check: "ss-check",
+  wide: "ss-wide",
+  packet: "ss-packet",
+  bar: "ss-packet bar",
+  flash: "ss-flash",
+  heldFlash: "ss-flash held",
+} as const;

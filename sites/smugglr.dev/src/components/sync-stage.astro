@@ -1,0 +1,133 @@
+---
+/**
+ * Sync stage: a full-bleed animation of one sync between two SQLite files.
+ *
+ * @cognitive-load 4/10 - Motion carries the story; one verb and one caption at a time
+ * @attention-economics Holds attention through the page's one moving element, and only while in view
+ * @trust-building Every beat names what smugglr does to the row, and the conflict stops rather than guesses
+ * @accessibility The animated layer is aria-hidden under a section label that tells the whole story; reduced motion gets a still version and no animation frame
+ * @semantic-meaning honey = what crosses the wire, violet = the check on it
+ *
+ * @usage-patterns
+ * DO: Place once on a page, full width
+ * NEVER: Put text a reader needs only inside the animated layer
+ *
+ * Both themes of the still are on the server, because reduced motion runs no
+ * script; home.css shows the one the viewer's theme calls for.
+ */
+import Container from "@/components/ui/container.astro";
+import Table from "@/components/ui/table.astro";
+import {
+  tableBodyClasses,
+  tableCaptionClasses,
+  tableCellClasses,
+  tableHeadClasses,
+  tableHeaderClasses,
+  tableRowClasses,
+} from "@/components/ui/table.classes";
+import Typography, { Code, H2, H3, Lead, Muted } from "@/components/ui/typography.astro";
+import { SS_COPY } from "./sync-stage.behavior";
+import { syncStageClasses as c } from "./sync-stage.classes";
+
+const files = ["laptop/shop.db", "server/shop.db"];
+---
+
+<section class={c.live} data-sync-stage aria-label={SS_COPY.label}>
+  <div aria-hidden="true">
+    <Container size="5xl" gap="8">
+      <div class={c.verb} data-ss="verb">
+        <H2 weight="black" align="center" line="none">
+          <span data-ss="bold">READ</span>{" "}
+          <Typography as="span" weight="thin" line="none" data-ss="thin">it.</Typography>
+        </H2>
+      </div>
+      <div class={c.closing} data-ss="closing" hidden>
+        <H2 weight="thin" align="center" line="none">
+          <span data-ss="closing-a"></span>{" "}
+          <span data-ink>
+            <Typography as="span" weight="black" line="none" color="primary-foreground" data-ss="closing-b" />
+          </span>
+        </H2>
+      </div>
+      <Lead align="center" data-ss="cap">{SS_COPY.caps[0]}</Lead>
+      <div class={c.field} data-ss="field">
+        <Container columns={3} gap="4" position="relative">
+          {
+            files.map((name, index) => (
+              <Fragment>
+                {index === 1 && <div />}
+                <Table>
+                  <caption class={tableCaptionClasses}>{name}</caption>
+                  <thead class={tableHeaderClasses}>
+                    <tr class={tableRowClasses}>
+                      <th class:list={[tableHeadClasses, c.wide]}>key</th>
+                      <th class={tableHeadClasses}>hash</th>
+                      <th class:list={[tableHeadClasses, c.wide]}>match</th>
+                    </tr>
+                  </thead>
+                  <tbody class={tableBodyClasses}>
+                    {SS_COPY.keys.map((key) => (
+                      <tr class={tableRowClasses}>
+                        <td class:list={[tableCellClasses, c.wide]}>
+                          <Code data-ss="key">{key}</Code>
+                        </td>
+                        <td class={tableCellClasses}>
+                          <Code data-ss="hash" />
+                          <span data-ss="narrow-mark" />
+                        </td>
+                        <td class:list={[tableCellClasses, c.wide]} data-ss="match" />
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Fragment>
+            ))
+          }
+          <div class={c.wire} data-ss="wire"><div class={c.check} data-ss="check"></div></div>
+        </Container>
+      </div>
+    </Container>
+  </div>
+</section>
+
+{
+  [false, true].map((dark) => (
+    <section class={dark ? c.stillDark : c.still} aria-label={SS_COPY.stillLabel}>
+      <Container size="5xl" gap="12">
+        <Container as="section" columns={{ base: 1, md: 5 }} gap="6">
+          {SS_COPY.still.map(([verb, line], i) => (
+            <Container gap="2">
+              <H3 weight="black" color={dark ? "warning" : undefined}>
+                {verb}{" "}
+                <Typography as="span" weight="thin" color={dark ? "warning" : undefined}>
+                  it.
+                </Typography>
+              </H3>
+              <Code>{line}</Code>
+              <Muted>{SS_COPY.caps[i]}</Muted>
+            </Container>
+          ))}
+        </Container>
+        <Lead align="center">{SS_COPY.stillThen}</Lead>
+        <div class={c.closing}>
+          <H2 weight="thin" align="center" line="none">
+            {SS_COPY.closingA}{" "}
+            <span data-ink>
+              <Typography as="span" weight="black" line="none" color="primary-foreground">
+                {SS_COPY.closingB}
+              </Typography>
+            </span>
+          </H2>
+        </div>
+      </Container>
+    </section>
+  ))
+}
+
+<script>
+  import { bindSyncStage } from "./sync-stage.behavior";
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-sync-stage]")) {
+    bindSyncStage(root);
+  }
+</script>

@@ -1,0 +1,247 @@
+---
+import Base from "@/src/layouts/Base.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import SyncStage from "@/components/sync-stage.astro";
+import Button from "@/components/ui/button.astro";
+import Table from "@/components/ui/table.astro";
+import {
+  tableBodyClasses,
+  tableCellClasses,
+  tableHeadClasses,
+  tableHeaderClasses,
+  tableRowClasses,
+} from "@/components/ui/table.classes";
+import { Code, CodeBlock } from "@/components/ui/typography.astro";
+
+const LEDE =
+  "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
+const INSTALL = "cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr";
+
+// Captured from the v0.6.1 release binary; never typed.
+const OUT = {
+  moved_dry: "$ smugglr sync laptop/shop.db server/shop.db --dryrun\nsmugglr sync: preview\n  products: would move, 1 to target, 1 to source, 1 deleted in target, 0 deleted in source, 0 overwritten in target, 0 overwritten in source\n    deleted in target: sku-0233",
+  moved_json: "$ smugglr sync laptop/shop.db server/shop.db --json\n{\n  \"status\": \"done\",\n  \"first_sync\": false,\n  \"deletes_seen\": true,\n  \"tables\": {\n    \"products\": {\n      \"status\": \"moved\",\n      \"to_target\": 1,\n      \"to_source\": 1,\n      \"deleted_in_target\": [\n        \"sku-0233\"\n      ],\n      \"deleted_in_source\": [],\n      \"overwritten_in_target\": [],\n      \"overwritten_in_source\": []\n    }\n  },\n  \"ignored\": []\n}",
+  mesh_insert: "$ sqlite3 ./node.db \"insert into notes values('n1','first note');\"   # on puck\n$ sqlite3 ./node.db \"select * from notes\"   # on rzr\nn1|first note\n# rzr, output so far\nsmugglr mesh: node rzr on UDP port 31402, key 180627566f7a4e3b\nsmugglr mesh: applied 1 change to notes from puck, key 180627566f7a4e3b",
+};
+
+type Block =
+  | { kind: "p"; text: string; code?: string }
+  | { kind: "table"; head: string[]; rows: string[][] }
+  | { kind: "out"; name: keyof typeof OUT };
+
+interface Sec {
+  num: string;
+  title: string;
+  note: string;
+  blocks: Block[];
+}
+
+const SECTIONS: Sec[] = [
+  {
+    num: "01",
+    title: "SCOPE",
+    note: "one paragraph",
+    blocks: [
+      {
+        kind: "p",
+        text: "smugglr keeps SQLite databases in step: a local file, any service that speaks HTTP-SQL, and Cloudflare D1. One Rust binary. Each row is compared by a 16-byte BLAKE3 hash of its contents, so only rows that changed cross the wire; a large first sync can move as a stash and a retrieve. A row changed in both places stops and is named; nothing is overwritten unless you say so. On a local network where nobody is in charge, smugglr mesh keeps nodes in step as changes happen. Every run prints a record, --json on request, and exits with a code that says what happened.",
+      },
+    ],
+  },
+  {
+    num: "02",
+    title: "INSTALL",
+    note: "one binary, two ways",
+    blocks: [
+      {
+        kind: "table",
+        head: ["channel", "command", "what you get"],
+        rows: [
+          [
+            "Release archive",
+            "https://github.com/rafters-studio/smugglr/releases",
+            "smugglr-<target>.tar.gz for four unix targets (x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-apple-darwin, aarch64-apple-darwin); smugglr-x86_64-pc-windows-msvc.zip for Windows",
+          ],
+          ["From source", INSTALL, "The smugglr command"],
+        ],
+      },
+    ],
+  },
+  {
+    num: "03",
+    title: "PLACES",
+    note: "one engine, every place",
+    blocks: [
+      {
+        kind: "table",
+        head: ["place", "address", "credentials"],
+        rows: [
+          ["Local file", "./shop.db", "none"],
+          ["HTTP-SQL service", "https://db.example.com", "none sent"],
+          ["Cloudflare D1", "d1://shop", "CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN"],
+        ],
+      },
+      {
+        kind: "p",
+        text: "smugglr keeps no secrets and has no environment of its own; it runs inside the project’s. Keep the D1 variables in that project’s .env, or in a secrets manager: ",
+        code: "op run --environment=<id> -- smugglr sync ./shop.db d1://shop",
+      },
+    ],
+  },
+  {
+    num: "04",
+    title: "EXIT CODES",
+    note: "scripts branch on these",
+    blocks: [
+      {
+        kind: "table",
+        head: ["code", "meaning"],
+        rows: [
+          ["0", "Done, or a preview. Every row written was read back as written."],
+          ["2", "Refused before anything was read or written: a bad flag, place or config, or a missing D1 variable."],
+          ["3", "Stopped before writing anything."],
+          ["4", "Wrote something and is not done. Run it again; a stopped table stops again until its rows are settled."],
+          ["5", "Too much for the wire. Nothing was sent."],
+        ],
+      },
+    ],
+  },
+  {
+    num: "05",
+    title: "SYNC MODES",
+    note: "when a row changed in both places",
+    blocks: [
+      {
+        kind: "table",
+        head: ["--sync-mode", "what happens"],
+        rows: [
+          ["stop", "Default. The table stops and names the rows."],
+          ["source", "The source’s copy is kept; each overwritten row is named."],
+          ["target", "The target’s copy is kept; each overwritten row is named."],
+          ["last", "The copy whose steering column is further on is kept."],
+        ],
+      },
+    ],
+  },
+  {
+    num: "06",
+    title: "THE RECORD",
+    note: "pasted from the release binary",
+    blocks: [
+      { kind: "p", text: "The preview names what would move. The run, here as JSON, moves exactly that." },
+      { kind: "out", name: "moved_dry" },
+      { kind: "out", name: "moved_json" },
+    ],
+  },
+  {
+    num: "07",
+    title: "MESH",
+    note: "nobody in charge",
+    blocks: [
+      {
+        kind: "p",
+        text: "smugglr mesh keeps every node on a local network that holds one key in step, as changes happen. Each change is signed, sealed and resent until each peer has decided it. A node is named by its machine; on a network with no broadcast, a peers setting names the others.",
+      },
+      { kind: "out", name: "mesh_insert" },
+    ],
+  },
+  {
+    num: "08",
+    title: "LIMITS",
+    note: "said in the same breath",
+    blocks: [
+      {
+        kind: "p",
+        text: "Direct and mesh syncs exist in 0.6.1: --sync-type hub and multi are refused as not built yet. A mesh node away longer than the sunset is told to catch up with stash and retrieve; it does not do it alone. smugglr sends no credentials to an HTTP-SQL place. A first sync cannot see deletes.",
+      },
+    ],
+  },
+];
+---
+
+<Base title="smugglr" description={LEDE} stickyTopbar={false}>
+  <div class="topbar-scroll"><SiteHeader /></div>
+
+  <div class="gutter">
+    <div class="hero">
+      <div class="eyebrow">SQLITE SYNC ENGINE · ONE RUST BINARY · MIT</div>
+      <h1>If you’re moving SQLite, <span data-ink>smuggl</span> it.</h1>
+      <p data-lede>{LEDE}</p>
+      <div class="install dark" data-install={INSTALL}>
+        <code><span data-prompt>$ </span>{INSTALL}</code>
+        <Button id="install-copy" variant="outline" size="xs">Copy</Button>
+      </div>
+      <p data-install-note>
+        Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.
+      </p>
+    </div>
+  </div>
+
+  <SyncStage />
+
+  <section class="band dark gutter" aria-label="Machine-readable summary">
+    <div class="band-inner">
+      <div class="band-head">
+        <b><span data-mark>»</span>MACHINE-READABLE SUMMARY</b>
+        <span>GET /llms.txt</span>
+      </div>
+
+      {
+        SECTIONS.map((sec) => (
+          <section class="sec">
+            <div class="sec-head">
+              <h2>
+                <span data-num>## {sec.num}</span>
+                {sec.title}
+              </h2>
+              <span data-note># {sec.note}</span>
+            </div>
+            {sec.blocks.map((block) => {
+              if (block.kind === "p") {
+                return (
+                  <p>
+                    {block.text}
+                    {block.code && <Code>{block.code}</Code>}
+                  </p>
+                );
+              }
+              if (block.kind === "out") {
+                return <CodeBlock data-out={block.name}>{OUT[block.name]}</CodeBlock>;
+              }
+              return (
+                <Table>
+                  <thead class={tableHeaderClasses}>
+                    <tr class={tableRowClasses}>
+                      {block.head.map((cell) => (
+                        <th class={tableHeadClasses}>{cell}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody class={tableBodyClasses}>
+                    {block.rows.map((row) => (
+                      <tr class={tableRowClasses}>
+                        {row.map((cell, i) => (
+                          <td class={tableCellClasses}>{i === 0 ? <Code>{cell}</Code> : cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              );
+            })}
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<script>
+  const pill = document.querySelector<HTMLElement>("[data-install]");
+  const command = pill?.dataset["install"];
+  if (pill && command) {
+    pill.querySelector("button")?.addEventListener("click", () => {
+      navigator.clipboard.writeText(command).catch(() => {});
+    });
+  }
+</script>
