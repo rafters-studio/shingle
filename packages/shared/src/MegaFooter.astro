@@ -9,12 +9,15 @@
  * own resources column) is passed in per site.
  *
  * Layout comes entirely from rafters Astro primitives (Container, Grid, Small).
+ * The padding is theirs too: with no `padding` or `gap` prop, Container's edge
+ * padding and Grid's spacing scale with the container, smallest on a phone.
  * The `@/` imports resolve against the CONSUMER's tsconfig at build time, so
  * each site themes the footer through its own tokens.
  */
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
-import Small from "@/components/ui/typography-small.astro";
+import { Small } from "@/components/ui/typography.astro";
+import type { ColumnsValue } from "@/components/ui/grid.behavior";
 import { PROJECTS } from "./ecosystem";
 import type { ProjectKey } from "./ecosystem";
 
@@ -52,22 +55,24 @@ const projectsColumn: FooterColumn = { heading: "Projects", links: projects };
 const columns: FooterColumn[] = [...leadingColumns, projectsColumn, siteColumn];
 ---
 
-<footer>
-  <Container fill="surface" size="full" padding="16" gap="12">
-    <Container size="7xl" gap="12">
-      <a href="https://rafters.studio" aria-label="Rafters Studio">
-        <img src="/rafters-logo.svg" alt="Rafters Studio" class="h-8 w-auto brightness-0 invert" />
-      </a>
+<footer class="dark">
+  <Container surface="surface" size="full">
+    <Container size="7xl">
+      <Grid id="megafooter-grid-brand" columns={1}>
+        <a href="https://rafters.studio" aria-label="Rafters Studio">
+          <img src="/rafters-logo.svg" alt="Rafters Studio" class="h-8 w-auto brightness-0 invert" />
+        </a>
+      </Grid>
 
-      <Grid columns={columns.length} gap="10">
+      <Grid id="megafooter-grid-1" columns={{ base: 1, sm: 2, lg: columns.length as ColumnsValue }}>
         {
           columns.map((column) => (
-            <Container gap="3">
+            <Container gap="1">
               <Small transform="uppercase" tracking="wider" color="muted-foreground">
                 {column.heading}
               </Small>
               {column.links.map((link) => (
-                <a href={link.href}>{link.label}</a>
+                <a href={link.href} class="flex min-h-11 items-center">{link.label}</a>
               ))}
             </Container>
           ))

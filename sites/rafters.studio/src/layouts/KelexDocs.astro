@@ -2,8 +2,8 @@
 import Base from './Base.astro';
 import Container from '@/components/ui/container.astro';
 import Grid from '@/components/ui/grid.astro';
-import GridItem from '@/components/ui/grid-item.astro';
-import Small from '@/components/ui/typography-small.astro';
+import { Small } from '@/components/ui/typography.astro';
+import { kelexBar } from '@/src/kelex-bar';
 
 interface Props {
   title: string;
@@ -38,18 +38,10 @@ function isActive(href: string): boolean {
 }
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} bar={kelexBar}>
   <Container size="7xl" padding="8" gap="10">
-    <Grid columns={2} gap="4">
-      <a href={base}>Kelex</a>
-      <Grid columns={2} gap="8">
-        <a href={`${base}docs/`}>Docs</a>
-        <a href="https://github.com/rafters-studio/kelex">GitHub</a>
-      </Grid>
-    </Grid>
-
-    <Grid columns={4} gap="8">
-      <GridItem colSpan={1}>
+    <Grid id="kelexdocs-grid-3" columns={4} gap="8">
+      <Container colSpan={1}>
         <Container as="aside" gap="8">
           {nav.map((group) => (
             <Container gap="2">
@@ -65,13 +57,13 @@ function isActive(href: string): boolean {
             </Container>
           ))}
         </Container>
-      </GridItem>
+      </Container>
 
-      <GridItem colSpan={3}>
+      <Container colSpan={3}>
         <Container as="article" gap="6">
           <slot />
         </Container>
-      </GridItem>
+      </Container>
     </Grid>
   </Container>
 </Base>

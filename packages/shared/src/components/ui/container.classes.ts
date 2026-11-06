@@ -1,9 +1,26 @@
 /**
- * Shared class definitions for Container component
- * Used by both container.tsx (React) and container.astro (Astro)
+ * @components grid
+ * @primitives classy
  */
+import classy from '@/lib/primitives/classy';
+import {
+  gridColSpanClasses,
+  gridGapClasses,
+  gridRowSpanClasses,
+  resolveColumnsClasses,
+} from '@/components/ui/grid.classes';
+import type {
+  ContainerConfig,
+  ContainerDepth,
+  ContainerPosition,
+  ContainerState,
+} from '@/components/ui/container.behavior';
 
-export const containerSizeClasses: Record<string, string> = {
+export interface ContainerClassSet {
+  root: string;
+}
+
+const sizeClasses: Record<string, string> = {
   sm: 'max-w-sm',
   md: 'max-w-md',
   lg: 'max-w-lg',
@@ -17,7 +34,7 @@ export const containerSizeClasses: Record<string, string> = {
   full: 'w-full',
 };
 
-export const containerPaddingClasses: Record<string, string> = {
+const paddingClasses: Record<string, string> = {
   '0': 'p-0',
   '1': 'p-1',
   '2': 'p-2',
@@ -33,7 +50,8 @@ export const containerPaddingClasses: Record<string, string> = {
   '24': 'p-24',
 };
 
-export const containerGapClasses: Record<string, string> = {
+/** Stack mode: vertical flow with gap. */
+const stackGapClasses: Record<string, string> = {
   '0': 'flex flex-col gap-0',
   '1': 'flex flex-col gap-1',
   '2': 'flex flex-col gap-2',
@@ -49,7 +67,8 @@ export const containerGapClasses: Record<string, string> = {
   '24': 'flex flex-col gap-24',
 };
 
-export const containerSizeGapScale: Record<string, string> = {
+/** gap=true walks the spacing scale by size: component tier into section tier. */
+const sizeGapScale: Record<string, string> = {
   sm: '3',
   md: '4',
   lg: '5',
@@ -62,43 +81,130 @@ export const containerSizeGapScale: Record<string, string> = {
   '7xl': '12',
 };
 
-/**
- * CQ-responsive horizontal padding applied automatically when size is set.
- * Prevents content from bleeding to viewport edges without requiring an explicit padding prop.
- * Explicit padding prop overrides this.
- */
-export const containerAutoEdgePadding = 'px-4 @md:px-6 @lg:px-8';
+/** CQ provider; w-full prevents width collapse in flex/grid contexts (TW v4). */
+const queryClasses = '@container w-full';
 
-export const containerArticleTypography = [
-  '[&_p]:leading-relaxed',
+/** CQ-responsive edge padding, applied when sized and no explicit padding. */
+const autoEdgePadding = 'px-4 @md:px-6 @lg:px-8';
+
+const positionClasses: Record<ContainerPosition, string> = {
+  sticky: 'sticky top-0',
+  fixed: 'fixed top-0 inset-x-0',
+  relative: 'relative',
+  absolute: 'absolute',
+  static: 'static',
+};
+
+const depthClasses: Record<ContainerDepth, string> = {
+  base: 'z-depth-base',
+  dropdown: 'z-depth-dropdown',
+  sticky: 'z-depth-sticky',
+  navigation: 'z-depth-navigation',
+  fixed: 'z-depth-fixed',
+  modal: 'z-depth-modal',
+  popover: 'z-depth-popover',
+  tooltip: 'z-depth-tooltip',
+  overlay: 'z-depth-overlay',
+  below: 'z-depth-below',
+  max: 'z-depth-max',
+};
+
+/*
+ * The article's type: Typography's variants behind descendant selectors, so
+ * bare native prose and Typography are one type system (#2889). Written out
+ * whole for Tailwind's scanner (#2825); a unit test fails when it drifts.
+ */
+// BEGIN GENERATED article type: pnpm -C packages/ui generate:article-type
+const articleType = [
+  '[&_h1]:text-4xl [&_h1]:font-bold [&_h1]:tracking-tight [&_h1]:@lg:text-5xl',
+  '[&_h2]:text-3xl [&_h2]:font-semibold [&_h2]:tracking-tight',
+  '[&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:tracking-tight',
+  '[&_h4]:text-xl [&_h4]:font-semibold [&_h4]:tracking-tight',
+  '[&_p]:leading-7',
+  '[&_li]:leading-7',
+  '[&_code]:bg-muted [&_code]:text-sm [&_code]:font-mono [&_code]:text-foreground',
+  '[&_pre]:bg-muted [&_pre]:text-sm [&_pre]:font-mono [&_pre]:text-foreground',
+].join(' ');
+// END GENERATED article type
+
+/**
+ * Article flow: the layout around the type -- spacing between prose blocks,
+ * list markers, borders, link colour. Type comes from `articleType` alone.
+ */
+const articleTypography = [
+  articleType,
   '[&_p]:mb-4',
   '[&_p:last-child]:mb-0',
-  '[&_h1]:text-4xl [&_h1]:font-bold [&_h1]:tracking-tight [&_h1]:mb-4 [&_h1]:mt-0 [&_h1]:text-accent-foreground',
-  '[&_h2]:text-3xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:first:mt-0 [&_h2]:text-accent-foreground',
-  '[&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-6 [&_h3]:text-accent-foreground',
-  '[&_h4]:text-xl [&_h4]:font-semibold [&_h4]:mb-2 [&_h4]:mt-4 [&_h4]:text-accent-foreground',
-  '[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4',
-  '[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4',
+  '[&_h1]:mb-4 [&_h1]:mt-0',
+  '[&_h2]:mb-3 [&_h2]:mt-8 [&_h2]:first:mt-0',
+  '[&_h3]:mb-2 [&_h3]:mt-6',
+  '[&_h4]:mb-2 [&_h4]:mt-4',
+  '[&_ul]:list-disc [&_ul]:ps-6 [&_ul]:mb-4',
+  '[&_ol]:list-decimal [&_ol]:ps-6 [&_ol]:mb-4',
   '[&_li]:mb-1',
   '[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_a:hover]:text-primary/80',
-  '[&_blockquote]:border-l-4 [&_blockquote]:border-muted [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4',
-  '[&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono',
-  '[&_pre]:bg-muted [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-4',
+  '[&_blockquote]:border-s-4 [&_blockquote]:border-muted [&_blockquote]:ps-4 [&_blockquote]:italic [&_blockquote]:my-4',
+  '[&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded',
+  '[&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-4',
   '[&_pre_code]:bg-transparent [&_pre_code]:p-0',
   '[&_hr]:border-border [&_hr]:my-8',
   '[&_img]:rounded-lg [&_img]:my-4',
   '[&_table]:w-full [&_table]:my-4',
-  '[&_th]:border [&_th]:border-border [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold',
+  '[&_th]:border [&_th]:border-border [&_th]:px-3 [&_th]:py-2 [&_th]:text-start [&_th]:font-semibold',
   '[&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-2',
-  'max-w-prose',
 ].join(' ');
 
-export type ContainerBackground = 'none' | 'muted' | 'accent' | 'card' | 'primary';
+/** The article's default reading measure; a set `size` governs width instead. */
+const articleMeasure = 'max-w-prose';
 
-export const containerBackgroundClasses: Record<ContainerBackground, string> = {
-  none: '',
-  muted: 'bg-muted',
-  accent: 'bg-accent',
-  card: 'bg-card',
-  primary: 'bg-primary text-primary-foreground',
-};
+export function containerClasses(
+  config: ContainerConfig,
+  _state: ContainerState,
+): ContainerClassSet {
+  const parts: string[] = [];
+
+  if (config.query !== false) parts.push(queryClasses);
+
+  if (config.size) {
+    parts.push(sizeClasses[config.size] ?? '');
+    if (config.size !== 'full') parts.push('mx-auto');
+  }
+
+  if (config.padding) {
+    parts.push(paddingClasses[config.padding] ?? '');
+  } else if (config.size && config.size !== 'full') {
+    parts.push(autoEdgePadding);
+  }
+
+  // Layout mode is exclusive: columns -> grid; gap alone -> stack.
+  if (config.columns !== undefined) {
+    parts.push('grid', resolveColumnsClasses(config.columns));
+    const gridGap =
+      config.gap === true
+        ? (config.size && sizeGapScale[config.size]) || '6'
+        : typeof config.gap === 'string'
+          ? config.gap
+          : undefined;
+    if (gridGap) parts.push(gridGapClasses[gridGap] ?? '');
+  } else if (config.gap) {
+    const stackGap =
+      config.gap === true ? (config.size && sizeGapScale[config.size]) || '6' : config.gap;
+    parts.push(stackGapClasses[stackGap] ?? '');
+  }
+
+  if (config.colSpan) parts.push(gridColSpanClasses[config.colSpan] ?? '');
+  if (config.rowSpan) parts.push(gridRowSpanClasses[config.rowSpan] ?? '');
+
+  // Container has no base surface: a fill (one bg-fill-* token) or nothing.
+  parts.push(classy.fill(config.fill, classy.surface(config.surface)));
+
+  if (config.position) parts.push(positionClasses[config.position]);
+  if (config.depth) parts.push(depthClasses[config.depth]);
+
+  if (config.as === 'article') {
+    parts.push(articleTypography);
+    if (config.size === undefined) parts.push(articleMeasure);
+  }
+
+  return { root: parts.filter(Boolean).join(' ') };
+}

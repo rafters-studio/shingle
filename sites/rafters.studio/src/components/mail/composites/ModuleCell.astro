@@ -1,6 +1,7 @@
 ---
 import Card from '@/components/ui/card.astro';
-import H3 from '@/components/ui/typography-h3.astro';
+import Container from '@/components/ui/container.astro';
+import { H3 } from '@/components/ui/typography.astro';
 
 interface Props {
   pathHead: string;
@@ -11,16 +12,18 @@ interface Props {
 const { pathHead, pathTail, title } = Astro.props;
 ---
 
-<Card class="flex flex-col gap-4 p-6">
+<Card>
+<Container padding="6" gap="4">
   <div class="font-mono text-label-small uppercase tracking-wide text-muted-foreground">
     <span class="text-foreground">{pathHead}</span>
     <span> / {pathTail}</span>
   </div>
-  <H3 size="title-medium" tracking="tight" class="m-0">{title}</H3>
+  <H3 size="lg" tracking="tight">{title}</H3>
   <div class="text-body-small text-muted-foreground">
     <slot name="description" />
   </div>
   <div class="flex flex-wrap gap-2 mt-auto">
     <slot name="intel" />
   </div>
+</Container>
 </Card>

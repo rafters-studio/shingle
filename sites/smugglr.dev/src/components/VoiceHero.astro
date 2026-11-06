@@ -6,16 +6,14 @@
  * Mirrors handoff Hero.jsx VoiceHero. Topology renders inside (step 4).
  */
 import Container from "@/components/ui/container.astro";
-import H1 from "@/components/ui/typography-h1.astro";
-import P from "@/components/ui/typography-p.astro";
-import Small from "@/components/ui/typography-small.astro";
+import { H1, P, Small } from "@/components/ui/typography.astro";
 import InkBlock from "@/components/InkBlock.astro";
 import HeroInstallCTA from "@/components/HeroInstallCTA.astro";
 import HeroTopology from "@/components/HeroTopology.astro";
 ---
 
 <section class="border-b border-border">
-    <Container size="5xl" padding="20" gap="10" class="items-center text-center">
+    <Container size="5xl" padding="20" gap="10">
         <Small color="muted-foreground" transform="uppercase" tracking="widest">
             sqlite sync engine &middot; one rust binary &middot; mit
         </Small>
@@ -24,13 +22,13 @@ import HeroTopology from "@/components/HeroTopology.astro";
             If you're moving SQLite, <InkBlock>smuggl</InkBlock> it.
         </H1>
 
-        <P align="center" size="display-small" class="max-w-prose">
+        <P align="center">
             LAN UDP fan-out. S3 relay. Host-to-host. D1, Turso, rqlite, StarbaseDB, SQLite Cloud. One binary.
         </P>
 
         <HeroTopology />
 
-        <P align="center" color="muted-foreground" class="max-w-prose">
+        <P align="center" color="muted-foreground">
             Nothing else combines these shapes in a single tool. Litestream does S3 backup. rqlite does Raft. ElectricSQL needs a server. smugglr does host, LAN, relay, and hosted backend: content-hashed delta sync, no coordinator, no service to run.
         </P>
 

@@ -1,9 +1,7 @@
 ---
 import Container from '@/components/ui/container.astro';
 import Grid from '@/components/ui/grid.astro';
-import GridItem from '@/components/ui/grid-item.astro';
-import H1 from '@/components/ui/typography-h1.astro';
-import P from '@/components/ui/typography-p.astro';
+import { H1, P } from '@/components/ui/typography.astro';
 import InstallCard from '@/components/mail/composites/InstallCard.astro';
 
 const installPrimary = [
@@ -33,19 +31,19 @@ const meta = [
 
 <section class="border-b border-border">
   <Container size="6xl" padding="16" gap="10">
-    <H1 size="display-large" tracking="tight" class="leading-tight">
+    <H1 size="5xl" tracking="tight">
       <span class="bg-foreground text-background px-2">Email</span>
       on the edge.
       <span class="text-muted-foreground">Sure.</span>
     </H1>
 
-    <P size="body-large" color="muted-foreground" class="max-w-prose m-0">
+    <P size="xl" color="muted-foreground">
       A full-stack email framework for the edge. Inbound, outbound,
       threading, blob storage, classification, and a native IMAP server — all
       without a third-party inbox.
     </P>
 
-    <P size="body-medium" color="muted-foreground" class="max-w-prose m-0">
+    <P size="base" color="muted-foreground">
       No edge SMTP. That would be a nightmare. But edge IMAP on Durable Objects?
       Absolutely. Bring your own auth, your own storage, your own routing.
       We ship the protocol layer and the data model.
@@ -53,14 +51,14 @@ const meta = [
 
     <InstallCard primary={installPrimary} followUps={installFollowUps} footline={footline} />
 
-    <Grid columns={4} gap="6">
+    <Grid id="mail-hero-grid-1" columns={4} gap="6">
       {meta.map(({ label, value }) => (
-        <GridItem>
+        <Container>
           <div class="flex flex-col gap-1 font-mono text-label-small uppercase tracking-wide text-muted-foreground">
             <span>{label}</span>
             <span class="text-foreground">{value}</span>
           </div>
-        </GridItem>
+        </Container>
       ))}
     </Grid>
   </Container>

@@ -4,10 +4,12 @@
 export type CleanupFunction = () => void;
 
 /**
- * Gamut tier for color swatch display
- * Caller-provided label indicating how well a color maps to a target gamut.
+ * Gamut tier: which CSS color space the color fits in.
+ * - srgb: in sRGB (safe on every screen)
+ * - p3:   in Display P3 but outside sRGB (wide-gamut displays only)
+ * - out:  outside both gamuts (not displayable)
  */
-export type GamutTier = 'gold' | 'silver' | 'fail';
+export type GamutTier = 'srgb' | 'p3' | 'out';
 
 export type OutsideClickHandler = (event: MouseEvent | TouchEvent | PointerEvent) => void;
 
@@ -211,7 +213,16 @@ export type InputType =
   | 'historyRedo';
 
 /**
- * Selection range for text selection primitive
+ * Selection range for text selection primitive.
+ *
+ * `startNode`/`endNode` are tree-order normalized (per `Range`'s own
+ * contract) -- for a backward selection (the user dragged or extended
+ * toward the document's start) `startNode` is the FOCUS, not the anchor.
+ * `anchorNode`/`anchorOffset`/`focusNode`/`focusOffset` carry the live
+ * `Selection`'s true, direction-preserving boundary pair alongside the
+ * ordered one: populated by `selectionToRange` when a `SelectionRange` is
+ * read from an actual `Selection`, absent when one is constructed directly
+ * (e.g. the argument to `setRange`), which has no direction to lose.
  */
 export interface SelectionRange {
   startNode: Node;
@@ -219,6 +230,14 @@ export interface SelectionRange {
   endNode: Node;
   endOffset: number;
   collapsed: boolean;
+  /** True anchor node from the live `Selection` (where the selection began). */
+  anchorNode?: Node;
+  /** Offset within `anchorNode`. */
+  anchorOffset?: number;
+  /** True focus node from the live `Selection` (where the selection is now). */
+  focusNode?: Node;
+  /** Offset within `focusNode`. */
+  focusOffset?: number;
 }
 
 /**
