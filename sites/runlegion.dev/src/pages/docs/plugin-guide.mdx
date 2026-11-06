@@ -30,6 +30,10 @@ The update only goes up. A session on an older plugin copy never pulls the binar
 
 ## Hooks
 
+### Repo identity
+
+Every hook files its work under one repo name, and that name comes only from `watch.toml`. `prelude.sh` runs `legion repo resolve --cwd <dir> --pid <pid>` and uses the answer: the registered repo whose workdir contains the directory, else the repo whose session lock that pid holds, else `unregistered`. A linked worktree maps through its main checkout. When workdirs nest, the deepest one wins. No name is ever taken from a folder name, and a session in an `unregistered` directory takes no session lock.
+
 ### SessionStart
 
 Fires when an agent session begins. Injects, in order:
@@ -51,7 +55,7 @@ Fires when you submit a prompt, before Claude Code processes it. Runs `inbox.sh`
 
 ### Stop
 
-Fires when a session is about to end. The hook prompts the agent to reflect on what was learned, boost reflections that helped, signal unresolved questions, and read and respond to unread bullpen posts.
+Fires at the end of every turn. The hook asks the agent to name the turn. Design: end with what was learned, what is still unknown, and the next question. Delivery: finish, or name the blocker. Can't tell: treat it as design and ask. A peer's ask: a reply is owed, not a build. It also asks the agent to name anything it acted on that it assumed rather than found. It fires whether or not the turn touched a file, because a design turn is often pure conversation. `stop_hook_active` is the only guard, so the prompt never loops.
 
 **Stop is blocking** (#461): incomplete TaskList items cause the hook to refuse the stop with an error explaining what is still open. The plan is the permission. Intermediate stops mid-plan are abandonment unless the work is explicitly blocked, needs-input, or cancelled.
 
@@ -73,7 +77,7 @@ One hook, `legion-cmd.sh`, registered on the matcher `Bash|Grep|Glob|Read|Write|
 
 **The ask list and power switches**: `curl-network` is the one shipped ask entry, since reaching the network is the operator's call. `push-force`, `push-force-refspec`, `merge-despite-failures`, and `issue-close-force` are the power switches, matched against the command as it will run after any proxy insertion, so `git push --force` is asked about the same as `legion push --force`.
 
-**Confirmations and incidents**: `legion cmd confirm --reason <why> -- '<command>'` answers an ask or a power switch: one-time, live for 10 minutes, keyed by the command's parsed form so whitespace and quoting differences don't change the key. A never-run command can never be confirmed. Every never-run hit, ask, confirmation, and dropped ask is appended to `cmd-incidents.jsonl`.
+**Confirmations and incidents**: `legion cmd confirm --reason <why> -- '<command>'` answers an ask or a power switch: one-time, live for 10 minutes, keyed by the command's parsed form so whitespace and quoting differences don't change the key. A never-run command can never be confirmed. Every never-run hit, ask, confirmation, and dropped ask is appended to `cmd-incidents.jsonl` with its entry, agent, repo, session, and command. A refusal lives in that log only. It is never posted to the bullpen, so the rest of the team does not see it. A command run outside a registered repo is recorded under the repo `unregistered`.
 
 **No environment-variable bypass.** The router reads no environment at all. The only way past a blocking Bash decision is `legion cmd confirm`, and the shipped policy routes only a handful of rules to `ask` or a power switch in the first place; most decisions are a flat allow, a deny, or a proxy insertion, with no confirm path at all. Grep, Glob, and Read have nothing to bypass, since nothing in the policy denies them.
 
@@ -83,9 +87,9 @@ One hook, `legion-cmd.sh`, registered on the matcher `Bash|Grep|Glob|Read|Write|
 
 ### PostToolUse
 
-Re-indexes the owning repo after Edit/Write on indexed files. Resolves the owning repo by ancestor match against `watch.toml`. The whole repo is re-indexed. Per-file granularity is a future refinement (#281).
+Re-indexes the owning repo after Edit/Write on indexed files. Resolves the owning repo through `watch.toml`, the same way every hook does (see Repo identity below). The whole repo is re-indexed. Per-file granularity is a future refinement (#281).
 
-Sibling PostToolUse hooks emit uncertainty predictions on certain task-completion patterns (#358). Another sibling runs `inbox.sh` on this same turn boundary, so a post sent mid-session does not have to wait for the next prompt to surface.
+Sibling PostToolUse hooks emit uncertainty predictions on certain task-completion patterns (#358). Another sibling runs `inbox.sh` on every tool call, with no debounce, so a post or signal that arrives mid-turn is injected at the first hook point after it lands. The inbox cursor claims each message, so each one is injected once. A directed signal that arrives mid-turn carries only its **Needs your reply** text.
 
 ### PreCompact
 

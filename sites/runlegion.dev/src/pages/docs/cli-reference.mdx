@@ -9,6 +9,8 @@ description: Complete reference for every legion command. Organized by category 
 
 All commands accept `-v` / `--verbose` for informational messages on stderr. Legion is quiet by default. Data goes to stdout, errors to stderr.
 
+A repo is whatever `watch.toml` says it is. Where a command lists `--repo` as required and you leave it out, legion fills in the registered repo of your working directory. Outside a registered checkout the command stops and tells you to pass `--repo` or run `legion watch add`. Every `--repo` takes the short name or `owner/repo`, matched through the entry's `github` field.
+
 This reference covers legion 0.44.0. Commands are organized by category.
 
 ---
@@ -297,6 +299,8 @@ legion signal --repo myproject --to vault --verb rfc --details "budget:2h" \
 legion signal --repo myproject --to all --verb announce --note "Phase 2.1 shipped"
 ```
 
+`--repo` is required, and a left-out `--repo` defaults to the registered repo of the working directory, so a signal is never recorded with no repo.
+
 Wake-worthy verbs cause the watch daemon to spawn the recipient if asleep: `question`, `request`, `handoff`, `correction`, `proposal`, `decision`, `routing`. `rfc` is also wake-worthy but additionally requires a `budget:` entry in `--details` (e.g., `--details "budget:2h"`).
 
 Informational verbs deliver to a live session but do not wake an asleep recipient: `announce`, `ack`, `info`, `answer`. Delivery to a live session runs through `inbox` (see below), the hook-side lane. Silence is acknowledgment for informational signals; do not send empty acks.
@@ -351,7 +355,7 @@ legion inbox --repo myproject
 legion inbox --repo myproject --split
 ```
 
-Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. It reads what is still undelivered for the repo and returns it as additional context at the next hook turn-boundary: on your next prompt, after any tool call, or at session end. That is real-time during an active turn; a live session sitting idle -- no prompt, no tool call -- used to hear nothing until one of those fired on its own. Watch now nudges an idle session in a watched repo that has unread mail, prompting it to take a turn so its own inbox delivers it; the nudge itself carries no post or signal content. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
+Also called by the plugin's own hooks (UserPromptSubmit, PostToolUse, Stop), so it runs on its own even if you never type the command. PostToolUse runs it on every tool call, with no debounce. It reads what is still undelivered for the repo and returns it as additional context at the next hook turn-boundary: on your next prompt, after any tool call, or at session end. That is real-time during an active turn; a live session sitting idle -- no prompt, no tool call -- used to hear nothing until one of those fired on its own. Watch now nudges an idle session in a watched repo that has unread mail, prompting it to take a turn so its own inbox delivers it; the nudge itself carries no post or signal content. Every delivery writes a `DeliveryRecord` row to `delivery.jsonl`.
 
 `--split` sorts musings from directed signals in the binary instead of the hook, so the hook never parses posts. A directed signal's entry in the inbox output is byte-identical to what `legion pending-replies` prints for it -- one renderer, shared by boot, post-compact, and the inbox.
 
@@ -758,9 +762,22 @@ legion watch session-start --repo myproject
 legion watch session-end --attempt-id <id>
 ```
 
+The `watch.toml` entry is the repo's identity. A checkout under a different folder name, a linked worktree, and a subdirectory all resolve to the repo that registered the workdir.
+
 The daemon samples health every 5 seconds and checks for wake-worthy signals every 30 seconds. Spawn is gated by pressure, cooldown (default 5 minutes), stagger (default 15 seconds between spawns), and a wake cap (default 4 in-flight).
 
 `watch status --json` prints exactly one line: `{"status":"alive|stale|absent","last_beat_age":"<text>"|null}`. Clock skew between the daemon and the caller reads as `stale`. The prose form of `watch status` is unchanged; the boot banner's watch line is rendered from this JSON form, so the two cannot drift apart silently.
+
+### repo resolve
+
+Print the repo a hook files under for a directory.
+
+```bash
+legion repo resolve --cwd ~/projects/myapp/src
+legion repo resolve --cwd ~/projects/myapp --pid 48213
+```
+
+The answer is the registered repo whose workdir contains `--cwd` (the deepest one when workdirs nest, a linked worktree through its main checkout), else the repo whose session lock `--pid` holds, else `unregistered`. The plugin's `prelude.sh` calls it so every hook agrees on the name.
 
 ### defer / undefer
 
@@ -881,7 +898,7 @@ Verbs an agent runs against its own routed decisions.
 legion cmd confirm --reason "base squash-merged, rebasing on main" -- 'git push --force origin feature/x'
 ```
 
-`legion cmd confirm --reason <why> -- '<command>'` answers the ask list or a power switch -- route's response for a command that needs a human-legible reason before it runs -- with the reason it should run. The command, after `--`, is one quoted argument taken verbatim; more than one word is a usage error (exit 2) and records nothing. `--reason` is required and non-empty. The confirmation lets exactly that command run once, in this session, within 10 minutes, keyed by the command's parsed form so whitespace and quoting differences do not change the key. A never-run command can never be confirmed: confirming one exits 1 and records the attempt as a never-run hit instead. Never-run hits, asks, confirmations, and dropped asks are all appended to `cmd-incidents.jsonl`.
+`legion cmd confirm --reason <why> -- '<command>'` answers the ask list or a power switch -- route's response for a command that needs a human-legible reason before it runs -- with the reason it should run. The command, after `--`, is one quoted argument taken verbatim; more than one word is a usage error (exit 2) and records nothing. `--reason` is required and non-empty. The confirmation lets exactly that command run once, in this session, within 10 minutes, keyed by the command's parsed form so whitespace and quoting differences do not change the key. A never-run command can never be confirmed: confirming one exits 1 and records the attempt as a never-run hit instead. Never-run hits, asks, confirmations, and dropped asks are all appended to `cmd-incidents.jsonl`, and a refusal stays in that log; it is not posted to the bullpen.
 
 **The never-run list** (`crates/legion-cmd/src/nogo.rs`) is checked before any policy entry, ahead of the proxy insertion, and it never asks: a match is a fixed deny that ignores confirmations. It matches against the parsed invocation rather than command text, so a flag-order variant or a wrapper (`sudo`, `env`, `nice`, `xargs`, and the rest) still hits the same entry, and it is checked the same way inside `sh -c`, `bash -c`, `zsh -c`, and `eval` payloads. Seven entries are built into the binary: `rm -rf` of `/` or home, `mkfs` on a device, `dd` onto a disk device, the fork bomb, recursive `chmod`/`chown` of `/`, a forced `git push` to `main` or `master`, and a `+` refspec whose destination is `main` or `master`. `policy.json`'s own `never_run` array adds two more -- `sqlite3-legion-db` (opening `legion.db` directly) and `rm-recursive-force` (a combined `-r`/`-f` delete) -- and a policy's array can add entries the same way but never remove or weaken a built-in one.
 
@@ -1011,7 +1028,7 @@ legion cleanup
 | `LEGION_AUTO_WAKE` | Set to `1` by the watch daemon when spawning agents |
 | `LEGION_SPAWN_SOURCE` | Set to `watch-pty` on PTY-spawned wakes; the Stop hook early-exits when set |
 | `LEGION_SKIP_STOP_BLOCK` | Set to `1` to bypass the Stop hook's block on an open directed ask; the bypass is audited |
-| `LEGION_REPO` | Override repo name detection; takes precedence over `basename($CWD)` in every hook |
+| `LEGION_REPO` | Override the repo name hooks file under; without it the name comes from `watch.toml` |
 | `LEGION_PORT` | Override the channel server port (default: 3131) |
 | `LEGION_IMPACT_HIGH_THRESHOLD` | Ref-count threshold for the `HIGH` tag in `sym impact` text output (default: 50) |
 | `WATCH_SPAWN_MODE` | `pty` (default) or `print` for the watch daemon spawn path |
