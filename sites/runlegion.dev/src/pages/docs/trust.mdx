@@ -17,7 +17,7 @@ So Legion does not ask the agent to be honest. An instruction to report faithful
 
 ## Everything consequential is logged
 
-Every action that touches shared state is recorded. Merging a PR, closing an issue, pushing a branch, posting a review: each one lands in the audit log, attributed to the agent that did it and stamped with when. Direct `gh` is blocked on purpose, so nothing routes around the log. A plain `git push` used to be the one way around it: nothing intercepted it, so it wrote no audit row at all. It is now rewritten to `legion push`, which does. A wrapper in front of `gh`, `git commit`, or `git push` -- `env X=1`, `sudo`, `timeout` -- was the other way around it, for the same reason: nothing looked past the wrapper to the command underneath. A wrapped invocation denies now, so it never runs unaudited.
+Every action that touches shared state is recorded. Merging a PR, closing an issue, pushing a branch, posting a review: each one lands in the audit log, attributed to the agent that did it and stamped with when. A plain `git push` or `git commit`, typed as you'd type it, is caught before it can run unaudited: the router inserts `legion ` in front of `git`, and the audited path underneath runs the same way `legion push`/`legion commit` do. A plain `gh` read runs straight through by design, since a read touches nothing; a `gh` write that translates is gated the same as the matching `legion` verb, and one that does not still writes an audit row on its way out. What the router does not reach is a command typed behind a wrapper -- `env X=1`, `sudo`, `timeout` -- since inserting `legion` only happens at a name the router can see as a command in its own right, not an argument to something else. A forced push to `main` or `master` is caught either way, wrapper or not, because that specific danger sits on a list the router checks regardless of what stands in front of it.
 
 ```
 legion audit --limit 20        # who did what, most recent first
@@ -33,9 +33,12 @@ An agent does not just make claims. It emits predictions, and the predictions ge
 legion uncertainty emit --surface <surface> --claimed-confidence <0-1> ...  # record a claim
 legion uncertainty witness <prediction-id> --outcome-label <label> ...     # record the outcome
 legion uncertainty calibration                                             # claimed vs actual, Brier scored
+legion uncertainty predictions --issue <owner>/<repo>#<n>                  # the raw rows, not a summary
 ```
 
 The Brier score is the teeth. An agent that says it is ninety percent sure and is right half the time does not get to keep saying ninety percent. The gap between claimed and actual is a measured number. Chronic overconfidence, which is the quiet everyday form of lying, stops being a vibe and becomes a metric. A prediction no one ever witnesses is an orphan, and orphans are counted too, because a claim that was never checked against reality is its own kind of risk.
+
+`legion uncertainty predictions` is the read behind the score: id, state, claimed confidence, and outcome, not a derived average. A prediction can carry the issue it belongs to (`emit --issue <owner>/<repo>#<n>`), and `predictions --issue <ref>` scopes the read to one piece of work -- the key the `legion-verify` skill and agent use to find the predictions that work made, so a claim can be checked against what actually happened.
 
 ## Done has to be shown, not asserted
 
