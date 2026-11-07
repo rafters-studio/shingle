@@ -34,6 +34,21 @@ describe("home page, built", () => {
     expect(text).not.toContain("cargo install");
   });
 
+  it("links the release's five archives and claims no missing checksum", () => {
+    const files = [
+      "smugglr-aarch64-apple-darwin.tar.gz",
+      "smugglr-x86_64-apple-darwin.tar.gz",
+      "smugglr-x86_64-unknown-linux-gnu.tar.gz",
+      "smugglr-aarch64-unknown-linux-gnu.tar.gz",
+      "smugglr-x86_64-pc-windows-msvc.zip",
+    ];
+    for (const file of files) {
+      expect(html).toContain(`href="https://github.com/rafters-studio/smugglr/releases/download/v0.6.2/${file}"`);
+    }
+    expect(html).toContain('href="https://github.com/rafters-studio/smugglr/releases/tag/v0.6.2"');
+    expect(text).not.toMatch(/no checksum/i);
+  });
+
   it("tells no one to use op or 1Password", () => {
     expect(text).not.toMatch(/op run|1Password|--environment/);
     expect(text).toContain("CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token>");
