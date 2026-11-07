@@ -210,7 +210,7 @@ A retrieve names each change it drops with its change hash. --replay decides tha
 
 <WrapCode>{OUT.mesh_loose}</WrapCode>
 
-A node signs and seals with the newest key and also accepts the one before it. The previous key is not retired in 0.6.1. No key is printed anywhere; a key is named by its id.
+A node signs and seals with the newest key and also accepts the one before it. The previous key is not retired in 0.6.2. No key is printed anywhere; a key is named by its id.
 
 A node is named by its machine’s name (`hostname`, or `COMPUTERNAME` on Windows), and every node needs its own: a node ignores any message carrying its own name, so two machines with one name do not sync and nothing says so. It broadcasts to find peers and sends to them by unicast; on a network with no broadcast, the `peers` setting names the addresses to announce to. A change too large for one datagram is refused with a line naming the row; on macOS the limit is about 9 KB.
 
@@ -336,10 +336,6 @@ A shape difference is carried under `shape`:
 
 <WrapCode>{OUT.unknown_type}</WrapCode>
 
-- Automatic catch-up past the sunset (#521). A mesh node away that long prints the stash and retrieve commands instead.
-- smugglr mesh remove (#521). A node gone for good stops being a target when the sunset passes.
-- Retiring the previous mesh key. It is accepted with no end date.
-- A loud mesh name clash (#521). Two machines with one name ignore each other.
-- The mesh\_wire setting, which belongs to the automatic catch-up.
+- Retiring the previous mesh key. A node accepts the key before the newest with no end date; nothing removes it but taking it out of the key file.
 
 </ManualSection>

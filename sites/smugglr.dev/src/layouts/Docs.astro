@@ -3,6 +3,7 @@ import Base from './Base.astro';
 import Container from '@/components/ui/container.astro';
 import Grid from '@/components/ui/grid.astro';
 import { Small } from '@/components/ui/typography.astro';
+import WrapProse from '@/components/wrap-prose.astro';
 import type { NavGroup } from '@/src/migratr/nav';
 
 interface Props {
@@ -47,7 +48,9 @@ function isActive(href: string, exact = false): boolean {
 
       <Container colSpan={3}>
         <Container as="article" gap="6">
-          <slot />
+          <WrapProse>
+            <slot />
+          </WrapProse>
         </Container>
       </Container>
     </Grid>

@@ -6,7 +6,7 @@ import { ELEMENT_NODE, type ElementNode, type Node, parse, TEXT_NODE, walkSync }
 import { describe, expect, it } from "vitest";
 import { parseVersion, smugglrVersion } from "../src/smugglr/version";
 import fixture from "./fixtures/manual.json";
-import migratrBaseline from "./fixtures/migratr-main-a874e3e.json";
+import migratrBaseline from "./fixtures/migratr-main.json";
 
 const root = process.cwd();
 const dist = join(root, "dist");
@@ -52,8 +52,8 @@ function article(route: string): ElementNode[] {
 const routes = Object.keys(fixture.pages) as (keyof typeof fixture.pages)[];
 
 describe("manual pages", () => {
-  it("reads 0.6.1 from the changelog copy", () => {
-    expect(version).toBe("0.6.1");
+  it("reads 0.6.2 from the changelog copy", () => {
+    expect(version).toBe("0.6.2");
   });
 
   for (const route of routes) {
@@ -103,8 +103,8 @@ describe("/changelog/", () => {
 
   it("renders the changelog copy", () => {
     const headings = article("changelog").filter((e) => e.name === "h2").map(text);
-    expect(headings).toContain("[0.6.1] - 2026-10-26");
-    expect(copy).toContain("## [0.6.1] - 2026-10-26");
+    expect(headings).toContain("[0.6.2] - 2026-11-05");
+    expect(copy).toContain("## [0.6.2] - 2026-11-05");
   });
 
   it("is listed in llms.txt", () => {
@@ -166,12 +166,13 @@ describe("version helper", () => {
   });
 });
 
-// Hashes of the <main> of each /migratr/ page built at a874e3e, the commit before
-// the manual. The site's nav and footer sit outside <main>, so they may change. A
-// deliberate change to a migratr page refreshes this fixture.
-describe("/migratr/ pages are untouched by the manual", () => {
+// Hashes of the <main> of each /migratr/ page as it now stands: the v0.2.0 docs,
+// the shared installer and wrapping code (#190). The site's nav and footer sit
+// outside <main>, so they may change. A deliberate change to a migratr page
+// refreshes this fixture; anything else that moves a hash is a regression.
+describe("/migratr/ pages hold their recorded main", () => {
   for (const [page, hash] of Object.entries(migratrBaseline)) {
-    it(`/migratr/${page} keeps the main of a874e3e`, () => {
+    it(`/migratr/${page} matches its recorded main`, () => {
       const main = html(join("migratr", page)).match(/<main[\s\S]*<\/main>/)?.[0] ?? "";
       expect(createHash("sha256").update(main).digest("hex")).toBe(hash);
     });

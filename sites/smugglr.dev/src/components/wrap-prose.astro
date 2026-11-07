@@ -1,0 +1,20 @@
+---
+/**
+ * Prose whose overlong words wrap. A long inline code span (a Rust path, a
+ * URL) has no break point, so on a phone it widens the page; inside this it
+ * breaks at the edge of its line instead.
+ *
+ * @cognitive-load 0/10 - Invisible structure; the prose carries the load
+ * @attention-economics Nothing is read by scrolling sideways
+ * @trust-building The text is unchanged; only where a line ends moves
+ * @accessibility No horizontal scroll at any width; reflow holds at 320px
+ * @semantic-meaning A run of prose, the same as its content
+ *
+ * @usage-patterns
+ * DO: Wrap a layout's article content once
+ * NEVER: Wrap code blocks; WrapCode already wraps them
+ */
+import { wrapProseClasses as c } from "./wrap-prose.classes";
+---
+
+<div class={c.root}><slot /></div>
