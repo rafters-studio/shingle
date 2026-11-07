@@ -54,7 +54,7 @@ Writes `<YYYYMMDDHHMMSS>_<NAME>.json` into `--dir`, creating the directory if ne
 | ------------------------------ | ---------------------------- | -------------------------------------------------- |
 | `create_<table>`               | `create_table`               | Required: at least one column.                     |
 | `add_<column>_to_<table>`      | `add_column`                 | The column.                                        |
-| `drop_<table or index>`        | `drop_table` or `drop_index` | None. The definition is copied from `schema.json`. |
+| `drop_<table, index or trigger>` | `drop_table`, `drop_index` or `drop_trigger` | None. The definition is copied from `schema.json`. |
 | `remove_<column>_from_<table>` | `drop_column`                | None. The definition is copied from `schema.json`. |
 | anything else                  | an empty `up`                | None.                                              |
 
@@ -241,7 +241,9 @@ Exit 0 on success. A usage error exits 2. Every other failure exits 1. Error cod
 | `apply_failed`          | 1    | A migration failed and was rolled back.                                |
 | `irreversible`          | 1    | A migration in the `down` range has an operation with no inverse.      |
 | `unparseable_table`     | 1    | A table's `CREATE TABLE` could not be parsed for a rebuild.            |
-| `foreign_key_violation` | 1    | A table rebuild left rows that violate foreign keys.                   |
+| `foreign_key_violation` | 1    | Rows in a table `up` or `plan` would rebuild name no parent row.       |
+| `no_such_foreign_key`   | 1    | `drop_foreign_key` named a key the table does not have.                |
+| `trigger_mismatch`      | 1    | A `create_trigger`'s `name` or `table` differs from its statement.     |
 | `column_in_use`         | 1    | A dropped column is used by another object.                            |
 | `rebuild_not_first`     | 1    | An operation that needs a table rebuild is not first in its migration. |
 | `snapshot_failed`       | 1    | A snapshot could not be written, so the step did not run.              |
@@ -277,7 +279,7 @@ $ migratr --db app.db down --json
 
 ```
 $ migratr --db app.db status --json
-{"code":"parse","command":"status","message":"20261009000000_bad.json: at up[0]: unknown variant `nope`, expected one of `create_table`, `drop_table`, `rename_table`, `add_column`, `drop_column`, `rename_column`, `create_index`, `drop_index`, `raw_sql`","status":"error"}
+{"code":"parse","command":"status","message":"20261009000000_bad.json: at up[0]: unknown variant `nope`, expected one of `create_table`, `drop_table`, `rename_table`, `add_column`, `drop_column`, `rename_column`, `create_index`, `drop_index`, `add_foreign_key`, `drop_foreign_key`, `create_trigger`, `drop_trigger`, `raw_sql`","status":"error"}
 [exit 1]
 ```
 
@@ -299,6 +301,6 @@ For more information, try '--help'.
 [exit 2]
 ```
 
-The `[exit N]` lines are added to the blocks above to show the process exit status; the binary does not print them. All blocks were captured from the 0.1.1 binary.
+The `[exit N]` lines are added to the blocks above to show the process exit status; the binary does not print them. All blocks were captured from the 0.1.1 binary, except the `parse` block listing operations, captured from 0.2.0.
 
 </Docs>
