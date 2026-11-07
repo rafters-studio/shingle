@@ -161,9 +161,7 @@ const jsonLd = {
         </main>
         <MegaFooter />
         <script>
-            // rafters.css @imports this package inside Tailwind, which inlines it
-            // without rebasing its ./files/ urls, so its faces 404 (see #190).
-            // Imported here, Vite bundles the faces with their files.
+            // Workaround for rafters 0.7.0: rafters.css @imports this package inside Tailwind without rebasing its ./files/ urls, so its faces 404; remove when rafters fixes the generated import.
             import "@fontsource-variable/noto-sans";
         </script>
     </body>
