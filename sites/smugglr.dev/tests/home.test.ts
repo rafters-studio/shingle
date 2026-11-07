@@ -27,7 +27,7 @@ describe("home page, built", () => {
   });
 
   it("shows the release binary's install line, not cargo", () => {
-    const line = "curl -fsSL https://raw.githubusercontent.com/rafters-studio/smugglr/main/install.sh | bash";
+    const line = "curl -fsSL https://smugglr.dev/install | bash";
     expect(text).toContain(line);
     expect(html).toContain(`data-install="${line}"`);
     expect(text).toContain("Install smugglr v0.6.2");

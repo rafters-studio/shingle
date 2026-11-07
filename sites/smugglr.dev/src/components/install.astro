@@ -21,10 +21,10 @@ const { version, command } = Astro.props;
 const release = `https://github.com/rafters-studio/smugglr/releases/tag/v${version}`;
 ---
 
-<Container as="section" size="6xl" padding="8" gap="6" aria-label="Install" data-install={command}>
+<Container as="section" size="6xl" padding="8" gap="12" aria-label="Install" data-install={command}>
   <H2>Install smugglr v{version}</H2>
   <P>
-    On Linux and macOS, x86_64 or aarch64, install.sh puts the v{version} binary in ~/.local/bin/smugglr, and says how
+    On Linux and macOS, x86_64 or aarch64, this script puts the v{version} binary in ~/.local/bin/smugglr, and says how
     to add that directory to PATH when it is not on it.
   </P>
   <Container columns={4} gap="2">

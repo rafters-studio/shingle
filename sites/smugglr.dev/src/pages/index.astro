@@ -18,8 +18,8 @@ import { Code, CodeBlock, P } from "@/components/ui/typography.astro";
 
 const LEDE =
   "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
-// The install line exactly as the smugglr README gives it.
-const INSTALL = "curl -fsSL https://raw.githubusercontent.com/rafters-studio/smugglr/main/install.sh | bash";
+// smugglr.dev/install redirects to smugglr's install.sh (public/_redirects).
+const INSTALL = "curl -fsSL https://smugglr.dev/install | bash";
 const RELEASE = "0.6.2";
 
 // Captured from the v0.6.1 release binary; never typed.
@@ -175,7 +175,7 @@ const SECTIONS: Sec[] = [
     <Install version={RELEASE} command={INSTALL} />
 
     <DarkBand label="Machine-readable summary">
-      <Container size="4xl" padding="12" gap="16">
+      <Container size="4xl" padding="12" gap="24">
         <BandHead title="MACHINE-READABLE SUMMARY" note="GET /llms.txt" />
 
         {
