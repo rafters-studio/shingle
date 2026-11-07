@@ -3,7 +3,7 @@ import Base from "@/src/layouts/Base.astro";
 import BandHead from "@/components/band-head.astro";
 import BandSection from "@/components/band-section.astro";
 import DarkBand from "@/components/dark-band.astro";
-import InstallPill from "@/components/install-pill.astro";
+import Install from "@/components/install.astro";
 import SyncStage from "@/components/sync-stage.astro";
 import Container from "@/components/ui/container.astro";
 import Table from "@/components/ui/table.astro";
@@ -14,11 +14,13 @@ import {
   tableHeaderClasses,
   tableRowClasses,
 } from "@/components/ui/table.classes";
-import Typography, { Code, CodeBlock, H1, Lead, Muted, P } from "@/components/ui/typography.astro";
+import { Code, CodeBlock, P } from "@/components/ui/typography.astro";
 
 const LEDE =
   "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
 const INSTALL = "cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr";
+const INSTALL_NOTE =
+  "Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.";
 
 // Captured from the v0.6.1 release binary; never typed.
 const OUT = {
@@ -163,25 +165,9 @@ const SECTIONS: Sec[] = [
 ---
 
 <Base title="smugglr" description={LEDE}>
-  <Container as="section" size="4xl" padding="8" gap="6">
-    <P family="mono" size="xs" tracking="widest" color="muted-foreground" align="center">
-      SQLITE SYNC ENGINE · ONE RUST BINARY · MIT
-    </P>
-    <H1 family="sans" size="7xl" weight="light" tracking="tight" line="none" align="center">
-      If you’re moving SQLite, <Typography as="span" weight="medium">smuggl</Typography> it.
-    </H1>
-    <Container size="xl" padding="0">
-      <Lead size="lg" color="muted-foreground" align="center">{LEDE}</Lead>
-    </Container>
-    <InstallPill command={INSTALL} />
-    <Container size="lg" padding="0">
-      <Muted align="center">
-        Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.
-      </Muted>
-    </Container>
-  </Container>
-
   <SyncStage />
+
+  <Install command={INSTALL} note={INSTALL_NOTE} />
 
   <DarkBand label="Machine-readable summary">
     <Container size="4xl" padding="8" gap="12">

@@ -1,28 +1,29 @@
 ---
 /**
- * Install: the command as a CodeBlock and its Copy button, rafters only.
- * The design's single dark pill (command and Copy on one line) has no rafters
- * component or prop yet; see #190.
+ * Install: the command as a CodeBlock, its Copy button, and where else to get
+ * the binary. Rafters components and props only, at the designer's sizes.
  *
  * @cognitive-load 2/10 - One command, one action
  * @accessibility The command is real text; Copy is a native button
  */
 import Button from "@/components/ui/button.astro";
 import Container from "@/components/ui/container.astro";
-import { CodeBlock } from "@/components/ui/typography.astro";
+import { CodeBlock, Muted } from "@/components/ui/typography.astro";
 
 interface Props {
   command: string;
+  note: string;
 }
 
-const { command } = Astro.props;
+const { command, note } = Astro.props;
 ---
 
-<Container gap="2" data-install={command}>
+<Container as="section" size="4xl" padding="8" gap="4" aria-label="Install" data-install={command}>
   <CodeBlock>$ {command}</CodeBlock>
   <Container size="sm" padding="0">
-    <Button id="install-copy" variant="outline" size="xs">Copy</Button>
+    <Button id="install-copy" variant="outline">Copy</Button>
   </Container>
+  <Muted align="center">{note}</Muted>
 </Container>
 
 <script>

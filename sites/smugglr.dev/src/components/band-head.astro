@@ -17,8 +17,8 @@ const { title, note } = Astro.props;
 ---
 
 <Container columns={2} gap="2">
-  <P family="mono" size="xs" weight="semibold" tracking="widest" line="none">
+  <P>
     <Typography as="span" color="warning">»</Typography> {title}
   </P>
-  <Muted family="mono" size="xs" align="end">{note}</Muted>
+  <Muted align="end">{note}</Muted>
 </Container>

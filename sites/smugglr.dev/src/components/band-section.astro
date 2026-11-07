@@ -19,10 +19,10 @@ const { num, title, note } = Astro.props;
 
 <Container as="section" gap="4">
   <Container columns={2} gap="2">
-    <H2 family="mono" size="sm" weight="semibold" tracking="widest" line="none">
+    <H2>
       <Typography as="span" color="warning">## {num}</Typography> {title}
     </H2>
-    <Muted family="mono" size="xs" align="end"># {note}</Muted>
+    <Muted align="end"># {note}</Muted>
   </Container>
   <slot />
 </Container>

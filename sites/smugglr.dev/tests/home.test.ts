@@ -21,30 +21,30 @@ function textOf(fragment: string): string {
 const text = textOf(html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ""));
 
 describe("home page, built", () => {
-  it("has the hero copy", () => {
-    expect(text).toContain("SQLITE SYNC ENGINE · ONE RUST BINARY · MIT");
-    expect(text).toContain("If you’re moving SQLite, smuggl it.");
+  it("has no hero", () => {
+    expect(html).not.toContain("<h1");
+    expect(text).not.toContain("If you’re moving SQLite");
+  });
+
+  it("shows the install command and its note", () => {
     expect(text).toContain(
-      "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.",
+      "$ cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr",
+    );
+    expect(html).toContain(
+      'data-install="cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr"',
     );
     expect(text).toContain(
       "Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.",
     );
   });
 
-  it("shows the install command", () => {
-    expect(text).toContain(
-      "$ cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr",
-    );
-  });
-
-  it("orders hero, stage and band", () => {
-    const hero = html.indexOf("<h1");
+  it("orders stage, install and band", () => {
     const stage = html.indexOf("data-sync-stage");
+    const install = html.indexOf("data-install=");
     const band = html.indexOf('aria-label="Machine-readable summary"');
-    expect(hero).toBeGreaterThan(-1);
-    expect(stage).toBeGreaterThan(hero);
-    expect(band).toBeGreaterThan(stage);
+    expect(stage).toBeGreaterThan(-1);
+    expect(install).toBeGreaterThan(stage);
+    expect(band).toBeGreaterThan(install);
   });
 
   it("has the band's head and its eight sections", () => {
@@ -77,6 +77,11 @@ describe("home page, built", () => {
       .replace(/class=\{table\w+Classes\}/g, "");
     expect(markup).not.toMatch(/\bclass(:list)?=|\bstyle=|<style/);
     expect(markup).not.toMatch(/<(div|span|b|h1)[\s>]/);
+    // Content takes the designer's sizes: no type overrides on the page or its pieces.
+    for (const file of ["src/pages/index.astro", "src/components/install.astro", "src/components/band-head.astro", "src/components/band-section.astro"]) {
+      const body = readFileSync(join(process.cwd(), file), "utf8").split("---").slice(2).join("---");
+      expect(body).not.toMatch(/<(H[1-6]|P|Lead|Muted|Code|CodeBlock|Button|Typography)\b[^>]*\b(size|weight|family|line|tracking)=/);
+    }
     expect(readdirSync(join(process.cwd(), "src/styles"))).toEqual(["global.css"]);
   });
 
