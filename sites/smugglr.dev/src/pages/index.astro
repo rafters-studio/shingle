@@ -2,9 +2,10 @@
 import Base from "@/src/layouts/Base.astro";
 import BandHead from "@/components/band-head.astro";
 import BandSection from "@/components/band-section.astro";
-import DarkBand from "@/components/dark-band.astro";
 import Install from "@/components/install.astro";
+import SpacedSection from "@/components/spaced-section.astro";
 import SyncStage from "@/components/sync-stage.astro";
+import WrapCode from "@/components/wrap-code.astro";
 import Container from "@/components/ui/container.astro";
 import Table from "@/components/ui/table.astro";
 import {
@@ -14,13 +15,12 @@ import {
   tableHeaderClasses,
   tableRowClasses,
 } from "@/components/ui/table.classes";
-import { Code, CodeBlock, P } from "@/components/ui/typography.astro";
+import { Code, P } from "@/components/ui/typography.astro";
+import { smugglrRelease } from "@/src/smugglr/release";
 
 const LEDE =
   "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
-// smugglr.dev/install redirects to smugglr's install.sh (public/_redirects).
-const INSTALL = "curl -fsSL https://smugglr.dev/install | bash";
-const RELEASE = "0.6.2";
+const INSTALL = smugglrRelease.command;
 
 // Captured from the v0.6.1 release binary; never typed.
 const OUT = {
@@ -169,55 +169,57 @@ const SECTIONS: Sec[] = [
 ---
 
 <Base title="smugglr" description={LEDE}>
-  <Container gap="24">
-    <SyncStage />
+  <SyncStage />
 
-    <Install version={RELEASE} command={INSTALL} />
+  <SpacedSection label="Install" space="24">
+    <Container size="4xl" padding="0">
+      <Install release={smugglrRelease} />
+    </Container>
+  </SpacedSection>
 
-    <DarkBand label="Machine-readable summary">
-      <Container size="4xl" padding="12" gap="24">
-        <BandHead title="MACHINE-READABLE SUMMARY" note="GET /llms.txt" />
+  <SpacedSection label="Machine-readable summary" space="24" dark>
+    <Container size="4xl" padding="0" gap="24">
+      <BandHead title="MACHINE-READABLE SUMMARY" note="GET /llms.txt" />
 
-        {
-          SECTIONS.map((sec) => (
-            <BandSection num={sec.num} title={sec.title} note={sec.note}>
-              {sec.blocks.map((block) => {
-                if (block.kind === "p") {
-                  return (
-                    <P>
-                      {block.text}
-                      {block.code && <Code>{block.code}</Code>}
-                    </P>
-                  );
-                }
-                if (block.kind === "out") {
-                  return <CodeBlock data-out={block.name}>{OUT[block.name]}</CodeBlock>;
-                }
+      {
+        SECTIONS.map((sec) => (
+          <BandSection num={sec.num} title={sec.title} note={sec.note}>
+            {sec.blocks.map((block) => {
+              if (block.kind === "p") {
                 return (
-                  <Table>
-                    <thead class={tableHeaderClasses}>
+                  <P>
+                    {block.text}
+                    {block.code && <Code>{block.code}</Code>}
+                  </P>
+                );
+              }
+              if (block.kind === "out") {
+                return <WrapCode out={block.name}>{OUT[block.name]}</WrapCode>;
+              }
+              return (
+                <Table>
+                  <thead class={tableHeaderClasses}>
+                    <tr class={tableRowClasses}>
+                      {block.head.map((cell) => (
+                        <th class={tableHeadClasses}>{cell}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody class={tableBodyClasses}>
+                    {block.rows.map((row) => (
                       <tr class={tableRowClasses}>
-                        {block.head.map((cell) => (
-                          <th class={tableHeadClasses}>{cell}</th>
+                        {row.map((cell, i) => (
+                          <td class={tableCellClasses}>{i === 0 ? <Code>{cell}</Code> : cell}</td>
                         ))}
                       </tr>
-                    </thead>
-                    <tbody class={tableBodyClasses}>
-                      {block.rows.map((row) => (
-                        <tr class={tableRowClasses}>
-                          {row.map((cell, i) => (
-                            <td class={tableCellClasses}>{i === 0 ? <Code>{cell}</Code> : cell}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                );
-              })}
-            </BandSection>
-          ))
-        }
-      </Container>
-    </DarkBand>
-  </Container>
+                    ))}
+                  </tbody>
+                </Table>
+              );
+            })}
+          </BandSection>
+        ))
+      }
+    </Container>
+  </SpacedSection>
 </Base>

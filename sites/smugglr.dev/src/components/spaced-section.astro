@@ -1,0 +1,31 @@
+---
+/**
+ * A full-width section with room above and below and the page's side gutter.
+ * Rafters' Container pads every side with one value, so on a phone vertical
+ * room costs width; this pads the block axis only.
+ *
+ * @cognitive-load 0/10 - Invisible structure; its content carries the load
+ * @attention-economics Space around a section marks where one idea ends and the next begins
+ * @trust-building The same rhythm on every section, from rafters' spacing scale
+ * @accessibility Named by `label`, so the section is a landmark
+ * @semantic-meaning A named region of the page; `dark` puts it under rafters' .dark scope
+ *
+ * @usage-patterns
+ * DO: Wrap a page's top-level sections, with a Container inside for width
+ * NEVER: Nest one inside another
+ */
+import type { SpacedSectionSpace } from "./spaced-section.behavior";
+import { spacedSectionClasses } from "./spaced-section.classes";
+
+interface Props {
+  label: string;
+  space?: SpacedSectionSpace;
+  dark?: boolean;
+}
+
+const { label, space = "16", dark = false } = Astro.props;
+---
+
+<section class={spacedSectionClasses(space, dark)} aria-label={label}>
+  <slot />
+</section>
