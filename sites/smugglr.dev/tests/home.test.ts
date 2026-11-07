@@ -69,7 +69,7 @@ describe("home page, built", () => {
     expect(found).toEqual(fixture);
   });
 
-  it("is rafters: no hand styling on the page, no stylesheet but the stage's", () => {
+  it("is rafters: no hand styling on the page, no stylesheet but globals and the signature pieces", () => {
     const source = readFileSync(join(process.cwd(), "src/pages/index.astro"), "utf8");
     const markup = source
       .slice(source.lastIndexOf("---"))
@@ -77,7 +77,7 @@ describe("home page, built", () => {
       .replace(/class=\{table\w+Classes\}/g, "");
     expect(markup).not.toMatch(/\bclass(:list)?=|\bstyle=|<style/);
     expect(markup).not.toMatch(/<(div|span|b|h1)[\s>]/);
-    expect(readdirSync(join(process.cwd(), "src/styles"))).toEqual(["global.css"]);
+    expect(readdirSync(join(process.cwd(), "src/styles"))).toEqual(["global.css", "home.css"]);
   });
 
   it("has no React island and no old copy", () => {

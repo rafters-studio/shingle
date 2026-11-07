@@ -1,0 +1,31 @@
+---
+/**
+ * The install pill: one dark line of text, the command, with its Copy button.
+ * The pill takes rafters' .dark scope, so the outline Button reads on it.
+ *
+ * @cognitive-load 2/10 - One command, one action
+ * @accessibility The command is real text; Copy is a native button
+ */
+import Button from "@/components/ui/button.astro";
+import { homeClasses as c } from "./home.classes";
+
+interface Props {
+  command: string;
+}
+
+const { command } = Astro.props;
+---
+
+<p class={c.install} data-install={command}>
+  <code><span class={c.prompt}>$ </span>{command}</code>
+  <Button id="install-copy" variant="outline" size="xs">Copy</Button>
+</p>
+
+<script>
+  for (const pill of document.querySelectorAll<HTMLElement>("[data-install]")) {
+    const command = pill.dataset.install;
+    pill.querySelector("button")?.addEventListener("click", () => {
+      if (command) navigator.clipboard.writeText(command).catch(() => {});
+    });
+  }
+</script>

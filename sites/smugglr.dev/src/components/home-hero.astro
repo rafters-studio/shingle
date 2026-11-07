@@ -1,0 +1,17 @@
+---
+/**
+ * The home page's hero frame: full width with the page gutter, its content a
+ * centred 4xl column, every line balanced. The headline scales with the
+ * viewport, 4xl to 7xl, which Typography's single size cannot say.
+ *
+ * @cognitive-load 0/10 - Frame only; its content carries the load
+ */
+import Container from "@/components/ui/container.astro";
+import { homeClasses as c } from "./home.classes";
+---
+
+<header class={c.hero}>
+  <Container size="4xl" padding="0" gap="6">
+    <slot />
+  </Container>
+</header>

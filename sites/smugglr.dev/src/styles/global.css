@@ -1,4 +1,5 @@
 @import "../../.rafters/output/rafters.css";
+@import "./home.css";
 
 /*
  * Scan the shared workspace package (@shingle/shared) so Tailwind emits the

@@ -6,6 +6,7 @@ const pages = ["index.html", "docs/index.html", "compare/index.html", "docs/get-
 const links = [
   "/docs/",
   "/docs/cli/",
+  "/migratr/",
   "/compare/",
   "/compare/games/",
   "https://github.com/rafters-studio/smugglr",

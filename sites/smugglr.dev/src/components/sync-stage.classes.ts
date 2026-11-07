@@ -1,6 +1,6 @@
 /**
  * Sync stage view: class strings, no logic. The rules live in
- * sync-stage.astro, built from rafters tokens.
+ * src/styles/home.css, built from rafters tokens.
  */
 export const syncStageClasses = {
   live: "ss-stage ss-live",
