@@ -1,29 +1,44 @@
 ---
 /**
- * Install: the command as a CodeBlock, its Copy button, and where else to get
- * the binary. Rafters components and props only, at the designer's sizes.
+ * Install: the release binary, one line to run and its Copy button side by
+ * side, with where else to get it. Rafters components and props only, at the
+ * designer's sizes.
  *
  * @cognitive-load 2/10 - One command, one action
  * @accessibility The command is real text; Copy is a native button
  */
 import Button from "@/components/ui/button.astro";
 import Container from "@/components/ui/container.astro";
-import { CodeBlock, Muted } from "@/components/ui/typography.astro";
+import { CodeBlock, H2, P } from "@/components/ui/typography.astro";
 
 interface Props {
+  /** The release, without the leading v. */
+  version: string;
   command: string;
-  note: string;
 }
 
-const { command, note } = Astro.props;
+const { version, command } = Astro.props;
+const release = `https://github.com/rafters-studio/smugglr/releases/tag/v${version}`;
 ---
 
-<Container as="section" size="4xl" padding="8" gap="4" aria-label="Install" data-install={command}>
-  <CodeBlock>$ {command}</CodeBlock>
-  <Container size="sm" padding="0">
-    <Button id="install-copy" variant="outline">Copy</Button>
+<Container as="section" size="6xl" padding="8" gap="6" aria-label="Install" data-install={command}>
+  <H2>Install smugglr v{version}</H2>
+  <P>
+    On Linux and macOS, x86_64 or aarch64, install.sh puts the v{version} binary in ~/.local/bin/smugglr, and says how
+    to add that directory to PATH when it is not on it.
+  </P>
+  <Container columns={4} gap="2">
+    <Container colSpan={3}>
+      <CodeBlock>{command}</CodeBlock>
+    </Container>
+    <Container colSpan={1}>
+      <Button id="install-copy" variant="primary">Copy</Button>
+    </Container>
   </Container>
-  <Muted align="center">{note}</Muted>
+  <P>
+    For Windows, or to fetch it by hand, <a href={release}>the v{version} release</a> carries one archive per target.
+    smugglr publishes no checksum file.
+  </P>
 </Container>
 
 <script>

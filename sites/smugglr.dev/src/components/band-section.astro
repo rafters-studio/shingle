@@ -6,7 +6,7 @@
  * @cognitive-load 2/10 - One topic per section, named before it is read
  */
 import Container from "@/components/ui/container.astro";
-import Typography, { H2, Muted } from "@/components/ui/typography.astro";
+import Typography, { H2, P } from "@/components/ui/typography.astro";
 
 interface Props {
   num: string;
@@ -22,7 +22,7 @@ const { num, title, note } = Astro.props;
     <H2>
       <Typography as="span" color="warning">## {num}</Typography> {title}
     </H2>
-    <Muted align="end"># {note}</Muted>
+    <P color="muted-foreground" align="end"># {note}</P>
   </Container>
   <slot />
 </Container>

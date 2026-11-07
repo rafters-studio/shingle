@@ -18,9 +18,9 @@ import { Code, CodeBlock, P } from "@/components/ui/typography.astro";
 
 const LEDE =
   "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
-const INSTALL = "cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr";
-const INSTALL_NOTE =
-  "Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.";
+// The install line exactly as the smugglr README gives it.
+const INSTALL = "curl -fsSL https://raw.githubusercontent.com/rafters-studio/smugglr/main/install.sh | bash";
+const RELEASE = "0.6.2";
 
 // Captured from the v0.6.1 release binary; never typed.
 const OUT = {
@@ -67,7 +67,11 @@ const SECTIONS: Sec[] = [
             "https://github.com/rafters-studio/smugglr/releases",
             "smugglr-<target>.tar.gz for four unix targets (x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-apple-darwin, aarch64-apple-darwin); smugglr-x86_64-pc-windows-msvc.zip for Windows",
           ],
-          ["From source", INSTALL, "The smugglr command"],
+          [
+            "install.sh",
+            INSTALL,
+            "The latest release’s binary in ~/.local/bin/smugglr, on Linux and macOS, x86_64 or aarch64",
+          ],
         ],
       },
     ],
@@ -88,8 +92,8 @@ const SECTIONS: Sec[] = [
       },
       {
         kind: "p",
-        text: "smugglr keeps no secrets and has no environment of its own; it runs inside the project’s. Keep the D1 variables in that project’s .env, or in a secrets manager: ",
-        code: "op run --environment=<id> -- smugglr sync ./shop.db d1://shop",
+        text: "smugglr keeps no secrets and has no environment of its own; it reads the two D1 variables from the environment it runs in, set however you keep them: ",
+        code: "CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop",
       },
     ],
   },
@@ -165,53 +169,55 @@ const SECTIONS: Sec[] = [
 ---
 
 <Base title="smugglr" description={LEDE}>
-  <SyncStage />
+  <Container gap="24">
+    <SyncStage />
 
-  <Install command={INSTALL} note={INSTALL_NOTE} />
+    <Install version={RELEASE} command={INSTALL} />
 
-  <DarkBand label="Machine-readable summary">
-    <Container size="4xl" padding="8" gap="12">
-      <BandHead title="MACHINE-READABLE SUMMARY" note="GET /llms.txt" />
+    <DarkBand label="Machine-readable summary">
+      <Container size="4xl" padding="12" gap="16">
+        <BandHead title="MACHINE-READABLE SUMMARY" note="GET /llms.txt" />
 
-      {
-        SECTIONS.map((sec) => (
-          <BandSection num={sec.num} title={sec.title} note={sec.note}>
-            {sec.blocks.map((block) => {
-              if (block.kind === "p") {
+        {
+          SECTIONS.map((sec) => (
+            <BandSection num={sec.num} title={sec.title} note={sec.note}>
+              {sec.blocks.map((block) => {
+                if (block.kind === "p") {
+                  return (
+                    <P>
+                      {block.text}
+                      {block.code && <Code>{block.code}</Code>}
+                    </P>
+                  );
+                }
+                if (block.kind === "out") {
+                  return <CodeBlock data-out={block.name}>{OUT[block.name]}</CodeBlock>;
+                }
                 return (
-                  <P>
-                    {block.text}
-                    {block.code && <Code>{block.code}</Code>}
-                  </P>
-                );
-              }
-              if (block.kind === "out") {
-                return <CodeBlock data-out={block.name}>{OUT[block.name]}</CodeBlock>;
-              }
-              return (
-                <Table>
-                  <thead class={tableHeaderClasses}>
-                    <tr class={tableRowClasses}>
-                      {block.head.map((cell) => (
-                        <th class={tableHeadClasses}>{cell}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody class={tableBodyClasses}>
-                    {block.rows.map((row) => (
+                  <Table>
+                    <thead class={tableHeaderClasses}>
                       <tr class={tableRowClasses}>
-                        {row.map((cell, i) => (
-                          <td class={tableCellClasses}>{i === 0 ? <Code>{cell}</Code> : cell}</td>
+                        {block.head.map((cell) => (
+                          <th class={tableHeadClasses}>{cell}</th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              );
-            })}
-          </BandSection>
-        ))
-      }
-    </Container>
-  </DarkBand>
+                    </thead>
+                    <tbody class={tableBodyClasses}>
+                      {block.rows.map((row) => (
+                        <tr class={tableRowClasses}>
+                          {row.map((cell, i) => (
+                            <td class={tableCellClasses}>{i === 0 ? <Code>{cell}</Code> : cell}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                );
+              })}
+            </BandSection>
+          ))
+        }
+      </Container>
+    </DarkBand>
+  </Container>
 </Base>

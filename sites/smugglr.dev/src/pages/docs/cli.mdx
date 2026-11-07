@@ -110,9 +110,9 @@ With `steering = "updated_at"` in the config, the preview and the run agree:
   ]}
 />
 
-smugglr keeps no secrets and has no environment of its own; it runs inside the environment of the project that calls it. Put the two D1 variables in that project’s `.env` or in a secrets manager, for example with 1Password Environments:
+smugglr keeps no secrets and has no environment of its own; it reads the two D1 variables from the environment it runs in. Set them however you keep them:
 
-<CodeBlock>{"op run --environment=<id> -- smugglr sync ./shop.db d1://shop"}</CodeBlock>
+<CodeBlock>{"CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop"}</CodeBlock>
 
 Other database engines (postgres://, for example) are refused: smugglr keeps SQLite in step with SQLite. Every table needs a primary key; a table without one stops the run with exit 3. SQLite’s `sqlite_*` tables are always ignored, and so are D1’s `_cf_*` tables.
 

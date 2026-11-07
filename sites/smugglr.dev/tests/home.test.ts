@@ -26,16 +26,17 @@ describe("home page, built", () => {
     expect(text).not.toContain("If you’re moving SQLite");
   });
 
-  it("shows the install command and its note", () => {
-    expect(text).toContain(
-      "$ cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr",
-    );
-    expect(html).toContain(
-      'data-install="cargo install --git https://github.com/rafters-studio/smugglr --tag v0.6.1 smugglr"',
-    );
-    expect(text).toContain(
-      "Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.",
-    );
+  it("shows the release binary's install line, not cargo", () => {
+    const line = "curl -fsSL https://raw.githubusercontent.com/rafters-studio/smugglr/main/install.sh | bash";
+    expect(text).toContain(line);
+    expect(html).toContain(`data-install="${line}"`);
+    expect(text).toContain("Install smugglr v0.6.2");
+    expect(text).not.toContain("cargo install");
+  });
+
+  it("tells no one to use op or 1Password", () => {
+    expect(text).not.toMatch(/op run|1Password|--environment/);
+    expect(text).toContain("CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token>");
   });
 
   it("orders stage, install and band", () => {
