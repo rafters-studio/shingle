@@ -3,6 +3,7 @@ import Base from "@/src/layouts/Base.astro";
 import BandHead from "@/components/band-head.astro";
 import BandSection from "@/components/band-section.astro";
 import Install from "@/components/install.astro";
+import MigratrSection from "@/components/migratr-section.astro";
 import SpacedSection from "@/components/spaced-section.astro";
 import SyncStage from "@/components/sync-stage.astro";
 import WrapCode from "@/components/wrap-code.astro";
@@ -174,6 +175,12 @@ const SECTIONS: Sec[] = [
   <SpacedSection label="Install" space="24">
     <Container size="4xl" padding="0">
       <Install release={smugglrRelease} />
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label="migratr" space="24">
+    <Container size="4xl" padding="0">
+      <MigratrSection />
     </Container>
   </SpacedSection>
 

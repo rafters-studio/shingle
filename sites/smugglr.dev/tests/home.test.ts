@@ -49,6 +49,16 @@ describe("home page, built", () => {
     expect(text).not.toMatch(/no checksum/i);
   });
 
+  it("has a migratr section with its installer and a way to its docs", () => {
+    const section = html.match(/<section[^>]*aria-label="migratr"[\s\S]*?<\/section>/)?.[0] ?? "";
+    expect(section).toContain('data-install="curl -fsSL https://smugglr.dev/migratr/install | bash"');
+    expect(section).toContain('href="/migratr/"');
+    expect(section).toContain('href="https://github.com/rafters-studio/migratr/releases/tag/v0.2.0"');
+    const migratr = html.indexOf('aria-label="migratr"');
+    expect(migratr).toBeGreaterThan(html.indexOf('aria-label="Install"'));
+    expect(migratr).toBeLessThan(html.indexOf('aria-label="Machine-readable summary"'));
+  });
+
   it("tells no one to use op or 1Password", () => {
     expect(text).not.toMatch(/op run|1Password|--environment/);
     expect(text).toContain("CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token>");
