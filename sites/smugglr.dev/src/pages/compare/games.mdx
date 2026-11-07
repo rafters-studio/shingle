@@ -5,7 +5,8 @@ description: "smugglr for game developers. Photon, Colyseus, Mirror, Nakama, Pla
 ---
 import Container from "@/components/ui/container.astro";
 import Grid from "@/components/ui/grid.astro";
-import { H1, H2, P, Small, Code, CodeBlock } from "@/components/ui/typography.astro";
+import { H1, H2, P, Small, Code } from "@/components/ui/typography.astro";
+import WrapCode from "@/components/wrap-code.astro";
 import InkBlock from "@/components/InkBlock.astro";
 import MrsSectionHeader from "@/components/MrsSectionHeader.astro";
 import MrsTable from "@/components/MrsTable.astro";
@@ -39,7 +40,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 
 <Container as="section" size="full">
-    <Container size="5xl" padding="20" gap="10">
+    <Container size="5xl" padding="8" gap="10">
         <Small color="muted-foreground" transform="uppercase" tracking="widest">
             compare &middot; games &middot; honest, falsifiable, no marketing
         </Small>
@@ -55,7 +56,7 @@ export const NOT_SMUGGLR_ROWS = [
 </Container>
 
 <div class="bg-background">
-<Container size="5xl" padding="20" gap="20">
+<Container size="5xl" padding="8" gap="20">
 
 <Container as="section" gap="6">
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">01 &middot; the shape of a game backend</div>
@@ -72,7 +73,7 @@ export const NOT_SMUGGLR_ROWS = [
 </div>
 
 <section class="dark bg-background text-foreground">
-<Container size="5xl" padding="20" gap="12">
+<Container size="5xl" padding="8" gap="12">
     <div class="flex items-center justify-between gap-4 pb-3 border-b border-border/50">
         <div class="flex items-center gap-3">
             <span class="font-mono text-sm text-warning">»</span>
@@ -94,7 +95,7 @@ export const NOT_SMUGGLR_ROWS = [
 </section>
 
 <div class="bg-background">
-<Container size="5xl" padding="20" gap="20">
+<Container size="5xl" padding="8" gap="20">
 
 <Container as="section" gap="6">
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">02 &middot; the netcode shelf</div>
@@ -102,7 +103,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 <P>If your game has frames and hitboxes, one of these is the right answer. Read this section to confirm smugglr is not on that shelf, then move on.</P>
 
-<Grid id="compare-games-grid-1" columns={2} gap="6">
+<Grid id="compare-games-grid-1" columns={{ base: 1, md: 2 }} gap="6">
     <Card>
         <h3 slot="title">Photon (Fusion, Quantum, PUN)</h3>
         <p slot="description">Authoritative netcode. UDP. 30 to 60 Hz. Lag compensation, prediction, snapshot interpolation.</p>
@@ -143,7 +144,7 @@ export const NOT_SMUGGLR_ROWS = [
 
 <P>Every game has accounts, inventory, currencies, leaderboards, quests, mail, settings, telemetry. The four tools below are what studios reach for. None of them are SQLite end to end. smugglr is.</P>
 
-<Grid id="compare-games-grid-2" columns={2} gap="6">
+<Grid id="compare-games-grid-2" columns={{ base: 1, md: 2 }} gap="6">
     <Card surface="muted">
         <h3 slot="title">Firebase Realtime DB, Firestore</h3>
         <p slot="description">The default leaderboard tier. The most-cited reason to migrate off.</p>
@@ -182,7 +183,7 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">04 &middot; two stacks</div>
 <H2>Where smugglr lives, depending on whether your game has a tick rate.</H2>
 
-<Grid id="compare-games-grid-3" columns={2} gap="6">
+<Grid id="compare-games-grid-3" columns={{ base: 1, md: 2 }} gap="6">
     <Card>
         <h3 slot="title">Tickrate game</h3>
         <p slot="description">FPS, MOBA, racing, fighting, action multiplayer. 30 to 60 Hz.</p>
@@ -214,12 +215,12 @@ export const NOT_SMUGGLR_ROWS = [
 <div class="font-heading font-medium text-sm uppercase tracking-widest text-muted-foreground mb-3.5 pt-3.5 border-t border-foreground">06 &middot; install</div>
 <H2>Three ways to use it. Same algorithm, same adapters, same verbs.</H2>
 
-<Grid id="compare-games-grid-4" columns={3} gap="6">
+<Grid id="compare-games-grid-4" columns={{ base: 1, md: 3 }} gap="6">
     <Card surface="muted">
         <h3 slot="title">CLI</h3>
         <p slot="description">Run smugglr as a command-line tool.</p>
         <CardContent>
-            <CodeBlock>{`curl -fsSL https://smugglr.dev/install | bash`}</CodeBlock>
+            <WrapCode>{`curl -fsSL https://smugglr.dev/install | bash`}</WrapCode>
             <P>The curl installer covers macOS and Linux. On Windows, use the release binary.</P>
         </CardContent>
     </Card>
@@ -228,7 +229,7 @@ export const NOT_SMUGGLR_ROWS = [
         <h3 slot="title">Rust crate</h3>
         <p slot="description">Embed the engine in a Rust service.</p>
         <CardContent>
-            <CodeBlock>{`cargo add smugglr-core`}</CodeBlock>
+            <WrapCode>{`cargo add smugglr-core`}</WrapCode>
             <P>No CLI dependencies. Same diff, same targets, same verbs, called from your code.</P>
         </CardContent>
     </Card>
@@ -237,7 +238,7 @@ export const NOT_SMUGGLR_ROWS = [
         <h3 slot="title">npm package</h3>
         <p slot="description">Use it from the browser or Node.</p>
         <CardContent>
-            <CodeBlock>{`npm install smugglr`}</CodeBlock>
+            <WrapCode>{`npm install smugglr`}</WrapCode>
             <P>Pairs with <Code>@smugglr/zustand</Code> and <Code>@smugglr/nanostores</Code> when you want a sync layer behind your existing client store.</P>
         </CardContent>
     </Card>

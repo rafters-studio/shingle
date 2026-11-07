@@ -6,6 +6,9 @@ description: "The migration file format and its operations, the ledger, snapshot
 import Docs from "@/src/layouts/Docs.astro";
 import { migratrNav } from "@/src/migratr/nav";
 import { version } from "@/src/migratr/version";
+import { mdxComponents } from "@/lib/mdx-components";
+
+export const components = mdxComponents;
 
 <Docs title="Migrations" description="The migration file format and its operations, the ledger, snapshots, and the rule for down." nav={migratrNav}>
 

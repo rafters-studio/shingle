@@ -6,12 +6,12 @@ layout: "../../layouts/Manual.astro"
 
 import ManualSection from "@/src/components/ManualSection.astro";
 import ManualTable from "@/src/components/ManualTable.astro";
-import { CodeBlock } from "@/components/ui/typography.astro";
+import WrapCode from "@/components/wrap-code.astro";
 import OUT from "@/src/smugglr/manual-output.json";
 
 <ManualSection id="synopsis" note="five commands">
 
-<CodeBlock>{"smugglr sync <source> <target> [flags]\nsmugglr mesh <place> --key-file <path> [--sync-mode stop|last]\nsmugglr mesh <place> --key-file <path> --replay <change hash>\nsmugglr mesh keygen --key-file <path>\nsmugglr stash <place> <dir> --key-file <path> --node <name> [--target <name>]... [--whole]\nsmugglr retrieve <place> <blob or dir> --key-file <path> --node <name> [--crossed-off <name>]... [--sync-mode stop|last] [--json]\nsmugglr retrieve <place> --key-file <path> --node <name> --replay <change hash> [--sync-mode stop|last] [--json]"}</CodeBlock>
+<WrapCode>{"smugglr sync <source> <target> [flags]\nsmugglr mesh <place> --key-file <path> [--sync-mode stop|last]\nsmugglr mesh <place> --key-file <path> --replay <change hash>\nsmugglr mesh keygen --key-file <path>\nsmugglr stash <place> <dir> --key-file <path> --node <name> [--target <name>]... [--whole]\nsmugglr retrieve <place> <blob or dir> --key-file <path> --node <name> [--crossed-off <name>]... [--sync-mode stop|last] [--json]\nsmugglr retrieve <place> --key-file <path> --node <name> --replay <change hash> [--sync-mode stop|last] [--json]"}</WrapCode>
 
 </ManualSection>
 
@@ -47,7 +47,7 @@ import OUT from "@/src/smugglr/manual-output.json";
   ]}
 />
 
-<CodeBlock>{OUT.watch_zero}</CodeBlock>
+<WrapCode>{OUT.watch_zero}</WrapCode>
 
 </ManualSection>
 
@@ -77,13 +77,13 @@ import OUT from "@/src/smugglr/manual-output.json";
 
 Without a steering column, `last` is refused before anything is read:
 
-<CodeBlock>{OUT.last_nosteer}</CodeBlock>
+<WrapCode>{OUT.last_nosteer}</WrapCode>
 
 With `steering = "updated_at"` in the config, the preview and the run agree:
 
-<CodeBlock>{OUT.last_dry}</CodeBlock>
+<WrapCode>{OUT.last_dry}</WrapCode>
 
-<CodeBlock>{OUT.last_run}</CodeBlock>
+<WrapCode>{OUT.last_run}</WrapCode>
 
 </ManualSection>
 
@@ -112,7 +112,7 @@ With `steering = "updated_at"` in the config, the preview and the run agree:
 
 smugglr keeps no secrets and has no environment of its own; it reads the two D1 variables from the environment it runs in. Set them however you keep them:
 
-<CodeBlock>{"CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop"}</CodeBlock>
+<WrapCode>{"CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop"}</WrapCode>
 
 Other database engines (postgres://, for example) are refused: smugglr keeps SQLite in step with SQLite. Every table needs a primary key; a table without one stops the run with exit 3. SQLite’s `sqlite_*` tables are always ignored, and so are D1’s `_cf_*` tables.
 
@@ -160,15 +160,15 @@ Other database engines (postgres://, for example) are refused: smugglr keeps SQL
 
 stash writes one new blob into the directory and prints its path. retrieve applies one blob, or every blob in a directory, in any order.
 
-<CodeBlock>{OUT.stash}</CodeBlock>
+<WrapCode>{OUT.stash}</WrapCode>
 
-<CodeBlock>{OUT.retrieve}</CodeBlock>
+<WrapCode>{OUT.retrieve}</WrapCode>
 
 A retrieve names each change it drops with its change hash. --replay decides that change again:
 
-<CodeBlock>{OUT.retrieve_drop}</CodeBlock>
+<WrapCode>{OUT.retrieve_drop}</WrapCode>
 
-<CodeBlock>{OUT.retrieve_replay}</CodeBlock>
+<WrapCode>{OUT.retrieve_replay}</WrapCode>
 
 </ManualSection>
 
@@ -206,23 +206,23 @@ A retrieve names each change it drops with its change hash. --replay decides tha
   ]}
 />
 
-<CodeBlock>{OUT.mesh_keygen}</CodeBlock>
+<WrapCode>{OUT.mesh_keygen}</WrapCode>
 
-<CodeBlock>{OUT.mesh_loose}</CodeBlock>
+<WrapCode>{OUT.mesh_loose}</WrapCode>
 
 A node signs and seals with the newest key and also accepts the one before it. The previous key is not retired in 0.6.1. No key is printed anywhere; a key is named by its id.
 
 A node is named by its machine’s name (`hostname`, or `COMPUTERNAME` on Windows), and every node needs its own: a node ignores any message carrying its own name, so two machines with one name do not sync and nothing says so. It broadcasts to find peers and sends to them by unicast; on a network with no broadcast, the `peers` setting names the addresses to announce to. A change too large for one datagram is refused with a line naming the row; on macOS the limit is about 9 KB.
 
-<CodeBlock>{OUT.mesh_start}</CodeBlock>
+<WrapCode>{OUT.mesh_start}</WrapCode>
 
-<CodeBlock>{OUT.mesh_toolarge}</CodeBlock>
+<WrapCode>{OUT.mesh_toolarge}</WrapCode>
 
 A change a node drops is named in the record with its change hash and kept in a dropped log. Here puck deletes a note and writes it again; rzr drops the second insert, then --replay decides it:
 
-<CodeBlock>{OUT.mesh_dropped}</CodeBlock>
+<WrapCode>{OUT.mesh_dropped}</WrapCode>
 
-<CodeBlock>{OUT.mesh_replay}</CodeBlock>
+<WrapCode>{OUT.mesh_replay}</WrapCode>
 
 <ManualTable
   head={["setting","default","what it does"]}
@@ -280,7 +280,7 @@ smugglr reads `config.toml` from its config directory: `$XDG_CONFIG_HOME/smugglr
   ]}
 />
 
-<CodeBlock>{"steering = \"updated_at\"\nignore = [\"audit\", \"cache_*\"]\nmax_wire = \"250 MB\"\n\n[tables.orders]\nsteering = \"modified\""}</CodeBlock>
+<WrapCode>{"steering = \"updated_at\"\nignore = [\"audit\", \"cache_*\"]\nmax_wire = \"250 MB\"\n\n[tables.orders]\nsteering = \"modified\""}</WrapCode>
 
 </ManualSection>
 
@@ -312,7 +312,7 @@ smugglr reads `config.toml` from its config directory: `$XDG_CONFIG_HOME/smugglr
   ]}
 />
 
-<CodeBlock>{OUT.too_much}</CodeBlock>
+<WrapCode>{OUT.too_much}</WrapCode>
 
 Exit 5 above: the record names the stash and retrieve commands to move the rows, with the flags they need. The code comes from what the run did. A crash cannot say whether it wrote, so it exits 4: running again is the next step either way.
 
@@ -322,11 +322,11 @@ Exit 5 above: the record names the stash and retrieve commands to move the rows,
 
 Every run prints a record of what it did; `--json` prints it as JSON. [Get started](/docs/get-started/) shows how to read it. A stopped table names its rows in the record:
 
-<CodeBlock>{OUT.stop_json}</CodeBlock>
+<WrapCode>{OUT.stop_json}</WrapCode>
 
 A shape difference is carried under `shape`:
 
-<CodeBlock>{OUT.shape_json}</CodeBlock>
+<WrapCode>{OUT.shape_json}</WrapCode>
 
 </ManualSection>
 
@@ -334,7 +334,7 @@ A shape difference is carried under `shape`:
 
 --sync-type hub and multi are not built. The CLI says so and exits 2; do not plan around them.
 
-<CodeBlock>{OUT.unknown_type}</CodeBlock>
+<WrapCode>{OUT.unknown_type}</WrapCode>
 
 - Automatic catch-up past the sunset (#521). A mesh node away that long prints the stash and retrieve commands instead.
 - smugglr mesh remove (#521). A node gone for good stops being a target when the sunset passes.

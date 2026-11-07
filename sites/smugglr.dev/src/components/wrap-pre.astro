@@ -1,0 +1,24 @@
+---
+/**
+ * The markdown code fence, wrapping. MDX maps a fence's pre to this (see
+ * src/lib/mdx-components.ts), so a fence reads like WrapCode: rafters'
+ * CodeBlock look, long lines wrapped, never a sideways scroll. The highlighter's
+ * inline colours are dropped so the block takes rafters' code colours.
+ *
+ * @cognitive-load 2/10 - Read top to bottom; nothing hides off the edge
+ * @attention-economics Commands and output stay whole at every width, so nothing is read by scrolling
+ * @trust-building The text is shown byte for byte; only the line box wraps
+ * @accessibility Native pre and code; no horizontal scroll region to reach by keyboard
+ * @semantic-meaning Machine text from a markdown fence: a command, a file, or output
+ *
+ * @usage-patterns
+ * DO: Map MDX's pre to it once per page through mdxComponents
+ * NEVER: Use it by hand; WrapCode is the component for authored blocks
+ */
+import { wrapCodeClasses as c } from "./wrap-code.classes";
+
+const html = Astro.slots.has("default") ? await Astro.slots.render("default") : "";
+const plain = html.replace(/\sstyle="[^"]*"/g, "");
+---
+
+<pre class={c.root} set:html={plain} />

@@ -6,7 +6,7 @@ layout: "../../layouts/Manual.astro"
 
 import ManualSection from "@/src/components/ManualSection.astro";
 import ManualTable from "@/src/components/ManualTable.astro";
-import { CodeBlock } from "@/components/ui/typography.astro";
+import WrapCode from "@/components/wrap-code.astro";
 import OUT from "@/src/smugglr/manual-output.json";
 
 <ManualSection id="hash" note="16 bytes of BLAKE3">
@@ -37,9 +37,9 @@ For each pair of places, smugglr remembers every key’s last agreed hash, saved
   ]}
 />
 
-<CodeBlock>{OUT.moved_dry}</CodeBlock>
+<WrapCode>{OUT.moved_dry}</WrapCode>
 
-<CodeBlock>{OUT.stop}</CodeBlock>
+<WrapCode>{OUT.stop}</WrapCode>
 
 A stopped table holds back only its own rows. Other tables move, and the run exits 4 instead of 3. The sync modes are listed in the [CLI reference](/docs/cli/).
 
@@ -69,7 +69,7 @@ Exit code `4` says a run wrote something and is not done. A crash cannot say whe
 
 A first sync between two places has no last agreed hash to compare with, so it cannot see deletes: a row on one side only is copied as new. It also weighs itself before sending anything. `max_wire` in the config sets the most it may send; unset, it is 100 MB. A first sync heavier than that stops with exit code `5` and names `smugglr stash` and `smugglr retrieve` as the way to move it:
 
-<CodeBlock>{OUT.too_much}</CodeBlock>
+<WrapCode>{OUT.too_much}</WrapCode>
 
 A retrieve does not give the pair a history. The next `smugglr sync` between those places is still a first sync; the rows already match, so none move.
 
@@ -79,11 +79,11 @@ A retrieve does not give the pair a history. The next `smugglr sync` between tho
 
 Before reading any row, smugglr checks that the two places hold the same tables, and that each table has the same columns, types and order. If they differ, the run stops, names the difference, and writes nothing. smugglr never changes a shape. A table without a primary key stops the run the same way.
 
-<CodeBlock>{OUT.shape}</CodeBlock>
+<WrapCode>{OUT.shape}</WrapCode>
 
 The check covers every table both places hold, whatever `--table` names. Naming one table does not skip the others.
 
-<CodeBlock>{OUT.shape_table}</CodeBlock>
+<WrapCode>{OUT.shape_table}</WrapCode>
 
 </ManualSection>
 
@@ -91,7 +91,7 @@ The check covers every table both places hold, whatever `--table` names. Naming 
 
 SQLite’s own `sqlite_*` tables and a place’s internal tables, such as D1’s `_cf_*` tables, are always ignored. The config’s `ignore` list adds more, by name or by pattern. An ignored table is never read, hashed, written or sent, and the shape check skips it. This is how a shared database keeps tables a sync should not touch out of the sync.
 
-<CodeBlock>{OUT.ignored}</CodeBlock>
+<WrapCode>{OUT.ignored}</WrapCode>
 
 </ManualSection>
 

@@ -6,7 +6,7 @@ layout: "../../layouts/Manual.astro"
 
 import ManualSection from "@/src/components/ManualSection.astro";
 import ManualTable from "@/src/components/ManualTable.astro";
-import { CodeBlock } from "@/components/ui/typography.astro";
+import WrapCode from "@/components/wrap-code.astro";
 import OUT from "@/src/smugglr/manual-output.json";
 
 <ManualSection id="install" note="one binary">
@@ -15,7 +15,7 @@ The GitHub release for tag v0.6.1 carries one archive per target: smugglr-\<targ
 
 On Linux and macOS, x86\_64 or aarch64, one line fetches the latest release's binary into `~/.local/bin/smugglr`:
 
-<CodeBlock>{"curl -fsSL https://smugglr.dev/install | bash"}</CodeBlock>
+<WrapCode>{"curl -fsSL https://smugglr.dev/install | bash"}</WrapCode>
 
 </ManualSection>
 
@@ -23,15 +23,15 @@ On Linux and macOS, x86\_64 or aarch64, one line fetches the latest release's bi
 
 Name two places. The first is the source; the second is the target. `--dryrun` plans the run, prints the record, and writes nothing.
 
-<CodeBlock>{OUT.first_dry}</CodeBlock>
+<WrapCode>{OUT.first_dry}</WrapCode>
 
 The run prints the same record with the same counts. The `first sync` line says these two places have never been synced: a row on one side only is copied as new, and deletes are not seen. `weight` is what the run will carry.
 
-<CodeBlock>{OUT.first_run}</CodeBlock>
+<WrapCode>{OUT.first_run}</WrapCode>
 
 Run it again. Nothing changed, so nothing moves.
 
-<CodeBlock>{OUT.in_step}</CodeBlock>
+<WrapCode>{OUT.in_step}</WrapCode>
 
 Every block on this page was pasted from a run of the release binary, in a scratch directory, on local files; the mesh blocks come from two nodes on one machine.
 
@@ -41,13 +41,13 @@ Every block on this page was pasted from a run of the release binary, in a scrat
 
 Between the runs above, a row was edited and another deleted in `laptop/shop.db`, and a row was inserted in `server/shop.db`. The preview names what would move; the run, here as JSON, moves exactly that. A delete is seen now because smugglr remembers the last sync.
 
-<CodeBlock>{OUT.moved_dry}</CodeBlock>
+<WrapCode>{OUT.moved_dry}</WrapCode>
 
-<CodeBlock>{OUT.moved_json}</CodeBlock>
+<WrapCode>{OUT.moved_json}</WrapCode>
 
 The next run finds the two files in step.
 
-<CodeBlock>{OUT.moved_in_step}</CodeBlock>
+<WrapCode>{OUT.moved_in_step}</WrapCode>
 
 </ManualSection>
 
@@ -105,17 +105,17 @@ In JSON the record carries `status`, `first_sync`, `deletes_seen`, `tables` and 
 
 Here `sku-0412` was edited in both files after the last sync. smugglr stops rather than choose, names the row, and exits `3`.
 
-<CodeBlock>{OUT.stop}</CodeBlock>
+<WrapCode>{OUT.stop}</WrapCode>
 
 A stop in one table does not hold the others back. When another table moved first, the run is `stopped in part` and exits `4` instead.
 
-<CodeBlock>{OUT.partial}</CodeBlock>
+<WrapCode>{OUT.partial}</WrapCode>
 
 `--sync-mode source` keeps the source’s copy and `target` the target’s. Each overwritten row is named in the preview and again in the run.
 
-<CodeBlock>{OUT.source_dry}</CodeBlock>
+<WrapCode>{OUT.source_dry}</WrapCode>
 
-<CodeBlock>{OUT.source_run}</CodeBlock>
+<WrapCode>{OUT.source_run}</WrapCode>
 
 `--sync-mode last` keeps the copy whose steering column is further on. Name the column in the config first; without it the run is refused with exit `2` (see the [CLI reference](/docs/cli/)).
 
@@ -125,21 +125,21 @@ A stop in one table does not hold the others back. When another table moved firs
 
 A D1 place is `d1://<database-name>`. smugglr reads the account and token from `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`; the token needs D1 edit permission. A missing variable is refused by name, with exit `2`.
 
-<CodeBlock>{OUT.d1_missing}</CodeBlock>
+<WrapCode>{OUT.d1_missing}</WrapCode>
 
 smugglr keeps no secrets and has no environment of its own. It reads the two variables from the environment it runs in; set them however you keep them:
 
-<CodeBlock>{"CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop --dryrun"}</CodeBlock>
+<WrapCode>{"CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop --dryrun"}</WrapCode>
 
 Tables a sync should not touch in a shared database go in the config’s `ignore` list. smugglr checks that both places have the same shape before it reads a row, and a table the two places hold differently stops the run:
 
-<CodeBlock>{OUT.shape}</CodeBlock>
+<WrapCode>{OUT.shape}</WrapCode>
 
 Ignore the table, and the check skips it. D1’s own `_cf_*` tables are ignored without being listed.
 
-<CodeBlock>{"# $XDG_CONFIG_HOME/smugglr/config.toml\nignore = [\"audit\"]"}</CodeBlock>
+<WrapCode>{"# $XDG_CONFIG_HOME/smugglr/config.toml\nignore = [\"audit\"]"}</WrapCode>
 
-<CodeBlock>{OUT.ignored}</CodeBlock>
+<WrapCode>{OUT.ignored}</WrapCode>
 
 --table does not narrow the shape check: every table both places hold is checked, so a mismatch in a table you did not name still stops the run.
 
@@ -149,23 +149,23 @@ Ignore the table, and the check skips it. D1’s own `_cf_*` tables are ignored 
 
 A first sync moves every row. For a large one, `smugglr stash` writes the rows into a signed blob in a directory, and `smugglr retrieve` applies the blob at the other place, so the move can go by any route that carries a file. Both sides share one key file holding 64 hex digits, and each names itself with `--node`.
 
-<CodeBlock>{"openssl rand -hex 32 > shop.key"}</CodeBlock>
+<WrapCode>{"openssl rand -hex 32 > shop.key"}</WrapCode>
 
-<CodeBlock>{OUT.stash}</CodeBlock>
+<WrapCode>{OUT.stash}</WrapCode>
 
-<CodeBlock>{OUT.retrieve}</CodeBlock>
+<WrapCode>{OUT.retrieve}</WrapCode>
 
 Retrieving the same blob again changes nothing.
 
-<CodeBlock>{OUT.retrieve_again}</CodeBlock>
+<WrapCode>{OUT.retrieve_again}</WrapCode>
 
 A sync between those two places afterwards still counts as a first sync, so it will not see deletes, but the rows already match and none move.
 
-<CodeBlock>{OUT.sync_after_retrieve}</CodeBlock>
+<WrapCode>{OUT.sync_after_retrieve}</WrapCode>
 
 smugglr does not decide for you when a first sync is large. Set `max_wire` in the config and a first sync heavier than that stops with exit `5` and names stash and retrieve. Here `max_wire = "10 B"` trips on two small rows; the run exits 5 and sends nothing. The command in the record needs the key file and node name from above, and a directory for the blobs.
 
-<CodeBlock>{OUT.too_much}</CodeBlock>
+<WrapCode>{OUT.too_much}</WrapCode>
 
 </ManualSection>
 
@@ -173,23 +173,23 @@ smugglr does not decide for you when a first sync is large. Set `max_wire` in th
 
 On a local network where nobody is in charge, `smugglr mesh` keeps one database in step with every other node that holds the same key. Each change goes out as it happens, signed and sealed under the key, and is resent until each peer has decided it. One key file serves the whole mesh; `keygen` writes it, and you copy it to every node.
 
-<CodeBlock>{OUT.mesh_keygen}</CodeBlock>
+<WrapCode>{OUT.mesh_keygen}</WrapCode>
 
 A node announces itself by broadcast and talks to the peers it hears by unicast. On a network with no broadcast (WireGuard, Tailscale, a cloud network) name the peers in the config instead. A node is named by its machine’s name, so every node needs its own. The nodes below share one machine, each with its own port, its own config and a one-line `hostname` script ahead of the real one on its path:
 
-<CodeBlock>{"# puck\nport = 31401\npeers = [\"127.0.0.1:31402\"]\n\n# rzr\nport = 31402\npeers = [\"127.0.0.1:31401\"]"}</CodeBlock>
+<WrapCode>{"# puck\nport = 31401\npeers = [\"127.0.0.1:31402\"]\n\n# rzr\nport = 31402\npeers = [\"127.0.0.1:31401\"]"}</WrapCode>
 
-<CodeBlock>{OUT.mesh_start}</CodeBlock>
+<WrapCode>{OUT.mesh_start}</WrapCode>
 
 A row written on puck, by any program, reaches rzr with no sync run. A delete crosses the same way.
 
-<CodeBlock>{OUT.mesh_insert}</CodeBlock>
+<WrapCode>{OUT.mesh_insert}</WrapCode>
 
-<CodeBlock>{OUT.mesh_delete}</CodeBlock>
+<WrapCode>{OUT.mesh_delete}</WrapCode>
 
 A node’s first run notes the rows already in its database and sends none of them. Use stash and retrieve to bring a new node up to date. A node that starts after being away longer than the sunset (the `graveyard` setting, 12 hours by default) says so and names the commands that catch it up; it does not catch up on its own in 0.6.1.
 
-<CodeBlock>{OUT.mesh_away}</CodeBlock>
+<WrapCode>{OUT.mesh_away}</WrapCode>
 
 The [CLI reference](/docs/cli/) lists the mesh flags and settings, and [How smugglr decides](/docs/how-smugglr-decides/) says how a change travels.
 
