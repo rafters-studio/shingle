@@ -34,7 +34,7 @@ Each method takes an `&mut impl Executor` and returns `Result<_, MigrateError>`.
 
 ## Example
 
-This program was built against `migratr = "0.1.1"` and `rusqlite = { version = "0.40", features = ["bundled"] }` with the `create_users` migration from [Migrations](/migratr/migrations) in `migrations/`.
+This program was built against `migratr = "0.2.0"` and `rusqlite = { version = "0.40", features = ["bundled"] }` with the `create_users` migration from [Migrations](/migratr/migrations) in `migrations/`.
 
 ```rust
 use migratr::{Migrator, RusqliteExecutor};
@@ -63,16 +63,16 @@ applied: [20261007235008]
 reverted 1 migration(s): 20261007235008. Data in dropped objects is not restored.
 ```
 
-Captured from `cargo run` in a scratch project against the published 0.1.1 crates.
+Captured from `cargo run` in a scratch project against the published 0.2.0 crates.
 
 ## The executor
 
-`Executor` is the boundary between migratr and a SQLite connection. An implementation reads the schema (`read_schema`), reads the ledger (`read_ledger`), runs a list of statements in one transaction (`run_atomic`, with an option to suspend foreign keys during a rebuild), and writes a consistent copy of the database for a snapshot (`snapshot`). It returns `Ok(None)` from `snapshot` when the database is not durable and needs none.
+`Executor` is the boundary between migratr and a SQLite connection. An implementation reads the schema (`read_schema`), reads the ledger (`read_ledger`), runs a list of statements in one transaction (`run_atomic`, which keeps an option to suspend foreign keys that `up` no longer uses), and writes a consistent copy of the database for a snapshot (`snapshot`). It returns `Ok(None)` from `snapshot` when the database is not durable and needs none. Two methods, `missing_parents` and `foreign_key_violations`, are optional: they default to `None`, so an existing executor still compiles. `RusqliteExecutor` implements both; another executor can through `migratr::missing_parents_through` and `migratr::foreign_key_violations_through` over a `SqlReader`. Without them a rebuild gets no count, and a row a foreign key refuses fails inside the atomic run as `apply_failed`, with nothing changed.
 
 The `rusqlite` feature is on by default and provides `RusqliteExecutor`, built from a `rusqlite::Connection`, plus `restore` and `latest_snapshot`. To supply your own executor, turn the default off:
 
 ```toml
-migratr = { version = "0.1.1", default-features = false }
+migratr = { version = "0.2.0", default-features = false }
 ```
 
 That keeps the parser, `up`, `down`, `Migrator` and the `Executor` trait, and drops rusqlite, so migratr sits beside another SQLite library such as sqlx without a second libsqlite3. migratr's CI builds this configuration next to sqlx on every change.
