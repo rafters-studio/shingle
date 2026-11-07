@@ -3,7 +3,7 @@
  * gutter, and rafters' .dark scope when asked.
  */
 import { classy } from "@/lib/primitives/classy";
-import type { SpacedSectionSpace } from "./spaced-section.behavior";
+import type { SpacedSectionSpace, SpacedSectionTone } from "./spaced-section.behavior";
 
 const spaceClasses: Record<SpacedSectionSpace, string> = {
   "8": "py-8",
@@ -13,6 +13,13 @@ const spaceClasses: Record<SpacedSectionSpace, string> = {
   "24": "py-24",
 };
 
-export function spacedSectionClasses(space: SpacedSectionSpace, dark: boolean): string {
-  return classy("px-4", spaceClasses[space], dark && "dark bg-background text-foreground");
+const toneClasses: Record<SpacedSectionTone, string> = {
+  plain: "",
+  dark: "dark bg-background text-foreground",
+  highlight: "bg-warning text-warning-foreground",
+  turn: "border-t-4 border-warning",
+};
+
+export function spacedSectionClasses(space: SpacedSectionSpace, tone: SpacedSectionTone): string {
+  return classy("px-4", spaceClasses[space], toneClasses[tone]);
 }

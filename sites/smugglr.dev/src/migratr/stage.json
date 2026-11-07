@@ -1,0 +1,177 @@
+{
+  "loop": 36000,
+  "events": [
+    {
+      "t": 0,
+      "verb": "PLAN",
+      "thin": "it.",
+      "cmd": "migratr --db app.db plan",
+      "cap": "plan prints every statement up would run, marks the destructive step and names the snapshot it would take. It changes nothing.",
+      "stmt": "20261107081658_remove_handle_from_users DESTRUCTIVE, snapshot 20261107081658_20261107081658_up.db"
+    },
+    {
+      "t": 3500,
+      "verb": "SNAPSHOT",
+      "thin": "it.",
+      "cmd": "migratr --db app.db up",
+      "cap": "Dropping a column is destructive, so before the step runs migratr copies app.db into .migratr/snapshots/.",
+      "stmt": "latest snapshot: ./.migratr/snapshots/20261107081658_20261107081658_up.db"
+    },
+    {
+      "t": 7000,
+      "verb": "BUILD",
+      "thin": "them.",
+      "cap": "SQLite cannot do this one in place, so migratr rebuilds users, and posts with it: posts references users.",
+      "stmt": "CREATE TABLE \"_migratr_rebuild\" (\"id\" INTEGER, \"name\" TEXT NOT NULL, PRIMARY KEY (\"id\"))"
+    },
+    {
+      "t": 8600,
+      "verb": "BUILD",
+      "thin": "them.",
+      "cap": "SQLite cannot do this one in place, so migratr rebuilds users, and posts with it: posts references users.",
+      "stmt": "CREATE TABLE \"_migratr_rebuild_2\" (\"id\" INTEGER, \"author_id\" INTEGER, \"title\" TEXT NOT NULL, PRIMARY KEY (\"id\"), FOREIGN KEY (\"author_id\") REFERENCES \"_migratr_rebuild\" (\"id\") ON DELETE CASCADE ON UPDATE NO ACTION)"
+    },
+    {
+      "t": 10400,
+      "verb": "COPY",
+      "thin": "them.",
+      "cap": "Rows are copied parents first, rowids with them: every user, then every post. handle stays behind.",
+      "stmt": "INSERT INTO \"_migratr_rebuild\" (rowid, \"id\", \"name\") SELECT rowid, \"id\", \"name\" FROM \"users\""
+    },
+    {
+      "t": 12600,
+      "verb": "COPY",
+      "thin": "them.",
+      "cap": "Rows are copied parents first, rowids with them: every user, then every post. handle stays behind.",
+      "stmt": "INSERT INTO \"_migratr_rebuild_2\" (rowid, \"id\", \"author_id\", \"title\") SELECT rowid, \"id\", \"author_id\", \"title\" FROM \"posts\""
+    },
+    {
+      "t": 14800,
+      "verb": "DROP",
+      "thin": "them.",
+      "cap": "The old child is dropped before the old parent.",
+      "stmt": "DROP TABLE \"posts\""
+    },
+    {
+      "t": 16000,
+      "verb": "DROP",
+      "thin": "them.",
+      "cap": "The old child is dropped before the old parent.",
+      "stmt": "DROP TABLE \"users\""
+    },
+    {
+      "t": 17400,
+      "verb": "RENAME",
+      "thin": "them.",
+      "cap": "The new tables are renamed parent first, so SQLite rewrites the references to the final names.",
+      "stmt": "ALTER TABLE \"_migratr_rebuild\" RENAME TO \"users\""
+    },
+    {
+      "t": 18600,
+      "verb": "RENAME",
+      "thin": "them.",
+      "cap": "The new tables are renamed parent first, so SQLite rewrites the references to the final names.",
+      "stmt": "ALTER TABLE \"_migratr_rebuild_2\" RENAME TO \"posts\""
+    },
+    {
+      "t": 20200,
+      "verb": "RECORD",
+      "thin": "it.",
+      "cap": "The ledger row goes in with the migration, in one atomic run. Its checksum is the SHA-256 of the canonical JSON of the version, the name and the up operations.",
+      "stmt": "INSERT INTO _migratr_migrations (version, name, checksum, applied_at) VALUES (20261107081658, 'remove_handle_from_users', '0afb06bd0f682931b526c18561753459fa6d49e1695a29be2bf42c04000265ff', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+    },
+    {
+      "t": 23200,
+      "close": [
+        "New shape.",
+        "Same rows."
+      ],
+      "cap": "Three users and three posts went in; three users and three posts came out. The handles are gone from app.db, and still in the snapshot.",
+      "stmt": "applied 1 migration(s): 20261107081658"
+    },
+    {
+      "t": 27200,
+      "verb": "RESTORE",
+      "thin": "it.",
+      "cmd": "migratr --db app.db restore --yes",
+      "cap": "restore replaces the database with the snapshot. Without --yes it changes nothing.",
+      "stmt": "restored; discards everything written since the snapshot of 20261107081658 (ledger version 20261107081657); ledger versions removed: 20261107081658"
+    },
+    {
+      "t": 31000,
+      "close": [
+        "And",
+        "a way back."
+      ],
+      "cmd": "migratr --db app.db status",
+      "cap": "The handles are back, and status lists the migration as pending again.",
+      "stmt": "20261107081658_remove_handle_from_users pending"
+    }
+  ],
+  "users": [
+    [
+      "1",
+      "Ada",
+      "ada"
+    ],
+    [
+      "2",
+      "Brian",
+      "brian"
+    ],
+    [
+      "3",
+      "Cleo",
+      "cleo"
+    ]
+  ],
+  "posts": [
+    [
+      "1",
+      "1",
+      "hello"
+    ],
+    [
+      "2",
+      "1",
+      "again"
+    ],
+    [
+      "3",
+      "2",
+      "notes"
+    ]
+  ],
+  "ledger": [
+    [
+      "20261107081655",
+      "create_users",
+      "af42501f11c0…"
+    ],
+    [
+      "20261107081656",
+      "create_posts",
+      "fa57b665259b…"
+    ],
+    [
+      "20261107081657",
+      "link_posts_to_users",
+      "08a0eb80c83b…"
+    ],
+    [
+      "20261107081658",
+      "remove_handle_from_users",
+      "0afb06bd0f68…"
+    ]
+  ],
+  "userTimes": [
+    10800,
+    11400,
+    12000
+  ],
+  "postTimes": [
+    13000,
+    13600,
+    14200
+  ]
+}

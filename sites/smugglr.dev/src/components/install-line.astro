@@ -1,0 +1,43 @@
+---
+/**
+ * One install command and its Copy button on one row: the command wraps in
+ * three quarters of the row, the button keeps its own width in the last
+ * quarter, so it is never clipped on a phone. Copy puts exactly the command
+ * on the clipboard. Rafters components and WrapCode, at the designer's sizes.
+ *
+ * @cognitive-load 2/10 - One command, one action
+ * @accessibility The command is real text; Copy is a native button
+ */
+import Button from "@/components/ui/button.astro";
+import Container from "@/components/ui/container.astro";
+import Typography from "@/components/ui/typography.astro";
+import WrapCode from "./wrap-code.astro";
+
+interface Props {
+  command: string;
+  /** A slug for the Copy button's id, unique on the page. */
+  id: string;
+  /** Show a "$ " prompt before the command (not copied). */
+  prompt?: boolean;
+}
+
+const { command, id, prompt = false } = Astro.props;
+---
+
+<Container columns={4} gap="2" data-install={command}>
+  <Container colSpan={3}>
+    <WrapCode>{prompt && <Typography as="span" color="warning">$ </Typography>}{command}</WrapCode>
+  </Container>
+  <Container colSpan={1}>
+    <Button id={`${id}-copy`} variant="primary">Copy</Button>
+  </Container>
+</Container>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>("[data-install]")) {
+    const command = root.dataset.install;
+    root.querySelector("button")?.addEventListener("click", () => {
+      if (command) navigator.clipboard.writeText(command).catch(() => {});
+    });
+  }
+</script>

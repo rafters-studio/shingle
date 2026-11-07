@@ -8,24 +8,26 @@
  * @attention-economics Space around a section marks where one idea ends and the next begins
  * @trust-building The same rhythm on every section, from rafters' spacing scale
  * @accessibility Named by `label`, so the section is a landmark
- * @semantic-meaning A named region of the page; `dark` puts it under rafters' .dark scope
+ * @semantic-meaning A named region of the page; its tone is plain, rafters' .dark scope, the warning ground, or a warning rule above
  *
  * @usage-patterns
  * DO: Wrap a page's top-level sections, with a Container inside for width
  * NEVER: Nest one inside another
  */
-import type { SpacedSectionSpace } from "./spaced-section.behavior";
+import type { SpacedSectionSpace, SpacedSectionTone } from "./spaced-section.behavior";
 import { spacedSectionClasses } from "./spaced-section.classes";
 
 interface Props {
   label: string;
   space?: SpacedSectionSpace;
+  /** Shorthand for tone="dark". */
   dark?: boolean;
+  tone?: SpacedSectionTone;
 }
 
-const { label, space = "16", dark = false } = Astro.props;
+const { label, space = "16", dark = false, tone = dark ? "dark" : "plain" } = Astro.props;
 ---
 
-<section class={spacedSectionClasses(space, dark)} aria-label={label}>
+<section class={spacedSectionClasses(space, tone)} aria-label={label}>
   <slot />
 </section>

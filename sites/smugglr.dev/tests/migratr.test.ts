@@ -23,17 +23,9 @@ describe("migratr pages", () => {
     });
   }
 
-  it("installs migratr with its own binary line and release archives, not cargo", () => {
+  it("installs migratr with its own binary line and its release, not cargo", () => {
     const html = readFileSync(join(dist, "migratr/index.html"), "utf8");
     expect(html).toContain('data-install="curl -fsSL https://smugglr.dev/migratr/install | bash"');
-    for (const file of [
-      "migratr-macos-arm64.tar.gz",
-      "migratr-macos-x64.tar.gz",
-      "migratr-linux-x64.tar.gz",
-      "migratr-windows-x64.zip",
-    ]) {
-      expect(html).toContain(`href="https://github.com/rafters-studio/migratr/releases/download/v0.2.0/${file}"`);
-    }
     expect(html).toContain('href="https://github.com/rafters-studio/migratr/releases/tag/v0.2.0"');
     expect(html).not.toContain("cargo install migratr-cli");
   });

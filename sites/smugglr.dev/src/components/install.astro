@@ -7,7 +7,6 @@
  * @cognitive-load 3/10 - One command to run; the downloads grouped by platform
  * @accessibility The command is real text; Copy is a native button; every download is a named link
  */
-import Button from "@/components/ui/button.astro";
 import CardContent from "@/components/ui/card-content.astro";
 import CardHeader from "@/components/ui/card-header.astro";
 import CardTitle from "@/components/ui/card-title.astro";
@@ -15,7 +14,7 @@ import Card from "@/components/ui/card.astro";
 import Container from "@/components/ui/container.astro";
 import { H2, H3, P } from "@/components/ui/typography.astro";
 import type { InstallRelease } from "./install.types";
-import WrapCode from "./wrap-code.astro";
+import InstallLine from "./install-line.astro";
 
 interface Props {
   release: InstallRelease;
@@ -26,18 +25,11 @@ interface Props {
 const { release: r, id = r.product } = Astro.props;
 ---
 
-<Container gap="16" data-install={r.command}>
+<Container gap="16">
   <Container gap="6">
     <H2>Install {r.product} v{r.version}</H2>
     <P>On Linux and macOS, one line puts the binary in {r.installs}, and {r.path}.</P>
-    <Container columns={4} gap="2">
-      <Container colSpan={3}>
-        <WrapCode>{r.command}</WrapCode>
-      </Container>
-      <Container colSpan={1}>
-        <Button id={`${id}-install-copy`} variant="primary">Copy</Button>
-      </Container>
-    </Container>
+    <InstallLine command={r.command} id={`${id}-install`} />
   </Container>
 
   <Container gap="6">
@@ -71,12 +63,3 @@ const { release: r, id = r.product } = Astro.props;
     </Container>
   </Container>
 </Container>
-
-<script>
-  for (const root of document.querySelectorAll<HTMLElement>("[data-install]")) {
-    const command = root.dataset.install;
-    root.querySelector("button")?.addEventListener("click", () => {
-      if (command) navigator.clipboard.writeText(command).catch(() => {});
-    });
-  }
-</script>

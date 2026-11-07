@@ -1,0 +1,74 @@
+[
+  {
+    "code": "usage",
+    "cause": "Bad arguments, or a missing --db."
+  },
+  {
+    "code": "parse",
+    "cause": "A migration file or spec could not be parsed."
+  },
+  {
+    "code": "duplicate_version",
+    "cause": "Two migration files share a version."
+  },
+  {
+    "code": "io",
+    "cause": "A file or directory could not be read or written."
+  },
+  {
+    "code": "checksum_mismatch",
+    "cause": "An applied migration’s file was edited."
+  },
+  {
+    "code": "missing_file",
+    "cause": "A ledger row has no migration file."
+  },
+  {
+    "code": "apply_failed",
+    "cause": "A migration failed and was rolled back."
+  },
+  {
+    "code": "irreversible",
+    "cause": "A migration in the down range has an operation with no inverse."
+  },
+  {
+    "code": "unparseable_table",
+    "cause": "A table’s CREATE TABLE could not be parsed for a rebuild."
+  },
+  {
+    "code": "foreign_key_violation",
+    "cause": "Rows in a table up or plan would rebuild name no parent row."
+  },
+  {
+    "code": "no_such_foreign_key",
+    "cause": "drop_foreign_key named a key the table does not have."
+  },
+  {
+    "code": "trigger_mismatch",
+    "cause": "A create_trigger’s name or table differs from its statement."
+  },
+  {
+    "code": "column_in_use",
+    "cause": "A dropped column is used by another object."
+  },
+  {
+    "code": "rebuild_not_first",
+    "cause": "An operation that needs a table rebuild is not first in its migration."
+  },
+  {
+    "code": "snapshot_failed",
+    "cause": "A snapshot could not be written, so the step did not run."
+  },
+  {
+    "code": "restore_not_confirmed",
+    "cause": "restore ran without --yes."
+  },
+  {
+    "code": "unknown_object",
+    "cause": "new named an object that is not in schema.json."
+  },
+  {
+    "code": "database",
+    "cause": "SQLite reported an error."
+  }
+]
