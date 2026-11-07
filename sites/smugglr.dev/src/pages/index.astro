@@ -3,8 +3,6 @@ import Base from "@/src/layouts/Base.astro";
 import BandHead from "@/components/band-head.astro";
 import BandSection from "@/components/band-section.astro";
 import DarkBand from "@/components/dark-band.astro";
-import HomeHero from "@/components/home-hero.astro";
-import InkWord from "@/components/ink-word.astro";
 import InstallPill from "@/components/install-pill.astro";
 import SyncStage from "@/components/sync-stage.astro";
 import Container from "@/components/ui/container.astro";
@@ -16,7 +14,7 @@ import {
   tableHeaderClasses,
   tableRowClasses,
 } from "@/components/ui/table.classes";
-import { Code, CodeBlock, H1, Lead, Muted, P } from "@/components/ui/typography.astro";
+import Typography, { Code, CodeBlock, H1, Lead, Muted, P } from "@/components/ui/typography.astro";
 
 const LEDE =
   "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
@@ -165,12 +163,12 @@ const SECTIONS: Sec[] = [
 ---
 
 <Base title="smugglr" description={LEDE}>
-  <HomeHero>
+  <Container as="section" size="4xl" padding="8" gap="6">
     <P family="mono" size="xs" tracking="widest" color="muted-foreground" align="center">
       SQLITE SYNC ENGINE · ONE RUST BINARY · MIT
     </P>
-    <H1 family="sans" weight="light" tracking="tight" align="center">
-      If you’re moving SQLite, <InkWord>smuggl</InkWord> it.
+    <H1 family="sans" size="7xl" weight="light" tracking="tight" line="none" align="center">
+      If you’re moving SQLite, <Typography as="span" weight="medium">smuggl</Typography> it.
     </H1>
     <Container size="xl" padding="0">
       <Lead size="lg" color="muted-foreground" align="center">{LEDE}</Lead>
@@ -181,12 +179,12 @@ const SECTIONS: Sec[] = [
         Or download the archive for your target from the v0.6.1 release on GitHub. No checksum file is published.
       </Muted>
     </Container>
-  </HomeHero>
+  </Container>
 
   <SyncStage />
 
   <DarkBand label="Machine-readable summary">
-    <Container size="3xl" padding="0" gap="12">
+    <Container size="4xl" padding="8" gap="12">
       <BandHead title="MACHINE-READABLE SUMMARY" note="GET /llms.txt" />
 
       {

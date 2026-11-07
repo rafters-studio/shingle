@@ -1,13 +1,15 @@
 ---
 /**
- * The install pill: one dark line of text, the command, with its Copy button.
- * The pill takes rafters' .dark scope, so the outline Button reads on it.
+ * Install: the command as a CodeBlock and its Copy button, rafters only.
+ * The design's single dark pill (command and Copy on one line) has no rafters
+ * component or prop yet; see #190.
  *
  * @cognitive-load 2/10 - One command, one action
  * @accessibility The command is real text; Copy is a native button
  */
 import Button from "@/components/ui/button.astro";
-import { homeClasses as c } from "./home.classes";
+import Container from "@/components/ui/container.astro";
+import { CodeBlock } from "@/components/ui/typography.astro";
 
 interface Props {
   command: string;
@@ -16,15 +18,17 @@ interface Props {
 const { command } = Astro.props;
 ---
 
-<p class={c.install} data-install={command}>
-  <code><span class={c.prompt}>$ </span>{command}</code>
-  <Button id="install-copy" variant="outline" size="xs">Copy</Button>
-</p>
+<Container gap="2" data-install={command}>
+  <CodeBlock>$ {command}</CodeBlock>
+  <Container size="sm" padding="0">
+    <Button id="install-copy" variant="outline" size="xs">Copy</Button>
+  </Container>
+</Container>
 
 <script>
-  for (const pill of document.querySelectorAll<HTMLElement>("[data-install]")) {
-    const command = pill.dataset.install;
-    pill.querySelector("button")?.addEventListener("click", () => {
+  for (const root of document.querySelectorAll<HTMLElement>("[data-install]")) {
+    const command = root.dataset.install;
+    root.querySelector("button")?.addEventListener("click", () => {
       if (command) navigator.clipboard.writeText(command).catch(() => {});
     });
   }

@@ -1,12 +1,12 @@
 ---
 /**
  * The summary band's head: its title behind a honey marker, and a note at the
- * far end, on one mono rule.
+ * far end. Rafters only.
  *
  * @cognitive-load 1/10 - A label and a pointer
  */
-import { Muted, P } from "@/components/ui/typography.astro";
-import { homeClasses as c } from "./home.classes";
+import Container from "@/components/ui/container.astro";
+import Typography, { Muted, P } from "@/components/ui/typography.astro";
 
 interface Props {
   title: string;
@@ -16,9 +16,9 @@ interface Props {
 const { title, note } = Astro.props;
 ---
 
-<header class={c.bandHead}>
+<Container columns={2} gap="2">
   <P family="mono" size="xs" weight="semibold" tracking="widest" line="none">
-    <span class={c.bandMark}>»</span>{title}
+    <Typography as="span" color="warning">»</Typography> {title}
   </P>
-  <Muted family="mono" size="xs">{note}</Muted>
-</header>
+  <Muted family="mono" size="xs" align="end">{note}</Muted>
+</Container>

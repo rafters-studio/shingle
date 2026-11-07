@@ -1,12 +1,12 @@
 ---
 /**
  * One numbered section of the summary band: "## NN TITLE" with its number in
- * honey, a "# note" at the far end, then the section's body.
+ * honey, a "# note" at the far end, then the section's body. Rafters only.
  *
  * @cognitive-load 2/10 - One topic per section, named before it is read
  */
-import { H2, Muted } from "@/components/ui/typography.astro";
-import { homeClasses as c } from "./home.classes";
+import Container from "@/components/ui/container.astro";
+import Typography, { H2, Muted } from "@/components/ui/typography.astro";
 
 interface Props {
   num: string;
@@ -17,12 +17,12 @@ interface Props {
 const { num, title, note } = Astro.props;
 ---
 
-<section class={c.section}>
-  <header class={c.sectionHead}>
+<Container as="section" gap="4">
+  <Container columns={2} gap="2">
     <H2 family="mono" size="sm" weight="semibold" tracking="widest" line="none">
-      <span class={c.sectionNum}>## {num}</span>{title}
+      <Typography as="span" color="warning">## {num}</Typography> {title}
     </H2>
-    <Muted family="mono" size="xs"># {note}</Muted>
-  </header>
+    <Muted family="mono" size="xs" align="end"># {note}</Muted>
+  </Container>
   <slot />
-</section>
+</Container>
