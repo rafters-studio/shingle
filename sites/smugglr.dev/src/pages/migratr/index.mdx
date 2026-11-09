@@ -13,7 +13,7 @@ migratr {version}
 
 migratr changes the shape of SQLite databases. It never moves rows; that is [smugglr](/). Migrations are JSON files. A ledger table records what has been applied. `down` reverses only what has an exact inverse. A snapshot is taken before every destructive step.
 
-It works on local SQLite files only.
+It works on a local SQLite file. Since 0.3.0 it can also ship a migration to a remote database, the place, through the `smugglr` binary: `migratr dev` copies the place down and records a rewind point, and `up --smuggl` and `down --smuggl` send the statements to it. See [CLI](/migratr/cli#dev-and-the-place). Snapshots and `restore` still act on the local file.
 
 ## Install
 
@@ -25,11 +25,11 @@ curl -fsSL https://smugglr.dev/migratr/install | bash
 cargo install migratr-cli
 ```
 
-The crate is `migratr-cli`; the binary is `migratr`. To embed migrations in a Rust program instead, add `migratr = "0.2"` as a dependency. See [Library](/migratr/library).
+The crate is `migratr-cli`; the binary is `migratr`. To embed migrations in a Rust program instead, add `migratr = "0.3"` as a dependency (it needs Rust 1.89 and rusqlite 0.41). See [Library](/migratr/library).
 
 ```
 $ migratr --version
-migratr 0.2.0
+migratr 0.3.0
 ```
 
 Captured from the released binary: `migratr --version`.
@@ -56,7 +56,7 @@ Captured from `migratr new create_users ...` followed by `migratr --db app.db pl
 
 | Page                              | Covers                                                                          |
 | --------------------------------- | ------------------------------------------------------------------------------- |
-| [CLI](/migratr/cli)               | Every command, every flag, `--json` documents, error codes, exit codes.         |
+| [CLI](/migratr/cli)               | Every command, every flag, `migratr.jsonc`, `--json` documents, error codes, exit codes. |
 | [Migrations](/migratr/migrations) | The file format and its operations, the ledger, snapshots, the rule for `down`. |
 | [Library](/migratr/library)       | `embed!`, `Migrator`, the `Executor` trait and the default `rusqlite` feature.  |
 | [Changelog](/migratr/changelog)   | Release notes.                                                                  |
