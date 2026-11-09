@@ -14,8 +14,10 @@ migratr {version}
 Every command. Every flag. Every exit code. Output below is pasted from runs of the released `migratr` binary; the runs used a scratch directory and a throwaway database.
 
 ```
-migratr [--db PATH] [--dir PATH] [--json] <new|up|down|status|plan|restore> ...
+migratr [--db PATH] [--dir PATH] [--config PATH] [--json] <new|dev|up|down|status|plan|restore> ...
 ```
+
+Before any command runs, migratr reads [`migratr.jsonc`](#migratrjsonc). By default every command also writes what it is doing to stderr; see [Loud](#loud).
 
 ## Global flags
 
@@ -23,6 +25,7 @@ migratr [--db PATH] [--dir PATH] [--json] <new|up|down|status|plan|restore> ...
 | ----------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
 | `--db <PATH>`     | none         | The SQLite database file. Required by every command except `new`. Without it the command fails with `usage`. |
 | `--dir <PATH>`    | `migrations` | The migrations directory.                                                                                    |
+| `--config <PATH>` | nearest `migratr.jsonc` | The settings file to read instead of the nearest `migratr.jsonc` in the working directory or a parent. |
 | `--json`          | off          | Write one JSON document describing the outcome to stdout.                                                    |
 | `-h`, `--help`    |              | Print help.                                                                                                  |
 | `-V`, `--version` |              | Print the version.                                                                                           |
@@ -34,8 +37,9 @@ The flags are global: they may come before or after the subcommand.
 | Command                                  | What it does                                               |
 | ---------------------------------------- | ---------------------------------------------------------- |
 | `new <NAME> [SPECS...]`                  | Scaffold a migration file.                                 |
-| `up [--to V]`                            | Apply pending migrations.                                  |
-| `down [--steps N]`                       | Reverse the newest N applied migrations (default 1).       |
+| `dev [--discover]`                       | Copy the place down and record a rewind point.             |
+| `up [--to V] [--smuggl [--discover]]`    | Apply pending migrations, locally or through the place.    |
+| `down [--steps N] [--smuggl [--discover]]` | Reverse the newest N applied migrations (default 1).     |
 | `status`                                 | List each migration as applied or pending.                 |
 | `plan [up [--to V] \| down [--steps N]]` | Print the statements a run would execute. Changes nothing. |
 | `restore [--snapshot PATH] --yes`        | Replace the database with a snapshot.                      |
@@ -87,8 +91,10 @@ migratr --db PATH up [--to V]
 | Flag       | Default     | Description              |
 | ---------- | ----------- | ------------------------ |
 | `--to <V>` | all pending | Stop after this version. |
+| `--smuggl` | off         | Ship the migrations to the place through the rewind point. See [dev and the place](#dev-and-the-place). |
+| `--discover` | off       | With `--smuggl`: report what the run would do and change nothing. |
 
-Applies each pending migration in version order. A migration and its ledger row go in one atomic run; a failure rolls it back. `up` refuses to run when an applied file was edited or a ledger row has no file.
+Applies each pending migration in version order. A migration and its ledger row go in one atomic run; a failure rolls it back. `up` refuses to run when an applied file was edited or a ledger row has no file. `up` also records, per migration, the SHA-256 of the statements it ran up and of the statements that revert it; see [the ledger](/migratr/migrations#the-ledger).
 
 ```
 $ migratr --db app.db up
@@ -111,6 +117,8 @@ migratr --db PATH down [--steps N]
 | Flag          | Default | Description                                            |
 | ------------- | ------- | ------------------------------------------------------ |
 | `--steps <N>` | `1`     | Reverse the newest N applied migrations, newest first. |
+| `--smuggl`    | off     | Ship the reverts to the place through the rewind point. |
+| `--discover`  | off     | With `--smuggl`: report what the run would do and change nothing. |
 
 `down` reverses structure only. Data in dropped objects is not restored. If any operation in the range has no exact inverse, the whole range is refused before anything runs; see [the rule for down](/migratr/migrations#the-rule-for-down).
 
@@ -132,7 +140,7 @@ $ migratr --db app.db down --json
 migratr --db PATH status
 ```
 
-Lists each migration file as applied (with the time) or pending. An applied migration whose file was edited is marked `CHECKSUM MISMATCH`. A ledger row with no file is reported as missing. The last line names the latest snapshot.
+Lists each migration file as applied (with the time) or pending. An applied migration whose file was edited is marked `CHECKSUM MISMATCH`. A ledger row with no file is reported as missing. The ledger's notes follow, each as its kind and its JSON (`rewind_point {...}`, `fingerprint {...}`); a note is never reported as a missing file. The last line names the latest snapshot. After `dev`, the latest snapshot is the rewind point, and it is what `restore` picks by default.
 
 ```
 $ migratr --db app.db status
@@ -213,6 +221,45 @@ $ migratr --db app.db restore --yes --json
 [exit 0]
 ```
 
+## dev and the place
+
+The place is a remote database that holds the real schema: a file path, an `https://` address or `d1://<name>`, set as `smuggl` in `migratr.jsonc`. It is not a new kind of target for `--db`; the local database stays the working copy, and the place is reached only through `smugglr`. `dev`, `up --smuggl` and `down --smuggl` need smugglr 0.6.3 or later, the first release with `exec`, found through the `SMUGGLR` environment variable or else `smugglr` on the PATH. Without it they refuse with `smugglr_missing` and name the version to install.
+
+```
+migratr --db PATH dev [--discover]
+migratr --db PATH up --smuggl [--to V] [--discover]
+migratr --db PATH down --smuggl [--steps N] [--discover]
+```
+
+**dev.** Reads the place with `smugglr exec <place> --read` and builds a new database in `.migratr/dev` beside the local one: the place's tables, then its rows through `smugglr sync` (smugglr's ignore list applies, so an ignored table arrives with its shape and no rows), then the ledger's migration rows, then the indexes, triggers and views. Triggers come last, so none fires on a copied row. It snapshots the new database as `<time>_<version>_dev.db` and checks with `smugglr sync --dryrun` that the snapshot and the new database move nothing. The new database's ledger then records a `rewind_point` note (the snapshot and its SHA-256) beside a `fingerprint` note (the place's structural fingerprint and the migration versions the place held). Only then is the old local database kept as `<time>_<version>_kept.db` and the new one renamed into place. A failed `dev` leaves the local database as it was. Pruning never removes `kept` or `dev` snapshots.
+
+The first `dev` against a place that has tables but no migratr ledger adopts it only when its shape matches what the migrations make, compared by structure: columns, foreign keys, indexes, CHECK and UNIQUE items, and trigger and view text, normalized for quoting, case and whitespace. On a match it records every migration. Otherwise it stops with `not_adoptable` and names each difference by table. A later `dev` compares the place's fingerprint with the recorded one and stops with `shape_changed` if they differ; if they match, it carries only the migration rows the place held, so a migration applied locally since then reads as pending again. A place with an AUTOINCREMENT table is refused with `autoincrement`, naming each table, because migratr allows no auto columns. A full-text table comes down with its rows. Every stop happens before anything changes.
+
+**up --smuggl and down --smuggl.** Before anything changes they check three things: the rewind point's file still has the SHA-256 `dev` recorded, the ledger holds a rewind point (otherwise `no_rewind_point`, which says to run `migratr dev`), and the place's fingerprint is the recorded one (otherwise `shape_changed`). They then snapshot the working database, put the rewind point back at the local path, and sync it with the place, so the place's own inserts, updates and deletes since `dev` arrive while rows made only in the working database stay home. Each migration is applied or reverted locally, then its statements, as `migratr plan` gives them, go to `smugglr exec --up|--down --version <v> --expect <fingerprint>`. smugglr runs them on the place only when their hash is the one recorded for that version and the place has the expected fingerprint. The place must end with the local database's fingerprint.
+
+On success with `autoclean` on, the rewind-point snapshot, its ledger row and the working database's snapshot are removed, and each is named in the output. On any failure the local database goes back to the rewind point with both notes, nothing is removed, and the command exits 1 with `ship_failed`. Run the same command again: a retry runs locally the migrations the failed run already took to the place, sends only the rest, and expects the fingerprint after the ones already taken. `down --smuggl` stops when the place holds migrations the rewind point does not, which can happen with `autoclean` off, because reverting from there would undo the wrong migration on the place.
+
+**--discover.** `dev --discover` prints `smugglr sync --discover` for the local database and the place. `up --smuggl --discover` and `down --smuggl --discover` (it requires `--smuggl`) print smugglr's `--discover --json` report for the rewind point and the place, the migrations the run would send with their statements, and the tables, columns and row counts each drop would destroy on the place. They change nothing, and exit 0 when the run could go ahead or 3 when it would stop. A smugglr report that is not JSON is an error, not a run with unknown counts.
+
+Limits: the place must be reachable by smugglr; `snapshot` and `restore` act on the local file, not the place; a place's virtual tables are ignored by the sync, and their rows arrive through their shadow tables.
+
+## migratr.jsonc
+
+Before any command runs, migratr reads the nearest `migratr.jsonc` in the working directory or a parent, or the file `--config` names. The file is JSON that may contain `//` and `/* */` comments.
+
+| Key        | Default | Meaning                                                                                                   |
+| ---------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `smuggl`   | unset   | The place: a file path, an `https://` address or `d1://<name>`.                                           |
+| `loud`     | `true`  | Write what the command is doing to stderr. See [Loud](#loud).                                             |
+| `safe`     | `true`  | Read and checked; no command acts on it yet.                                                              |
+| `autoclean` | `true` | Whether a successful ship removes its rewind point and working snapshot.                                  |
+
+A key that is not one of these four, or a value of the wrong type, is a usage error: exit 2, nothing changes. Because the nearest file above the working directory is read on every command, a malformed one fails every command with exit 2.
+
+## Loud
+
+With `loud` on, which is the default, every command writes to stderr the settings file used (or that none was found), each key with its value and whether the file or the default set it, and, for `up` and `down`, each migration as it starts and each statement it runs. Each run ends with the note `loud can be turned off in migratr.jsonc: "loud": false`. Stdout, including `--json` documents, is unchanged. A script that treats any stderr output as failure should set `"loud": false`. The output blocks on this page show stdout.
+
 ## JSON output
 
 With `--json`, a command writes one JSON document to stdout and nothing else; logs go to stderr. The document carries `command` and `status` (`ok` or `error`). A success adds the outcome's fields. A failure adds `code` and `message` and the process exits non-zero.
@@ -222,13 +269,13 @@ With `--json`, a command writes one JSON document to stdout and nothing else; lo
 | `new`     | `path`                                                                                                               |
 | `up`      | `applied` (versions, in order)                                                                                       |
 | `down`    | `reverted` (versions, newest first), `data_restored`, `snapshot`                                                     |
-| `status`  | `migrations` (each with `version`, `name`, `state`, `applied_at`, `checksum_mismatch`), `missing`, `latest_snapshot` |
+| `status`  | `migrations` (each with `version`, `name`, `state`, `applied_at`, `checksum_mismatch`), `missing`, `notes` (each `{kind, value}`), `latest_snapshot` |
 | `plan`    | `direction`, `database_bytes`, `steps`                                                                               |
 | `restore` | `restored`, `removed`, `snapshot_time`, `snapshot_version`                                                           |
 
 ## Exit codes and error codes
 
-Exit 0 on success. A usage error exits 2. Every other failure exits 1. Error codes are stable across patch releases.
+Exit 0 on success. A usage error exits 2. A `--discover` that reports the run would stop exits 3. Every other failure exits 1. Error codes are stable across patch releases.
 
 | Code                    | Exit | Cause                                                                  |
 | ----------------------- | ---- | ---------------------------------------------------------------------- |
@@ -250,6 +297,13 @@ Exit 0 on success. A usage error exits 2. Every other failure exits 1. Error cod
 | `restore_not_confirmed` | 1    | `restore` ran without `--yes`.                                         |
 | `unknown_object`        | 1    | `new` named an object that is not in `schema.json`.                    |
 | `database`              | 1    | SQLite reported an error.                                              |
+| `smugglr_missing`       | 1    | `smugglr` 0.6.3 or later was not found; the message names the version. |
+| `not_adoptable`         | 1    | The place has tables but no ledger, and its shape is not what the migrations make. |
+| `autoincrement`         | 1    | The place has an AUTOINCREMENT table.                                  |
+| `shape_changed`         | 1    | The place's fingerprint differs from the recorded one; run with `--discover`. |
+| `no_rewind_point`       | 1    | `--smuggl` ran with no rewind point in the ledger; run `migratr dev`.  |
+| `ship_failed`           | 1    | A ship failed; the local database is back at the rewind point. Run it again. |
+| `smugglr`               | 1    | smugglr refused or failed; the message is smugglr's own.               |
 
 In text mode an error prints as `error [<code>]: <message>` on stderr.
 
@@ -301,6 +355,6 @@ For more information, try '--help'.
 [exit 2]
 ```
 
-The `[exit N]` lines are added to the blocks above to show the process exit status; the binary does not print them. All blocks were captured from the 0.1.1 binary, except the `parse` block listing operations, captured from 0.2.0.
+The `[exit N]` lines are added to the blocks above to show the process exit status; the binary does not print them. All blocks were captured from the 0.1.1 binary, except the `parse` block listing operations, captured from 0.2.0. The 0.3.0 commands (`dev`, `--smuggl`, `--discover`) have no output blocks here yet; their behaviour is described above from the release notes.
 
 </Docs>

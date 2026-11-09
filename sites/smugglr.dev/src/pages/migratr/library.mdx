@@ -63,7 +63,7 @@ applied: [20261007235008]
 reverted 1 migration(s): 20261007235008. Data in dropped objects is not restored.
 ```
 
-Captured from `cargo run` in a scratch project against the published 0.2.0 crates.
+Captured from `cargo run` in a scratch project against the published 0.2.0 crates. Against 0.3 the program is the same except for the dependency line: use `migratr = "0.3"` and rusqlite 0.41, and Rust 1.89 or later.
 
 ## The executor
 
@@ -72,13 +72,21 @@ Captured from `cargo run` in a scratch project against the published 0.2.0 crate
 The `rusqlite` feature is on by default and provides `RusqliteExecutor`, built from a `rusqlite::Connection`, plus `restore` and `latest_snapshot`. To supply your own executor, turn the default off:
 
 ```toml
-migratr = { version = "0.2.0", default-features = false }
+migratr = { version = "0.3", default-features = false }
 ```
 
 That keeps the parser, `up`, `down`, `Migrator` and the `Executor` trait, and drops rusqlite, so migratr sits beside another SQLite library such as sqlx without a second libsqlite3. migratr's CI builds this configuration next to sqlx on every change.
 
+## Upgrading from 0.2
+
+0.3 is a minor release with three changes that can break a build.
+
+`LedgerRow` gains the public fields `up_hash` and `down_hash` and is not `#[non_exhaustive]`, so code that builds a `LedgerRow` literal fails to compile against 0.3. Every crate declares `rust-version = "1.89"`, and an older toolchain refuses to build. `RusqliteExecutor::new` takes a `rusqlite::Connection` from rusqlite 0.41 (libsqlite3-sys 0.39), the release that bundles the SQLite fix for RUSTSEC-2026-0459. libsqlite3-sys links `sqlite3`, so only one version of it can be in a build: a dependent that uses rusqlite anywhere in its graph must move to 0.41 with migratr.
+
+New exports: `Note` (`RewindPoint` at version 0, `Fingerprint` at version 1); `record_note`, which writes or replaces a note in one atomic run and creates the ledger when it is absent; `snapshot_for_dev(db_path, source, kind)` with `DevSnapshot`; `has_keyword`, which says whether a statement holds a keyword as a bare word rather than inside a quoted identifier; and `RusqliteExecutor::shape_differences`, the structural comparison `dev` uses. `read_ledger_through` reads the hashes when the ledger has the columns and reads an older ledger without them. The ledger's schema change is described under [the ledger](/migratr/migrations#the-ledger).
+
 ## What it does not do
 
-`Migrator` applies and reverses migrations; it does not write `schema.json`. The CLI does that after each `up` and `down`; in a library, `migratr::write_schema` writes it on request. Local SQLite only.
+`Migrator` applies and reverses migrations; it does not write `schema.json`. The CLI does that after each `up` and `down`; in a library, `migratr::write_schema` writes it on request. `dev` and `--smuggl` belong to the CLI; the library works on the connection it is given.
 
 </Docs>
