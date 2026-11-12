@@ -26,12 +26,12 @@ describe("home page, built", () => {
     expect(text).not.toContain("If you’re moving SQLite");
   });
 
-  it("shows the release binary's install line, not cargo", () => {
+  it("shows the release binary's install line and the crate", () => {
     const line = "curl -fsSL https://smugglr.dev/install | bash";
     expect(text).toContain(line);
     expect(html).toContain(`data-install="${line}"`);
-    expect(text).toContain("Install smugglr v0.6.2");
-    expect(text).not.toContain("cargo install");
+    expect(text).toContain("Install smugglr v0.6.4");
+    expect(html).toContain('data-install="cargo install smugglr"');
   });
 
   it("links the release's five archives and claims no missing checksum", () => {
@@ -43,9 +43,9 @@ describe("home page, built", () => {
       "smugglr-x86_64-pc-windows-msvc.zip",
     ];
     for (const file of files) {
-      expect(html).toContain(`href="https://github.com/rafters-studio/smugglr/releases/download/v0.6.2/${file}"`);
+      expect(html).toContain(`href="https://github.com/rafters-studio/smugglr/releases/download/v0.6.4/${file}"`);
     }
-    expect(html).toContain('href="https://github.com/rafters-studio/smugglr/releases/tag/v0.6.2"');
+    expect(html).toContain('href="https://github.com/rafters-studio/smugglr/releases/tag/v0.6.4"');
     expect(text).not.toMatch(/no checksum/i);
   });
 
@@ -53,7 +53,7 @@ describe("home page, built", () => {
     const section = html.match(/<section[^>]*aria-label="migratr"[\s\S]*?<\/section>/)?.[0] ?? "";
     expect(section).toContain('data-install="curl -fsSL https://smugglr.dev/migratr/install | bash"');
     expect(section).toContain('href="/migratr/"');
-    expect(section).toContain('href="https://github.com/rafters-studio/migratr/releases/tag/v0.2.0"');
+    expect(section).toContain('href="https://github.com/rafters-studio/migratr/releases/tag/v0.3.0"');
     const migratr = html.indexOf('aria-label="migratr"');
     expect(migratr).toBeGreaterThan(html.indexOf('aria-label="Install"'));
     expect(migratr).toBeLessThan(html.indexOf('aria-label="Machine-readable summary"'));

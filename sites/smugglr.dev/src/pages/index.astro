@@ -17,17 +17,18 @@ import {
   tableRowClasses,
 } from "@/components/ui/table.classes";
 import { Code, P } from "@/components/ui/typography.astro";
+import MANUAL from "@/src/smugglr/manual-output.json";
 import { smugglrRelease } from "@/src/smugglr/release";
 
 const LEDE =
   "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
 const INSTALL = smugglrRelease.command;
 
-// Captured from the v0.6.2 release binary; never typed.
+// Captured from the smugglr 0.6.4 release binary by scripts/capture-manual.sh; never typed.
 const OUT = {
-  moved_dry: "$ smugglr sync laptop/shop.db server/shop.db --dryrun\nsmugglr sync: preview\n  products: would move, 1 to target, 1 to source, 1 deleted in target, 0 deleted in source, 0 overwritten in target, 0 overwritten in source\n    deleted in target: sku-0233",
-  moved_json: "$ smugglr sync laptop/shop.db server/shop.db --json\n{\n  \"status\": \"done\",\n  \"first_sync\": false,\n  \"deletes_seen\": true,\n  \"tables\": {\n    \"products\": {\n      \"status\": \"moved\",\n      \"to_target\": 1,\n      \"to_source\": 1,\n      \"deleted_in_target\": [\n        \"sku-0233\"\n      ],\n      \"deleted_in_source\": [],\n      \"overwritten_in_target\": [],\n      \"overwritten_in_source\": []\n    }\n  },\n  \"ignored\": []\n}",
-  mesh_insert: "$ sqlite3 ./node.db \"insert into notes values('n1','first note');\"   # on puck\n$ sqlite3 ./node.db \"select * from notes\"   # on rzr\nn1|first note\n# rzr, output so far\nsmugglr mesh: node rzr on UDP port 31402, key 71bd9d3ffb252d53\nsmugglr mesh: applied 1 change to notes from puck, key 71bd9d3ffb252d53",
+  moved_dry: MANUAL.moved_dry,
+  moved_json: MANUAL.moved_json,
+  mesh_insert: MANUAL.mesh_insert,
 };
 
 type Block =
@@ -50,14 +51,14 @@ const SECTIONS: Sec[] = [
     blocks: [
       {
         kind: "p",
-        text: "smugglr keeps SQLite databases in step: a local file, any service that speaks HTTP-SQL, and Cloudflare D1. One Rust binary. Each row is compared by a 16-byte BLAKE3 hash of its contents, so only rows that changed cross the wire; a large first sync can move as a stash and a retrieve. A row changed in both places stops and is named; nothing is overwritten unless you say so. On a local network where nobody is in charge, smugglr mesh keeps nodes in step as changes happen. Every run prints a record, --json on request, and exits with a code that says what happened.",
+        text: "smugglr keeps SQLite databases in step: a local file, any service that speaks HTTP-SQL, and Cloudflare D1. One Rust binary. Each row is compared by a 16-byte BLAKE3 hash of its contents, so only rows that changed cross the wire; a large first sync can move as a stash and a retrieve. A row changed in both places stops and is named; nothing is overwritten unless you say so. On a local network where nobody is in charge, smugglr mesh keeps nodes in step as changes happen. Every run prints a record, --json on request, and exits with a code that says what happened. smugglr sync <a> <b> --discover writes nothing and says what two places are and what a sync between them would meet. smugglr exec runs a migration's statements on a place for migratr. smugglr stash and smugglr retrieve, the multi shape, move a person's own devices through signed blobs.",
       },
     ],
   },
   {
     num: "02",
     title: "INSTALL",
-    note: "one binary, two ways",
+    note: "one binary, three ways",
     blocks: [
       {
         kind: "table",
@@ -72,6 +73,11 @@ const SECTIONS: Sec[] = [
             "install.sh",
             INSTALL,
             "The latest release’s binary in ~/.local/bin/smugglr, on Linux and macOS, x86_64 or aarch64",
+          ],
+          [
+            "crates.io",
+            smugglrRelease.cargo?.command ?? "",
+            "The smugglr crate built from source, with Rust 1.89 or later",
           ],
         ],
       },
@@ -109,7 +115,7 @@ const SECTIONS: Sec[] = [
         rows: [
           ["0", "Done, or a preview. Every row written was read back as written."],
           ["2", "Refused before anything was read or written: a bad flag, place or config, or a missing D1 variable."],
-          ["3", "Stopped before writing anything."],
+          ["3", "Stopped before writing anything, or --discover found a sync would stop."],
           ["4", "Wrote something and is not done. Run it again; a stopped table stops again until its rows are settled."],
           ["5", "Too much for the wire. Nothing was sent."],
         ],
@@ -162,7 +168,7 @@ const SECTIONS: Sec[] = [
     blocks: [
       {
         kind: "p",
-        text: "Direct and mesh syncs exist in 0.6.2: --sync-type hub and multi are refused as not built yet. smugglr sends no credentials to an HTTP-SQL place. A first sync cannot see deletes.",
+        text: "Direct and mesh syncs exist in 0.6.4: --sync-type hub and multi are refused as not built yet, and stash and retrieve are the multi shape as commands. smugglr sends no credentials to an HTTP-SQL place. A first sync cannot see deletes. A mesh node that restarts can be taken by the others for a second machine under its name (#684).",
       },
     ],
   },
@@ -170,6 +176,8 @@ const SECTIONS: Sec[] = [
 ---
 
 <Base title="smugglr" description={LEDE}>
+  <!-- One article around the page: llms-full.txt takes the first article, so the machine-readable summary band reaches it. -->
+  <Container as="article" padding="0">
   <SyncStage />
 
   <SpacedSection label="Install" space="24">
@@ -229,4 +237,5 @@ const SECTIONS: Sec[] = [
       }
     </Container>
   </SpacedSection>
+  </Container>
 </Base>

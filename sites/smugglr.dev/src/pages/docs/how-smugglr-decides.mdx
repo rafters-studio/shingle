@@ -129,12 +129,12 @@ The mesh uses the same rules to decide a change as a direct sync: what a row mea
   ]}
 />
 
-A change dies at its sunset, the sender’s clock plus the graveyard setting. A node that starts after being away longer than the sunset says so and names stash and retrieve; the changes it missed are not resent. A change a node drops is named with its change hash and kept in a dropped log; --replay decides it again. A row too large for one datagram is refused with a line naming it. Clocks should agree to within one twelfth of the sunset.
+A change dies at its sunset, the sender’s clock plus the graveyard setting. A node that starts after being away longer than the sunset says so and names stash and retrieve; the changes it missed are not resent; when an awake peer holds the rows, it takes a stash from that peer over the mesh instead. A change a node drops is named with its change hash and kept in a dropped log; --replay decides it again. A row too large for one datagram crosses in numbered parts, each answered and resent until the row arrives whole. Clocks should agree to within one twelfth of the sunset.
 
 </ManualSection>
 
 <ManualSection id="limits" note="said in the same breath">
 
-smugglr stores no data of its own; it moves rows between places. It sends no credentials to an HTTP-SQL place. A first sync cannot see deletes. A retrieve leaves the pair’s next sync a first sync. `--sync-type` accepts direct and mesh: hub and multi are not built yet. In a mesh, automatic catch-up past the sunset, smugglr mesh remove and a loud name clash are not built (#521), and the previous key is accepted with no end date.
+smugglr stores no data of its own; it moves rows between places. It sends no credentials to an HTTP-SQL place. A first sync cannot see deletes. A retrieve leaves the pair’s next sync a first sync. `--sync-type` accepts direct and mesh: hub and multi are not built yet, and stash and retrieve are the multi shape as commands. In a mesh, the previous key is accepted with no end date, and a node that restarts can be taken by the others for a second machine under its name (#684).
 
 </ManualSection>

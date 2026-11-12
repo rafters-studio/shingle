@@ -10,10 +10,10 @@ import type { TableSlot } from "./migratr-stage.behavior";
 import { migratrStageClasses as c } from "./migratr-stage.classes";
 
 interface Props {
-  slot: TableSlot;
+  table: TableSlot;
 }
 
-const { slot } = Astro.props;
+const { table: slot } = Astro.props;
 ---
 
 <div class={c.tableWrap}>

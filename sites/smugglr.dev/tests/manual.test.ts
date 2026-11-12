@@ -52,8 +52,8 @@ function article(route: string): ElementNode[] {
 const routes = Object.keys(fixture.pages) as (keyof typeof fixture.pages)[];
 
 describe("manual pages", () => {
-  it("reads 0.6.2 from the changelog copy", () => {
-    expect(version).toBe("0.6.2");
+  it("reads 0.6.4 from the changelog copy", () => {
+    expect(version).toBe("0.6.4");
   });
 
   for (const route of routes) {
@@ -103,8 +103,8 @@ describe("/changelog/", () => {
 
   it("renders the changelog copy", () => {
     const headings = article("changelog").filter((e) => e.name === "h2").map(text);
-    expect(headings).toContain("[0.6.2] - 2026-11-05");
-    expect(copy).toContain("## [0.6.2] - 2026-11-05");
+    expect(headings).toContain("[0.6.4] - 2026-11-11");
+    expect(copy).toContain("## [0.6.4] - 2026-11-11");
   });
 
   it("is listed in llms.txt", () => {
@@ -113,6 +113,40 @@ describe("/changelog/", () => {
     expect(readFileSync(join(dist, "llms-full.txt"), "utf8")).toContain(
       "https://smugglr.dev/changelog/",
     );
+  });
+});
+
+describe("what 0.6.4 does, in llms.txt and llms-full.txt", () => {
+  const llms = readFileSync(join(dist, "llms.txt"), "utf8");
+  const full = readFileSync(join(dist, "llms-full.txt"), "utf8");
+
+  it("names mesh, multi, exec and --discover", () => {
+    for (const word of ["mesh", "multi", "smugglr exec", "--discover"]) expect(full).toContain(word);
+    expect(llms).toContain("mesh");
+  });
+
+  it("names the crate on crates.io beside the release archives and the installer", () => {
+    expect(full).toContain("cargo install smugglr");
+    expect(full).toContain("curl -fsSL https://smugglr.dev/install | bash");
+  });
+
+  it("does not show smugglr sync --migratr as the way to migrate", () => {
+    // The changelog copies are the record of releases and may name it; no other page does.
+    const pages = ["", "docs", "docs/cli", "docs/get-started", "docs/how-smugglr-decides", "migratr", "migratr/cli", "migratr/migrations", "migratr/library"];
+    for (const page of pages) {
+      expect(readFileSync(join(dist, page, "index.html"), "utf8"), page).not.toContain("--migratr");
+    }
+    expect(readFileSync(join(dist, "migratr/index.html"), "utf8")).toContain("up --smuggl");
+  });
+
+  it("names forgr once, with its crates.io name and nothing more", () => {
+    expect(full.match(/forgr/g)?.length).toBe(1);
+    expect(full).toContain("forgr on crates.io makes test data from the schema.json an app already has.");
+  });
+
+  it("is not stale about S3 or version", () => {
+    expect(llms).not.toMatch(/S3 relay/);
+    expect(llms).not.toMatch(/0\.6\.[0-3]\b/);
   });
 });
 
@@ -166,7 +200,7 @@ describe("version helper", () => {
   });
 });
 
-// Hashes of the <main> of each /migratr/ page as it now stands: the v0.2.0 docs,
+// Hashes of the <main> of each /migratr/ page as it now stands: the v0.3.0 docs,
 // the shared installer and wrapping code (#190). The site's nav and footer sit
 // outside <main>, so they may change. A deliberate change to a migratr page
 // refreshes this fixture; anything else that moves a hash is a regression.

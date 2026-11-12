@@ -12,8 +12,8 @@
 export const SITE_NAME = "smugglr";
 
 export const SITE_DESCRIPTION =
-  "smugglr is a universal SQLite sync engine. Fast, stateless, encrypted. LAN broadcast, S3 relay, and agent-friendly JSON output.";
+  "smugglr keeps SQLite databases in step: a local file, a service that speaks HTTP-SQL, or Cloudflare D1. One Rust binary. sync and sync --discover for two places, mesh for a local network, stash and retrieve (multi) for a person’s own devices, exec for migratr, JSON on request and exit codes that say what happened.";
 
 /** Shorter form used by the structured-data graph, which has its own length budget. */
 export const SITE_DESCRIPTION_SHORT =
-  "Universal SQLite sync engine. LAN broadcast, S3 relay, agent-friendly output.";
+  "Keeps SQLite databases in step: files, HTTP-SQL services, D1 and a LAN mesh. One Rust binary.";

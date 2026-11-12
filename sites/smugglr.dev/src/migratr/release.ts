@@ -1,6 +1,6 @@
 import type { InstallRelease } from "@/components/install.types";
 
-const version = "0.2.0";
+const version = "0.3.0";
 
 /** migratr's current release, as its GitHub release page lists it. */
 export const migratrRelease: InstallRelease = {
@@ -12,6 +12,10 @@ export const migratrRelease: InstallRelease = {
   installs: "~/.local/bin/migratr",
   release: `https://github.com/rafters-studio/migratr/releases/tag/v${version}`,
   downloads: `https://github.com/rafters-studio/migratr/releases/download/v${version}/`,
+  cargo: {
+    command: "cargo install migratr-cli",
+    note: "the crate is migratr-cli and the binary it builds is migratr; it needs Rust 1.89 or later.",
+  },
   platforms: [
     {
       os: "macOS",

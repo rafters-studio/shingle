@@ -1,6 +1,6 @@
 /**
  * migratr stage score: one migration, remove_handle_from_users on app.db, as a
- * 36-second loop. Each beat's statement is a line the published migratr 0.2.0
+ * 36-second loop. Each beat's statement is a line the published migratr 0.3.0
  * binary printed (plan, up, restore, status); the timeline is the accepted
  * design's (canvas VJupMmxDvGJQ4KqyEqf11S v13). `stageFrame(t)` is pure state
  * for a time, which the server renders as the still frame; `bindMigratrStage`

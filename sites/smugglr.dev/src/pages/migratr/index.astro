@@ -3,7 +3,7 @@
  * /migratr/: the accepted migratr page design (canvas VJupMmxDvGJQ4KqyEqf11S,
  * v13). Above the FOR AGENTS turn is for people: the hero, the rebuild stage,
  * then alternating highlight and reversed sections. Below it is the record:
- * every command and its output from runs of the published migratr 0.2.0
+ * every command and its output from runs of the published migratr 0.3.0
  * binary, in the order they ran. Rafters components and props, and the site's
  * own components made by the rafters rules; colour is semantic only.
  */
@@ -52,7 +52,8 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
     title: "install",
     blocks: [
       { code: `$ ${migratrRelease.command}` },
-      { text: `Archives: ${migratrRelease.release}, with checksums.txt.` },
+      { code: `$ ${migratrRelease.cargo?.command ?? ""}` },
+      { text: `Archives: ${migratrRelease.release}, with checksums.txt. The crates are on crates.io too: migratr-cli builds the migratr binary, and migratr is the library.` },
       { run: "checksums" },
       { run: "version" },
     ],
@@ -192,7 +193,7 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
 
   <SpacedSection label="Foreign keys" space="24">
     <Container size="5xl" padding="0" gap="12">
-      <P>NEW IN 0.2.0 · FOREIGN KEYS</P>
+      <P>FOREIGN KEYS</P>
       <H2>Add a foreign key to a table that already has rows. The rows are the check.</H2>
       <Container columns={{ base: 1, md: 2 }} gap="10">
         <Lead>
@@ -218,8 +219,8 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
         </Card>
       </Container>
       <P>
-        Also new in 0.2.0: drop a foreign key, CHECK and composite UNIQUE constraints, triggers, and partial, expression,
-        descending and collated indexes, all as typed operations.
+        Also typed operations: drop a foreign key, CHECK and composite UNIQUE constraints, triggers, and partial, expression,
+        descending and collated indexes.
       </P>
     </Container>
   </SpacedSection>
@@ -269,14 +270,18 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
       <P>LOCAL FIRST</P>
       <H2>Your file, your machine. The snapshot sits right next to it.</H2>
       <Lead>
-        migratr works on local SQLite files. Snapshot and restore act on the local file. Moving rows between places is
-        smugglr's job; migratr changes the shape.
+        The database migratr works on is a local SQLite file, and snapshot and restore act on that file. Since 0.3.0 it
+        can also ship a migration to a remote database, the place, through the smugglr binary: migratr dev, up --smuggl
+        and down --smuggl, with smugglr 0.6.3 or later. Moving rows between places is smugglr's job; migratr changes the
+        shape.
       </Lead>
       <InstallLine command={migratrRelease.command} id="migratr-local" prompt />
+      <InstallLine command={migratrRelease.cargo?.command ?? ""} id="migratr-cargo" prompt />
       <Container as="article">
         <p>
-          Or take the archive for your machine from the <a href={migratrRelease.release}>v{version} release</a>. To embed
-          migrations in a Rust program, see <a href="/migratr/library/">Library</a>.
+          Or take the archive for your machine from the <a href={migratrRelease.release}>v{version} release</a>. The
+          crates are on crates.io too: migratr-cli builds the migratr binary. To embed migrations in a Rust program, add
+          the migratr crate; see <a href="/migratr/library/">Library</a>.
         </p>
       </Container>
     </Container>
@@ -286,8 +291,10 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
     <Container size="4xl" padding="0" gap="6">
       <H2>FOR AGENTS</H2>
       <Lead>
-        Below this line is the record: every command and its output from runs of the published 0.2.0 binary, in the order
-        they ran, nothing collapsed. sqlite3 blocks read the same database. The scratch directory prints as a dot.
+        Below this line is the record: every command and its output from runs of the published 0.3.0 binary, in the order
+        they ran, nothing collapsed. sqlite3 blocks read the same database. The scratch directory prints as a dot. The
+        runs set "loud": false in migratr.jsonc; by default migratr 0.3.0 also writes its settings, and each statement
+        a run executes, to stderr.
       </Lead>
     </Container>
   </SpacedSection>
@@ -336,7 +343,7 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
         </H3>
         <Container as="article">
           <ul>
-            <li>Local SQLite files only. Snapshot and restore act on the local file.</li>
+            <li>The working database is a local SQLite file. A place (a file, an https:// address or d1://) is reached only through smugglr 0.6.3 or later. Snapshot and restore act on the local file, not on the place.</li>
             <li>Only the newest snapshot is kept. A snapshot that cannot be written stops the step (snapshot_failed).</li>
             <li>down reverses structure only; data in dropped objects is not restored.</li>
             <li>

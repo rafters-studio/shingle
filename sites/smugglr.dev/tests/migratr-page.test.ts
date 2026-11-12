@@ -27,7 +27,7 @@ describe("/migratr/, built", () => {
       'aria-label="The way back"',
       'aria-label="Local first"',
       'aria-label="For agents"',
-      'aria-label="migratr 0.2.0 runs"',
+      'aria-label="migratr 0.3.0 runs"',
     ];
     const at = marks.map((m) => html.indexOf(m));
     for (const [i, pos] of at.entries()) expect(pos, marks[i]).toBeGreaterThan(-1);
@@ -35,7 +35,7 @@ describe("/migratr/, built", () => {
   });
 
   it("numbers the agent sections 01 to 10, in order", () => {
-    const runsAt = html.indexOf('aria-label="migratr 0.2.0 runs"');
+    const runsAt = html.indexOf('aria-label="migratr 0.3.0 runs"');
     const titles = [
       "install",
       "new, plan, up",

@@ -6,7 +6,7 @@
  *
  * @cognitive-load 5/10 - One beat at a time: a verb, a caption, the statement the binary printed, and the tables it touched
  * @attention-economics The page's one moving element, and only while it is on screen
- * @trust-building Every statement shown is a line the published migratr 0.2.0 binary printed
+ * @trust-building Every statement shown is a line the published migratr 0.3.0 binary printed
  * @accessibility The animated layer is aria-hidden under a label that tells the whole run; reduced motion gets the still frame, a summary, and no script
  * @semantic-meaning warning = what arrives, highlight = the ledger's check, an inverted ink = the closing line
  *
@@ -52,7 +52,7 @@ const f = stageFrame(STAGE_REST);
         {
           f.slots.map((s) => (
             <div class={c.slot}>
-              {s.kind === "table" ? <StageTable slot={s} /> : <div class={`${c.ghost} ${s.cls}`}>{s.text}</div>}
+              {s.kind === "table" ? <StageTable table={s} /> : <div class={`${c.ghost} ${s.cls}`}>{s.text}</div>}
             </div>
           ))
         }
@@ -60,14 +60,14 @@ const f = stageFrame(STAGE_REST);
       <div class={c.side} data-mg="side">
         <div class={c.snap}>
           <div class={c.mono}>{SNAPSHOT_PATH}</div>
-          <StageTable slot={f.snap} />
+          <StageTable table={f.snap} />
           <Muted>{SNAPSHOT_NOTE}</Muted>
         </div>
       </div>
     </div>
 
     <div aria-hidden="true" data-mg="ledger">
-      <StageTable slot={f.ledger} />
+      <StageTable table={f.ledger} />
     </div>
 
     <div data-mg-still>

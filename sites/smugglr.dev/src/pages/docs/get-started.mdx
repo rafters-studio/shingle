@@ -11,11 +11,15 @@ import OUT from "@/src/smugglr/manual-output.json";
 
 <ManualSection id="install" note="one binary">
 
-The GitHub release for tag v0.6.2 carries one archive per target: smugglr-\<target\>.tar.gz for x86\_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86\_64-apple-darwin and aarch64-apple-darwin, and smugglr-x86\_64-pc-windows-msvc.zip for Windows. Download the one for your machine from [the releases page](https://github.com/rafters-studio/smugglr/releases), which shows each archive's SHA-256.
+The GitHub release for tag v0.6.4 carries one archive per target: smugglr-\<target\>.tar.gz for x86\_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86\_64-apple-darwin and aarch64-apple-darwin, and smugglr-x86\_64-pc-windows-msvc.zip for Windows. Download the one for your machine from [the releases page](https://github.com/rafters-studio/smugglr/releases), which shows each archive's SHA-256.
 
 On Linux and macOS, x86\_64 or aarch64, one line fetches the latest release's binary into `~/.local/bin/smugglr`:
 
 <WrapCode>{"curl -fsSL https://smugglr.dev/install | bash"}</WrapCode>
+
+The crate is on crates.io too. With Rust 1.89 or later, this builds the same binary from source:
+
+<WrapCode>{"cargo install smugglr"}</WrapCode>
 
 </ManualSection>
 
@@ -187,7 +191,7 @@ A row written on puck, by any program, reaches rzr with no sync run. A delete cr
 
 <WrapCode>{OUT.mesh_delete}</WrapCode>
 
-A node’s first run notes the rows already in its database and sends none of them. Use stash and retrieve to bring a new node up to date. A node that starts after being away longer than the sunset (the `graveyard` setting, 12 hours by default) says so and names the commands that catch it up; it does not catch up on its own in 0.6.1.
+A node’s first run notes the rows already in its database and sends none of them. Use stash and retrieve to bring a new node up to date. A node that starts after being away longer than the sunset (the `graveyard` setting, 12 hours by default) says so and names the commands that catch it up. When an awake peer holds the rows, it also takes a stash from that peer over the mesh.
 
 <WrapCode>{OUT.mesh_away}</WrapCode>
 

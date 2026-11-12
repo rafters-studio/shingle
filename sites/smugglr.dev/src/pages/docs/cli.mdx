@@ -1,6 +1,6 @@
 ---
 title: "CLI reference"
-description: "smugglr sync, mesh, stash and retrieve, their flags, the places they read and write, the config file, and the exit codes."
+description: "smugglr sync (with --discover), mesh, stash and retrieve, and exec: their flags, the places they read and write, the config file, and the exit codes."
 layout: "../../layouts/Manual.astro"
 ---
 
@@ -11,7 +11,7 @@ import OUT from "@/src/smugglr/manual-output.json";
 
 <ManualSection id="synopsis" note="five commands">
 
-<WrapCode>{"smugglr sync <source> <target> [flags]\nsmugglr mesh <place> --key-file <path> [--sync-mode stop|last]\nsmugglr mesh <place> --key-file <path> --replay <change hash>\nsmugglr mesh keygen --key-file <path>\nsmugglr stash <place> <dir> --key-file <path> --node <name> [--target <name>]... [--whole]\nsmugglr retrieve <place> <blob or dir> --key-file <path> --node <name> [--crossed-off <name>]... [--sync-mode stop|last] [--json]\nsmugglr retrieve <place> --key-file <path> --node <name> --replay <change hash> [--sync-mode stop|last] [--json]"}</WrapCode>
+<WrapCode>{"smugglr sync <source> <target> [flags]\nsmugglr mesh <place> --key-file <path> [--sync-mode stop|last]\nsmugglr mesh <place> --key-file <path> --replay <change hash>\nsmugglr mesh keygen --key-file <path>\nsmugglr stash <place> <dir> --key-file <path> --node <name> [--target <name>]... [--whole]\nsmugglr retrieve <place> <blob or dir> --key-file <path> --node <name> [--crossed-off <name>]... [--sync-mode stop|last] [--json]\nsmugglr retrieve <place> --key-file <path> --node <name> --replay <change hash> [--sync-mode stop|last] [--json]\nsmugglr mesh remove <node> --key-file <path>\nsmugglr exec <local> <place> --version <v> --up|--down --expect <fingerprint>\nsmugglr exec <database-or-place> --read\nsmugglr --version"}</WrapCode>
 
 </ManualSection>
 
@@ -43,11 +43,27 @@ import OUT from "@/src/smugglr/manual-output.json";
     [
       "--watch [seconds]",
       "Runs again every N seconds, 60 by default, with one record per run, until stopped. --watch 0 is a usage error."
+    ],
+    [
+      "--discover",
+      "Writes nothing. Says what each place is and what a sync between them would meet, first the findings a sync could not get past. Exits 3 when a sync would stop, 0 when it could go ahead."
     ]
   ]}
 />
 
 <WrapCode>{OUT.watch_zero}</WrapCode>
+
+`--discover` prints, for each place, its identity (for D1, the account and the database’s uuid), its ledger, its tables with rows and bytes estimated from a sample of 1,000 rows, the copy order, self-references, triggers, views, indexes and ignored tables. A finding comes first and the exit code is 3:
+
+<WrapCode>{OUT.discover_stop}</WrapCode>
+
+When nothing blocks, the same report ends `shapes: the same` and the exit code is 0. With `--json` the report carries `identity`, `ledger`, `blocking` and `shapes_match`. A sync that stops with exit 3 or 5 ends its stderr with the `--discover` command for the same two places.
+
+<WrapCode>{OUT.discover}</WrapCode>
+
+A sync writes a parent’s rows before its children’s, so a place that enforces foreign keys, as D1 always does, takes them. `smugglr --version` and `-V` print the version and exit 0:
+
+<WrapCode>{OUT.version}</WrapCode>
 
 </ManualSection>
 
@@ -170,6 +186,32 @@ A retrieve names each change it drops with its change hash. --replay decides tha
 
 <WrapCode>{OUT.retrieve_replay}</WrapCode>
 
+stash and retrieve are multi: a person’s own devices kept in step through blobs the app stores, where the devices are not online together. The blobs, the device list and the keys are the app’s. `--sync-type multi` is not how to run it and is refused as not built.
+
+</ManualSection>
+
+<ManualSection id="exec" note="smugglr exec, for migratr">
+
+`smugglr exec` runs a migration’s statements on a place for migratr, so that a schema change can reach a place such as D1 through smugglr. migratr 0.3.0 calls it from `migratr dev`, `up --smuggl` and `down --smuggl`; `smugglr --help` does not name it.
+
+<ManualTable
+  head={["command","what it does"]}
+  rows={[
+    [
+      "smugglr exec <local> <place> --version <v> --up|--down --expect <fingerprint>",
+      "Reads a JSON array of statements on stdin and runs them on the place in one all-or-nothing batch with the version’s ledger row, or its removal for --down. It runs only when the batch’s SHA-256 equals the up or down hash the local database recorded for that version, and the place’s structural fingerprint is the one --expect names. A down batch needs the local database to have run the down first. It prints the place’s fingerprint after."
+    ],
+    [
+      "smugglr exec <database-or-place> --read",
+      "Prints the schema, the ledger and the fingerprint, as one JSON object. It takes no query."
+    ]
+  ]}
+/>
+
+<WrapCode>{OUT.exec_read}</WrapCode>
+
+A D1 place and a file in the same shape have the same fingerprint. A refusal exits 3 and leaves the place as it was; a failing statement exits 1 with nothing changed; a usage error exits 2.
+
 </ManualSection>
 
 <ManualSection id="mesh" note="smugglr mesh">
@@ -184,6 +226,10 @@ A retrieve names each change it drops with its change hash. --replay decides tha
     [
       "smugglr mesh keygen --key-file <path>",
       "Appends a new key to the key file, making the file when there is none, and prints the key’s id."
+    ],
+    [
+      "smugglr mesh remove <node> --key-file <path>",
+      "Tells the mesh a node is gone for good, so its peers stop owing it changes. A node heard again is back."
     ]
   ]}
 />
@@ -210,13 +256,13 @@ A retrieve names each change it drops with its change hash. --replay decides tha
 
 <WrapCode>{OUT.mesh_loose}</WrapCode>
 
-A node signs and seals with the newest key and also accepts the one before it. The previous key is not retired in 0.6.2. No key is printed anywhere; a key is named by its id.
+A node signs and seals with the newest key and also accepts the one before it. The previous key is not retired in 0.6.4. No key is printed anywhere; a key is named by its id.
 
-A node is named by its machine’s name (`hostname`, or `COMPUTERNAME` on Windows), and every node needs its own: a node ignores any message carrying its own name, so two machines with one name do not sync and nothing says so. It broadcasts to find peers and sends to them by unicast; on a network with no broadcast, the `peers` setting names the addresses to announce to. A change too large for one datagram is refused with a line naming the row; on macOS the limit is about 9 KB.
+A node is named by its machine’s name (`hostname`, or `COMPUTERNAME` on Windows), and every node needs its own: a node that finds its name taken by a node already running says so and does not join, and exits 3. It broadcasts to find peers and sends to them by unicast; on a network with no broadcast, the `peers` setting names the addresses to announce to. A change too large for one datagram crosses in numbered parts, each answered and resent until the row arrives whole.
 
 <WrapCode>{OUT.mesh_start}</WrapCode>
 
-<WrapCode>{OUT.mesh_toolarge}</WrapCode>
+<WrapCode>{OUT.mesh_parts}</WrapCode>
 
 A change a node drops is named in the record with its change hash and kept in a dropped log. Here puck deletes a note and writes it again; rzr drops the second insert, then --replay decides it:
 
@@ -229,7 +275,7 @@ A change a node drops is named in the record with its change hash and kept in a 
   rows={[
     [
       "port",
-      "31337",
+      "31415",
       "The UDP port a node broadcasts and listens on."
     ],
     [
@@ -246,11 +292,21 @@ A change a node drops is named in the record with its change hash and kept in a 
       "graveyard",
       "12 hours",
       "Seconds a change is carried; sets each change’s sunset."
+    ],
+    [
+      "mesh_wire",
+      "8 MB",
+      "The line past which a node that is catching up takes a stash from a peer, which then travels past this line."
+    ],
+    [
+      "stash_max",
+      "64 MB",
+      "The largest database a node offers a stash of, since a stash is held in memory at about 16 times its size."
     ]
   ]}
 />
 
-The mesh is designed and tested for up to 50 nodes. A node away longer than the sunset prints the stash and retrieve commands that catch it up and keeps running.
+The mesh is designed and tested for up to 50 nodes. A node away longer than the sunset prints the stash and retrieve commands that catch it up and keeps running; when an awake peer holds the rows, it takes a stash from that peer over the mesh. A node that restarts can be taken by the others for a second machine under its name; that is open as #684 and present in 0.6.3 and 0.6.4.
 
 </ManualSection>
 
@@ -299,7 +355,7 @@ smugglr reads `config.toml` from its config directory: `$XDG_CONFIG_HOME/smugglr
     ],
     [
       "3",
-      "Stopped before writing anything: a row changed in both places, a shape that differs, or a table without a primary key."
+      "Stopped before writing anything: a row changed in both places, a shape that differs, a table without a primary key, a --discover that finds a sync would stop, a mesh node whose name is taken, or an exec that refuses."
     ],
     [
       "4",

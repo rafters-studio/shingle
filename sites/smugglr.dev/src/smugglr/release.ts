@@ -1,6 +1,6 @@
 import type { InstallRelease } from "@/components/install.types";
 
-const version = "0.6.2";
+const version = "0.6.4";
 
 /** smugglr's current release, as its GitHub release page lists it. */
 export const smugglrRelease: InstallRelease = {
@@ -12,6 +12,10 @@ export const smugglrRelease: InstallRelease = {
   installs: "~/.local/bin/smugglr",
   release: `https://github.com/rafters-studio/smugglr/releases/tag/v${version}`,
   downloads: `https://github.com/rafters-studio/smugglr/releases/download/v${version}/`,
+  cargo: {
+    command: "cargo install smugglr",
+    note: "with Rust 1.89 or later, this builds the smugglr binary from source.",
+  },
   platforms: [
     {
       os: "macOS",

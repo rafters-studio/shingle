@@ -7,7 +7,7 @@
       "thin": "it.",
       "cmd": "migratr --db app.db plan",
       "cap": "plan prints every statement up would run, marks the destructive step and names the snapshot it would take. It changes nothing.",
-      "stmt": "20261107081658_remove_handle_from_users DESTRUCTIVE, snapshot 20261107081658_20261107081658_up.db"
+      "stmt": "20261112063554_remove_handle_from_users DESTRUCTIVE, snapshot 20261112063554_20261112063554_up.db"
     },
     {
       "t": 3500,
@@ -15,7 +15,7 @@
       "thin": "it.",
       "cmd": "migratr --db app.db up",
       "cap": "Dropping a column is destructive, so before the step runs migratr copies app.db into .migratr/snapshots/.",
-      "stmt": "latest snapshot: ./.migratr/snapshots/20261107081658_20261107081658_up.db"
+      "stmt": "latest snapshot: ./.migratr/snapshots/20261112063554_20261112063554_up.db"
     },
     {
       "t": 7000,
@@ -77,8 +77,8 @@
       "t": 20200,
       "verb": "RECORD",
       "thin": "it.",
-      "cap": "The ledger row goes in with the migration, in one atomic run. Its checksum is the SHA-256 of the canonical JSON of the version, the name and the up operations.",
-      "stmt": "INSERT INTO _migratr_migrations (version, name, checksum, applied_at) VALUES (20261107081658, 'remove_handle_from_users', '0afb06bd0f682931b526c18561753459fa6d49e1695a29be2bf42c04000265ff', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
+      "cap": "The ledger row goes in with the migration, in one atomic run. Its checksum is the SHA-256 of the canonical JSON of the version, the name and the up operations. It also records up_hash and down_hash, the SHA-256 of the statements that run it up and of the statements that revert it.",
+      "stmt": "INSERT INTO _migratr_migrations (version, name, checksum, applied_at, up_hash, down_hash) VALUES (20261112063554, 'remove_handle_from_users', '946d46564ece3b8264257cf1c23bf220bac7713e20fa447ef581da10c992fe71', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), '0b78a25ac9e49a78e71380b77156e20e79b13cc72041811e5dafb2a8ab17fce4', 'd2c2dacf4a8735946697342815e62c2d6a91ec5018d8f8587b800de887800bdd')"
     },
     {
       "t": 23200,
@@ -87,7 +87,7 @@
         "Same rows."
       ],
       "cap": "Three users and three posts went in; three users and three posts came out. The handles are gone from app.db, and still in the snapshot.",
-      "stmt": "applied 1 migration(s): 20261107081658"
+      "stmt": "applied 1 migration(s): 20261112063554"
     },
     {
       "t": 27200,
@@ -95,7 +95,7 @@
       "thin": "it.",
       "cmd": "migratr --db app.db restore --yes",
       "cap": "restore replaces the database with the snapshot. Without --yes it changes nothing.",
-      "stmt": "restored; discards everything written since the snapshot of 20261107081658 (ledger version 20261107081657); ledger versions removed: 20261107081658"
+      "stmt": "restored; discards everything written since the snapshot of 20261112063554 (ledger version 20261112063553); ledger versions removed: 20261112063554"
     },
     {
       "t": 31000,
@@ -105,7 +105,7 @@
       ],
       "cmd": "migratr --db app.db status",
       "cap": "The handles are back, and status lists the migration as pending again.",
-      "stmt": "20261107081658_remove_handle_from_users pending"
+      "stmt": "20261112063554_remove_handle_from_users pending"
     }
   ],
   "users": [
@@ -144,22 +144,22 @@
   ],
   "ledger": [
     [
-      "20261107081655",
+      "20261112063551",
       "create_users",
       "af42501f11c0…"
     ],
     [
-      "20261107081656",
+      "20261112063552",
       "create_posts",
       "fa57b665259b…"
     ],
     [
-      "20261107081657",
+      "20261112063553",
       "link_posts_to_users",
       "08a0eb80c83b…"
     ],
     [
-      "20261107081658",
+      "20261112063554",
       "remove_handle_from_users",
       "0afb06bd0f68…"
     ]
