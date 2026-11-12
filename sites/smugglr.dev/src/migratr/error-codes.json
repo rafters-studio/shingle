@@ -17,7 +17,7 @@
   },
   {
     "code": "checksum_mismatch",
-    "cause": "An applied migration’s file was edited."
+    "cause": "An applied migration\u2019s file was edited."
   },
   {
     "code": "missing_file",
@@ -33,7 +33,7 @@
   },
   {
     "code": "unparseable_table",
-    "cause": "A table’s CREATE TABLE could not be parsed for a rebuild."
+    "cause": "A table\u2019s CREATE TABLE could not be parsed for a rebuild."
   },
   {
     "code": "foreign_key_violation",
@@ -45,7 +45,7 @@
   },
   {
     "code": "trigger_mismatch",
-    "cause": "A create_trigger’s name or table differs from its statement."
+    "cause": "A create_trigger\u2019s name or table differs from its statement."
   },
   {
     "code": "column_in_use",
@@ -70,5 +70,33 @@
   {
     "code": "database",
     "cause": "SQLite reported an error."
+  },
+  {
+    "code": "smugglr_missing",
+    "cause": "smugglr 0.6.3 or later was not found; the message names the version."
+  },
+  {
+    "code": "not_adoptable",
+    "cause": "The place has tables but no ledger, and its shape is not what the migrations make."
+  },
+  {
+    "code": "autoincrement",
+    "cause": "The place has an AUTOINCREMENT table."
+  },
+  {
+    "code": "shape_changed",
+    "cause": "The place's fingerprint differs from the recorded one; run with --discover."
+  },
+  {
+    "code": "no_rewind_point",
+    "cause": "--smuggl ran with no rewind point in the ledger; run migratr dev."
+  },
+  {
+    "code": "ship_failed",
+    "cause": "A ship failed; the local database is back at the rewind point. Run it again."
+  },
+  {
+    "code": "smugglr",
+    "cause": "smugglr refused or failed; the message is smugglr's own."
   }
 ]

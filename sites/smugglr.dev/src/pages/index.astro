@@ -58,7 +58,7 @@ const SECTIONS: Sec[] = [
   {
     num: "02",
     title: "INSTALL",
-    note: "one binary, three ways",
+    note: "one binary, two ways",
     blocks: [
       {
         kind: "table",
@@ -73,11 +73,6 @@ const SECTIONS: Sec[] = [
             "install.sh",
             INSTALL,
             "The latest release’s binary in ~/.local/bin/smugglr, on Linux and macOS, x86_64 or aarch64",
-          ],
-          [
-            "crates.io",
-            smugglrRelease.cargo?.command ?? "",
-            "The smugglr crate built from source, with Rust 1.89 or later",
           ],
         ],
       },
@@ -177,7 +172,7 @@ const SECTIONS: Sec[] = [
 
 <Base title="smugglr" description={LEDE}>
   <!-- One article around the page: llms-full.txt takes the first article, so the machine-readable summary band reaches it. -->
-  <Container as="article" padding="0">
+  <Container as="article" size="full" padding="0">
   <SyncStage />
 
   <SpacedSection label="Install" space="24">

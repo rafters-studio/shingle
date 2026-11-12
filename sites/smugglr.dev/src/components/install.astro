@@ -30,14 +30,6 @@ const { release: r, id = r.product } = Astro.props;
     <H2>Install {r.product} v{r.version}</H2>
     <P>On Linux and macOS, one line puts the binary in {r.installs}, and {r.path}.</P>
     <InstallLine command={r.command} id={`${id}-install`} />
-    {
-      r.cargo && (
-        <>
-          <P>The crate is on crates.io too: {r.cargo.note}</P>
-          <InstallLine command={r.cargo.command} id={`${id}-cargo`} />
-        </>
-      )
-    }
   </Container>
 
   <Container gap="6">

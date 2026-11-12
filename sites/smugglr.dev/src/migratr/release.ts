@@ -12,10 +12,6 @@ export const migratrRelease: InstallRelease = {
   installs: "~/.local/bin/migratr",
   release: `https://github.com/rafters-studio/migratr/releases/tag/v${version}`,
   downloads: `https://github.com/rafters-studio/migratr/releases/download/v${version}/`,
-  cargo: {
-    command: "cargo install migratr-cli",
-    note: "the crate is migratr-cli and the binary it builds is migratr; it needs Rust 1.89 or later.",
-  },
   platforms: [
     {
       os: "macOS",

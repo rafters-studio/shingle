@@ -52,8 +52,7 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
     title: "install",
     blocks: [
       { code: `$ ${migratrRelease.command}` },
-      { code: `$ ${migratrRelease.cargo?.command ?? ""}` },
-      { text: `Archives: ${migratrRelease.release}, with checksums.txt. The crates are on crates.io too: migratr-cli builds the migratr binary, and migratr is the library.` },
+      { text: `Archives: ${migratrRelease.release}, with checksums.txt.` },
       { run: "checksums" },
       { run: "version" },
     ],
@@ -73,6 +72,7 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
       { run: "up_orphan_json" },
       { text: "Post 4 deleted with sqlite3, then:" },
       { run: "plan_key" },
+      { text: "migratr --db app.db up then applied link_posts_to_users. Its output is not shown here." },
     ],
   },
   {
@@ -276,12 +276,10 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
         shape.
       </Lead>
       <InstallLine command={migratrRelease.command} id="migratr-local" prompt />
-      <InstallLine command={migratrRelease.cargo?.command ?? ""} id="migratr-cargo" prompt />
       <Container as="article">
         <p>
-          Or take the archive for your machine from the <a href={migratrRelease.release}>v{version} release</a>. The
-          crates are on crates.io too: migratr-cli builds the migratr binary. To embed migrations in a Rust program, add
-          the migratr crate; see <a href="/migratr/library/">Library</a>.
+          Or take the archive for your machine from the <a href={migratrRelease.release}>v{version} release</a>. To embed
+          migrations in a Rust program, see <a href="/migratr/library/">Library</a>.
         </p>
       </Container>
     </Container>
@@ -331,7 +329,7 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
         </H3>
         <P>
           With --json a command writes one JSON document to stdout and nothing else; logs go to stderr. It carries command
-          and status (ok or error). A failure adds code and message and exits 2 for a usage error, 1 otherwise. Codes are
+          and status (ok or error). A failure adds code and message and exits 2 for a usage error, 1 otherwise; up --discover and down --discover exit 3 when the run would stop. Codes are
           stable across patch releases.
         </P>
         <DataTable head={["code", "cause"]} rows={codes.map((e) => [e.code, e.cause])} code />
@@ -344,7 +342,7 @@ const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
         <Container as="article">
           <ul>
             <li>The working database is a local SQLite file. A place (a file, an https:// address or d1://) is reached only through smugglr 0.6.3 or later. Snapshot and restore act on the local file, not on the place.</li>
-            <li>Only the newest snapshot is kept. A snapshot that cannot be written stops the step (snapshot_failed).</li>
+            <li>Only the newest snapshot of a step is kept; migratr dev's rewind point and kept snapshots are never pruned. A snapshot that cannot be written stops the step (snapshot_failed).</li>
             <li>down reverses structure only; data in dropped objects is not restored.</li>
             <li>
               A rebuild is refused before anything runs when the table's CREATE TABLE does not parse, when another object

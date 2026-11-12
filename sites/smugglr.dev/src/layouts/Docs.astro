@@ -19,7 +19,8 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
 const nav: NavGroup[] = navProp ?? [];
 
-function isActive(href: string, exact = false): boolean {
+function isActive(link: string, exact = false): boolean {
+  const href = link.replace(/\/$/, '');
   if (exact) return currentPath === href;
   return currentPath === href || currentPath.startsWith(href + '/');
 }

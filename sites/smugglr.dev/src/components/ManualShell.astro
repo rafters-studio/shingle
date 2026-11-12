@@ -10,7 +10,7 @@ const rail = 'shrink-0 md:sticky md:top-0 md:h-svh md:self-start';
 const page = 'min-w-0 flex-1';
 ---
 
-<div class={shell}>
+<div class={shell} data-manual-shell>
   <div class={rail}>
     <slot name="nav" />
   </div>
@@ -18,3 +18,9 @@ const page = 'min-w-0 flex-1';
     <slot />
   </div>
 </div>
+
+<script>
+  import { bindManualShell } from "@/components/manual-shell.behavior";
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-manual-shell]")) bindManualShell(root);
+</script>

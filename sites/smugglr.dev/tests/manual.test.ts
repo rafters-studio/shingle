@@ -125,8 +125,10 @@ describe("what 0.6.4 does, in llms.txt and llms-full.txt", () => {
     expect(llms).toContain("mesh");
   });
 
-  it("names the crate on crates.io beside the release archives and the installer", () => {
-    expect(full).toContain("cargo install smugglr");
+  it("names the installer, never cargo", () => {
+    for (const page of ["", "docs/get-started"]) {
+      expect(readFileSync(join(dist, page, "index.html"), "utf8"), page).not.toContain("cargo install");
+    }
     expect(full).toContain("curl -fsSL https://smugglr.dev/install | bash");
   });
 

@@ -17,10 +17,6 @@ On Linux and macOS, x86\_64 or aarch64, one line fetches the latest release's bi
 
 <WrapCode>{"curl -fsSL https://smugglr.dev/install | bash"}</WrapCode>
 
-The crate is on crates.io too. With Rust 1.89 or later, this builds the same binary from source:
-
-<WrapCode>{"cargo install smugglr"}</WrapCode>
-
 </ManualSection>
 
 <ManualSection id="first-sync" note="source first, target second">
@@ -181,7 +177,9 @@ On a local network where nobody is in charge, `smugglr mesh` keeps one database 
 
 A node announces itself by broadcast and talks to the peers it hears by unicast. On a network with no broadcast (WireGuard, Tailscale, a cloud network) name the peers in the config instead. A node is named by its machine’s name, so every node needs its own. The nodes below share one machine, each with its own port, its own config and a one-line `hostname` script ahead of the real one on its path:
 
-<WrapCode>{"# puck\nport = 31401\npeers = [\"127.0.0.1:31402\"]\n\n# rzr\nport = 31402\npeers = [\"127.0.0.1:31401\"]"}</WrapCode>
+<WrapCode>{"# puck\nport = 31401\npeers = [\"127.0.0.1:31402\"]\n\n# rzr\nport = 31402\npeers = [\"127.0.0.1:31401\"]\ngraveyard = 3"}</WrapCode>
+
+`graveyard = 3` on rzr is for the sunset demonstration below; leave it out for a real mesh.
 
 <WrapCode>{OUT.mesh_start}</WrapCode>
 
@@ -202,6 +200,6 @@ The [CLI reference](/docs/cli/) lists the mesh flags and settings, and [How smug
 <ManualSection id="next" note="two more pages">
 
 - [How smugglr decides](/docs/how-smugglr-decides/): what moves, what stops, and why a row that moved on is never overwritten.
-- [CLI reference](/docs/cli/): every flag, place, config key and exit code.
+- [CLI reference](/docs/cli/): the flags, places, config keys and exit codes.
 
 </ManualSection>

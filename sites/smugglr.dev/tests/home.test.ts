@@ -26,12 +26,12 @@ describe("home page, built", () => {
     expect(text).not.toContain("If you’re moving SQLite");
   });
 
-  it("shows the release binary's install line and the crate", () => {
+  it("shows the release binary's install line, not cargo", () => {
     const line = "curl -fsSL https://smugglr.dev/install | bash";
     expect(text).toContain(line);
     expect(html).toContain(`data-install="${line}"`);
     expect(text).toContain("Install smugglr v0.6.4");
-    expect(html).toContain('data-install="cargo install smugglr"');
+    expect(text).not.toContain("cargo install");
   });
 
   it("links the release's five archives and claims no missing checksum", () => {

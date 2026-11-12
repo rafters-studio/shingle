@@ -162,6 +162,10 @@ const jsonLd = {
             // Workaround for rafters 0.7.0: rafters.css @imports this package inside Tailwind without rebasing its ./files/ urls, so its faces 404; remove when rafters fixes the generated import.
             import "@fontsource-variable/noto-sans";
         </script>
+        <script>
+            import { bindScrollRegions } from "@/components/scroll-region.behavior";
+            bindScrollRegions();
+        </script>
     </body>
 </html>
 
@@ -180,5 +184,14 @@ const jsonLd = {
         display: block;
         max-width: 100%;
         overflow-x: auto;
+    }
+
+    /* A table that overflows shows it: an edge shadow, and a ring when focused. */
+    [data-scrolls] {
+        box-shadow: inset -1.5rem 0 1rem -1rem var(--color-border);
+    }
+    [data-scrolls]:focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: 2px;
     }
 </style>

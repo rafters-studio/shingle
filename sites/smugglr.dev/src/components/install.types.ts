@@ -28,11 +28,4 @@ export interface InstallRelease {
   /** The release's download base: the archive's file name follows it. */
   downloads: string;
   platforms: InstallPlatform[];
-  /** The crate on crates.io, when the release is also published there. */
-  cargo?: {
-    /** The command, exactly as Copy puts it on the clipboard. */
-    command: string;
-    /** What it builds, finishing "The crate is on crates.io too: ...". */
-    note: string;
-  };
 }
