@@ -814,23 +814,8 @@ export function bindSyncStage(root: HTMLElement): () => void {
   );
   observer.observe(root);
 
-  // Dark when the viewer is: prefers-color-scheme dark or data-theme="dark" on
-  // the root, unless the root says light. The stage then takes rafters' .dark scope.
-  const scheme = window.matchMedia("(prefers-color-scheme: dark)");
-  const docRoot = document.documentElement;
-  function applyTheme(): void {
-    const theme = docRoot.getAttribute("data-theme");
-    root.classList.toggle("dark", theme === "dark" || (theme !== "light" && scheme.matches));
-  }
-  applyTheme();
-  scheme.addEventListener("change", applyTheme);
-  const themeObserver = new MutationObserver(applyTheme);
-  themeObserver.observe(docRoot, { attributes: true, attributeFilter: ["data-theme"] });
-
   return () => {
     stop();
     observer.disconnect();
-    themeObserver.disconnect();
-    scheme.removeEventListener("change", applyTheme);
   };
 }

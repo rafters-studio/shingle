@@ -111,6 +111,29 @@ describe("home page, built", () => {
     expect(readdirSync(join(process.cwd(), "src/styles"))).toEqual(["global.css"]);
   });
 
+  it("renders the sync stage in rafters' dark scope whatever the preference, live and still", () => {
+    const live = html.match(/<section[^>]*data-sync-stage[^>]*>/)?.[0] ?? "";
+    expect(live).toMatch(/class="[^"]*\bdark\b/);
+    const stills = [...html.matchAll(/<section[^>]*class="([^"]*ss-still[^"]*)"/g)].map((m) => m[1] ?? "");
+    expect(stills).toHaveLength(1);
+    expect(stills[0]).toMatch(/\bdark\b/);
+    // No script and no stylesheet rule picks a theme for the stage from the viewer's preference.
+    const source = readFileSync(join(process.cwd(), "src/components/sync-stage.astro"), "utf8");
+    const behavior = readFileSync(join(process.cwd(), "src/components/sync-stage.behavior.ts"), "utf8");
+    expect(source).not.toContain("prefers-color-scheme");
+    expect(source).not.toContain(":not(.dark)");
+    expect(behavior).not.toContain("prefers-color-scheme");
+  });
+
+  it("adds the dark scope to the stage and to nothing else", () => {
+    const dark = [...html.matchAll(/<(\w+)[^>]*class="[^"]*\bdark\b[^"]*"/g)].map((m) => m[0]);
+    // Outside the stage only the summary band and the footer were dark before, and still are.
+    const outside = dark.filter((tag) => !/ss-stage/.test(tag));
+    expect(outside).toHaveLength(2);
+    expect(outside[0]).toContain("<section");
+    expect(outside[1]).toContain("<footer");
+  });
+
   it("has no React island and no old copy", () => {
     expect(html).not.toContain("astro-island");
     expect(html).not.toMatch(/<meta name="description"[^>]*S3 relay/);
