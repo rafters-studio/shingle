@@ -119,6 +119,12 @@ Applied migrations are recorded in the table `_migratr_migrations`, created on t
 CREATE TABLE IF NOT EXISTS _migratr_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, checksum TEXT NOT NULL, applied_at TEXT NOT NULL)
 ```
 
+Since 0.3.0 the table also carries `up_hash` and `down_hash`, both `TEXT`. The next `up`, `down`, `record_applied` or `record_note` on a database whose ledger lacks them runs `ALTER TABLE _migratr_migrations ADD COLUMN up_hash TEXT` and `... ADD COLUMN down_hash TEXT` inside the same atomic run as the first migration it applies or reverts, and keeps every existing row. Rows written before 0.3.0 keep NULL hashes. The migration file format is unchanged and every existing file keeps its checksum.
+
+`up` rehearses the pending migrations on an in-memory copy of the database's schema, the way `plan` works out statements. For each migration it runs the up, then the down that reverts it, and stores the SHA-256 of each statement list, joined with newlines, in `up_hash` and `down_hash`. The ledger's own statements are left out of both. A hash is NULL when it cannot be known: for an irreversible down, for every migration from one whose up fails on the copy onward, for a row `record_applied` writes, and in builds without the `rusqlite` feature. The hashes are what lets `smugglr exec` check that the statements sent to a place are the ones recorded for that version.
+
+Ledger versions 0 and 1 are reserved for notes: version 0 holds the `rewind_point` note and version 1 the `fingerprint` note, both written by `migratr dev`. `status` lists them and the ledger readers otherwise leave them out, so a migration numbered 0 or 1 would not be seen. Versions are timestamps, so no real migration takes those numbers.
+
 The checksum is the SHA-256 of the canonical JSON of the version, the name and the `up` operations. Edit an applied file and the next `up`, `down` or `status` sees a different checksum:
 
 ```
@@ -148,7 +154,7 @@ plan down; database is 16384 bytes
   DELETE FROM _migratr_migrations WHERE version = 20261007235009
 ```
 
-Snapshot files are named `<timestamp>_<version>_<direction>.db`. Only the newest snapshot is kept. A snapshot that cannot be written stops the step (`snapshot_failed`). `restore` replaces the database with the newest snapshot, or the one named by `--snapshot`, and changes nothing without `--yes`. Snapshot and restore act on the local file.
+Snapshot files are named `<timestamp>_<version>_<direction>.db`. Only the newest snapshot is kept, with one exception: `migratr dev` writes `<time>_<version>_dev.db` and `<time>_<version>_kept.db` snapshots (the rewind point and the previous local database), and pruning never removes them. They count toward the latest snapshot, so after `dev` the latest snapshot, and the default for `restore`, is the rewind point. A snapshot that cannot be written stops the step (`snapshot_failed`). `restore` replaces the database with the newest snapshot, or the one named by `--snapshot`, and changes nothing without `--yes`. Snapshot and restore act on the local file.
 
 ## The rule for down
 
