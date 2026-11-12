@@ -93,39 +93,35 @@ const files = ["laptop/shop.db", "server/shop.db"];
   </div>
 </section>
 
-{
-  [true].map((dark) => (
-    <section class={c.still} aria-label={SS_COPY.stillLabel}>
-      <Container size="5xl" gap="12">
-        <Container as="section" columns={{ base: 1, md: 5 }} gap="6">
-          {SS_COPY.still.map(([verb, line], i) => (
-            <Container gap="2">
-              <H3 weight="black" color={dark ? "warning" : undefined}>
-                {verb}{" "}
-                <Typography as="span" weight="thin" color={dark ? "warning" : undefined}>
-                  it.
-                </Typography>
-              </H3>
-              <Code>{line}</Code>
-              <Muted>{SS_COPY.caps[i]}</Muted>
-            </Container>
-          ))}
-        </Container>
-        <Lead align="center">{SS_COPY.stillThen}</Lead>
-        <div class={c.closing}>
-          <H2 weight="thin" align="center" line="none">
-            {SS_COPY.closingA}{" "}
-            <span data-ink>
-              <Typography as="span" weight="black" line="none" color="primary-foreground">
-                {SS_COPY.closingB}
+  <section class={c.still} aria-label={SS_COPY.stillLabel}>
+    <Container size="5xl" gap="12">
+      <Container as="section" columns={{ base: 1, md: 5 }} gap="6">
+        {SS_COPY.still.map(([verb, line], i) => (
+          <Container gap="2">
+            <H3 weight="black" color="warning">
+              {verb}{" "}
+              <Typography as="span" weight="thin" color="warning">
+                it.
               </Typography>
-            </span>
-          </H2>
-        </div>
+            </H3>
+            <Code>{line}</Code>
+            <Muted>{SS_COPY.caps[i]}</Muted>
+          </Container>
+        ))}
       </Container>
-    </section>
-  ))
-}
+      <Lead align="center">{SS_COPY.stillThen}</Lead>
+      <div class={c.closing}>
+        <H2 weight="thin" align="center" line="none">
+          {SS_COPY.closingA}{" "}
+          <span data-ink>
+            <Typography as="span" weight="black" line="none" color="primary-foreground">
+              {SS_COPY.closingB}
+            </Typography>
+          </span>
+        </H2>
+      </div>
+    </Container>
+  </section>
 
 <script>
   import { bindSyncStage } from "./sync-stage.behavior";
