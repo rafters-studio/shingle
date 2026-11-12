@@ -1,0 +1,380 @@
+---
+/**
+ * /migratr/: the accepted migratr page design (canvas VJupMmxDvGJQ4KqyEqf11S,
+ * v13). Above the FOR AGENTS turn is for people: the hero, the rebuild stage,
+ * then alternating highlight and reversed sections. Below it is the record:
+ * every command and its output from runs of the published migratr 0.3.0
+ * binary, in the order they ran. Rafters components and props, and the site's
+ * own components made by the rafters rules; colour is semantic only.
+ */
+import Base from "@/src/layouts/Base.astro";
+import CardContent from "@/components/ui/card-content.astro";
+import Card from "@/components/ui/card.astro";
+import Container from "@/components/ui/container.astro";
+import Typography, { H1, H2, H3, Lead, Muted, P } from "@/components/ui/typography.astro";
+import DataTable from "@/components/data-table.astro";
+import Ink from "@/components/ink.astro";
+import InstallLine from "@/components/install-line.astro";
+import MigratrStage from "@/components/migratr-stage.astro";
+import SpacedSection from "@/components/spaced-section.astro";
+import WrapCode from "@/components/wrap-code.astro";
+import codes from "@/src/migratr/error-codes.json";
+import { migratrRelease } from "@/src/migratr/release";
+import runs from "@/src/migratr/runs.json";
+import { version } from "@/src/migratr/version";
+
+type Run = keyof typeof runs;
+
+const DESCRIPTION =
+  "Schema migrations for SQLite: JSON migration files, an applied-migrations ledger, safe table rebuilds, exact-inverse downs, and snapshots before destructive steps.";
+
+const facts = [
+  ["plan", "Every statement a run would execute, before it runs. It changes nothing."],
+  ["ledger", "One row per applied migration, with a checksum. Edited files are refused."],
+  ["snapshot", "A copy of the database before every destructive step. restore puts it back."],
+];
+
+const users = [
+  ["1", "Ada"],
+  ["2", "Brian"],
+  ["3", "Cleo"],
+];
+
+interface AgentBlock {
+  run?: Run;
+  text?: string;
+  code?: string;
+}
+
+const agents: { num: string; title: string; blocks: AgentBlock[] }[] = [
+  {
+    num: "01",
+    title: "install",
+    blocks: [
+      { code: `$ ${migratrRelease.command}` },
+      { text: `Archives: ${migratrRelease.release}, with checksums.txt.` },
+      { run: "checksums" },
+      { run: "version" },
+    ],
+  },
+  {
+    num: "02",
+    title: "new, plan, up",
+    blocks: [{ run: "new_users" }, { run: "new_posts" }, { run: "plan_first" }, { run: "up_first" }, { run: "rows_before" }],
+  },
+  {
+    num: "03",
+    title: "add_foreign_key",
+    blocks: [
+      { text: "The file below was written by hand after migratr new link_posts_to_users." },
+      { run: "key_file" },
+      { run: "plan_orphan" },
+      { run: "up_orphan_json" },
+      { text: "Post 4 deleted with sqlite3, then:" },
+      { run: "plan_key" },
+      { text: "migratr --db app.db up then applied link_posts_to_users. Its output is not shown here." },
+    ],
+  },
+  {
+    num: "04",
+    title: "drop_column, rebuilt as a family",
+    blocks: [{ run: "new_drop" }, { run: "drop_file" }, { run: "plan_drop" }, { run: "up_drop" }, { run: "rows_after" }],
+  },
+  {
+    num: "05",
+    title: "ledger and checksum",
+    blocks: [
+      { run: "ledger" },
+      { run: "status" },
+      { text: '"handle" changed to "nickname" in the applied file, then:' },
+      { run: "status_edited" },
+      { run: "up_edited_json" },
+    ],
+  },
+  {
+    num: "06",
+    title: "restore",
+    blocks: [
+      { text: "The file put back as applied, then:" },
+      { run: "restore_no" },
+      { run: "restore_yes" },
+      { run: "rows_restored" },
+      { run: "status_restored" },
+    ],
+  },
+  {
+    num: "07",
+    title: "down: exact inverses only",
+    blocks: [
+      { text: "A second database, notes.db, whose newest migration is a raw_sql with no down:" },
+      { run: "side_new" },
+      { run: "side_up" },
+      { run: "side_plan_down" },
+      { run: "side_down_json" },
+    ],
+  },
+];
+---
+
+<Base title="migratr" description={DESCRIPTION}>
+  <SpacedSection label="migratr" space="24" tone="dark">
+    <Container size="6xl" padding="0" gap="12">
+      <Muted align="center">SCHEMA MIGRATIONS FOR SQLITE · {version}</Muted>
+      <H1 align="center">Change the shape of SQLite. <Ink>Keep a way back.</Ink></H1>
+      <Lead align="center">
+        Where SQLite cannot change a table in place, migratr builds it again and copies every row across. Every migration
+        goes in a ledger. Before anything destructive, the database is snapshotted.
+      </Lead>
+      <Container size="3xl" padding="0">
+        <InstallLine command={migratrRelease.command} id="migratr-hero" prompt />
+      </Container>
+      <Container columns={{ base: 1, md: 3 }} gap="8">
+        {
+          facts.map(([name, line]) => (
+            <Container gap="2">
+              <P color="warning">{name}</P>
+              <P>{line}</P>
+            </Container>
+          ))
+        }
+      </Container>
+    </Container>
+  </SpacedSection>
+
+  <MigratrStage />
+
+  <SpacedSection label="Every row carried across" space="24" tone="highlight">
+    <Container size="5xl" padding="0" gap="12">
+      <P>THE REBUILD</P>
+      <Container gap="2">
+        <H2>3 users in. 3 users out.</H2>
+        <H2>3 posts in. 3 posts out.</H2>
+      </Container>
+      <Lead>
+        When SQLite cannot change a table in place, migratr builds it again and copies every row across, rowids with
+        them. Tables that reference it are rebuilt with it, parents first, so their keys still point home.
+      </Lead>
+      <P>
+        In the run on this page, dropping users.handle rebuilt users and posts together. Same rows before and after; the
+        handles stayed behind in the snapshot.
+      </P>
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label="The ledger" space="24" tone="dark">
+    <Container size="5xl" padding="0" gap="12">
+      <P>THE LEDGER</P>
+      <H2>Every migration is written down. Edit one after the fact, and migratr stops.</H2>
+      <Container columns={{ base: 1, md: 2 }} gap="10">
+        <Lead>
+          Each applied migration is a row in _migratr_migrations with a checksum of what was applied. Change the file
+          later and the next up, down or status refuses until the file is put back. The change belongs in a new
+          migration.
+        </Lead>
+        <Card>
+          <CardContent>
+            <DataTable
+              head={["migration", "state"]}
+              rows={[
+                ["create_users", "applied"],
+                ["create_posts", "applied"],
+                ["link_posts_to_users", "applied"],
+                ["remove_handle_from_users", "CHECKSUM MISMATCH"],
+              ]}
+              caption="status, after the applied file was edited"
+              selected={3}
+              flag={1}
+            />
+          </CardContent>
+        </Card>
+      </Container>
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label="Foreign keys" space="24">
+    <Container size="5xl" padding="0" gap="12">
+      <P>FOREIGN KEYS</P>
+      <H2>Add a foreign key to a table that already has rows. The rows are the check.</H2>
+      <Container columns={{ base: 1, md: 2 }} gap="10">
+        <Lead>
+          Before anything changes, migratr counts the rows whose key names no parent. Post 4 names author 9, and there is
+          no user 9, so plan and up both refuse and say how many. Delete the stray row and the key goes on, every row and
+          index kept.
+        </Lead>
+        <Card>
+          <CardContent>
+            <DataTable
+              head={["id", "author_id", "title"]}
+              rows={[
+                ["1", "1", "hello"],
+                ["2", "1", "again"],
+                ["3", "2", "notes"],
+                ["4", "9", "stray"],
+              ]}
+              caption="posts, against users 1, 2 and 3: 1 row names no parent"
+              selected={3}
+              flag={1}
+            />
+          </CardContent>
+        </Card>
+      </Container>
+      <P>
+        Also typed operations: drop a foreign key, CHECK and composite UNIQUE constraints, triggers, and partial, expression,
+        descending and collated indexes.
+      </P>
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label="The way back" space="24" tone="highlight">
+    <Container size="5xl" padding="0" gap="12">
+      <P>THE WAY BACK</P>
+      <Container gap="2">
+        <H2>A snapshot before every drop.</H2>
+        <H2>One command to go back.</H2>
+      </Container>
+      <Container columns={{ base: 1, md: 2 }} gap="10">
+        <Card>
+          <CardContent>
+            <Container gap="4">
+              <P>app.db, after the drop</P>
+              <DataTable head={["id", "name"]} rows={users} />
+            </Container>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <Container gap="4">
+              <P>after restore --yes</P>
+              <DataTable
+                head={["id", "name", "handle"]}
+                rows={[
+                  ["1", "Ada", "ada"],
+                  ["2", "Brian", "brian"],
+                  ["3", "Cleo", "cleo"],
+                ]}
+              />
+            </Container>
+          </CardContent>
+        </Card>
+      </Container>
+      <Lead>
+        Before a step that drops a table, column, index or trigger, or runs raw SQL, migratr copies the database into
+        .migratr/snapshots/. restore puts the copy back; without --yes it changes nothing and says what it would discard.
+        down reverses only what has an exact inverse, and does not restore data in dropped objects.
+      </Lead>
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label="Local first" space="24" tone="dark">
+    <Container size="4xl" padding="0" gap="12">
+      <P>LOCAL FIRST</P>
+      <H2>Your file, your machine. The snapshot sits right next to it.</H2>
+      <Lead>
+        The database migratr works on is a local SQLite file, and snapshot and restore act on that file. Since 0.3.0 it
+        can also ship a migration to a remote database, the place, through the smugglr binary: migratr dev, up --smuggl
+        and down --smuggl, with smugglr 0.6.3 or later. Moving rows between places is smugglr's job; migratr changes the
+        shape.
+      </Lead>
+      <InstallLine command={migratrRelease.command} id="migratr-local" prompt />
+      <Container as="article">
+        <p>
+          Or take the archive for your machine from the <a href={migratrRelease.release}>v{version} release</a>. To embed
+          migrations in a Rust program, see <a href="/migratr/library/">Library</a>.
+        </p>
+      </Container>
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label="For agents" space="24" tone="turn">
+    <Container size="4xl" padding="0" gap="6">
+      <H2>FOR AGENTS</H2>
+      <Lead>
+        Below this line is the record: every command and its output from runs of the published 0.3.0 binary, in the order
+        they ran, nothing collapsed. sqlite3 blocks read the same database. The scratch directory prints as a dot. The
+        runs set "loud": false in migratr.jsonc; by default migratr 0.3.0 also writes its settings, and each statement
+        a run executes, to stderr.
+      </Lead>
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label={`migratr ${version} runs`} space="24">
+    <Container size="4xl" padding="0" gap="20">
+      {
+        agents.map((sec) => (
+          <Container as="section" gap="6">
+            <H3>
+              <Typography as="span" color="warning">
+                {sec.num}
+              </Typography>{" "}
+              {sec.title}
+            </H3>
+            <Container gap="3">
+              {sec.blocks.map((b) =>
+                b.run ? (
+                  <WrapCode out={b.run}>{runs[b.run]}</WrapCode>
+                ) : b.code ? (
+                  <WrapCode>{b.code}</WrapCode>
+                ) : (
+                  <P>{b.text}</P>
+                ),
+              )}
+            </Container>
+          </Container>
+        ))
+      }
+
+      <Container as="section" gap="6">
+        <H3>
+          <Typography as="span" color="warning">08</Typography> --json and exit codes
+        </H3>
+        <P>
+          With --json a command writes one JSON document to stdout and nothing else; logs go to stderr. It carries command
+          and status (ok or error). A failure adds code and message and exits 2 for a usage error, 1 otherwise; up --discover and down --discover exit 3 when the run would stop. Codes are
+          stable across patch releases.
+        </P>
+        <DataTable head={["code", "cause"]} rows={codes.map((e) => [e.code, e.cause])} code />
+      </Container>
+
+      <Container as="section" gap="6">
+        <H3>
+          <Typography as="span" color="warning">09</Typography> limits
+        </H3>
+        <Container as="article">
+          <ul>
+            <li>The working database is a local SQLite file. A place (a file, an https:// address or d1://) is reached only through smugglr 0.6.3 or later. Snapshot and restore act on the local file, not on the place.</li>
+            <li>Only the newest snapshot of a step is kept; migratr dev's rewind point and kept snapshots are never pruned. A snapshot that cannot be written stops the step (snapshot_failed).</li>
+            <li>down reverses structure only; data in dropped objects is not restored.</li>
+            <li>
+              A rebuild is refused before anything runs when the table's CREATE TABLE does not parse, when another object
+              uses the dropped column, or when the rebuild is not the first operation in its migration.
+            </li>
+            <li>
+              A rebuild leaves foreign keys on and creates no TEMP objects, so the same rebuild runs on a local file and on
+              a D1 database.
+            </li>
+          </ul>
+        </Container>
+      </Container>
+
+      <Container as="section" gap="6">
+        <H3>
+          <Typography as="span" color="warning">10</Typography> pages
+        </H3>
+        <Container as="article">
+          <ul>
+            <li><a href="/migratr/cli/">/migratr/cli</a>: every command, every flag, --json documents, error codes, exit codes.</li>
+            <li>
+              <a href="/migratr/migrations/">/migratr/migrations</a>: the file format and its operations, the ledger,
+              snapshots, the rule for down.
+            </li>
+            <li>
+              <a href="/migratr/library/">/migratr/library</a>: embed!, Migrator, the Executor trait and the default
+              rusqlite feature.
+            </li>
+            <li><a href="/migratr/changelog/">/migratr/changelog</a>: release notes.</li>
+          </ul>
+        </Container>
+      </Container>
+    </Container>
+  </SpacedSection>
+</Base>

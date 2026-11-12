@@ -1,0 +1,27 @@
+---
+/**
+ * An inline run of text on a solid semantic ground. Rafters' Mark is the
+ * accent highlight; this is the warning ground, or the page's own ink
+ * inverted, for the one word a reader must not miss.
+ *
+ * @cognitive-load 1/10 - One phrase, set apart
+ * @attention-economics Spent sparingly: the promise, a stray key, a mismatch
+ * @trust-building The mark sits on the exact value it is about
+ * @accessibility A native mark element; the semantic foreground pairs with its ground
+ * @semantic-meaning warning = look here; inverse = the closing word
+ *
+ * @usage-patterns
+ * DO: Mark one value or one phrase
+ * NEVER: Mark a whole sentence
+ */
+import type { InkTone } from "./ink.behavior";
+import { inkClasses } from "./ink.classes";
+
+interface Props {
+  tone?: InkTone;
+}
+
+const { tone = "warning" } = Astro.props;
+---
+
+<mark class={inkClasses(tone)}><slot /></mark>

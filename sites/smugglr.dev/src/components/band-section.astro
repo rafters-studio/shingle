@@ -1,0 +1,28 @@
+---
+/**
+ * One numbered section of the summary band: "## NN TITLE" with its number in
+ * honey, a "# note" at the far end, then the section's body. Rafters only.
+ *
+ * @cognitive-load 2/10 - One topic per section, named before it is read
+ */
+import Container from "@/components/ui/container.astro";
+import Typography, { H2, P } from "@/components/ui/typography.astro";
+
+interface Props {
+  num: string;
+  title: string;
+  note: string;
+}
+
+const { num, title, note } = Astro.props;
+---
+
+<Container as="section" gap="8">
+  <Container columns={2} gap="2">
+    <H2>
+      <Typography as="span" color="warning">## {num}</Typography> {title}
+    </H2>
+    <P color="muted-foreground" align="end"># {note}</P>
+  </Container>
+  <slot />
+</Container>

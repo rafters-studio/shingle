@@ -1,0 +1,236 @@
+---
+import Base from "@/src/layouts/Base.astro";
+import BandHead from "@/components/band-head.astro";
+import BandSection from "@/components/band-section.astro";
+import Install from "@/components/install.astro";
+import MigratrSection from "@/components/migratr-section.astro";
+import SpacedSection from "@/components/spaced-section.astro";
+import SyncStage from "@/components/sync-stage.astro";
+import WrapCode from "@/components/wrap-code.astro";
+import Container from "@/components/ui/container.astro";
+import Table from "@/components/ui/table.astro";
+import {
+  tableBodyClasses,
+  tableCellClasses,
+  tableHeadClasses,
+  tableHeaderClasses,
+  tableRowClasses,
+} from "@/components/ui/table.classes";
+import { Code, P } from "@/components/ui/typography.astro";
+import MANUAL from "@/src/smugglr/manual-output.json";
+import { smugglrRelease } from "@/src/smugglr/release";
+
+const LEDE =
+  "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
+const INSTALL = smugglrRelease.command;
+
+// Captured from the smugglr 0.6.4 release binary by scripts/capture-manual.sh; never typed.
+const OUT = {
+  moved_dry: MANUAL.moved_dry,
+  moved_json: MANUAL.moved_json,
+  mesh_insert: MANUAL.mesh_insert,
+};
+
+type Block =
+  | { kind: "p"; text: string; code?: string }
+  | { kind: "table"; head: string[]; rows: string[][] }
+  | { kind: "out"; name: keyof typeof OUT };
+
+interface Sec {
+  num: string;
+  title: string;
+  note: string;
+  blocks: Block[];
+}
+
+const SECTIONS: Sec[] = [
+  {
+    num: "01",
+    title: "SCOPE",
+    note: "one paragraph",
+    blocks: [
+      {
+        kind: "p",
+        text: "smugglr keeps SQLite databases in step: a local file, any service that speaks HTTP-SQL, and Cloudflare D1. One Rust binary. Each row is compared by a 16-byte BLAKE3 hash of its contents, so only rows that changed cross the wire; a large first sync can move as a stash and a retrieve. A row changed in both places stops and is named; nothing is overwritten unless you say so. On a local network where nobody is in charge, smugglr mesh keeps nodes in step as changes happen. Every run prints a record, --json on request, and exits with a code that says what happened. smugglr sync <a> <b> --discover writes nothing and says what two places are and what a sync between them would meet. smugglr exec runs a migration's statements on a place for migratr. smugglr stash and smugglr retrieve, the multi shape, move a person's own devices through signed blobs.",
+      },
+    ],
+  },
+  {
+    num: "02",
+    title: "INSTALL",
+    note: "one binary, two ways",
+    blocks: [
+      {
+        kind: "table",
+        head: ["channel", "command", "what you get"],
+        rows: [
+          [
+            "Release archive",
+            "https://github.com/rafters-studio/smugglr/releases",
+            "smugglr-<target>.tar.gz for four unix targets (x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-apple-darwin, aarch64-apple-darwin); smugglr-x86_64-pc-windows-msvc.zip for Windows",
+          ],
+          [
+            "install.sh",
+            INSTALL,
+            "The latest release’s binary in ~/.local/bin/smugglr, on Linux and macOS, x86_64 or aarch64",
+          ],
+        ],
+      },
+    ],
+  },
+  {
+    num: "03",
+    title: "PLACES",
+    note: "one engine, every place",
+    blocks: [
+      {
+        kind: "table",
+        head: ["place", "address", "credentials"],
+        rows: [
+          ["Local file", "./shop.db", "none"],
+          ["HTTP-SQL service", "https://db.example.com", "none sent"],
+          ["Cloudflare D1", "d1://shop", "CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN"],
+        ],
+      },
+      {
+        kind: "p",
+        text: "smugglr keeps no secrets and has no environment of its own; it reads the two D1 variables from the environment it runs in, set however you keep them: ",
+        code: "CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop",
+      },
+    ],
+  },
+  {
+    num: "04",
+    title: "EXIT CODES",
+    note: "scripts branch on these",
+    blocks: [
+      {
+        kind: "table",
+        head: ["code", "meaning"],
+        rows: [
+          ["0", "Done, or a preview. Every row written was read back as written."],
+          ["2", "Refused before anything was read or written: a bad flag, place or config, or a missing D1 variable."],
+          ["3", "Stopped before writing anything, or --discover found a sync would stop."],
+          ["4", "Wrote something and is not done. Run it again; a stopped table stops again until its rows are settled."],
+          ["5", "Too much for the wire. Nothing was sent."],
+        ],
+      },
+    ],
+  },
+  {
+    num: "05",
+    title: "SYNC MODES",
+    note: "when a row changed in both places",
+    blocks: [
+      {
+        kind: "table",
+        head: ["--sync-mode", "what happens"],
+        rows: [
+          ["stop", "Default. The table stops and names the rows."],
+          ["source", "The source’s copy is kept; each overwritten row is named."],
+          ["target", "The target’s copy is kept; each overwritten row is named."],
+          ["last", "The copy whose steering column is further on is kept."],
+        ],
+      },
+    ],
+  },
+  {
+    num: "06",
+    title: "THE RECORD",
+    note: "pasted from the release binary",
+    blocks: [
+      { kind: "p", text: "The preview names what would move. The run, here as JSON, moves exactly that." },
+      { kind: "out", name: "moved_dry" },
+      { kind: "out", name: "moved_json" },
+    ],
+  },
+  {
+    num: "07",
+    title: "MESH",
+    note: "nobody in charge",
+    blocks: [
+      {
+        kind: "p",
+        text: "smugglr mesh keeps every node on a local network that holds one key in step, as changes happen. Each change is signed, sealed and resent until each peer has decided it. A node is named by its machine; on a network with no broadcast, a peers setting names the others.",
+      },
+      { kind: "out", name: "mesh_insert" },
+    ],
+  },
+  {
+    num: "08",
+    title: "LIMITS",
+    note: "said in the same breath",
+    blocks: [
+      {
+        kind: "p",
+        text: "Direct and mesh syncs exist in 0.6.4: --sync-type hub and multi are refused as not built yet, and stash and retrieve are the multi shape as commands. smugglr sends no credentials to an HTTP-SQL place. A first sync cannot see deletes. A mesh node that restarts can be taken by the others for a second machine under its name (#684).",
+      },
+    ],
+  },
+];
+---
+
+<Base title="smugglr" description={LEDE}>
+  <!-- One article around the page: llms-full.txt takes the first article, so the machine-readable summary band reaches it. -->
+  <Container as="article" size="full" padding="0">
+  <SyncStage />
+
+  <SpacedSection label="Install" space="24">
+    <Container size="4xl" padding="0">
+      <Install release={smugglrRelease} />
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label="migratr" space="24">
+    <Container size="4xl" padding="0">
+      <MigratrSection />
+    </Container>
+  </SpacedSection>
+
+  <SpacedSection label="Machine-readable summary" space="24" dark>
+    <Container size="4xl" padding="0" gap="24">
+      <BandHead title="MACHINE-READABLE SUMMARY" note="GET /llms.txt" />
+
+      {
+        SECTIONS.map((sec) => (
+          <BandSection num={sec.num} title={sec.title} note={sec.note}>
+            {sec.blocks.map((block) => {
+              if (block.kind === "p") {
+                return (
+                  <P>
+                    {block.text}
+                    {block.code && <Code>{block.code}</Code>}
+                  </P>
+                );
+              }
+              if (block.kind === "out") {
+                return <WrapCode out={block.name}>{OUT[block.name]}</WrapCode>;
+              }
+              return (
+                <Table>
+                  <thead class={tableHeaderClasses}>
+                    <tr class={tableRowClasses}>
+                      {block.head.map((cell) => (
+                        <th class={tableHeadClasses}>{cell}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody class={tableBodyClasses}>
+                    {block.rows.map((row) => (
+                      <tr class={tableRowClasses}>
+                        {row.map((cell, i) => (
+                          <td class={tableCellClasses}>{i === 0 ? <Code>{cell}</Code> : cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              );
+            })}
+          </BandSection>
+        ))
+      }
+    </Container>
+  </SpacedSection>
+  </Container>
+</Base>

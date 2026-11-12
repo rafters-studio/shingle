@@ -1,0 +1,20 @@
+---
+import { Muted } from '@/components/ui/typography.astro';
+import { manualPages } from '@/src/smugglr/manual';
+
+interface Props {
+  id: string;
+  note: string;
+}
+
+const { id, note } = Astro.props;
+const page = manualPages.find((p) => p.route === Astro.url.pathname);
+const section = page?.sections.find((s) => s.id === id);
+if (section === undefined) {
+  throw new Error(`${Astro.url.pathname}: no manual section "${id}" in src/smugglr/manual.ts`);
+}
+---
+
+<h2 id={id}>{section.num} {section.title}</h2>
+<Muted family="mono"># {note}</Muted>
+<slot />

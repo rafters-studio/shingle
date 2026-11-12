@@ -27,19 +27,50 @@
   },
   "installed": {
     "components": [
+      "button",
       "card",
+      "card-action",
+      "card-content",
+      "card-footer",
+      "card-header",
+      "card-title",
       "container",
       "grid",
       "sheet",
+      "sidebar",
+      "sidebar-content",
+      "sidebar-footer",
+      "sidebar-group",
+      "sidebar-group-action",
+      "sidebar-group-content",
+      "sidebar-group-label",
+      "sidebar-header",
+      "sidebar-inset",
+      "sidebar-menu",
+      "sidebar-menu-action",
+      "sidebar-menu-badge",
+      "sidebar-menu-button",
+      "sidebar-menu-item",
+      "sidebar-menu-skeleton",
+      "sidebar-menu-sub",
+      "sidebar-menu-sub-button",
+      "sidebar-menu-sub-item",
+      "sidebar-rail",
+      "sidebar-separator",
+      "sidebar-trigger",
+      "table",
       "typography"
     ],
     "primitives": [
       "aria-manager",
+      "astro-as-child",
       "classy",
       "focus-trap",
       "memory",
       "outside-click",
       "roving-focus",
+      "sr-announcer",
+      "surface",
       "types"
     ],
     "composites": [],
@@ -47,7 +78,8 @@
     "substrate": [
       "compose",
       "contract",
-      "disclosable"
+      "disclosable",
+      "pressable"
     ]
   }
 }

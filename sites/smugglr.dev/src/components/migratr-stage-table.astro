@@ -1,0 +1,37 @@
+---
+/**
+ * One table on the migratr stage, server-rendered from a stage frame. The
+ * client redraws the same structure with the same classes as the stage plays.
+ *
+ * @cognitive-load 2/10 - A caption, its columns and up to four rows
+ * @accessibility Native table markup inside the stage's aria-hidden layer
+ */
+import type { TableSlot } from "./migratr-stage.behavior";
+import { migratrStageClasses as c } from "./migratr-stage.classes";
+
+interface Props {
+  table: TableSlot;
+}
+
+const { table: slot } = Astro.props;
+---
+
+<div class={c.tableWrap}>
+  <table class={c.table}>
+    <caption class={`${c.caption} ${slot.capCls}`}>{slot.caption}</caption>
+    <thead class={c.thead}>
+      <tr class={c.tr}>{slot.cols.map((col) => <th class={c.th}>{col}</th>)}</tr>
+    </thead>
+    <tbody class={c.tbody}>
+      {
+        slot.rows.map((r) => (
+          <tr class={c.tr} data-state={r.sel ? "selected" : undefined}>
+            {r.cells.map((cell) => (
+              <td class={`${c.td} ${cell.cls}`}>{cell.v}</td>
+            ))}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

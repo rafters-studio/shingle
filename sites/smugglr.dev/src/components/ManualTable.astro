@@ -1,0 +1,37 @@
+---
+import Table from '@/components/ui/table.astro';
+import {
+  tableBodyClasses,
+  tableCellClasses,
+  tableHeadClasses,
+  tableHeaderClasses,
+  tableRowClasses,
+} from '@/components/ui/table.classes';
+import { Code } from '@/components/ui/typography.astro';
+
+interface Props {
+  head: string[];
+  rows: string[][];
+}
+
+const { head, rows } = Astro.props;
+---
+
+<Table>
+  <thead class={tableHeaderClasses}>
+    <tr class={tableRowClasses}>
+      {head.map((cell) => <th scope="col" class={tableHeadClasses}>{cell}</th>)}
+    </tr>
+  </thead>
+  <tbody class={tableBodyClasses}>
+    {
+      rows.map((row) => (
+        <tr class={tableRowClasses}>
+          {row.map((cell, i) => (
+            <td class={tableCellClasses}>{i === 0 ? <Code>{cell}</Code> : cell}</td>
+          ))}
+        </tr>
+      ))
+    }
+  </tbody>
+</Table>

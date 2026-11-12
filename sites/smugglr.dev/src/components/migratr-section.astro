@@ -1,0 +1,43 @@
+---
+/**
+ * The landing page's migratr section: what migratr does, in claims taken from
+ * its README and its 0.3.0 changelog, its installer, and the way to its docs.
+ * Rafters components and props only, at the designer's sizes.
+ *
+ * @cognitive-load 3/10 - Five short claims, one command, one link
+ * @accessibility Headings in order; the docs link is named by its text
+ */
+import Container from "@/components/ui/container.astro";
+import { H2, P } from "@/components/ui/typography.astro";
+import { migratrRelease } from "@/src/migratr/release";
+import Install from "./install.astro";
+---
+
+<Container gap="16">
+  <Container gap="6">
+    <H2>migratr</H2>
+    <P>
+      migratr changes the shape of a SQLite database; smugglr moves its rows. A migration is a JSON file, and a ledger
+      table in the database records which have been applied.
+    </P>
+    <P>
+      plan prints the statements a run would execute and the snapshot each destructive step would take, and changes
+      nothing. A destructive step takes its snapshot first, and restore puts the database back.
+    </P>
+    <P>down reverses a migration only when every operation in it has an inverse.</P>
+    <P>
+      A table rebuild uses no TEMP objects and leaves foreign keys on, so the same rebuild runs on a local file and on a
+      D1 database.
+    </P>
+    <P>
+      migratr dev copies a remote database, the place, down and records a rewind point; up --smuggl and down --smuggl
+      then ship a migration, or its revert, to the place through the smugglr binary (0.6.3 or later), and roll the local
+      database back to the rewind point when a ship fails.
+    </P>
+    <Container as="article">
+      <p><a href="/migratr/">The migratr docs</a></p>
+    </Container>
+    <P>forgr on crates.io makes test data from the schema.json an app already has.</P>
+  </Container>
+  <Install release={migratrRelease} />
+</Container>

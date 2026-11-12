@@ -5,11 +5,11 @@ export const migratrNav: NavGroup[] = [
   {
     heading: "migratr",
     items: [
-      { label: "Overview", href: "/migratr", exact: true },
-      { label: "CLI", href: "/migratr/cli" },
-      { label: "Migrations", href: "/migratr/migrations" },
-      { label: "Library", href: "/migratr/library" },
-      { label: "Changelog", href: "/migratr/changelog" },
+      { label: "Overview", href: "/migratr/", exact: true },
+      { label: "CLI", href: "/migratr/cli/" },
+      { label: "Migrations", href: "/migratr/migrations/" },
+      { label: "Library", href: "/migratr/library/" },
+      { label: "Changelog", href: "/migratr/changelog/" },
     ],
   },
 ];

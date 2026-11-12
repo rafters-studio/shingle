@@ -3,6 +3,7 @@ import Base from './Base.astro';
 import Container from '@/components/ui/container.astro';
 import Grid from '@/components/ui/grid.astro';
 import { Small } from '@/components/ui/typography.astro';
+import WrapProse from '@/components/wrap-prose.astro';
 import type { NavGroup } from '@/src/migratr/nav';
 
 interface Props {
@@ -16,35 +17,10 @@ const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
 const { title = '', description, nav: navProp } = merged;
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
-const defaultNav: NavGroup[] = [
-  {
-    heading: 'Start',
-    items: [
-      { label: 'Get Started', href: '/get-started' },
-      { label: 'CLI Reference', href: '/docs/cli-reference' },
-      { label: 'Configuration', href: '/docs/configuration' },
-    ],
-  },
-  {
-    heading: 'Internals',
-    items: [
-      { label: 'How It Works', href: '/docs/how-it-works' },
-      { label: 'Usage Patterns', href: '/docs/patterns' },
-      { label: 'Plugin Guide', href: '/docs/plugin-guide' },
-      { label: 'Concepts', href: '/docs/concepts' },
-    ],
-  },
-  {
-    heading: 'Browser',
-    items: [
-      { label: 'Browser Client', href: '/docs/browser-client' },
-    ],
-  },
-];
+const nav: NavGroup[] = navProp ?? [];
 
-const nav: NavGroup[] = navProp ?? defaultNav;
-
-function isActive(href: string, exact = false): boolean {
+function isActive(link: string, exact = false): boolean {
+  const href = link.replace(/\/$/, '');
   if (exact) return currentPath === href;
   return currentPath === href || currentPath.startsWith(href + '/');
 }
@@ -73,7 +49,9 @@ function isActive(href: string, exact = false): boolean {
 
       <Container colSpan={3}>
         <Container as="article" gap="6">
-          <slot />
+          <WrapProse>
+            <slot />
+          </WrapProse>
         </Container>
       </Container>
     </Grid>

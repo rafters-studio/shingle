@@ -1,0 +1,65 @@
+---
+/**
+ * Install: a product's one-line installer first, with its Copy button, then
+ * the release's archives by platform, each linking to its download. Rafters
+ * components and props, and WrapCode for the command, at the designer's sizes.
+ *
+ * @cognitive-load 3/10 - One command to run; the downloads grouped by platform
+ * @accessibility The command is real text; Copy is a native button; every download is a named link
+ */
+import CardContent from "@/components/ui/card-content.astro";
+import CardHeader from "@/components/ui/card-header.astro";
+import CardTitle from "@/components/ui/card-title.astro";
+import Card from "@/components/ui/card.astro";
+import Container from "@/components/ui/container.astro";
+import { H2, H3, P } from "@/components/ui/typography.astro";
+import type { InstallRelease } from "./install.types";
+import InstallLine from "./install-line.astro";
+
+interface Props {
+  release: InstallRelease;
+  /** A slug for the Copy button's id, unique on the page. */
+  id?: string;
+}
+
+const { release: r, id = r.product } = Astro.props;
+---
+
+<Container gap="16">
+  <Container gap="6">
+    <H2>Install {r.product} v{r.version}</H2>
+    <P>On Linux and macOS, one line puts the binary in {r.installs}, and {r.path}.</P>
+    <InstallLine command={r.command} id={`${id}-install`} />
+  </Container>
+
+  <Container gap="6">
+    <H3>Or download v{r.version}</H3>
+    <Container columns={{ base: 1, md: 3 }} gap="4">
+      {
+        r.platforms.map((platform) => (
+          <Card>
+            <CardHeader>
+              <CardTitle>{platform.os}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Container as="article" gap="2">
+                {platform.builds.map((build) => (
+                  <p>
+                    <a href={`${r.downloads}${build.file}`} title={build.file}>
+                      {build.arch}
+                    </a>
+                  </p>
+                ))}
+              </Container>
+            </CardContent>
+          </Card>
+        ))
+      }
+    </Container>
+    <Container as="article">
+      <p>
+        Each archive's SHA-256 is on <a href={r.release}>the v{r.version} release</a>.
+      </p>
+    </Container>
+  </Container>
+</Container>

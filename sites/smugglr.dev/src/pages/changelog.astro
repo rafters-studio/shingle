@@ -1,0 +1,13 @@
+---
+import Manual from '@/src/layouts/Manual.astro';
+import { Content } from '@/src/smugglr/CHANGELOG.md';
+import { version } from '@/src/smugglr/version';
+---
+
+<Manual
+  title="smugglr changelog"
+  description={`Every smugglr release, newest first. Current version ${version}.`}
+>
+  <p>Current version: <code>{version}</code></p>
+  <Content />
+</Manual>

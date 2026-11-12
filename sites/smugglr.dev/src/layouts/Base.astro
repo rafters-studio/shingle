@@ -68,7 +68,7 @@ if (isHome) {
         applicationCategory: "DeveloperApplication",
         operatingSystem: "macOS, Linux, Windows",
         description:
-            "Universal SQLite sync engine. Content hashing, delta sync, LAN broadcast, S3 relay. Agent-friendly JSON output and structured exit codes.",
+            "Keeps SQLite databases in step: files, HTTP-SQL services and Cloudflare D1, with a mesh for a local network. Row hashes, JSON on request and exit codes that say what happened.",
         url: `${siteOrigin}/`,
         codeRepository: "https://github.com/rafters-studio/smugglr",
         license: "https://opensource.org/licenses/MIT",
@@ -125,12 +125,6 @@ const jsonLd = {
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={absoluteImage} />
 
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
-            rel="stylesheet"
-        />
         <link
             rel="alternate"
             type="text/plain"
@@ -154,12 +148,9 @@ const jsonLd = {
         <TopBar
             brand={{ name: "smugglr" }}
             links={[
+                { href: "/migratr/", label: "migratr" },
                 { href: "/docs/", label: "docs" },
-                { href: "/docs/cli-reference/", label: "cli" },
-                { href: "/#targets", label: "targets" },
-                { href: "/#shapes", label: "shapes" },
-                { href: "/compare/", label: "compare" },
-                { href: "/compare/games/", label: "games" },
+                { href: "/docs/cli/", label: "cli" },
                 { href: "https://github.com/rafters-studio/smugglr", label: "github" },
             ]}
         />
@@ -167,6 +158,14 @@ const jsonLd = {
             <slot />
         </main>
         <MegaFooter />
+        <script>
+            // Workaround for rafters 0.7.0: rafters.css @imports this package inside Tailwind without rebasing its ./files/ urls, so its faces 404; remove when rafters fixes the generated import.
+            import "@fontsource-variable/noto-sans";
+        </script>
+        <script>
+            import { bindScrollRegions } from "@/components/scroll-region.behavior";
+            bindScrollRegions();
+        </script>
     </body>
 </html>
 
@@ -174,50 +173,30 @@ const jsonLd = {
     @import "../styles/global.css";
 
     /*
-     * Tables need a scroll container and do not have one.
-     *
-     * Article mode styles tables with `[&_table]:w-full` and nothing else, and
-     * the registry's `tableWrapperClasses` ("relative w-full overflow-auto")
-     * applies only to the Table COMPONENT. Neither the .mdx docs tables nor
-     * the MrsBlock tables on the home page are that component, so both are
-     * bare <table> elements that never see it.
-     *
-     * Measured at 375px before this rule: /docs/cli-reference/ overflowed the
-     * document by 136px with a 348px table inside a 311px article, and / by
-     * 177px with a 472px table. That is the horizontal overflow in #101.
-     *
-     * This sits in Base rather than Docs because the home page has seven
-     * tables and does not use the Docs layout, so a docs-scoped rule fixed
-     * the smaller half of the problem and left the front page broken.
-     *
-     * `display: block` is what makes overflow-x apply to a table at all. It
-     * costs full-width automatic column sizing, which is the accepted trade:
-     * a table that scrolls beats a page that does.
-     *
-     * It lives here and not in container.classes.ts because that file is
-     * registry-installed and the next `rafters add` would overwrite it, and it
-     * targets the element rather than a class because Rafters components own
-     * their classes and refuse a consumer `class` prop.
+     * Tables outside rafters' Table component (bare markdown tables, the
+     * compare pages' MrsTable) have no scroll container, so on a phone they
+     * would widen the page (#101). display: block lets overflow-x apply to
+     * them. Rafters' Table scrolls in its own wrapper, so its table (the one
+     * with tableRootClasses' caption-bottom) is left alone and fills its
+     * column.
      */
-    table {
+    table:not(.caption-bottom) {
         display: block;
         max-width: 100%;
         overflow-x: auto;
     }
 
-    :root {
-        --font-sans:
-            "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
-            sans-serif;
-        --font-heading:
-            "IBM Plex Sans Condensed", -apple-system, BlinkMacSystemFont,
-            "Segoe UI", sans-serif;
-        --font-body:
-            "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
-            sans-serif;
-        --font-code:
-            "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code", monospace;
-        --font-mono:
-            "IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code", monospace;
+    /* Decorative tables (the stages, aria-hidden) clip instead of scrolling: nothing focusable lives there. */
+    [aria-hidden="true"] div:has(> table) {
+        overflow: hidden;
+    }
+
+    /* A table that overflows shows it: an edge shadow, and a ring when focused. */
+    [data-scrolls] {
+        box-shadow: inset -1.5rem 0 1rem -1rem var(--color-border);
+    }
+    [data-scrolls]:focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: 2px;
     }
 </style>

@@ -6,6 +6,9 @@ description: "Embed migratr migrations in a Rust program: embed!, Migrator, the 
 import Docs from "@/src/layouts/Docs.astro";
 import { migratrNav } from "@/src/migratr/nav";
 import { version } from "@/src/migratr/version";
+import { mdxComponents } from "@/lib/mdx-components";
+
+export const components = mdxComponents;
 
 <Docs title="Library" description="Embed migratr migrations in a Rust program: embed!, Migrator, the Executor trait and the default rusqlite feature." nav={migratrNav}>
 
@@ -34,7 +37,7 @@ Each method takes an `&mut impl Executor` and returns `Result<_, MigrateError>`.
 
 ## Example
 
-This program was built against `migratr = "0.2.0"` and `rusqlite = { version = "0.40", features = ["bundled"] }` with the `create_users` migration from [Migrations](/migratr/migrations) in `migrations/`.
+This program was built against `migratr = "0.2.0"` and `rusqlite = { version = "0.40", features = ["bundled"] }` with the `create_users` migration from [Migrations](/migratr/migrations/) in `migrations/`.
 
 ```rust
 use migratr::{Migrator, RusqliteExecutor};
@@ -83,7 +86,7 @@ That keeps the parser, `up`, `down`, `Migrator` and the `Executor` trait, and dr
 
 `LedgerRow` gains the public fields `up_hash` and `down_hash` and is not `#[non_exhaustive]`, so code that builds a `LedgerRow` literal fails to compile against 0.3. Every crate declares `rust-version = "1.89"`, and an older toolchain refuses to build. `RusqliteExecutor::new` takes a `rusqlite::Connection` from rusqlite 0.41 (libsqlite3-sys 0.39), the release that bundles the SQLite fix for RUSTSEC-2026-0459. libsqlite3-sys links `sqlite3`, so only one version of it can be in a build: a dependent that uses rusqlite anywhere in its graph must move to 0.41 with migratr.
 
-New exports: `Note` (`RewindPoint` at version 0, `Fingerprint` at version 1); `record_note`, which writes or replaces a note in one atomic run and creates the ledger when it is absent; `snapshot_for_dev(db_path, source, kind)` with `DevSnapshot`; `has_keyword`, which says whether a statement holds a keyword as a bare word rather than inside a quoted identifier; and `RusqliteExecutor::shape_differences`, the structural comparison `dev` uses. `read_ledger_through` reads the hashes when the ledger has the columns and reads an older ledger without them. The ledger's schema change is described under [the ledger](/migratr/migrations#the-ledger).
+New exports: `Note` (`RewindPoint` at version 0, `Fingerprint` at version 1); `record_note`, which writes or replaces a note in one atomic run and creates the ledger when it is absent; `snapshot_for_dev(db_path, source, kind)` with `DevSnapshot`; `has_keyword`, which says whether a statement holds a keyword as a bare word rather than inside a quoted identifier; and `RusqliteExecutor::shape_differences`, the structural comparison `dev` uses. `read_ledger_through` reads the hashes when the ledger has the columns and reads an older ledger without them. The ledger's schema change is described under [the ledger](/migratr/migrations/#the-ledger).
 
 ## What it does not do
 

@@ -1,0 +1,54 @@
+---
+/**
+ * A small table of strings on rafters' Table, with one row marked selected
+ * and one cell set in Ink where the point of the table is that value.
+ *
+ * @cognitive-load 2/10 - A few rows; the one that matters is marked
+ * @accessibility Native table with a caption
+ */
+import Table from "@/components/ui/table.astro";
+import {
+  tableBodyClasses,
+  tableCaptionClasses,
+  tableCellClasses,
+  tableHeadClasses,
+  tableHeaderClasses,
+  tableRowClasses,
+} from "@/components/ui/table.classes";
+import { Code } from "@/components/ui/typography.astro";
+import Ink from "./ink.astro";
+
+interface Props {
+  head: string[];
+  rows: string[][];
+  caption?: string;
+  /** The row to mark selected, by index. */
+  selected?: number;
+  /** The cell in the selected row to set in Ink, by column index. */
+  flag?: number;
+  /** Set the first column as code. */
+  code?: boolean;
+}
+
+const { head, rows, caption, selected, flag, code = false } = Astro.props;
+---
+
+<Table>
+  {caption && <caption class={tableCaptionClasses}>{caption}</caption>}
+  <thead class={tableHeaderClasses}>
+    <tr class={tableRowClasses}>{head.map((h) => <th class={tableHeadClasses}>{h}</th>)}</tr>
+  </thead>
+  <tbody class={tableBodyClasses}>
+    {
+      rows.map((row, i) => (
+        <tr class={tableRowClasses} data-state={i === selected ? "selected" : undefined}>
+          {row.map((cell, j) => (
+            <td class={tableCellClasses}>
+              {i === selected && j === flag ? <Ink>{cell}</Ink> : code && j === 0 ? <Code>{cell}</Code> : cell}
+            </td>
+          ))}
+        </tr>
+      ))
+    }
+  </tbody>
+</Table>

@@ -1,0 +1,151 @@
+---
+/**
+ * migratr stage: one migration rebuilt as a family, on a 36-second loop. plan,
+ * snapshot, build, copy parents first, drop children first, rename parent
+ * first, record the ledger row; then restore puts the snapshot back.
+ *
+ * @cognitive-load 5/10 - One beat at a time: a verb, a caption, the statement the binary printed, and the tables it touched
+ * @attention-economics The page's one moving element, and only while it is on screen
+ * @trust-building Every statement shown is a line the published migratr 0.3.0 binary printed
+ * @accessibility The animated layer is aria-hidden under a label that tells the whole run; reduced motion gets the still frame, a summary, and no script
+ * @semantic-meaning warning = what arrives, highlight = the ledger's check, an inverted ink = the closing line
+ *
+ * @usage-patterns
+ * DO: Place once, full width, on the migratr page
+ * NEVER: Put text a reader needs only inside the animated layer
+ */
+import Typography, { H2, Lead, Muted } from "@/components/ui/typography.astro";
+import StageTable from "./migratr-stage-table.astro";
+import {
+  SNAPSHOT_NOTE,
+  SNAPSHOT_PATH,
+  STAGE_LABEL,
+  STAGE_REST,
+  STAGE_STILL,
+  stageFrame,
+} from "./migratr-stage.behavior";
+import { migratrStageClasses as c } from "./migratr-stage.classes";
+
+const f = stageFrame(STAGE_REST);
+---
+
+<section class={c.root} data-migratr-stage aria-label={STAGE_LABEL}>
+  <div class={c.wrap}>
+    <div class={c.head} aria-hidden="true">
+      <div class={c.cmd}>$ <code data-mg="cmd">{f.cmd}</code></div>
+      <H2 size="5xl" weight="black" align="center" line="none" data-mg="verb-line" hidden={f.close !== null}>
+        <b data-mg="verb-bold">{f.verb}</b>{" "}
+        <Typography as="span" weight="thin" data-mg="verb-thin">{f.thin}</Typography>
+      </H2>
+      <H2 size="5xl" weight="thin" align="center" line="none" data-mg="close-line" hidden={f.close === null}>
+        <i data-mg="close-a">{f.close?.[0]}</i>{" "}
+        <b class={c.ink} data-mg="close-b">{f.close?.[1]}</b>
+      </H2>
+      <Lead align="center" data-mg="cap">{f.cap}</Lead>
+      <div class={`${c.stmtBox} ${f.stmtCls}`} data-mg="stmt-box">
+        <pre class={c.stmt}><code data-mg="stmt">{f.stmt}</code></pre>
+      </div>
+    </div>
+
+    <div class={c.field} aria-hidden="true">
+      <div class={c.pairs} data-mg="pairs">
+        {
+          f.slots.map((s) => (
+            <div class={c.slot}>
+              {s.kind === "table" ? <StageTable table={s} /> : <div class={`${c.ghost} ${s.cls}`}>{s.text}</div>}
+            </div>
+          ))
+        }
+      </div>
+      <div class={c.side} data-mg="side">
+        <div class={c.snap}>
+          <div class={c.mono}>{SNAPSHOT_PATH}</div>
+          <StageTable table={f.snap} />
+          <Muted>{SNAPSHOT_NOTE}</Muted>
+        </div>
+      </div>
+    </div>
+
+    <div aria-hidden="true" data-mg="ledger">
+      <StageTable table={f.ledger} />
+    </div>
+
+    <div data-mg-still>
+      <Lead align="center">{STAGE_STILL}</Lead>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { bindMigratrStage } from "./migratr-stage.behavior";
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-migratr-stage]")) {
+    bindMigratrStage(root);
+  }
+</script>
+
+<style is:global>
+  /* The stage's own motion. Colour is semantic: warning arrives, highlight checks. */
+  .mg-in-a,
+  .mg-flip-a {
+    animation: mg-in-a 0.5s ease-out both;
+  }
+  .mg-flip-b {
+    animation: mg-in-b 0.5s ease-out both;
+  }
+  @keyframes mg-in-a {
+    from {
+      opacity: 0;
+      transform: translateY(calc(var(--spacing) * 1.5));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes mg-in-b {
+    from {
+      opacity: 0;
+      transform: translateY(calc(var(--spacing) * 1.5));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .mg-arrive {
+    animation: mg-arrive 1.2s ease-out both;
+  }
+  @keyframes mg-arrive {
+    0%,
+    35% {
+      background: var(--warning);
+      color: var(--warning-foreground);
+    }
+    100% {
+      background: transparent;
+    }
+  }
+  .mg-check {
+    animation: mg-check 1.8s ease-out both;
+  }
+  @keyframes mg-check {
+    0%,
+    55% {
+      background: var(--highlight);
+      color: var(--highlight-foreground);
+    }
+  }
+  /* The still summary shows only when nothing plays. */
+  [data-mg-still] {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mg-stage * {
+      animation: none !important;
+    }
+    [data-mg-still] {
+      display: block;
+    }
+  }
+</style>

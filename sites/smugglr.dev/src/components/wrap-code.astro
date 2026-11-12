@@ -1,0 +1,26 @@
+---
+/**
+ * A code block whose long lines wrap. Rafters' CodeBlock scrolls a long line
+ * sideways and has no prop to wrap it; this is that CodeBlock, wrapping.
+ *
+ * @cognitive-load 2/10 - Read top to bottom; nothing hides off the edge
+ * @attention-economics Commands and output stay whole at every width, so nothing is read by scrolling
+ * @trust-building The text is shown byte for byte; only the line box wraps
+ * @accessibility Native pre and code; no horizontal scroll region to reach by keyboard
+ * @semantic-meaning Machine text: a command to run or output a binary printed
+ *
+ * @usage-patterns
+ * DO: Use for commands and pasted output that can be wider than a phone
+ * NEVER: Use for prose
+ */
+import { wrapCodeClasses as c } from "./wrap-code.classes";
+
+interface Props {
+  /** The name of the captured output this block shows, when it is one. */
+  out?: string;
+}
+
+const { out } = Astro.props;
+---
+
+<pre class={c.root} data-out={out}><code><slot /></code></pre>

@@ -1,0 +1,264 @@
+import { createHash } from "node:crypto";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { ELEMENT_NODE, type ElementNode, type Node, parse, TEXT_NODE, walkSync } from "ultrahtml";
+import { describe, expect, it } from "vitest";
+import { parseVersion, smugglrVersion } from "../src/smugglr/version";
+import fixture from "./fixtures/manual.json";
+import migratrBaseline from "./fixtures/migratr-main.json";
+
+const root = process.cwd();
+const dist = join(root, "dist");
+const version = smugglrVersion();
+
+function html(route: string): string {
+  return readFileSync(join(dist, route, "index.html"), "utf8");
+}
+
+function elements(route: string): ElementNode[] {
+  const found: ElementNode[] = [];
+  walkSync(parse(html(route)), (node: Node) => {
+    if (node.type === ELEMENT_NODE) found.push(node);
+  });
+  return found;
+}
+
+function text(node: Node): string {
+  if (node.type === TEXT_NODE) return decode(node.value);
+  return (node.children ?? []).map(text).join("");
+}
+
+function decode(value: string): string {
+  return value
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&amp;/g, "&");
+}
+
+function article(route: string): ElementNode[] {
+  const root = elements(route).find((e) => e.name === "article");
+  if (root === undefined) throw new Error(`${route}: no article`);
+  const found: ElementNode[] = [];
+  walkSync(root, (node: Node) => {
+    if (node.type === ELEMENT_NODE) found.push(node);
+  });
+  return found;
+}
+
+const routes = Object.keys(fixture.pages) as (keyof typeof fixture.pages)[];
+
+describe("manual pages", () => {
+  it("reads 0.6.4 from the changelog copy", () => {
+    expect(version).toBe("0.6.4");
+  });
+
+  for (const route of routes) {
+    const page = fixture.pages[route];
+
+    it(`${route} shows the version on the mono header line`, () => {
+      const header = elements(route).find((e) => e.attributes["data-sidebar"] === "header");
+      expect(header && text(header).trim()).toBe(`smugglr manual v${version}`);
+    });
+
+    it(`${route} shows every section in order`, () => {
+      const headings = article(route).filter((e) => e.name === "h2").map(text);
+      expect(headings).toEqual(page.sections);
+    });
+
+    it(`${route} carries the artifact's title, lead and path line`, () => {
+      const h1 = article(route).find((e) => e.name === "h1");
+      expect(h1 && text(h1)).toBe(page.title);
+      expect(html(route)).toContain(page.description);
+      expect(html(route)).toContain(`smugglr manual / ${page.num} ${page.title.toLowerCase()}`);
+    });
+
+    it(`${route} has every output block, byte for byte and in order`, () => {
+      const blocks = article(route).filter((e) => e.name === "pre").map(text);
+      const expected = page.blocks.map((name) => fixture.out[name as keyof typeof fixture.out]);
+      expect(blocks.filter((b) => expected.includes(b))).toEqual(expected);
+    });
+
+    it(`${route} is in llms.txt and llms-full.txt with its description`, () => {
+      const url = `https://smugglr.dev${route}`;
+      const llms = readFileSync(join(dist, "llms.txt"), "utf8");
+      expect(llms).toContain(`(${url}): ${page.description}`);
+      const full = readFileSync(join(dist, "llms-full.txt"), "utf8");
+      expect(full).toContain(url);
+      expect(full).toContain(page.description);
+    });
+  }
+
+  it("/docs/ lists the three manual pages", () => {
+    const hrefs = article("docs").filter((e) => e.name === "a").map((a) => a.attributes["href"]);
+    expect(hrefs).toEqual(routes);
+  });
+});
+
+describe("/changelog/", () => {
+  const copy = readFileSync(join(root, "src/smugglr/CHANGELOG.md"), "utf8");
+
+  it("renders the changelog copy", () => {
+    const headings = article("changelog").filter((e) => e.name === "h2").map(text);
+    expect(headings).toContain("[0.6.4] - 2026-11-11");
+    expect(copy).toContain("## [0.6.4] - 2026-11-11");
+  });
+
+  it("is listed in llms.txt", () => {
+    const llms = readFileSync(join(dist, "llms.txt"), "utf8");
+    expect(llms).toContain("https://smugglr.dev/changelog/");
+    expect(readFileSync(join(dist, "llms-full.txt"), "utf8")).toContain(
+      "https://smugglr.dev/changelog/",
+    );
+  });
+});
+
+describe("what 0.6.4 does, in llms.txt and llms-full.txt", () => {
+  const llms = readFileSync(join(dist, "llms.txt"), "utf8");
+  const full = readFileSync(join(dist, "llms-full.txt"), "utf8");
+
+  it("names mesh, multi, exec and --discover", () => {
+    for (const word of ["mesh", "multi", "smugglr exec", "--discover"]) expect(full).toContain(word);
+    expect(llms).toContain("mesh");
+  });
+
+  it("names the installer, never cargo", () => {
+    for (const page of ["", "docs/get-started"]) {
+      expect(readFileSync(join(dist, page, "index.html"), "utf8"), page).not.toContain("cargo install");
+    }
+    expect(full).toContain("curl -fsSL https://smugglr.dev/install | bash");
+  });
+
+  it("does not show smugglr sync --migratr as the way to migrate", () => {
+    // The changelog copies are the record of releases and may name it; no other page does.
+    const pages = ["", "docs", "docs/cli", "docs/get-started", "docs/how-smugglr-decides", "migratr", "migratr/cli", "migratr/migrations", "migratr/library"];
+    for (const page of pages) {
+      expect(readFileSync(join(dist, page, "index.html"), "utf8"), page).not.toContain("--migratr");
+    }
+    expect(readFileSync(join(dist, "migratr/index.html"), "utf8")).toContain("up --smuggl");
+  });
+
+  it("names forgr once, with its crates.io name and nothing more", () => {
+    expect(full.match(/forgr/g)?.length).toBe(1);
+    expect(full).toContain("forgr on crates.io makes test data from the schema.json an app already has.");
+  });
+
+  it("is not stale about S3 or version", () => {
+    expect(llms).not.toMatch(/S3 relay/);
+    expect(llms).not.toMatch(/0\.6\.[0-3]\b/);
+  });
+});
+
+describe("/compare is gone (rewrite tracked in shingle#207)", () => {
+  function htmlFiles(dir: string): string[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? htmlFiles(join(dir, e.name)) : e.name.endsWith(".html") ? [join(dir, e.name)] : [],
+    );
+  }
+
+  it("has no compare page and no page links /compare", () => {
+    expect(existsSync(join(dist, "compare"))).toBe(false);
+    for (const file of htmlFiles(dist)) {
+      expect(readFileSync(file, "utf8"), file).not.toMatch(/href="[^"]*\/compare/);
+    }
+  });
+
+  it("has no compare entry in llms.txt or llms-full.txt", () => {
+    for (const name of ["llms.txt", "llms-full.txt"]) {
+      expect(readFileSync(join(dist, name), "utf8"), name).not.toMatch(/\/compare/);
+    }
+  });
+
+  it("redirects /compare paths to the home page with a 301", () => {
+    const lines = readFileSync(join(dist, "_redirects"), "utf8").split("\n").map((l) => l.trim().split(/\s+/).join(" "));
+    for (const from of ["/compare", "/compare/", "/compare/games", "/compare/games/", "/compare/*"]) {
+      expect(lines).toContain(`${from} / 301`);
+    }
+  });
+});
+
+describe("internal links", () => {
+  function pages(dir: string): string[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? pages(join(dir, e.name)) : e.name.endsWith(".html") ? [join(dir, e.name)] : [],
+    );
+  }
+
+  it("end in a slash, so no page links a path that 404s", () => {
+    // Files (a dot in the last segment) and the installer redirects are the only slashless paths.
+    const exempt = new Set(["/install", "/migratr/install"]);
+    for (const file of pages(dist)) {
+      const hrefs = [...readFileSync(file, "utf8").matchAll(/href="(\/[^"#?]*)/g)].map((m) => m[1] ?? "");
+      for (const href of hrefs) {
+        if (href === "" || href.endsWith("/") || exempt.has(href) || (href.split("/").pop() ?? "").includes(".")) continue;
+        expect.fail(`${file} links ${href} without a trailing slash`);
+      }
+    }
+  });
+});
+
+describe("retired pages", () => {
+  const lines = readFileSync(join(dist, "_redirects"), "utf8")
+    .split("\n")
+    .map((l) => l.trim().split(/\s+/).join(" "));
+  const retired: Record<string, string> = {
+    "/get-started": "/docs/get-started/",
+    "/docs/browser-client": "/docs/get-started/",
+    "/docs/how-it-works": "/docs/how-smugglr-decides/",
+    "/docs/concepts": "/docs/how-smugglr-decides/",
+    "/docs/configuration": "/docs/cli/",
+    "/docs/patterns": "/docs/cli/",
+    "/docs/plugin-guide": "/docs/cli/",
+    "/docs/cli-reference": "/docs/cli/",
+  };
+
+  for (const [from, to] of Object.entries(retired)) {
+    it(`${from} answers 301 to ${to}, and is gone from llms`, () => {
+      expect(lines).toContain(`${from} ${to} 301`);
+      expect(lines).toContain(`${from}/ ${to} 301`);
+      const url = `https://smugglr.dev${from}/`;
+      expect(readFileSync(join(dist, "llms.txt"), "utf8")).not.toContain(url);
+      expect(readFileSync(join(dist, "llms-full.txt"), "utf8")).not.toContain(url);
+    });
+  }
+
+  it("keeps the existing lines", () => {
+    const smugglr = "https://raw.githubusercontent.com/rafters-studio/smugglr/main/install.sh";
+    const migratr = "https://raw.githubusercontent.com/rafters-studio/migratr/main/install.sh";
+    expect(lines.slice(0, 4)).toEqual([
+      `/install ${smugglr} 302`,
+      `/install.sh ${smugglr} 302`,
+      `/migratr/install ${migratr} 302`,
+      `/migratr/install.sh ${migratr} 302`,
+    ]);
+  });
+});
+
+describe("version helper", () => {
+  it("throws naming the file when there is no version heading", () => {
+    const file = join(mkdtempSync(join(tmpdir(), "smugglr-")), "CHANGELOG.md");
+    writeFileSync(file, "# Changelog\n\n## [Unreleased]\n");
+    expect(() => smugglrVersion(file)).toThrow(file);
+    expect(() => parseVersion("# x", "CHANGELOG.md")).toThrow("CHANGELOG.md");
+  });
+
+  it("skips [Unreleased] and takes the first release", () => {
+    expect(parseVersion("## [Unreleased]\n\n## [1.2.3] - 2026-01-01\n", "f")).toBe("1.2.3");
+  });
+});
+
+// Hashes of the <main> of each /migratr/ page as it now stands: the v0.3.0 docs,
+// the shared installer and wrapping code (#190). The site's nav and footer sit
+// outside <main>, so they may change. A deliberate change to a migratr page
+// refreshes this fixture; anything else that moves a hash is a regression.
+describe("/migratr/ pages hold their recorded main", () => {
+  for (const [page, hash] of Object.entries(migratrBaseline)) {
+    it(`/migratr/${page} matches its recorded main`, () => {
+      const main = html(join("migratr", page)).match(/<main[\s\S]*<\/main>/)?.[0] ?? "";
+      expect(createHash("sha256").update(main).digest("hex")).toBe(hash);
+    });
+  }
+});
