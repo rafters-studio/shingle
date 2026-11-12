@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ELEMENT_NODE, type ElementNode, type Node, parse, TEXT_NODE, walkSync } from "ultrahtml";
@@ -147,6 +147,34 @@ describe("what 0.6.4 does, in llms.txt and llms-full.txt", () => {
   it("is not stale about S3 or version", () => {
     expect(llms).not.toMatch(/S3 relay/);
     expect(llms).not.toMatch(/0\.6\.[0-3]\b/);
+  });
+});
+
+describe("/compare is gone (rewrite tracked in shingle#207)", () => {
+  function htmlFiles(dir: string): string[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? htmlFiles(join(dir, e.name)) : e.name.endsWith(".html") ? [join(dir, e.name)] : [],
+    );
+  }
+
+  it("has no compare page and no page links /compare", () => {
+    expect(existsSync(join(dist, "compare"))).toBe(false);
+    for (const file of htmlFiles(dist)) {
+      expect(readFileSync(file, "utf8"), file).not.toMatch(/href="[^"]*\/compare/);
+    }
+  });
+
+  it("has no compare entry in llms.txt or llms-full.txt", () => {
+    for (const name of ["llms.txt", "llms-full.txt"]) {
+      expect(readFileSync(join(dist, name), "utf8"), name).not.toMatch(/\/compare/);
+    }
+  });
+
+  it("redirects /compare paths to the home page with a 301", () => {
+    const lines = readFileSync(join(dist, "_redirects"), "utf8").split("\n").map((l) => l.trim().split(/\s+/).join(" "));
+    for (const from of ["/compare", "/compare/", "/compare/games", "/compare/games/", "/compare/*"]) {
+      expect(lines).toContain(`${from} / 301`);
+    }
   });
 });
 
