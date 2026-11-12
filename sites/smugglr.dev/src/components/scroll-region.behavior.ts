@@ -6,10 +6,12 @@
  * edge shadow and a focus ring.
  */
 export function bindScrollRegions(doc: Document = document): () => void {
-  const regions = (): HTMLElement[] => [
-    ...doc.querySelectorAll<HTMLElement>('div:has(> table[data-part="root"])'),
-    ...doc.querySelectorAll<HTMLElement>("table:not([data-part])"),
-  ];
+  // Content under aria-hidden is decorative (the stages): it is never focusable, so it never scrolls.
+  const regions = (): HTMLElement[] =>
+    [
+      ...doc.querySelectorAll<HTMLElement>('div:has(> table[data-part="root"])'),
+      ...doc.querySelectorAll<HTMLElement>("table:not([data-part])"),
+    ].filter((el) => el.closest('[aria-hidden="true"]') === null);
 
   const mark = (): void => {
     for (const el of regions()) {

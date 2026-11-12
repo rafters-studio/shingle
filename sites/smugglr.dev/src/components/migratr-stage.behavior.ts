@@ -80,7 +80,13 @@ export const STAGE_LABEL =
 export const STAGE_STILL =
   "In order: plan, snapshot, build the new tables, copy the rows parents first, drop the old children before the old parent, rename parent first, record the ledger row. restore --yes puts the snapshot back.";
 
-export const SNAPSHOT_PATH = ".migratr/snapshots/20261107081658_20261107081658_up.db";
+/** The snapshot's path as the captured run printed it (the SNAPSHOT beat's `latest snapshot:` line). */
+export const SNAPSHOT_PATH = ((): string => {
+  const line = (stage.events as StageEvent[]).find((e) => e.verb === "SNAPSHOT")?.stmt ?? "";
+  const path = /snapshot: \.\/(\S+)$/.exec(line)?.[1];
+  if (path === undefined) throw new Error("stage.json: the SNAPSHOT beat has no `latest snapshot:` path");
+  return path;
+})();
 export const SNAPSHOT_NOTE = "A copy of app.db, taken before the step ran.";
 
 function count(times: number[], t: number): number {

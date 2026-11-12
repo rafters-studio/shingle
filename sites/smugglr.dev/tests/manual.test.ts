@@ -180,6 +180,26 @@ describe("/compare is gone (rewrite tracked in shingle#207)", () => {
   });
 });
 
+describe("internal links", () => {
+  function pages(dir: string): string[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? pages(join(dir, e.name)) : e.name.endsWith(".html") ? [join(dir, e.name)] : [],
+    );
+  }
+
+  it("end in a slash, so no page links a path that 404s", () => {
+    // Files (a dot in the last segment) and the installer redirects are the only slashless paths.
+    const exempt = new Set(["/install", "/migratr/install"]);
+    for (const file of pages(dist)) {
+      const hrefs = [...readFileSync(file, "utf8").matchAll(/href="(\/[^"#?]*)/g)].map((m) => m[1] ?? "");
+      for (const href of hrefs) {
+        if (href === "" || href.endsWith("/") || exempt.has(href) || (href.split("/").pop() ?? "").includes(".")) continue;
+        expect.fail(`${file} links ${href} without a trailing slash`);
+      }
+    }
+  });
+});
+
 describe("retired pages", () => {
   const lines = readFileSync(join(dist, "_redirects"), "utf8")
     .split("\n")

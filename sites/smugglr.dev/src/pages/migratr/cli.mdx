@@ -97,7 +97,7 @@ migratr --db PATH up [--to V]
 | `--smuggl` | off         | Ship the migrations to the place through the rewind point. See [dev and the place](#dev-and-the-place). |
 | `--discover` | off       | With `--smuggl`: report what the run would do and change nothing. |
 
-Applies each pending migration in version order. A migration and its ledger row go in one atomic run; a failure rolls it back. `up` refuses to run when an applied file was edited or a ledger row has no file. `up` also records, per migration, the SHA-256 of the statements it ran up and of the statements that revert it; see [the ledger](/migratr/migrations#the-ledger).
+Applies each pending migration in version order. A migration and its ledger row go in one atomic run; a failure rolls it back. `up` refuses to run when an applied file was edited or a ledger row has no file. `up` also records, per migration, the SHA-256 of the statements it ran up and of the statements that revert it; see [the ledger](/migratr/migrations/#the-ledger).
 
 ```
 $ migratr --db app.db up
@@ -123,7 +123,7 @@ migratr --db PATH down [--steps N]
 | `--smuggl`    | off     | Ship the reverts to the place through the rewind point. |
 | `--discover`  | off     | With `--smuggl`: report what the run would do and change nothing. |
 
-`down` reverses structure only. Data in dropped objects is not restored. If any operation in the range has no exact inverse, the whole range is refused before anything runs; see [the rule for down](/migratr/migrations#the-rule-for-down).
+`down` reverses structure only. Data in dropped objects is not restored. If any operation in the range has no exact inverse, the whole range is refused before anything runs; see [the rule for down](/migratr/migrations/#the-rule-for-down).
 
 ```
 $ migratr --db app.db down --steps 2

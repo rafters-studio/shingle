@@ -186,6 +186,11 @@ const jsonLd = {
         overflow-x: auto;
     }
 
+    /* Decorative tables (the stages, aria-hidden) clip instead of scrolling: nothing focusable lives there. */
+    [aria-hidden="true"] div:has(> table) {
+        overflow: hidden;
+    }
+
     /* A table that overflows shows it: an edge shadow, and a ring when focused. */
     [data-scrolls] {
         box-shadow: inset -1.5rem 0 1rem -1rem var(--color-border);
