@@ -12,8 +12,9 @@
  * DO: Place once on a page, full width
  * NEVER: Put text a reader needs only inside the animated layer
  *
- * Both themes of the still are on the server, because reduced motion runs no
- * script; the stylesheet below shows the one the viewer's theme calls for.
+ * The stage is always dark: it takes rafters' .dark scope whatever the viewer's
+ * theme, live and in the still (the operator's direction, #209). Reduced motion
+ * runs no script, so the still is on the server and the stylesheet shows it.
  * The component is standalone: everything it needs is in this file and its
  * behavior and classes files.
  */
@@ -93,8 +94,8 @@ const files = ["laptop/shop.db", "server/shop.db"];
 </section>
 
 {
-  [false, true].map((dark) => (
-    <section class={dark ? c.stillDark : c.still} aria-label={SS_COPY.stillLabel}>
+  [true].map((dark) => (
+    <section class={c.still} aria-label={SS_COPY.stillLabel}>
       <Container size="5xl" gap="12">
         <Container as="section" columns={{ base: 1, md: 5 }} gap="6">
           {SS_COPY.still.map(([verb, line], i) => (
@@ -276,21 +277,7 @@ const files = ["laptop/shop.db", "server/shop.db"];
     .ss-live {
       display: none;
     }
-    .ss-still:not(.dark) {
-      display: block;
-    }
-    :root[data-theme="dark"] .ss-still:not(.dark) {
-      display: none;
-    }
-    :root[data-theme="dark"] .ss-still.dark {
-      display: block;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) and (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .ss-still:not(.dark) {
-      display: none;
-    }
-    :root:not([data-theme="light"]) .ss-still.dark {
+    .ss-still {
       display: block;
     }
   }

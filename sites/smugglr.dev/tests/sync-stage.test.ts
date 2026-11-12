@@ -135,4 +135,16 @@ describe("bindSyncStage", () => {
     report?.([{ isIntersecting: false }]);
     expect(cancel).toHaveBeenCalledTimes(1);
   });
+
+  it("never changes the stage's theme, under a light preference or any other", () => {
+    stubBrowser(false); // prefers-color-scheme: dark does not match: a light preference
+    const toggle = vi.fn();
+    const add = vi.fn();
+    const remove = vi.fn();
+    const root = { ...fakeElement(), classList: { toggle, add, remove } };
+    bindSyncStage(root as unknown as HTMLElement);
+    expect(toggle).not.toHaveBeenCalled();
+    expect(add).not.toHaveBeenCalled();
+    expect(remove).not.toHaveBeenCalled();
+  });
 });
