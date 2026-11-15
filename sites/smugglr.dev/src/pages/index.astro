@@ -2,7 +2,7 @@
 import Base from "@/src/layouts/Base.astro";
 import BandHead from "@/components/band-head.astro";
 import BandSection from "@/components/band-section.astro";
-import Install from "@/components/install.astro";
+import InstallSection from "@/components/install-section.astro";
 import MigratrSection from "@/components/migratr-section.astro";
 import SpacedSection from "@/components/spaced-section.astro";
 import SyncStage from "@/components/sync-stage.astro";
@@ -16,13 +16,14 @@ import {
   tableHeaderClasses,
   tableRowClasses,
 } from "@/components/ui/table.classes";
-import { Code, P } from "@/components/ui/typography.astro";
+import { Code, Muted, P } from "@/components/ui/typography.astro";
 import MANUAL from "@/src/smugglr/manual-output.json";
-import { smugglrRelease } from "@/src/smugglr/release";
+import { installData, INSTALLERS } from "@/src/install/data";
 
 const LEDE =
   "smugglr compares every row by its hash and moves only what changed. When it cannot be sure, it stops and names the rows.";
-const INSTALL = smugglrRelease.command;
+const install = await installData();
+const { smugglr, migratr } = install.programs;
 
 // Captured from the smugglr 0.6.4 release binary by scripts/capture-manual.sh; never typed.
 const OUT = {
@@ -34,7 +35,8 @@ const OUT = {
 type Block =
   | { kind: "p"; text: string; code?: string }
   | { kind: "table"; head: string[]; rows: string[][] }
-  | { kind: "out"; name: keyof typeof OUT };
+  | { kind: "out"; name: keyof typeof OUT }
+  | { kind: "commands"; groups: { title: string; items: { label: string; command: string }[] }[] };
 
 interface Sec {
   num: string;
@@ -58,22 +60,39 @@ const SECTIONS: Sec[] = [
   {
     num: "02",
     title: "INSTALL",
-    note: "one binary, two ways",
+    note: "run it, or build it in",
     blocks: [
       {
-        kind: "table",
-        head: ["channel", "command", "what you get"],
-        rows: [
-          [
-            "Release archive",
-            "https://github.com/rafters-studio/smugglr/releases",
-            "smugglr-<target>.tar.gz for four unix targets (x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-apple-darwin, aarch64-apple-darwin); smugglr-x86_64-pc-windows-msvc.zip for Windows",
-          ],
-          [
-            "install.sh",
-            INSTALL,
-            "The latest release’s binary in ~/.local/bin/smugglr, on Linux and macOS, x86_64 or aarch64",
-          ],
+        kind: "commands",
+        groups: [
+          {
+            title: "macOS and Linux",
+            items: [
+              { label: `smugglr ${smugglr.tag}: the latest release's binary in ~/.local/bin/smugglr, x86_64 or aarch64`, command: INSTALLERS.unix.smugglr },
+              { label: `migratr ${migratr.tag}: the latest release's binary in ~/.local/bin/migratr`, command: INSTALLERS.unix.migratr },
+            ],
+          },
+          {
+            title: "Windows, from PowerShell",
+            items: [
+              { label: `smugglr ${smugglr.tag}`, command: INSTALLERS.windows.smugglr },
+              { label: `migratr ${migratr.tag}`, command: INSTALLERS.windows.migratr },
+            ],
+          },
+          {
+            title: "Archives and checksums",
+            items: [
+              { label: "smugglr's latest release on GitHub", command: smugglr.url },
+              { label: "migratr's latest release on GitHub", command: migratr.url },
+            ],
+          },
+          {
+            title: "Rust crates",
+            items: install.crates.map((crate) => ({
+              label: `${crate.name} ${crate.version}: ${crate.description}`,
+              command: crate.command,
+            })),
+          },
         ],
       },
     ],
@@ -175,11 +194,7 @@ const SECTIONS: Sec[] = [
   <Container as="article" size="full" padding="0">
   <SyncStage />
 
-  <SpacedSection label="Install" space="24">
-    <Container size="4xl" padding="0">
-      <Install release={smugglrRelease} />
-    </Container>
-  </SpacedSection>
+  <InstallSection />
 
   <SpacedSection label="migratr" space="24">
     <Container size="4xl" padding="0">
@@ -205,6 +220,19 @@ const SECTIONS: Sec[] = [
               }
               if (block.kind === "out") {
                 return <WrapCode out={block.name}>{OUT[block.name]}</WrapCode>;
+              }
+              if (block.kind === "commands") {
+                return block.groups.map((group) => (
+                  <Container gap="3" padding="0">
+                    <P>{group.title}</P>
+                    {group.items.map((item) => (
+                      <Container gap="1" padding="0">
+                        <Muted>{item.label}</Muted>
+                        <WrapCode>{item.command}</WrapCode>
+                      </Container>
+                    ))}
+                  </Container>
+                ));
               }
               return (
                 <Table>

@@ -27,6 +27,7 @@
   },
   "installed": {
     "components": [
+      "badge",
       "button",
       "card",
       "card-action",
@@ -36,6 +37,8 @@
       "card-title",
       "container",
       "grid",
+      "input",
+      "input-group",
       "sheet",
       "sidebar",
       "sidebar-content",
@@ -59,6 +62,7 @@
       "sidebar-separator",
       "sidebar-trigger",
       "table",
+      "tabs",
       "typography"
     ],
     "primitives": [
