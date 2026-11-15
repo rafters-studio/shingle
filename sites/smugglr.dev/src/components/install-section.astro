@@ -1,0 +1,88 @@
+---
+/**
+ * The home install section, "Run it, or build it in": two parts. The first is
+ * the programs, installed from the command line, in tabs for the visitor's
+ * machine. The second is the crates, for a visitor who wants the engine inside
+ * their own Rust program. Versions and descriptions are read when the site
+ * builds (src/install/data.ts); the installer commands and the lines about each
+ * program are the site's.
+ *
+ * @cognitive-load 4/10 - Two parts, one decision each: which machine, which crate
+ * @attention-economics The command-line part leads; the crates follow for the visitor who does not want a binary
+ * @accessibility Two labelled sections, headings in order, each command a labelled input with a Copy button
+ */
+import Container from "@/components/ui/container.astro";
+import { H2, Lead, Muted } from "@/components/ui/typography.astro";
+import { installData, INSTALLERS } from "@/src/install/data";
+import InstallRow from "./install-row.astro";
+import InstallTabs from "./install-tabs.astro";
+import SpacedSection from "./spaced-section.astro";
+
+const data = await installData();
+const { smugglr, migratr } = data.programs;
+
+const SMUGGLR_JOB = "Sync, mesh, stash, retrieve and exec, as one command.";
+const MIGRATR_JOB = "Plan, up, down, status and restore for a SQLite file.";
+const platforms = [
+  { value: "unix", label: "macOS and Linux", suffix: "" },
+  { value: "windows", label: "Windows", suffix: " In PowerShell." },
+] as const;
+---
+
+<SpacedSection label="Install" space="24">
+  <Container size="3xl" padding="0" gap="16">
+    <Container as="section" gap="6" aria-label="Command line">
+      <H2 color="accent-foreground">Run it from the command line</H2>
+      <Lead>
+        Two programs for a terminal or a script. Each installer picks your machine and puts the binary on your PATH.
+      </Lead>
+      <InstallTabs id="install-os" value="unix" tabs={platforms.map((p) => ({ value: p.value, label: p.label }))}>
+        {
+          platforms.map((p) => (
+            <Fragment slot={`panel-${p.value}`}>
+              <Container gap="8" padding="6">
+                <InstallRow
+                  id={`${p.value}-smugglr`}
+                  name="smugglr"
+                  version={smugglr.tag}
+                  description={`${SMUGGLR_JOB}${p.suffix}`}
+                  command={INSTALLERS[p.value].smugglr}
+                />
+                <InstallRow
+                  id={`${p.value}-migratr`}
+                  name="migratr"
+                  version={migratr.tag}
+                  description={`${MIGRATR_JOB}${p.suffix}`}
+                  command={INSTALLERS[p.value].migratr}
+                />
+              </Container>
+            </Fragment>
+          ))
+        }
+      </InstallTabs>
+      <Muted>
+        Archives and checksums: <a href={smugglr.url}>smugglr</a>, <a href={migratr.url}>migratr</a>.
+      </Muted>
+    </Container>
+
+    <Container as="section" gap="6" aria-label="Rust libraries">
+      <H2 color="accent-foreground">Build it into your Rust program</H2>
+      <Lead>
+        No binary to install. Add the crate for the job your program does; the same engine runs underneath.
+      </Lead>
+      <Container gap="8">
+        {
+          data.crates.map((crate) => (
+            <InstallRow
+              id={crate.name}
+              name={crate.name}
+              version={crate.version}
+              description={crate.description}
+              command={crate.command}
+            />
+          ))
+        }
+      </Container>
+    </Container>
+  </Container>
+</SpacedSection>

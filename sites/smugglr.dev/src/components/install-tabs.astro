@@ -1,0 +1,92 @@
+---
+/**
+ * Install tabs: rafters' Tabs score (tabs.behavior, tabs.classes) with panels
+ * that hold markup. The installed tabs.astro takes each panel as a string, so
+ * it cannot hold a row of components; this is its shell with named slots,
+ * `panel-<value>`, in place of that string. Same classes, same aria, same
+ * bindTabs.
+ *
+ * @cognitive-load 2/10 - Two tabs; the visitor's own is open
+ * @accessibility tablist, tab and tabpanel roles and the roving tabindex from the score
+ */
+import { tabs, tabsIds, tabsInstanceAria, type TabsConfig, type TabsPart } from "@/components/ui/tabs.behavior";
+import { tabsClasses } from "@/components/ui/tabs.classes";
+import type { PartIds } from "@/lib/contract";
+
+interface Tab {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  id: string;
+  tabs: Tab[];
+  /** The tab open on first paint; the visitor's platform replaces it once the page runs. */
+  value: string;
+}
+
+const { id, tabs: items, value } = Astro.props;
+const config: TabsConfig = { defaultValue: value, orientation: "horizontal" };
+const state = tabs.initialState(config);
+const classes = tabsClasses(config, state);
+const ids = {} as PartIds<TabsPart>;
+for (const part of Object.keys(tabs.parts) as TabsPart[]) ids[part] = `${id}-${part}`;
+const rootAria = tabs.aria(state, config, ids);
+const panels = await Promise.all(items.map(async (item) => Astro.slots.render(`panel-${item.value}`)));
+---
+
+<div data-part="root" id={ids.root} class={classes.root} {...rootAria.root} data-install-tabs>
+  <div data-part="list" id={ids.list} role="tablist" class={classes.list} {...rootAria.list}>
+    {
+      items.map((item) => {
+        const { triggerId, panelId } = tabsIds(id, item.value);
+        return (
+          <button
+            type="button"
+            role="tab"
+            id={triggerId}
+            data-part="trigger"
+            data-value={item.value}
+            tabindex={item.value === state.value ? 0 : -1}
+            class={classes.trigger}
+            {...tabsInstanceAria("trigger", item.value, state, config, { trigger: triggerId, panel: panelId })}
+          >
+            {item.label}
+          </button>
+        );
+      })
+    }
+  </div>
+  {
+    items.map((item, i) => {
+      const { triggerId, panelId } = tabsIds(id, item.value);
+      return (
+        <div
+          role="tabpanel"
+          id={panelId}
+          data-part="panel"
+          data-value={item.value}
+          tabindex="0"
+          class={classes.panel}
+          {...tabsInstanceAria("panel", item.value, state, config, { trigger: triggerId, panel: panelId })}
+          set:html={panels[i]}
+        />
+      );
+    })
+  }
+</div>
+
+<script>
+  import { bindTabs } from "@/components/ui/tabs.behavior";
+  import { bindInstallCopy, platformTab } from "./install-copy.behavior";
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-install-tabs]")) {
+    if (root.dataset["bound"] === "true") continue;
+    root.dataset["bound"] = "true";
+    bindTabs(root);
+    // Open on the visitor's own platform.
+    const wanted = platformTab();
+    if (wanted !== "unix") root.querySelector<HTMLElement>(`[data-part="trigger"][data-value="${wanted}"]`)?.click();
+  }
+  bindInstallCopy();
+</script>

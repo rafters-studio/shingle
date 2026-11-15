@@ -9,8 +9,6 @@
  */
 import Container from "@/components/ui/container.astro";
 import { H2, P } from "@/components/ui/typography.astro";
-import { migratrRelease } from "@/src/migratr/release";
-import Install from "./install.astro";
 ---
 
 <Container gap="16">
@@ -39,5 +37,4 @@ import Install from "./install.astro";
     </Container>
     <P>forgr on crates.io makes test data from the schema.json an app already has.</P>
   </Container>
-  <Install release={migratrRelease} />
 </Container>

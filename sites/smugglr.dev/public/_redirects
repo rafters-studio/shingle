@@ -23,3 +23,5 @@
 /compare/games  /  301
 /compare/games/  /  301
 /compare/*  /  301
+/install.ps1  https://raw.githubusercontent.com/rafters-studio/smugglr/main/install.ps1  302
+/migratr/install.ps1  https://raw.githubusercontent.com/rafters-studio/migratr/main/install.ps1  302

@@ -1,0 +1,34 @@
+---
+/**
+ * One install row: the name in accent, its version as a Badge, what it does,
+ * and the command in an InputGroup with a Copy button in the end addon.
+ *
+ * @cognitive-load 2/10 - A name, a version, a sentence and one command
+ * @accessibility The command is a labelled input the visitor can select; Copy is a native button
+ */
+import Badge from "@/components/ui/badge.astro";
+import Button from "@/components/ui/button.astro";
+import Container from "@/components/ui/container.astro";
+import InputGroup from "@/components/ui/input-group.astro";
+import { H4, Muted } from "@/components/ui/typography.astro";
+
+interface Props {
+  /** The program or crate. */
+  name: string;
+  version: string;
+  description: string;
+  command: string;
+  /** A slug, unique on the page. */
+  id: string;
+}
+
+const { name, version, description, command, id } = Astro.props;
+---
+
+<Container gap="2" padding="0" data-copy-command={command} data-install-row={name}>
+  <H4 color="accent-foreground">{name} <Badge variant="outline">{version}</Badge></H4>
+  <Muted>{description}</Muted>
+  <InputGroup id={`${id}-command`} value={command} aria-label={`${name} install command`}>
+    <Button slot="end" id={`${id}-copy`} size="sm" variant="ghost">Copy</Button>
+  </InputGroup>
+</Container>

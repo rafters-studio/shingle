@@ -26,34 +26,10 @@ describe("home page, built", () => {
     expect(text).not.toContain("If you’re moving SQLite");
   });
 
-  it("shows the release binary's install line, not cargo", () => {
-    const line = "curl -fsSL https://smugglr.dev/install | bash";
-    expect(text).toContain(line);
-    expect(html).toContain(`data-install="${line}"`);
-    expect(text).toContain("Install smugglr v0.6.4");
-    expect(text).not.toContain("cargo install");
-  });
-
-  it("links the release's five archives and claims no missing checksum", () => {
-    const files = [
-      "smugglr-aarch64-apple-darwin.tar.gz",
-      "smugglr-x86_64-apple-darwin.tar.gz",
-      "smugglr-x86_64-unknown-linux-gnu.tar.gz",
-      "smugglr-aarch64-unknown-linux-gnu.tar.gz",
-      "smugglr-x86_64-pc-windows-msvc.zip",
-    ];
-    for (const file of files) {
-      expect(html).toContain(`href="https://github.com/rafters-studio/smugglr/releases/download/v0.6.4/${file}"`);
-    }
-    expect(html).toContain('href="https://github.com/rafters-studio/smugglr/releases/tag/v0.6.4"');
-    expect(text).not.toMatch(/no checksum/i);
-  });
-
-  it("has a migratr section with its installer and a way to its docs", () => {
+  it("has a migratr section with a way to its docs and no install stack of its own", () => {
     const section = html.match(/<section[^>]*aria-label="migratr"[\s\S]*?<\/section>/)?.[0] ?? "";
-    expect(section).toContain('data-install="curl -fsSL https://smugglr.dev/migratr/install | bash"');
     expect(section).toContain('href="/migratr/"');
-    expect(section).toContain('href="https://github.com/rafters-studio/migratr/releases/tag/v0.3.0"');
+    expect(section).not.toContain("data-copy-command");
     const migratr = html.indexOf('aria-label="migratr"');
     expect(migratr).toBeGreaterThan(html.indexOf('aria-label="Install"'));
     expect(migratr).toBeLessThan(html.indexOf('aria-label="Machine-readable summary"'));
@@ -66,7 +42,7 @@ describe("home page, built", () => {
 
   it("orders stage, install and band", () => {
     const stage = html.indexOf("data-sync-stage");
-    const install = html.indexOf("data-install=");
+    const install = html.indexOf("data-copy-command=");
     const band = html.indexOf('aria-label="Machine-readable summary"');
     expect(stage).toBeGreaterThan(-1);
     expect(install).toBeGreaterThan(stage);
@@ -104,7 +80,7 @@ describe("home page, built", () => {
     expect(markup).not.toMatch(/\bclass(:list)?=|\bstyle=|<style/);
     expect(markup).not.toMatch(/<(div|span|b|h1)[\s>]/);
     // Content takes the designer's sizes: no type overrides on the page or its pieces.
-    for (const file of ["src/pages/index.astro", "src/components/install.astro", "src/components/band-head.astro", "src/components/band-section.astro"]) {
+    for (const file of ["src/pages/index.astro", "src/components/install-section.astro", "src/components/band-head.astro", "src/components/band-section.astro"]) {
       const body = readFileSync(join(process.cwd(), file), "utf8").split("---").slice(2).join("---");
       expect(body).not.toMatch(/<(H[1-6]|P|Lead|Muted|Code|CodeBlock|Button|Typography)\b[^>]*\b(size|weight|family|line|tracking)=/);
     }
