@@ -56,12 +56,26 @@ function field(value: unknown, key: string, url: string): string {
   return found.trim();
 }
 
+/**
+ * The latest release's tag, read the way install.sh and install.ps1 read it:
+ * follow https://github.com/<repo>/releases/latest and take the tag from the
+ * final URL, .../releases/tag/vX.Y.Z. No API and no token. Any other final URL
+ * fails the build, naming the URL.
+ */
+export function tagFromUrl(finalUrl: string, asked: string): string {
+  const tag = /\/releases\/tag\/([^/?#]+)$/.exec(finalUrl)?.[1];
+  if (tag === undefined || !/^v\d+\.\d+\.\d+/.test(tag)) {
+    throw new Error(`install section: ${asked} ended at ${finalUrl}, which is not a release tag`);
+  }
+  return tag;
+}
+
 async function program(name: "smugglr" | "migratr"): Promise<Program> {
   const repo = `rafters-studio/${name}`;
-  const url = `https://api.github.com/repos/${repo}/releases/latest`;
-  const token = process.env["GITHUB_TOKEN"];
-  const release = await getJson(url, token ? { Authorization: `Bearer ${token}` } : {});
-  return { name, repo, tag: field(release, "tag_name", url), url: `https://github.com/${repo}/releases/latest` };
+  const url = `https://github.com/${repo}/releases/latest`;
+  const response = await fetch(url, { redirect: "follow", headers: { "User-Agent": USER_AGENT } });
+  if (!response.ok) throw new Error(`install section: ${url} answered ${response.status}`);
+  return { name, repo, tag: tagFromUrl(response.url, url), url };
 }
 
 async function crate(spec: { name: string; command: string }): Promise<Crate> {
