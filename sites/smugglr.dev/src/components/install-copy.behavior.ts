@@ -21,12 +21,17 @@ export function bindInstallCopy(root: ParentNode = document): void {
     const label = text.textContent ?? "Copy";
     let timer: ReturnType<typeof setTimeout> | undefined;
     button.addEventListener("click", () => {
-      navigator.clipboard.writeText(command).catch(() => {});
-      text.textContent = "Copied";
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        text.textContent = label;
-      }, COPIED_MS);
+      // Copied only when the browser took the copy; a refusal leaves the label as Copy.
+      navigator.clipboard.writeText(command).then(
+        () => {
+          text.textContent = "Copied";
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            text.textContent = label;
+          }, COPIED_MS);
+        },
+        () => {},
+      );
     });
   }
 }
