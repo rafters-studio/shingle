@@ -16,7 +16,7 @@ import {
   tableHeaderClasses,
   tableRowClasses,
 } from "@/components/ui/table.classes";
-import { Code, P } from "@/components/ui/typography.astro";
+import { Code, Muted, P } from "@/components/ui/typography.astro";
 import MANUAL from "@/src/smugglr/manual-output.json";
 import { installData, INSTALLERS } from "@/src/install/data";
 
@@ -35,7 +35,8 @@ const OUT = {
 type Block =
   | { kind: "p"; text: string; code?: string }
   | { kind: "table"; head: string[]; rows: string[][] }
-  | { kind: "out"; name: keyof typeof OUT };
+  | { kind: "out"; name: keyof typeof OUT }
+  | { kind: "commands"; groups: { title: string; items: { label: string; command: string }[] }[] };
 
 interface Sec {
   num: string;
@@ -62,16 +63,36 @@ const SECTIONS: Sec[] = [
     note: "run it, or build it in",
     blocks: [
       {
-        kind: "table",
-        head: ["channel", "command", "what you get"],
-        rows: [
-          ["macOS and Linux", INSTALLERS.unix.smugglr, `smugglr ${smugglr.tag}: the latest release's binary in ~/.local/bin/smugglr, x86_64 or aarch64`],
-          ["macOS and Linux", INSTALLERS.unix.migratr, `migratr ${migratr.tag}: the latest release's binary in ~/.local/bin/migratr`],
-          ["Windows", INSTALLERS.windows.smugglr, `smugglr ${smugglr.tag}, from PowerShell`],
-          ["Windows", INSTALLERS.windows.migratr, `migratr ${migratr.tag}, from PowerShell`],
-          ["Archives and checksums", smugglr.url, "smugglr's latest release on GitHub"],
-          ["Archives and checksums", migratr.url, "migratr's latest release on GitHub"],
-          ...install.crates.map((crate) => [`Rust crate ${crate.name}`, crate.command, `${crate.name} ${crate.version}: ${crate.description}`]),
+        kind: "commands",
+        groups: [
+          {
+            title: "macOS and Linux",
+            items: [
+              { label: `smugglr ${smugglr.tag}: the latest release's binary in ~/.local/bin/smugglr, x86_64 or aarch64`, command: INSTALLERS.unix.smugglr },
+              { label: `migratr ${migratr.tag}: the latest release's binary in ~/.local/bin/migratr`, command: INSTALLERS.unix.migratr },
+            ],
+          },
+          {
+            title: "Windows, from PowerShell",
+            items: [
+              { label: `smugglr ${smugglr.tag}`, command: INSTALLERS.windows.smugglr },
+              { label: `migratr ${migratr.tag}`, command: INSTALLERS.windows.migratr },
+            ],
+          },
+          {
+            title: "Archives and checksums",
+            items: [
+              { label: "smugglr's latest release on GitHub", command: smugglr.url },
+              { label: "migratr's latest release on GitHub", command: migratr.url },
+            ],
+          },
+          {
+            title: "Rust crates",
+            items: install.crates.map((crate) => ({
+              label: `${crate.name} ${crate.version}: ${crate.description}`,
+              command: crate.command,
+            })),
+          },
         ],
       },
     ],
@@ -199,6 +220,19 @@ const SECTIONS: Sec[] = [
               }
               if (block.kind === "out") {
                 return <WrapCode out={block.name}>{OUT[block.name]}</WrapCode>;
+              }
+              if (block.kind === "commands") {
+                return block.groups.map((group) => (
+                  <Container gap="3" padding="0">
+                    <P>{group.title}</P>
+                    {group.items.map((item) => (
+                      <Container gap="1" padding="0">
+                        <Muted>{item.label}</Muted>
+                        <WrapCode>{item.command}</WrapCode>
+                      </Container>
+                    ))}
+                  </Container>
+                ));
               }
               return (
                 <Table>

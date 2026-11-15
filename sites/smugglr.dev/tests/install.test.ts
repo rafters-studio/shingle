@@ -111,6 +111,16 @@ describe("home install section", () => {
       expect(bandText).toContain(command);
     }
   });
+
+  it("lists the band's commands as wrapping blocks, not a table that crushes them at phone width", () => {
+    const band = html.slice(html.indexOf('aria-label="Machine-readable summary"'));
+    const install = band.slice(band.indexOf("</span> INSTALL"), band.indexOf("</span> PLACES"));
+    expect(install).not.toContain("<table");
+    for (const command of [...unix, ...windows, ...data.crates.map((c) => c.command)]) {
+      expect(install).toContain(command);
+    }
+    expect(install.match(/<pre/g)?.length).toBe(unix.length + windows.length + 2 + data.crates.length);
+  });
 });
 
 describe("installer redirects", () => {
