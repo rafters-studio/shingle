@@ -81,6 +81,7 @@ export function repoDocRoute(file: string): string {
 
 /** The docs copied from the smugglr repo, after the written pages, docs before examples. */
 export const repoDocs: { route: string; doc: RepoDoc }[] = Object.entries(docs)
+  .filter(([, doc]) => doc.frontmatter.source?.startsWith("https://github.com/rafters-studio/smugglr/"))
   .map(([file, doc]) => ({ route: repoDocRoute(file), doc }))
   .sort(
     (a, b) =>

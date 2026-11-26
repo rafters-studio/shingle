@@ -1,7 +1,7 @@
 ---
 layout: "../../layouts/Manual.astro"
 title: "The smugglr mesh protocol"
-description: "`smugglr mesh` keeps the copies of one SQLite database in step across machines where nobody is in charge: no server, no hub, no coordinator. Any node can leave and the rest go on. This document says what goes over the wire and what each node does with it. The rules that decide what a change means (apply, skip, hold, conflict, graveyard) belong to `smugglr-core` and are the same for every sync type; the mesh only carries them."
+description: "smugglr mesh keeps the copies of one SQLite database in step across machines where nobody is in charge: no server, no hub, no coordinator. Any node can leave and the rest go on. This document says what goes over the wire and what each node does with it. The rules that decide what a change means (apply, skip, hold, conflict, graveyard) belong to smugglr-core and are the same for every sync type; the mesh only carries them."
 source: "https://github.com/rafters-studio/smugglr/blob/v0.6.4/docs/mesh-protocol.md"
 tag: "v0.6.4"
 lead: false

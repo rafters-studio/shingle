@@ -1,7 +1,7 @@
 ---
 layout: "../../../layouts/Manual.astro"
 title: "hono-tab"
-description: "The endpoint a tab keeps in step with. `@smugglr/web` opens a tab's own database and syncs it with an endpoint the app names; smugglr ships no server. This Worker (Hono on Cloudflare Workers, over D1) is one way to write that endpoint, for the signed-in person's rows only."
+description: "The endpoint a tab keeps in step with. @smugglr/web opens a tab's own database and syncs it with an endpoint the app names; smugglr ships no server. This Worker (Hono on Cloudflare Workers, over D1) is one way to write that endpoint, for the signed-in person's rows only."
 source: "https://github.com/rafters-studio/smugglr/blob/v0.6.4/examples/hono-tab/README.md"
 tag: "v0.6.4"
 lead: false

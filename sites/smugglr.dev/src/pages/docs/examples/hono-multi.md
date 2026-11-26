@@ -1,7 +1,7 @@
 ---
 layout: "../../../layouts/Manual.astro"
 title: "hono-multi"
-description: "A person's own devices kept in step by `smugglr stash` and `smugglr retrieve`, through a bucket the app owns. The hub never holds this data. smugglr makes and applies blobs; the bucket, the device list, crossing off, keys and new devices are app code, and this Worker (`src/index.ts`, Hono on Cloudflare Workers with an R2 bucket) is one way to write them."
+description: "A person's own devices kept in step by smugglr stash and smugglr retrieve, through a bucket the app owns. The hub never holds this data. smugglr makes and applies blobs; the bucket, the device list, crossing off, keys and new devices are app code, and this Worker (src/index.ts, Hono on Cloudflare Workers with an R2 bucket) is one way to write them."
 source: "https://github.com/rafters-studio/smugglr/blob/v0.6.4/examples/hono-multi/README.md"
 tag: "v0.6.4"
 lead: false

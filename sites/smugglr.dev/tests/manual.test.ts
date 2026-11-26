@@ -4,7 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ELEMENT_NODE, type ElementNode, type Node, parse, TEXT_NODE, walkSync } from "ultrahtml";
 import { describe, expect, it } from "vitest";
+import { isCopy } from "../src/smugglr/docs-copy";
 import { parseVersion, smugglrVersion } from "../src/smugglr/version";
+import fixture from "./fixtures/manual.json";
+import migratrBaseline from "./fixtures/migratr-main.json";
 
 /** The routes of the pages copied from the smugglr repo (#213), docs before examples, as the sidebar orders them. */
 function repoDocRoutes(): string[] {
@@ -12,12 +15,10 @@ function repoDocRoutes(): string[] {
   return readdirSync(pages, { recursive: true, withFileTypes: true })
     .filter((e) => e.isFile() && e.name.endsWith(".md"))
     .map((e) => join(e.parentPath, e.name))
-    .filter((file) => /^source: "https:\/\/github\.com\/rafters-studio\/smugglr\//m.test(readFileSync(file, "utf8")))
+    .filter((file) => isCopy(readFileSync(file, "utf8")))
     .map((file) => `/docs/${file.slice(pages.length + 1).replace(/\.md$/, "")}/`)
     .sort((a, b) => Number(a.includes("/examples/")) - Number(b.includes("/examples/")) || a.localeCompare(b));
 }
-import fixture from "./fixtures/manual.json";
-import migratrBaseline from "./fixtures/migratr-main.json";
 
 const root = process.cwd();
 const dist = join(root, "dist");
