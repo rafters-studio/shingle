@@ -6,7 +6,9 @@
  * because that renders a <main> inside Base's <main>.
  */
 const shell = 'flex flex-col md:flex-row';
-const rail = 'shrink-0 md:sticky md:top-0 md:h-svh md:self-start';
+// The sidebar renders its toggle before its panel, which puts it on the outer
+// edge; on the manual it sits on the panel's inner edge, beside the page.
+const rail = 'shrink-0 md:sticky md:top-0 md:h-svh md:self-start md:[&_[data-part=trigger]]:order-last';
 const page = 'min-w-0 flex-1';
 ---
 
