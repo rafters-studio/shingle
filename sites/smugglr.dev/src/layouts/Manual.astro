@@ -17,11 +17,25 @@ import { version } from '@/src/smugglr/version';
 interface Props {
   title: string;
   description?: string;
+  /** Show the description as the lead under the title; a copied doc's own text already opens with it. */
+  lead?: boolean;
+  /** For a doc copied from the smugglr repo: the file it came from, and the tag. */
+  source?: string;
+  tag?: string;
 }
 
 const rawProps = Astro.props as Props & { frontmatter?: Partial<Props> };
 const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
-const { title = '', description } = merged;
+const { title = '', description, lead = true, source, tag } = merged;
+
+// A code block in a Markdown page arrives highlighted by Astro (`.astro-code`,
+// an inline dark background). Shown as the site's own code block: the muted
+// surface and foreground text that WrapCode uses, lines wrapped.
+const markdownCode = [
+  '[&_.astro-code]:!bg-muted [&_.astro-code]:!text-foreground [&_.astro-code_span]:!text-foreground',
+  '[&_.astro-code]:rounded-lg [&_.astro-code]:p-4 [&_.astro-code]:text-sm [&_.astro-code]:font-mono',
+  '[&_.astro-code]:whitespace-pre-wrap [&_.astro-code]:wrap-anywhere',
+].join(' ');
 
 const current = manualPages.find((p) => p.route === Astro.url.pathname);
 const pathLine = current
@@ -74,7 +88,14 @@ const pathLine = current
       <Muted family="mono">{pathLine}</Muted>
       <Container as="article">
         <h1>{title}</h1>
-        {description && <Lead>{description}</Lead>}
+        {lead && description && <Lead>{description}</Lead>}
+        {
+          source && (
+            <Muted family="mono">
+              from the smugglr repo at {tag}: <a href={source}>{source}</a>
+            </Muted>
+          )
+        }
         {
           current && (
             <>
@@ -91,7 +112,9 @@ const pathLine = current
             </>
           )
         }
-        <slot />
+        <div class={markdownCode}>
+          <slot />
+        </div>
       </Container>
     </Container>
   </ManualShell>

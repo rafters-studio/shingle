@@ -18,7 +18,7 @@ const description = (route: string): string => {
           <a href={p.route}>
             {p.num} {p.label}
           </a>
-          : {description(p.route)}
+          : {p.description ?? description(p.route)}
         </li>
       ))
     }

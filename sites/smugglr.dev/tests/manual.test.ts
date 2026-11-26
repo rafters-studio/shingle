@@ -4,9 +4,21 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ELEMENT_NODE, type ElementNode, type Node, parse, TEXT_NODE, walkSync } from "ultrahtml";
 import { describe, expect, it } from "vitest";
+import { isCopy } from "../src/smugglr/docs-copy";
 import { parseVersion, smugglrVersion } from "../src/smugglr/version";
 import fixture from "./fixtures/manual.json";
 import migratrBaseline from "./fixtures/migratr-main.json";
+
+/** The routes of the pages copied from the smugglr repo (#213), docs before examples, as the sidebar orders them. */
+function repoDocRoutes(): string[] {
+  const pages = join(process.cwd(), "src/pages/docs");
+  return readdirSync(pages, { recursive: true, withFileTypes: true })
+    .filter((e) => e.isFile() && e.name.endsWith(".md"))
+    .map((e) => join(e.parentPath, e.name))
+    .filter((file) => isCopy(readFileSync(file, "utf8")))
+    .map((file) => `/docs/${file.slice(pages.length + 1).replace(/\.md$/, "")}/`)
+    .sort((a, b) => Number(a.includes("/examples/")) - Number(b.includes("/examples/")) || a.localeCompare(b));
+}
 
 const root = process.cwd();
 const dist = join(root, "dist");
@@ -92,9 +104,9 @@ describe("manual pages", () => {
     });
   }
 
-  it("/docs/ lists the three manual pages", () => {
+  it("/docs/ lists the three manual pages first, then the docs copied from the smugglr repo", () => {
     const hrefs = article("docs").filter((e) => e.name === "a").map((a) => a.attributes["href"]);
-    expect(hrefs).toEqual(routes);
+    expect(hrefs).toEqual([...routes, ...repoDocRoutes()]);
   });
 });
 

@@ -1,7 +1,15 @@
 export type ManualSection = { num: string; id: string; title: string };
-export type ManualPage = { route: string; num: string; label: string; sections: ManualSection[] };
+export type ManualPage = {
+  route: string;
+  num: string;
+  label: string;
+  sections: ManualSection[];
+  /** For a page copied from the smugglr repo: its one-line description. */
+  description?: string;
+};
 
-export const manualPages: ManualPage[] = [
+/** The manual pages written for the site. */
+const written: ManualPage[] = [
   {
     route: "/docs/get-started/",
     num: "01",
@@ -54,4 +62,43 @@ export const manualPages: ManualPage[] = [
       { num: "11", id: "not-built", title: "Not in 0.6.4" },
     ],
   },
+];
+
+/** A doc copied from the smugglr repo into src/pages/docs/ by scripts/smugglr-docs.mjs. */
+export type RepoDoc = {
+  frontmatter: { title: string; description: string; source: string; tag: string };
+  getHeadings: () => { depth: number; slug: string; text: string }[];
+};
+
+const docs = import.meta.glob<RepoDoc>("../pages/docs/**/*.md", { eager: true });
+
+const two = (n: number): string => String(n).padStart(2, "0");
+
+/** A copied doc's route: docs/x.md is /docs/x/, docs/examples/x.md is /docs/examples/x/. */
+export function repoDocRoute(file: string): string {
+  return `/docs/${file.replace(/^\.\.\/pages\/docs\//, "").replace(/\.md$/, "")}/`;
+}
+
+/** The docs copied from the smugglr repo, after the written pages, docs before examples. */
+export const repoDocs: { route: string; doc: RepoDoc }[] = Object.entries(docs)
+  .filter(([, doc]) => doc.frontmatter.source?.startsWith("https://github.com/rafters-studio/smugglr/"))
+  .map(([file, doc]) => ({ route: repoDocRoute(file), doc }))
+  .sort(
+    (a, b) =>
+      Number(a.route.includes("/examples/")) - Number(b.route.includes("/examples/")) ||
+      a.route.localeCompare(b.route),
+  );
+
+export const manualPages: ManualPage[] = [
+  ...written,
+  ...repoDocs.map(({ route, doc }, i) => ({
+    route,
+    num: two(written.length + i + 1),
+    label: doc.frontmatter.title,
+    description: doc.frontmatter.description,
+    sections: doc
+      .getHeadings()
+      .filter((h) => h.depth === 2)
+      .map((h, j) => ({ num: two(j + 1), id: h.slug, title: h.text })),
+  })),
 ];
