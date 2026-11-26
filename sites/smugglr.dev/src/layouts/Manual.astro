@@ -17,11 +17,16 @@ import { version } from '@/src/smugglr/version';
 interface Props {
   title: string;
   description?: string;
+  /** Show the description as the lead under the title; a copied doc's own text already opens with it. */
+  lead?: boolean;
+  /** For a doc copied from the smugglr repo: the file it came from, and the tag. */
+  source?: string;
+  tag?: string;
 }
 
 const rawProps = Astro.props as Props & { frontmatter?: Partial<Props> };
 const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
-const { title = '', description } = merged;
+const { title = '', description, lead = true, source, tag } = merged;
 
 const current = manualPages.find((p) => p.route === Astro.url.pathname);
 const pathLine = current
@@ -74,7 +79,14 @@ const pathLine = current
       <Muted family="mono">{pathLine}</Muted>
       <Container as="article">
         <h1>{title}</h1>
-        {description && <Lead>{description}</Lead>}
+        {lead && description && <Lead>{description}</Lead>}
+        {
+          source && (
+            <Muted family="mono">
+              from the smugglr repo at {tag}: <a href={source}>{source}</a>
+            </Muted>
+          )
+        }
         {
           current && (
             <>
