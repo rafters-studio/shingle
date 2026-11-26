@@ -4,13 +4,13 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ELEMENT_NODE, type ElementNode, type Node, parse, TEXT_NODE, walkSync } from "ultrahtml";
 import { describe, expect, it } from "vitest";
+import { smugglrVersion } from "../src/smugglr/version";
 
 const root = process.cwd();
 const dist = join(root, "dist");
 const pages = join(root, "src/pages/docs");
 
-const release = readFileSync(join(root, "src/smugglr/release.ts"), "utf8");
-const tag = `v${/const version = "(\d+\.\d+\.\d+)"/.exec(release)?.[1] ?? ""}`;
+const tag = `v${smugglrVersion()}`;
 
 type Copy = { file: string; route: string; title: string; source: string; tag: string; body: string };
 
@@ -66,7 +66,7 @@ describe("docs copied from the smugglr repo", () => {
   });
 
   for (const copy of all) {
-    it(`${copy.route} comes from the release tag the site names`, () => {
+    it(`${copy.route} comes from the release tag the manual names`, () => {
       expect(copy.tag).toBe(tag);
       expect(copy.source).toContain(`/blob/${tag}/`);
     });

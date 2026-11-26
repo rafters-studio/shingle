@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Copies the smugglr repo's own docs onto smugglr.dev, at the release tag the
-// site names (src/smugglr/release.ts): every docs/*.md and every
+// manual names (the changelog copy's version): every docs/*.md and every
 // examples/*/README.md. Each lands as a page in src/pages/docs/ (an example in
 // src/pages/docs/examples/), with frontmatter naming its source and tag; the
 // text is the smugglr repo's, unchanged except that its first "# " heading
@@ -14,10 +14,12 @@ import { REPO, isCopy, page, published, target } from "../src/smugglr/docs-copy.
 
 const OUT = join(process.cwd(), "src/pages/docs");
 
-const release = readFileSync(join(process.cwd(), "src/smugglr/release.ts"), "utf8");
-const version = /const version = "(\d+\.\d+\.\d+)"/.exec(release)?.[1];
+// The release the manual names: the first "## [X.Y.Z]" of the changelog copy,
+// as src/smugglr/version.ts reads it for the manual's header.
+const changelog = readFileSync(join(process.cwd(), "src/smugglr/CHANGELOG.md"), "utf8");
+const version = /^## \[(\d+\.\d+\.\d+)\]/m.exec(changelog)?.[1];
 if (version === undefined) {
-  throw new Error("src/smugglr/release.ts: no `const version = \"X.Y.Z\"` found");
+  throw new Error('src/smugglr/CHANGELOG.md: no "## [X.Y.Z]" version heading found');
 }
 const tag = `v${version}`;
 
