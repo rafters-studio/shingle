@@ -28,6 +28,15 @@ const rawProps = Astro.props as Props & { frontmatter?: Partial<Props> };
 const merged: Partial<Props> = { ...rawProps.frontmatter, ...rawProps };
 const { title = '', description, lead = true, source, tag } = merged;
 
+// A code block in a Markdown page arrives highlighted by Astro (`.astro-code`,
+// an inline dark background). Shown as the site's own code block: the muted
+// surface and foreground text that WrapCode uses, lines wrapped.
+const markdownCode = [
+  '[&_.astro-code]:!bg-muted [&_.astro-code]:!text-foreground [&_.astro-code_span]:!text-foreground',
+  '[&_.astro-code]:rounded-lg [&_.astro-code]:p-4 [&_.astro-code]:text-sm [&_.astro-code]:font-mono',
+  '[&_.astro-code]:whitespace-pre-wrap [&_.astro-code]:wrap-anywhere',
+].join(' ');
+
 const current = manualPages.find((p) => p.route === Astro.url.pathname);
 const pathLine = current
   ? `smugglr manual / ${current.num} ${current.label.toLowerCase()}`
@@ -103,7 +112,9 @@ const pathLine = current
             </>
           )
         }
-        <slot />
+        <div class={markdownCode}>
+          <slot />
+        </div>
       </Container>
     </Container>
   </ManualShell>
