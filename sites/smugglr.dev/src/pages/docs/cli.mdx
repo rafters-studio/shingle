@@ -30,7 +30,7 @@ import OUT from "@/src/smugglr/manual-output.json";
     ],
     [
       "--sync-type direct|mesh",
-      "How the places connect; direct is the default. mesh takes one place and is smugglr mesh. hub and multi are refused as not built yet."
+      "How the places connect: direct, the default, or mesh, which takes one place and is smugglr mesh. A browser tab syncing with its service is a direct sync; stash and retrieve are their own commands."
     ],
     [
       "--sync-mode <mode>",
@@ -186,7 +186,7 @@ A retrieve names each change it drops with its change hash. --replay decides tha
 
 <WrapCode>{OUT.retrieve_replay}</WrapCode>
 
-stash and retrieve are multi: a person’s own devices kept in step through blobs the app stores, where the devices are not online together. The blobs, the device list and the keys are the app’s. `--sync-type multi` is not how to run it and is refused as not built.
+stash and retrieve keep a person’s own devices in step through signed blobs the app stores, where the devices are not online together. The blobs, the device list and the keys are the app’s.
 
 </ManualSection>
 
@@ -386,11 +386,7 @@ A shape difference is carried under `shape`:
 
 </ManualSection>
 
-<ManualSection id="not-built" note="refused, not built">
-
---sync-type hub and multi are not built. The CLI says so and exits 2; do not plan around them.
-
-<WrapCode>{OUT.unknown_type}</WrapCode>
+<ManualSection id="limits" note="what 0.6.4 does not do">
 
 - Retiring the previous mesh key. A node accepts the key before the newest with no end date; nothing removes it but taking it out of the key file.
 

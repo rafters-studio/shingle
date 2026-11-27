@@ -51,7 +51,7 @@ export const manualPages: ManualPage[] = [
       { num: "08", id: "config", title: "Config" },
       { num: "09", id: "exit-codes", title: "Exit codes" },
       { num: "10", id: "record", title: "The record" },
-      { num: "11", id: "not-built", title: "Not in 0.6.4" },
+      { num: "11", id: "limits", title: "What 0.6.4 does not do" },
     ],
   },
 ];

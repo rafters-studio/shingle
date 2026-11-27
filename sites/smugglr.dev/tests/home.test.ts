@@ -35,9 +35,10 @@ describe("home page, built", () => {
     expect(migratr).toBeLessThan(html.indexOf('aria-label="Machine-readable summary"'));
   });
 
-  it("tells no one to use op or 1Password", () => {
+  it("tells no one to use op or 1Password, and types no credential on a command line (#217)", () => {
     expect(text).not.toMatch(/op run|1Password|--environment/);
-    expect(text).toContain("CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token>");
+    expect(text).toContain("CLOUDFLARE_ACCOUNT_ID");
+    expect(text).not.toMatch(/CLOUDFLARE_API_TOKEN=/);
   });
 
   it("orders stage, install and band", () => {
@@ -49,20 +50,28 @@ describe("home page, built", () => {
     expect(band).toBeGreaterThan(install);
   });
 
-  it("has the band's head and its eight sections", () => {
+  it("has the band's head and its eight sections, the ways to sync before the mesh (#217)", () => {
     expect(text).toContain("MACHINE-READABLE SUMMARY");
     expect(text).toContain("GET /llms.txt");
     const sections = [
       "01 SCOPE",
-      "02 INSTALL",
+      "02 WAYS TO SYNC",
       "03 PLACES",
-      "04 EXIT CODES",
-      "05 SYNC MODES",
-      "06 THE RECORD",
+      "04 WHEN A ROW CHANGED IN BOTH PLACES",
+      "05 THE RECORD",
+      "06 EXIT CODES",
       "07 MESH",
       "08 LIMITS",
     ];
-    for (const section of sections) expect(text).toContain(`## ${section}`);
+    const at = sections.map((section) => text.indexOf(`## ${section}`));
+    expect(at.every((i) => i >= 0)).toBe(true);
+    expect([...at].sort((a, b) => a - b)).toEqual(at);
+    for (const way of ["Local to host", "Web to host", "Stash and retrieve", "Mesh"]) expect(text).toContain(way);
+    expect(text).toContain("A browser tab");
+  });
+
+  it("says nothing is not built (#217)", () => {
+    expect(text).not.toMatch(/not built/i);
   });
 
   it("has the fixture's output blocks, byte for byte", () => {

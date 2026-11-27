@@ -82,7 +82,7 @@
         "08 Config",
         "09 Exit codes",
         "10 The record",
-        "11 Not in 0.6.4"
+        "11 What 0.6.4 does not do"
       ],
       "blocks": [
         "watch_zero",
@@ -105,8 +105,7 @@
         "mesh_replay",
         "too_much",
         "stop_json",
-        "shape_json",
-        "unknown_type"
+        "shape_json"
       ]
     }
   },

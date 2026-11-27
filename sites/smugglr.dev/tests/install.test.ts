@@ -104,23 +104,13 @@ describe("home install section", () => {
     expect(section).toContain('href="https://github.com/rafters-studio/migratr/releases/latest"');
   });
 
-  it("lists the installers and the crates in the machine-readable summary", () => {
+  it("shows install once: the machine-readable summary repeats no installer (#217)", () => {
     const band = html.slice(html.indexOf('aria-label="Machine-readable summary"'));
     const bandText = decode(band.replace(/<[^>]+>/g, " ").replace(/\s+/g, " "));
-    for (const command of [...unix, ...windows, ...data.crates.map((c) => c.command)]) {
-      expect(bandText).toContain(command);
-    }
+    expect(bandText).not.toContain("INSTALL");
+    for (const command of [...unix, ...windows]) expect(bandText).not.toContain(command);
   });
 
-  it("lists the band's commands as wrapping blocks, not a table that crushes them at phone width", () => {
-    const band = html.slice(html.indexOf('aria-label="Machine-readable summary"'));
-    const install = band.slice(band.indexOf("</span> INSTALL"), band.indexOf("</span> PLACES"));
-    expect(install).not.toContain("<table");
-    for (const command of [...unix, ...windows, ...data.crates.map((c) => c.command)]) {
-      expect(install).toContain(command);
-    }
-    expect(install.match(/<pre/g)?.length).toBe(unix.length + windows.length + 2 + data.crates.length);
-  });
 });
 
 describe("installer redirects", () => {

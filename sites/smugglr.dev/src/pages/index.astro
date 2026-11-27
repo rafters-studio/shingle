@@ -38,6 +38,9 @@ type Block =
   | { kind: "out"; name: keyof typeof OUT }
   | { kind: "commands"; groups: { title: string; items: { label: string; command: string }[] }[] };
 
+/** Text with `code` spans: the even parts are text, the odd parts code. */
+const spans = (text: string): string[] => text.split("`");
+
 interface Sec {
   num: string;
   title: string;
@@ -49,50 +52,25 @@ const SECTIONS: Sec[] = [
   {
     num: "01",
     title: "SCOPE",
-    note: "one paragraph",
+    note: "what it does",
     blocks: [
-      {
-        kind: "p",
-        text: "smugglr keeps SQLite databases in step: a local file, any service that speaks HTTP-SQL, and Cloudflare D1. One Rust binary. Each row is compared by a 16-byte BLAKE3 hash of its contents, so only rows that changed cross the wire; a large first sync can move as a stash and a retrieve. A row changed in both places stops and is named; nothing is overwritten unless you say so. On a local network where nobody is in charge, smugglr mesh keeps nodes in step as changes happen. Every run prints a record, --json on request, and exits with a code that says what happened. smugglr sync <a> <b> --discover writes nothing and says what two places are and what a sync between them would meet. smugglr exec runs a migration's statements on a place for migratr. smugglr stash and smugglr retrieve, the multi shape, move a person's own devices through signed blobs.",
-      },
+      { kind: "p", text: "smugglr keeps SQLite databases in step: one Rust binary, also Rust crates and a browser package. It compares every row by a hash of its contents, so only rows that changed move. A row changed in both places stops the sync and is named; nothing is overwritten unless you say so." },
+      { kind: "p", text: "`smugglr sync <a> <b> --discover` says what two places are and what a sync between them would meet, and writes nothing. `smugglr exec` runs migratr's statements on a place." },
     ],
   },
   {
     num: "02",
-    title: "INSTALL",
-    note: "run it, or build it in",
+    title: "WAYS TO SYNC",
+    note: "pick the one that fits",
     blocks: [
       {
-        kind: "commands",
-        groups: [
-          {
-            title: "macOS and Linux",
-            items: [
-              { label: `smugglr ${smugglr.tag}: the latest release's binary in ~/.local/bin/smugglr, x86_64 or aarch64`, command: INSTALLERS.unix.smugglr },
-              { label: `migratr ${migratr.tag}: the latest release's binary in ~/.local/bin/migratr`, command: INSTALLERS.unix.migratr },
-            ],
-          },
-          {
-            title: "Windows, from PowerShell",
-            items: [
-              { label: `smugglr ${smugglr.tag}`, command: INSTALLERS.windows.smugglr },
-              { label: `migratr ${migratr.tag}`, command: INSTALLERS.windows.migratr },
-            ],
-          },
-          {
-            title: "Archives and checksums",
-            items: [
-              { label: "smugglr's latest release on GitHub", command: smugglr.url },
-              { label: "migratr's latest release on GitHub", command: migratr.url },
-            ],
-          },
-          {
-            title: "Rust crates",
-            items: install.crates.map((crate) => ({
-              label: `${crate.name} ${crate.version}: ${crate.description}`,
-              command: crate.command,
-            })),
-          },
+        kind: "table",
+        head: ["way", "when you need it", "how"],
+        rows: [
+          ["Local to host", "A SQLite file on a machine kept in step with a hosted database: Cloudflare D1, or any service that speaks HTTP-SQL.", "`smugglr sync ./shop.db d1://shop`, or an https:// address for an HTTP-SQL service."],
+          ["Web to host", "A web app keeps its own SQLite database in the browser tab and syncs it with a service the app runs. The service answers for the rows that belong to the signed-in user (the app's tenant id). smugglr ships no server; the smugglr repo has an example service on Cloudflare Workers with Hono and D1. A desktop app built with Tauri uses the Rust crates the same way.", "The `@smugglr/web` package: `open()` the tab's database with the endpoint the app names, then `sync()`."],
+          ["Stash and retrieve", "A person's own devices kept in step without being online together, through signed files (blobs) kept in storage the app owns. Also the way to move a large first sync.", "`smugglr stash` on one device, `smugglr retrieve` on the other."],
+          ["Mesh", "Machines on one local network, with nobody in charge, kept in step as changes happen.", "`smugglr mesh ./node.db --key-file mesh.key` on each machine."],
         ],
       },
     ],
@@ -100,90 +78,82 @@ const SECTIONS: Sec[] = [
   {
     num: "03",
     title: "PLACES",
-    note: "one engine, every place",
+    note: "what an address looks like",
     blocks: [
       {
         kind: "table",
         head: ["place", "address", "credentials"],
         rows: [
-          ["Local file", "./shop.db", "none"],
-          ["HTTP-SQL service", "https://db.example.com", "none sent"],
-          ["Cloudflare D1", "d1://shop", "CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN"],
+          ["A local SQLite file", "`./shop.db`", "None."],
+          ["A service that speaks HTTP-SQL", "`https://...`", "smugglr sends none of its own."],
+          ["Cloudflare D1", "`d1://shop`", "`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, read from the environment smugglr runs in. Set them however you keep secrets; never type them on the command line."],
+          ["A browser tab", "Through the `@smugglr/web` package and the endpoint the app names.", "The headers the app's sign-in needs."],
         ],
-      },
-      {
-        kind: "p",
-        text: "smugglr keeps no secrets and has no environment of its own; it reads the two D1 variables from the environment it runs in, set however you keep them: ",
-        code: "CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop",
       },
     ],
   },
   {
     num: "04",
-    title: "EXIT CODES",
-    note: "scripts branch on these",
+    title: "WHEN A ROW CHANGED IN BOTH PLACES",
+    note: "you choose the winner",
     blocks: [
       {
         kind: "table",
-        head: ["code", "meaning"],
+        head: ["--sync-mode", "what happens"],
         rows: [
-          ["0", "Done, or a preview. Every row written was read back as written."],
-          ["2", "Refused before anything was read or written: a bad flag, place or config, or a missing D1 variable."],
-          ["3", "Stopped before writing anything, or --discover found a sync would stop."],
-          ["4", "Wrote something and is not done. Run it again; a stopped table stops again until its rows are settled."],
-          ["5", "Too much for the wire. Nothing was sent."],
+          ["`stop`", "The default. The table stops and names the rows."],
+          ["`source`", "The first place's copy is kept, and each overwritten row is named."],
+          ["`target`", "The second place's copy is kept, and each overwritten row is named."],
+          ["`last`", "The copy whose steering column is further on is kept. The steering column is a column you already have, such as `updated_at`."],
         ],
       },
     ],
   },
   {
     num: "05",
-    title: "SYNC MODES",
-    note: "when a row changed in both places",
-    blocks: [
-      {
-        kind: "table",
-        head: ["--sync-mode", "what happens"],
-        rows: [
-          ["stop", "Default. The table stops and names the rows."],
-          ["source", "The source’s copy is kept; each overwritten row is named."],
-          ["target", "The target’s copy is kept; each overwritten row is named."],
-          ["last", "The copy whose steering column is further on is kept."],
-        ],
-      },
-    ],
-  },
-  {
-    num: "06",
     title: "THE RECORD",
-    note: "pasted from the release binary",
+    note: "dry run, then the run",
     blocks: [
-      { kind: "p", text: "The preview names what would move. The run, here as JSON, moves exactly that." },
+      { kind: "p", text: "A dry run names what would move; the run moves exactly that and says so, as text or as JSON." },
       { kind: "out", name: "moved_dry" },
       { kind: "out", name: "moved_json" },
     ],
   },
   {
-    num: "07",
-    title: "MESH",
-    note: "nobody in charge",
+    num: "06",
+    title: "EXIT CODES",
+    note: "what the number tells you",
     blocks: [
       {
-        kind: "p",
-        text: "smugglr mesh keeps every node on a local network that holds one key in step, as changes happen. Each change is signed, sealed and resent until each peer has decided it. A node is named by its machine; on a network with no broadcast, a peers setting names the others.",
+        kind: "table",
+        head: ["code", "meaning"],
+        rows: [
+          ["`0`", "Done, or a dry run. Every row written was read back as written."],
+          ["`2`", "Refused before anything was read or written: a bad flag, place or config, or a missing D1 variable."],
+          ["`3`", "Stopped before writing anything."],
+          ["`4`", "Wrote something and is not done. Run it again."],
+          ["`5`", "Too much for one sync. Nothing was sent."],
+        ],
       },
+    ],
+  },
+  {
+    num: "07",
+    title: "MESH",
+    note: "no server, one key",
+    blocks: [
+      { kind: "p", text: "Every machine on a local network holding the same key stays in step as changes happen. Each change is signed and encrypted, and resent until every other machine has it." },
       { kind: "out", name: "mesh_insert" },
     ],
   },
   {
     num: "08",
     title: "LIMITS",
-    note: "said in the same breath",
+    note: "true of smugglr 0.6.4",
     blocks: [
-      {
-        kind: "p",
-        text: "Direct and mesh syncs exist in 0.6.4: --sync-type hub and multi are refused as not built yet, and stash and retrieve are the multi shape as commands. smugglr sends no credentials to an HTTP-SQL place. A first sync cannot see deletes. A mesh node that restarts can be taken by the others for a second machine under its name (#684).",
-      },
+      { kind: "p", text: "A first sync cannot see deletes, because there is no last agreement to compare with. A table without a primary key stops the sync." },
+      { kind: "p", text: "D1 refuses a query whose result is over 50 MB, and smugglr reads each D1 table in one query, so a table over 50 MB stops the sync. Put it in the config's ignore list and move it another way." },
+      { kind: "p", text: "A mesh machine that restarts can be taken by the others for a second machine under its name. This is fixed for the next release." },
     ],
   },
 ];
@@ -213,7 +183,7 @@ const SECTIONS: Sec[] = [
               if (block.kind === "p") {
                 return (
                   <P>
-                    {block.text}
+                    {spans(block.text).map((part, i) => (i % 2 ? <Code>{part}</Code> : part))}
                     {block.code && <Code>{block.code}</Code>}
                   </P>
                 );
@@ -246,8 +216,8 @@ const SECTIONS: Sec[] = [
                   <tbody class={tableBodyClasses}>
                     {block.rows.map((row) => (
                       <tr class={tableRowClasses}>
-                        {row.map((cell, i) => (
-                          <td class={tableCellClasses}>{i === 0 ? <Code>{cell}</Code> : cell}</td>
+                        {row.map((cell) => (
+                          <td class={tableCellClasses}>{spans(cell).map((part, j) => (j % 2 ? <Code>{part}</Code> : part))}</td>
                         ))}
                       </tr>
                     ))}
