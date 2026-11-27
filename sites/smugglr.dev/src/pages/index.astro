@@ -29,7 +29,6 @@ const { smugglr, migratr } = install.programs;
 const OUT = {
   moved_dry: MANUAL.moved_dry,
   moved_json: MANUAL.moved_json,
-  mesh_insert: MANUAL.mesh_insert,
 };
 
 type Block =
@@ -139,15 +138,6 @@ const SECTIONS: Sec[] = [
   },
   {
     num: "07",
-    title: "MESH",
-    note: "no server, one key",
-    blocks: [
-      { kind: "p", text: "Every machine on a local network holding the same key stays in step as changes happen. Each change is signed and encrypted, and resent until every other machine has it." },
-      { kind: "out", name: "mesh_insert" },
-    ],
-  },
-  {
-    num: "08",
     title: "LIMITS",
     note: "true of smugglr 0.6.4",
     blocks: [

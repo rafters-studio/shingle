@@ -50,7 +50,7 @@ describe("home page, built", () => {
     expect(band).toBeGreaterThan(install);
   });
 
-  it("has the band's head and its eight sections, the ways to sync before the mesh (#217)", () => {
+  it("has the band's head and its seven sections; the mesh is one way to sync, with no section of its own (#217)", () => {
     expect(text).toContain("MACHINE-READABLE SUMMARY");
     expect(text).toContain("GET /llms.txt");
     const sections = [
@@ -60,13 +60,13 @@ describe("home page, built", () => {
       "04 WHEN A ROW CHANGED IN BOTH PLACES",
       "05 THE RECORD",
       "06 EXIT CODES",
-      "07 MESH",
-      "08 LIMITS",
+      "07 LIMITS",
     ];
     const at = sections.map((section) => text.indexOf(`## ${section}`));
     expect(at.every((i) => i >= 0)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
     for (const way of ["Local to host", "Web to host", "Stash and retrieve", "Mesh"]) expect(text).toContain(way);
+    expect(text).not.toMatch(/## \d+ MESH/);
     expect(text).toContain("A browser tab");
   });
 
