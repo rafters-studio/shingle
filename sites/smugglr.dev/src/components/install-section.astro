@@ -1,88 +1,96 @@
 ---
 /**
- * The home install section, "Run it, or build it in": two parts. The first is
- * the programs, installed from the command line, in tabs for the visitor's
- * machine. The second is the crates, for a visitor who wants the engine inside
- * their own Rust program. Versions and descriptions are read when the site
- * builds (src/install/data.ts); the installer commands and the lines about each
- * program are the site's.
+ * The home install section: the two programs from the command line, in tabs
+ * for the visitor's machine, then the crates a Rust program adds, one table
+ * row per job. Versions are read when the site builds (src/install/data.ts);
+ * the commands and the jobs are the site's.
  *
- * @cognitive-load 4/10 - Two parts, one decision each: which machine, which crate
- * @attention-economics The command-line part leads; the crates follow for the visitor who does not want a binary
- * @accessibility Two labelled sections, headings in order, each command a labelled input with a Copy button
+ * @cognitive-load 3/10 - Which machine, then which job
+ * @attention-economics Short enough to sit above the fold: one line per program, one row per crate
+ * @accessibility One labelled section; each command is real text that wraps, with a native Copy button
  */
+import Button from "@/components/ui/button.astro";
 import Container from "@/components/ui/container.astro";
-import { H2, Lead, Muted } from "@/components/ui/typography.astro";
+import Table from "@/components/ui/table.astro";
+import {
+  tableBodyClasses,
+  tableCellClasses,
+  tableHeadClasses,
+  tableHeaderClasses,
+  tableRowClasses,
+} from "@/components/ui/table.classes";
+import { Code, H2, Muted } from "@/components/ui/typography.astro";
 import { installData, INSTALLERS } from "@/src/install/data";
-import InstallRow from "./install-row.astro";
 import InstallTabs from "./install-tabs.astro";
 import SpacedSection from "./spaced-section.astro";
+import WrapCode from "./wrap-code.astro";
 
 const data = await installData();
 const { smugglr, migratr } = data.programs;
 
-const SMUGGLR_JOB = "Sync, mesh, stash, retrieve and exec, as one command.";
-const MIGRATR_JOB = "Plan, up, down, status and restore for a SQLite file.";
 const platforms = [
-  { value: "unix", label: "macOS and Linux", suffix: "" },
-  { value: "windows", label: "Windows", suffix: " In PowerShell." },
+  { value: "unix", label: "macOS and Linux" },
+  { value: "windows", label: "Windows (PowerShell)" },
+] as const;
+const programs = [
+  { name: "smugglr", tag: smugglr.tag, url: smugglr.url },
+  { name: "migratr", tag: migratr.tag, url: migratr.url },
 ] as const;
 ---
 
-<SpacedSection label="Install" space="24">
-  <Container size="3xl" padding="0" gap="16">
-    <Container as="section" gap="6" aria-label="Command line">
-      <H2 color="accent-foreground">Run it from the command line</H2>
-      <Lead>
-        Two programs for a terminal or a script. Each installer picks your machine and puts the binary on your PATH.
-      </Lead>
-      <InstallTabs id="install-os" value="unix" tabs={platforms.map((p) => ({ value: p.value, label: p.label }))}>
-        {
-          platforms.map((p) => (
-            <Fragment slot={`panel-${p.value}`}>
-              <Container gap="8" padding="6">
-                <InstallRow
-                  id={`${p.value}-smugglr`}
-                  name="smugglr"
-                  version={smugglr.tag}
-                  description={`${SMUGGLR_JOB}${p.suffix}`}
-                  command={INSTALLERS[p.value].smugglr}
-                />
-                <InstallRow
-                  id={`${p.value}-migratr`}
-                  name="migratr"
-                  version={migratr.tag}
-                  description={`${MIGRATR_JOB}${p.suffix}`}
-                  command={INSTALLERS[p.value].migratr}
-                />
-              </Container>
-            </Fragment>
-          ))
-        }
-      </InstallTabs>
-      <Muted>
-        Archives and checksums: <a href={smugglr.url}>smugglr</a>, <a href={migratr.url}>migratr</a>.
-      </Muted>
-    </Container>
-
-    <Container as="section" gap="6" aria-label="Rust libraries">
-      <H2 color="accent-foreground">Build it into your Rust program</H2>
-      <Lead>
-        No binary to install. Add the crate for the job your program does; the same engine runs underneath.
-      </Lead>
-      <Container gap="8">
+<SpacedSection label="Install" space="12">
+  <Container size="3xl" padding="0" gap="6">
+    <H2 color="accent-foreground">Install</H2>
+    <InstallTabs id="install-os" value="unix" tabs={platforms.map((p) => ({ value: p.value, label: p.label }))}>
+      {
+        platforms.map((p) => (
+          <Fragment slot={`panel-${p.value}`}>
+            <Container gap="3" padding="0">
+              {programs.map((program) => (
+                <Container gap="1" padding="0" data-copy-command={INSTALLERS[p.value][program.name]} data-install-row={program.name}>
+                  <Container columns={4} gap="2" padding="0">
+                    <Container colSpan={3} padding="0">
+                      <Muted>
+                        {`${program.name} ${program.tag}, `}<a href={program.url}>archives and checksums</a>
+                      </Muted>
+                    </Container>
+                    <Container colSpan={1} padding="0">
+                      <Button id={`${p.value}-${program.name}-copy`} variant="outline">Copy</Button>
+                    </Container>
+                  </Container>
+                  <WrapCode>{INSTALLERS[p.value][program.name]}</WrapCode>
+                </Container>
+              ))}
+            </Container>
+          </Fragment>
+        ))
+      }
+    </InstallTabs>
+    <Table>
+      <thead class={tableHeaderClasses}>
+        <tr class={tableRowClasses}>
+          <th class={tableHeadClasses}>In a Rust program</th>
+          <th class={tableHeadClasses}>Add</th>
+          <th class={tableHeadClasses}>Version</th>
+        </tr>
+      </thead>
+      <tbody class={tableBodyClasses}>
         {
           data.crates.map((crate) => (
-            <InstallRow
-              id={crate.name}
-              name={crate.name}
-              version={crate.version}
-              description={crate.description}
-              command={crate.command}
-            />
+            <tr class={tableRowClasses} data-crate={crate.name}>
+              <td class={tableCellClasses}>{crate.job}</td>
+              <td class={tableCellClasses}>
+                <Code>{crate.command}</Code>
+              </td>
+              <td class={tableCellClasses}>{crate.version}</td>
+            </tr>
           ))
         }
-      </Container>
-    </Container>
+      </tbody>
+    </Table>
+    <Muted>
+      In a web app, the browser package <Code>@smugglr/web</Code> is not on npm yet; it comes from the smugglr repo.
+    </Muted>
   </Container>
 </SpacedSection>
+

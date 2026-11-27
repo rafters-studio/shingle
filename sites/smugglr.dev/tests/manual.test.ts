@@ -141,8 +141,9 @@ describe("what 0.6.4 does, in llms.txt and llms-full.txt", () => {
     expect(readFileSync(join(dist, "migratr/index.html"), "utf8")).toContain("up --smuggl");
   });
 
-  it("names forgr with its crates.io name", () => {
-    expect(full).toContain("forgr on crates.io makes test data from the schema.json an app already has.");
+  it("links forgr's own page, which carries forgr's README", () => {
+    expect(full).toContain("https://smugglr.dev/forgr/");
+    expect(full).toContain("Test data from the schema.json");
   });
 
   it("is not stale about S3 or version", () => {

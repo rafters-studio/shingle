@@ -24,6 +24,8 @@ export interface Crate {
   version: string;
   description: string;
   command: string;
+  /** What a program adds the crate for, in the site's words. */
+  job: string;
 }
 
 export interface InstallData {
@@ -31,15 +33,17 @@ export interface InstallData {
   crates: Crate[];
 }
 
-/** The crates, in the order the section lists them, with the command that adds each. */
-export const CRATES: { name: string; command: string }[] = [
-  { name: "smugglr-sync", command: "cargo add smugglr-sync" },
-  { name: "smugglr-mesh", command: "cargo add smugglr-mesh" },
-  { name: "smugglr-multi", command: "cargo add smugglr-multi" },
-  { name: "smugglr-web", command: "cargo add smugglr-web" },
-  { name: "smugglr-core", command: "cargo add smugglr-core" },
-  { name: "migratr", command: "cargo add migratr" },
-  { name: "forgr", command: "cargo add forgr --dev --features fake" },
+/**
+ * The crates a program adds, by the job it adds them for, in the order the
+ * section lists them. smugglr-core and smugglr-web come in with these and are
+ * not listed on their own.
+ */
+export const CRATES: { name: string; command: string; job: string }[] = [
+  { name: "smugglr-sync", command: "cargo add smugglr-sync", job: "Sync two places from a Rust program" },
+  { name: "smugglr-multi", command: "cargo add smugglr-multi", job: "Stash and retrieve between a person's devices" },
+  { name: "smugglr-mesh", command: "cargo add smugglr-mesh", job: "A mesh on a local network" },
+  { name: "migratr", command: "cargo add migratr", job: "Schema migrations" },
+  { name: "forgr", command: "cargo add forgr --dev --features fake", job: "Test data from your schema" },
 ];
 
 const USER_AGENT = "smugglr.dev site build (https://smugglr.dev)";
@@ -78,7 +82,7 @@ async function program(name: "smugglr" | "migratr"): Promise<Program> {
   return { name, repo, tag: tagFromUrl(response.url, url), url };
 }
 
-async function crate(spec: { name: string; command: string }): Promise<Crate> {
+async function crate(spec: { name: string; command: string; job: string }): Promise<Crate> {
   const url = `https://crates.io/api/v1/crates/${spec.name}`;
   const body = (await getJson(url)) as { crate?: unknown };
   return {
@@ -86,6 +90,7 @@ async function crate(spec: { name: string; command: string }): Promise<Crate> {
     version: field(body.crate, "max_version", url),
     description: field(body.crate, "description", url),
     command: spec.command,
+    job: spec.job,
   };
 }
 

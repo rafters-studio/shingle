@@ -27,81 +27,67 @@ const from = html.indexOf('aria-label="Install"');
 const to = html.indexOf('aria-label="migratr"');
 const section = from === -1 || to === -1 ? "" : html.slice(from, to);
 const text = decode(section.replace(/<[^>]+>/g, " ").replace(/\s+/g, " "));
-const commandValues = [...section.matchAll(/<input[^>]*value="([^"]*)"/g)].map((m) => decode(m[1] ?? ""));
 
 const unix = ["curl -fsSL https://smugglr.dev/install | bash", "curl -fsSL https://smugglr.dev/migratr/install | bash"];
 const windows = ["irm https://smugglr.dev/install.ps1 | iex", "irm https://smugglr.dev/migratr/install.ps1 | iex"];
 const crates = [
   "smugglr-sync",
-  "smugglr-mesh",
   "smugglr-multi",
-  "smugglr-web",
-  "smugglr-core",
+  "smugglr-mesh",
   "migratr",
   "forgr",
 ];
 
 describe("home install section", () => {
-  it("is one section, in place of the old install stacks", () => {
+  it("is one section under one heading, Install", () => {
     expect(section).not.toBe("");
     expect(html.match(/aria-label="Install"/g)).toHaveLength(1);
-    expect(html).not.toContain("Or download v");
-    expect(html).not.toContain("Install smugglr v");
+    expect(section.match(/<h2[^>]*>/g)).toHaveLength(1);
+    expect(text).toContain("Install");
   });
 
-  it("has the command-line part, then the Rust program part, each heading in accent", () => {
-    const cli = section.indexOf("Run it from the command line");
-    const lib = section.indexOf("Build it into your Rust program");
-    expect(cli).toBeGreaterThan(-1);
-    expect(lib).toBeGreaterThan(cli);
-    expect(section.match(/<h2[^>]*text-accent-foreground[^>]*>/g)).toHaveLength(2);
-  });
-
-  it("has the tabs macOS and Linux, then Windows", () => {
+  it("has the tabs macOS and Linux, then Windows (PowerShell)", () => {
     const tabs = [...section.matchAll(/role="tab"[^>]*>\s*([^<]+?)\s*</g)].map((m) => m[1]);
-    expect(tabs).toEqual(["macOS and Linux", "Windows"]);
+    expect(tabs).toEqual(["macOS and Linux", "Windows (PowerShell)"]);
   });
 
-  it("holds every command exactly, in order", () => {
-    expect(commandValues).toEqual([
-      ...unix,
-      ...windows,
-      ...data.crates.map((c) => c.command),
-    ]);
-    expect(data.crates.map((c) => c.name)).toEqual(crates);
-    expect(data.crates.at(-1)?.command).toBe("cargo add forgr --dev --features fake");
-    for (const c of data.crates.slice(0, -1)) expect(c.command).toBe(`cargo add ${c.name}`);
+  it("shows each installer whole, as text that wraps, in order", () => {
+    const blocks = [...section.matchAll(/<pre[^>]*><code>([\s\S]*?)<\/code><\/pre>/g)].map((m) => decode(m[1] ?? "").trim());
+    expect(blocks).toEqual([...unix, ...windows]);
+    expect(section).not.toMatch(/<input/);
   });
 
-  it("gives each command row a Copy button and a command to copy", () => {
+  it("gives each installer a Copy button and the command to copy", () => {
     const rows = [...section.matchAll(/data-copy-command="([^"]*)"/g)].map((m) => decode(m[1] ?? ""));
-    expect(rows).toEqual(commandValues);
-    expect(section.match(/data-part="label"[^>]*>Copy</g)).toHaveLength(commandValues.length);
+    expect(rows).toEqual([...unix, ...windows]);
+    expect(section.match(/data-part="label"[^>]*>Copy</g)).toHaveLength(rows.length);
   });
 
-  it("shows each version as the build read it", () => {
+  it("names each program with the tag the build read, and links its release for archives and checksums", () => {
     for (const name of ["smugglr", "migratr"] as const) {
       const tag = data.programs[name].tag;
       expect(tag).toMatch(/^v\d+\.\d+\.\d+/);
-      expect(text).toContain(`${name} ${tag}`);
+      expect(text).toContain(`${name} ${tag}, archives and checksums`);
     }
-    for (const c of data.crates) {
-      expect(c.version).toMatch(/^\d+\.\d+\.\d+/);
-      expect(text).toContain(`${c.name} ${c.version}`);
-    }
-  });
-
-  it("shows each crate's description as crates.io gave it", () => {
-    for (const c of data.crates) {
-      expect(c.description.length).toBeGreaterThan(0);
-      expect(text).toContain(c.description);
-    }
-  });
-
-  it("links each repo's latest release for archives and checksums", () => {
-    expect(text).toContain("Archives and checksums:");
     expect(section).toContain('href="https://github.com/rafters-studio/smugglr/releases/latest"');
     expect(section).toContain('href="https://github.com/rafters-studio/migratr/releases/latest"');
+  });
+
+  it("lists one row per crate, by job, with its command and the version the build read", () => {
+    expect(data.crates.map((c) => c.name)).toEqual(crates);
+    const rows = [...section.matchAll(/data-crate="([^"]+)"/g)].map((m) => m[1]);
+    expect(rows).toEqual(crates);
+    for (const c of data.crates) {
+      expect(c.version).toMatch(/^\d+\.\d+\.\d+/);
+      expect(text).toContain(c.job);
+      expect(text).toContain(c.command);
+      expect(text).toContain(c.version);
+    }
+    expect(data.crates.at(-1)?.command).toBe("cargo add forgr --dev --features fake");
+  });
+
+  it("says the browser package is not on npm yet", () => {
+    expect(text).toContain("@smugglr/web is not on npm yet");
   });
 
   it("shows install once: the machine-readable summary repeats no installer (#217)", () => {

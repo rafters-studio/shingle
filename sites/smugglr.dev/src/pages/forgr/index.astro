@@ -1,0 +1,28 @@
+---
+/**
+ * /forgr/: forgr's README at the tag for its crates.io version, copied by
+ * scripts/forgr-docs.mjs into src/forgr/README.md, in the docs layout.
+ * Highlighted code shows as the site's own code block.
+ */
+import Docs from "@/src/layouts/Docs.astro";
+import { Content, frontmatter } from "@/src/forgr/README.md";
+import { H1, Muted } from "@/components/ui/typography.astro";
+
+const nav = [{ heading: "forgr", items: [{ label: "Overview", href: "/forgr/", exact: true }] }];
+const description = "Test data from the schema.json an app already has: a factory and a mock for every table, and a test that your SQL still fits the schema.";
+const markdownCode = [
+  "[&_.astro-code]:!bg-muted [&_.astro-code]:!text-foreground [&_.astro-code_span]:!text-foreground",
+  "[&_.astro-code]:rounded-lg [&_.astro-code]:p-4 [&_.astro-code]:text-sm [&_.astro-code]:font-mono",
+  "[&_.astro-code]:whitespace-pre-wrap [&_.astro-code]:wrap-anywhere",
+].join(" ");
+---
+
+<Docs title={frontmatter.title} description={description} nav={nav}>
+  <H1>forgr</H1>
+  <Muted>
+    forgr {frontmatter.tag}, from its README: <a href={frontmatter.source}>{frontmatter.source}</a>
+  </Muted>
+  <div class={markdownCode}>
+    <Content />
+  </div>
+</Docs>
