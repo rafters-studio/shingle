@@ -141,9 +141,9 @@ describe("what 0.6.4 does, in llms.txt and llms-full.txt", () => {
     expect(readFileSync(join(dist, "migratr/index.html"), "utf8")).toContain("up --smuggl");
   });
 
-  it("links forgr's own page, which carries forgr's README", () => {
+  it("has forgr's own page in llms-full.txt", () => {
     expect(full).toContain("https://smugglr.dev/forgr/");
-    expect(full).toContain("Test data from the schema.json");
+    expect(full).toContain("forgr::schema!");
   });
 
   it("is not stale about S3 or version", () => {

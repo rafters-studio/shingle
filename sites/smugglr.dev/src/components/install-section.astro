@@ -1,32 +1,28 @@
 ---
 /**
  * The home install section: the two programs from the command line, in tabs
- * for the visitor's machine, then the crates a Rust program adds, one table
- * row per job. Versions are read when the site builds (src/install/data.ts);
- * the commands and the jobs are the site's.
+ * for the visitor's machine, each one command with its Copy button; then the
+ * three products as cards, each with one sentence, the crate a Rust program
+ * adds, and its docs. The words are writer-smugglr's; versions are read when
+ * the site builds (src/install/data.ts).
  *
- * @cognitive-load 3/10 - Which machine, then which job
- * @attention-economics Short enough to sit above the fold: one line per program, one row per crate
- * @accessibility One labelled section; each command is real text that wraps, with a native Copy button
+ * @cognitive-load 3/10 - Which machine, which product
+ * @accessibility Headings in order; each command is real text with a native Copy button; each link is named by its text
  */
-import Button from "@/components/ui/button.astro";
+import CardContent from "@/components/ui/card-content.astro";
+import CardHeader from "@/components/ui/card-header.astro";
+import CardTitle from "@/components/ui/card-title.astro";
+import Card from "@/components/ui/card.astro";
 import Container from "@/components/ui/container.astro";
-import Table from "@/components/ui/table.astro";
-import {
-  tableBodyClasses,
-  tableCellClasses,
-  tableHeadClasses,
-  tableHeaderClasses,
-  tableRowClasses,
-} from "@/components/ui/table.classes";
-import { Code, H2, Muted } from "@/components/ui/typography.astro";
+import { H2 } from "@/components/ui/typography.astro";
 import { installData, INSTALLERS } from "@/src/install/data";
+import InstallLine from "./install-line.astro";
 import InstallTabs from "./install-tabs.astro";
 import SpacedSection from "./spaced-section.astro";
-import WrapCode from "./wrap-code.astro";
 
 const data = await installData();
 const { smugglr, migratr } = data.programs;
+const crate = (name: string) => data.crates.find((c) => c.name === name);
 
 const platforms = [
   { value: "unix", label: "macOS and Linux" },
@@ -36,61 +32,78 @@ const programs = [
   { name: "smugglr", tag: smugglr.tag, url: smugglr.url },
   { name: "migratr", tag: migratr.tag, url: migratr.url },
 ] as const;
+const cards = [
+  {
+    name: "smugglr",
+    sentence:
+      "Keeps SQLite databases in step across files, HTTP-SQL services, D1 and browser tabs; compares rows by hash, moves what changed.",
+    crate: crate("smugglr-sync"),
+    docs: "/docs/",
+  },
+  {
+    name: "migratr",
+    sentence:
+      "Schema migrations for SQLite: JSON files, a plan before anything runs, a snapshot before every destructive step, and restore.",
+    crate: crate("migratr"),
+    docs: "/migratr/",
+  },
+  {
+    name: "forgr",
+    sentence:
+      "Test data for SQLite apps, generated from the schema.json you already have: an empty store, factories and mocks.",
+    crate: crate("forgr"),
+    docs: "/forgr/",
+  },
+];
 ---
 
-<SpacedSection label="Install" space="12">
-  <Container size="3xl" padding="0" gap="6">
-    <H2 color="accent-foreground">Install</H2>
-    <InstallTabs id="install-os" value="unix" tabs={platforms.map((p) => ({ value: p.value, label: p.label }))}>
-      {
-        platforms.map((p) => (
-          <Fragment slot={`panel-${p.value}`}>
-            <Container gap="3" padding="0">
-              {programs.map((program) => (
-                <Container gap="1" padding="0" data-copy-command={INSTALLERS[p.value][program.name]} data-install-row={program.name}>
-                  <Container columns={4} gap="2" padding="0">
-                    <Container colSpan={3} padding="0">
-                      <Muted>
-                        {`${program.name} ${program.tag}, `}<a href={program.url}>archives and checksums</a>
-                      </Muted>
-                    </Container>
-                    <Container colSpan={1} padding="0">
-                      <Button id={`${p.value}-${program.name}-copy`} variant="outline">Copy</Button>
-                    </Container>
-                  </Container>
-                  <WrapCode>{INSTALLERS[p.value][program.name]}</WrapCode>
-                </Container>
-              ))}
-            </Container>
-          </Fragment>
-        ))
-      }
-    </InstallTabs>
-    <Table>
-      <thead class={tableHeaderClasses}>
-        <tr class={tableRowClasses}>
-          <th class={tableHeadClasses}>In a Rust program</th>
-          <th class={tableHeadClasses}>Add</th>
-          <th class={tableHeadClasses}>Version</th>
-        </tr>
-      </thead>
-      <tbody class={tableBodyClasses}>
+<SpacedSection label="Install" space="16">
+  <Container size="4xl" padding="0" gap="12">
+    <Container gap="6" padding="0">
+      <H2>Install</H2>
+      <InstallTabs id="install-os" value="unix" tabs={platforms.map((p) => ({ value: p.value, label: p.label }))}>
         {
-          data.crates.map((crate) => (
-            <tr class={tableRowClasses} data-crate={crate.name}>
-              <td class={tableCellClasses}>{crate.job}</td>
-              <td class={tableCellClasses}>
-                <Code>{crate.command}</Code>
-              </td>
-              <td class={tableCellClasses}>{crate.version}</td>
-            </tr>
+          platforms.map((p) => (
+            <Fragment slot={`panel-${p.value}`}>
+              <Container gap="6" padding="0">
+                {programs.map((program) => (
+                  <Container gap="2" padding="0" data-install-row={program.name}>
+                    <Container as="article" padding="0">
+                      <p>
+                        <strong>{program.name}</strong> {program.tag} · <a href={program.url}>archives and checksums</a>
+                      </p>
+                    </Container>
+                    <InstallLine command={INSTALLERS[p.value][program.name]} id={`${p.value}-${program.name}`} />
+                  </Container>
+                ))}
+              </Container>
+            </Fragment>
           ))
         }
-      </tbody>
-    </Table>
-    <Muted>
-      In a web app, the browser package <Code>@smugglr/web</Code> is not on npm yet; it comes from the smugglr repo.
-    </Muted>
+      </InstallTabs>
+    </Container>
+
+    <Container columns={{ base: 1, md: 3 }} gap="4" padding="0">
+      {
+        cards.map((card) => (
+          <Card data-product={card.name}>
+            <CardHeader>
+              <CardTitle>{card.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Container as="article" gap="3" padding="0">
+                <p>{card.sentence}</p>
+                <p>
+                  <code>{card.crate?.command}</code> {card.crate?.version}
+                </p>
+                <p>
+                  <a href={card.docs}>The {card.name} docs</a>
+                </p>
+              </Container>
+            </CardContent>
+          </Card>
+        ))
+      }
+    </Container>
   </Container>
 </SpacedSection>
-

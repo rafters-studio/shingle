@@ -26,13 +26,14 @@ describe("home page, built", () => {
     expect(text).not.toContain("If you’re moving SQLite");
   });
 
-  it("has a migratr section with a way to its docs and no install stack of its own", () => {
-    const section = html.match(/<section[^>]*aria-label="migratr"[\s\S]*?<\/section>/)?.[0] ?? "";
-    expect(section).toContain('href="/migratr/"');
-    expect(section).not.toContain("data-copy-command");
-    const migratr = html.indexOf('aria-label="migratr"');
-    expect(migratr).toBeGreaterThan(html.indexOf('aria-label="Install"'));
-    expect(migratr).toBeLessThan(html.indexOf('aria-label="Machine-readable summary"'));
+  it("gives migratr and forgr a card in the install section, each linking its own page, with no install stack of their own", () => {
+    const install = html.slice(html.indexOf('aria-label="Install"'), html.indexOf('aria-label="Machine-readable summary"'));
+    for (const product of ["migratr", "forgr"]) {
+      const card = install.match(new RegExp(`data-product="${product}"[\\s\\S]*?href="/${product}/"`))?.[0] ?? "";
+      expect(card).not.toBe("");
+      expect(card).not.toContain("data-copy-command");
+    }
+    expect(html).not.toContain('aria-label="migratr"');
   });
 
   it("tells no one to use op or 1Password, and types no credential on a command line (#217)", () => {
@@ -43,7 +44,7 @@ describe("home page, built", () => {
 
   it("orders stage, install and band", () => {
     const stage = html.indexOf("data-sync-stage");
-    const install = html.indexOf("data-copy-command=");
+    const install = html.indexOf('aria-label="Install"');
     const band = html.indexOf('aria-label="Machine-readable summary"');
     expect(stage).toBeGreaterThan(-1);
     expect(install).toBeGreaterThan(stage);

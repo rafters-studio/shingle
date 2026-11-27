@@ -1,0 +1,111 @@
+---
+title: "forgr"
+description: "Test data for SQLite apps, generated from the schema.json you already have: an empty store, factories and mocks."
+---
+
+import Docs from "@/src/layouts/Docs.astro";
+import { mdxComponents } from "@/lib/mdx-components";
+
+export const components = mdxComponents;
+
+<Docs title="forgr" description="Test data for SQLite apps, generated from the schema.json you already have: an empty store, factories and mocks." nav={[{ heading: "forgr", items: [{ label: "Overview", href: "/forgr/", exact: true }] }]}>
+
+forgr 0.1.0 on [crates.io](https://crates.io/crates/forgr). Source: [github.com/rafters-studio/forgr](https://github.com/rafters-studio/forgr).
+
+## What forgr is
+
+forgr is a Rust library that makes test data from the `schema.json` an app already has, in migratr's format (migratr writes one after every `up` and `down`). One `forgr::schema!` call gives you an empty test store, a factory per table and, behind the `fake` feature, a mock per table. When the schema changes, tests that no longer match it fail in the commands you already run. forgr reads the file and never writes it; it does not run migrations or move rows between databases.
+
+## Install
+
+In the crate that owns the store, forgr is an optional dependency. A feature turns it on together with `forgr/fake` for mocks, and a dev-dependency covers that crate's own tests:
+
+```toml
+[features]
+testing = ["dep:forgr", "forgr/fake"]
+
+[dependencies]
+forgr = { version = "0.1", optional = true }
+
+[dev-dependencies]
+forgr = { version = "0.1", features = ["fake"] }
+```
+
+The feature name is yours; `testing` is the name used below. Other crates need no forgr dependency of their own.
+
+## Set it up
+
+Make one `forgr::schema!` call, in the library of the crate that owns the store, inside a module behind the cargo feature. The path is relative to the crate's manifest directory:
+
+```rust
+/// Test data from this store's schema, for this crate's tests and, through `testing`, every other crate's.
+#[cfg(any(test, feature = "testing"))]
+pub mod forgr {
+    forgr::schema!("schema/schema.json");
+}
+```
+
+Another crate's tests depend on the owning crate with the feature, and on nothing else from forgr:
+
+```toml
+[dependencies]
+store = { path = "../store" }
+rusqlite = { version = "0.41", features = ["bundled"] }
+[dev-dependencies]
+store = { path = "../store", features = ["testing"] }
+```
+
+The module around the call matters: `schema!` puts its items in the scope it is called in, and at a test file's root it can collide with names such as `Override` (error `E0252`).
+
+## Write a test
+
+`empty_store()` is an in-memory SQLite connection with the schema applied and foreign keys on, holding no rows. Each call is a fresh store. A factory builds one row, with setters named for the columns. A mock builds many, filled with fake data. This test, from `app/tests/uses_store.rs`, uses all three:
+
+```rust
+use store::forgr::notes;
+#[test]
+fn notes_from_the_owners_schema() {
+    let conn = store::forgr::empty_store();
+    let n = notes::factory().id("n1").owner("ana").updated_at("t").kind("memo").insert(&conn).unwrap();
+    assert_eq!(n.owner, "ana");
+    assert_eq!(notes::mock(4).insert(&conn).unwrap().len(), 4);
+    use store::forgr::Override::{Fixed, Pick};
+    let m = notes::mock(6).with(notes::Overrides { owner: Fixed("bo".into()), kind: Pick(vec!["todo".into()]), ..Default::default() }).insert(&conn).unwrap();
+    assert!(m.iter().all(|r| r.owner == "bo" && r.kind == "todo"));
+}
+```
+
+A NOT NULL column with no default, and every primary-key column, left unset on a factory is a compile error. Tests do not assert on mock values; they assert on the properties the test sets.
+
+## Overrides
+
+Each table has an `Overrides` struct with one field per column. A field is an `Override`: `Fake` (the default), `Fixed(value)`, `Pick(list)` or `Each(closure)`. `..Default::default()` leaves the rest Fake. The test above uses `Fixed` and `Pick`. `Each` makes the value per row from a closure; `r.row` is the row's number and `r.pick(list)` picks from a list:
+
+```rust
+    use macro_toy::Override;
+    mock_events_with(
+        called,
+        macro_toy::events::Overrides {
+            body: Override::each(|r| format!("kid {}", r.row)),
+            ..Default::default()
+        },
+    )
+```
+
+## When the schema changes
+
+Three things tell you, each in a command the project already runs.
+
+An unset required column is a compile error, one per column, so `cargo check` reports it. Rename a column in `schema.json` and `cargo clippy --workspace --tests` fails in every test that still uses the old name; the error is rustc's own. SQL that no longer matches the schema fails `cargo test`: `schema!` also emits a test, `forgr_sql_matches_schema`, that prepares the SQL strings and `.sql` files in the non-test `src/` of every crate in the workspace against `schema.json`, and names the file and line of each statement that does not match.
+
+## Limits in 0.1
+
+- SQL built with `format!` is unchecked. The check lists it.
+- DDL is unchecked, whether it is in a string literal or a `.sql` file.
+- An INTEGER column whose values mean an enum, with no CHECK, gets any integer from a mock. Set it with `Pick` or `Fixed`.
+- forgr does not read a TEXT column as JSON. Set a JSON value with `Fixed`, `Pick` or `Each`.
+- An FTS5 virtual table gets no factory and no mock, and its shadow tables are skipped.
+- One schema per workspace: `schema!` is called once, in the crate that owns the store.
+- `#[cfg(test)]` code and a crate's `tests/` are not scanned by the SQL check.
+
+</Docs>

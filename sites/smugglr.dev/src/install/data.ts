@@ -33,17 +33,11 @@ export interface InstallData {
   crates: Crate[];
 }
 
-/**
- * The crates a program adds, by the job it adds them for, in the order the
- * section lists them. smugglr-core and smugglr-web come in with these and are
- * not listed on their own.
- */
+/** The crates the home page's product cards add, one per product. */
 export const CRATES: { name: string; command: string; job: string }[] = [
-  { name: "smugglr-sync", command: "cargo add smugglr-sync", job: "Sync two places from a Rust program" },
-  { name: "smugglr-multi", command: "cargo add smugglr-multi", job: "Stash and retrieve between a person's devices" },
-  { name: "smugglr-mesh", command: "cargo add smugglr-mesh", job: "A mesh on a local network" },
-  { name: "migratr", command: "cargo add migratr", job: "Schema migrations" },
-  { name: "forgr", command: "cargo add forgr --dev --features fake", job: "Test data from your schema" },
+  { name: "smugglr-sync", command: "cargo add smugglr-sync", job: "smugglr" },
+  { name: "migratr", command: "cargo add migratr", job: "migratr" },
+  { name: "forgr", command: "cargo add forgr --dev --features fake", job: "forgr" },
 ];
 
 const USER_AGENT = "smugglr.dev site build (https://smugglr.dev)";

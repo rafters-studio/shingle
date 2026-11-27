@@ -24,7 +24,7 @@ function decode(text: string): string {
 }
 
 const from = html.indexOf('aria-label="Install"');
-const to = html.indexOf('aria-label="migratr"');
+const to = html.indexOf('aria-label="Machine-readable summary"');
 const section = from === -1 || to === -1 ? "" : html.slice(from, to);
 const text = decode(section.replace(/<[^>]+>/g, " ").replace(/\s+/g, " "));
 
@@ -32,8 +32,6 @@ const unix = ["curl -fsSL https://smugglr.dev/install | bash", "curl -fsSL https
 const windows = ["irm https://smugglr.dev/install.ps1 | iex", "irm https://smugglr.dev/migratr/install.ps1 | iex"];
 const crates = [
   "smugglr-sync",
-  "smugglr-multi",
-  "smugglr-mesh",
   "migratr",
   "forgr",
 ];
@@ -43,7 +41,6 @@ describe("home install section", () => {
     expect(section).not.toBe("");
     expect(html.match(/aria-label="Install"/g)).toHaveLength(1);
     expect(section.match(/<h2[^>]*>/g)).toHaveLength(1);
-    expect(text).toContain("Install");
   });
 
   it("has the tabs macOS and Linux, then Windows (PowerShell)", () => {
@@ -51,43 +48,33 @@ describe("home install section", () => {
     expect(tabs).toEqual(["macOS and Linux", "Windows (PowerShell)"]);
   });
 
-  it("shows each installer whole, as text that wraps, in order", () => {
-    const blocks = [...section.matchAll(/<pre[^>]*><code>([\s\S]*?)<\/code><\/pre>/g)].map((m) => decode(m[1] ?? "").trim());
-    expect(blocks).toEqual([...unix, ...windows]);
-    expect(section).not.toMatch(/<input/);
-  });
-
-  it("gives each installer a Copy button and the command to copy", () => {
-    const rows = [...section.matchAll(/data-copy-command="([^"]*)"/g)].map((m) => decode(m[1] ?? ""));
+  it("shows each installer whole, as text that wraps, with a Copy button that copies it", () => {
+    const rows = [...section.matchAll(/data-install="([^"]*)"/g)].map((m) => decode(m[1] ?? ""));
     expect(rows).toEqual([...unix, ...windows]);
-    expect(section.match(/data-part="label"[^>]*>Copy</g)).toHaveLength(rows.length);
+    for (const command of [...unix, ...windows]) expect(text).toContain(command);
+    expect(section).not.toMatch(/<input/);
+    expect(section.match(/>\s*Copy\s*</g)?.length).toBe(rows.length);
   });
 
   it("names each program with the tag the build read, and links its release for archives and checksums", () => {
     for (const name of ["smugglr", "migratr"] as const) {
       const tag = data.programs[name].tag;
       expect(tag).toMatch(/^v\d+\.\d+\.\d+/);
-      expect(text).toContain(`${name} ${tag}, archives and checksums`);
+      expect(text).toContain(`${name} ${tag} · archives and checksums`);
     }
     expect(section).toContain('href="https://github.com/rafters-studio/smugglr/releases/latest"');
     expect(section).toContain('href="https://github.com/rafters-studio/migratr/releases/latest"');
   });
 
-  it("lists one row per crate, by job, with its command and the version the build read", () => {
+  it("has a card per product, smugglr, migratr, forgr, each with its crate, the version the build read, and its docs", () => {
+    const cards = [...section.matchAll(/data-product="([^"]+)"/g)].map((m) => m[1]);
+    expect(cards).toEqual(["smugglr", "migratr", "forgr"]);
     expect(data.crates.map((c) => c.name)).toEqual(crates);
-    const rows = [...section.matchAll(/data-crate="([^"]+)"/g)].map((m) => m[1]);
-    expect(rows).toEqual(crates);
     for (const c of data.crates) {
       expect(c.version).toMatch(/^\d+\.\d+\.\d+/);
-      expect(text).toContain(c.job);
-      expect(text).toContain(c.command);
-      expect(text).toContain(c.version);
+      expect(text).toContain(`${c.command} ${c.version}`);
     }
-    expect(data.crates.at(-1)?.command).toBe("cargo add forgr --dev --features fake");
-  });
-
-  it("says the browser package is not on npm yet", () => {
-    expect(text).toContain("@smugglr/web is not on npm yet");
+    for (const docs of ["/docs/", "/migratr/", "/forgr/"]) expect(section).toContain(`href="${docs}"`);
   });
 
   it("shows install once: the machine-readable summary repeats no installer (#217)", () => {
