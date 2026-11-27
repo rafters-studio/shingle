@@ -12,8 +12,9 @@
  * DO: Place once on a page, full width
  * NEVER: Put text a reader needs only inside the animated layer
  *
- * Both themes of the still are on the server, because reduced motion runs no
- * script; the stylesheet below shows the one the viewer's theme calls for.
+ * The stage is always dark: it takes rafters' .dark scope whatever the viewer's
+ * theme, live and in the still (the operator's direction, #209). Reduced motion
+ * runs no script, so the still is on the server and the stylesheet shows it.
  * The component is standalone: everything it needs is in this file and its
  * behavior and classes files.
  */
@@ -92,39 +93,35 @@ const files = ["laptop/shop.db", "server/shop.db"];
   </div>
 </section>
 
-{
-  [false, true].map((dark) => (
-    <section class={dark ? c.stillDark : c.still} aria-label={SS_COPY.stillLabel}>
-      <Container size="5xl" gap="12">
-        <Container as="section" columns={{ base: 1, md: 5 }} gap="6">
-          {SS_COPY.still.map(([verb, line], i) => (
-            <Container gap="2">
-              <H3 weight="black" color={dark ? "warning" : undefined}>
-                {verb}{" "}
-                <Typography as="span" weight="thin" color={dark ? "warning" : undefined}>
-                  it.
-                </Typography>
-              </H3>
-              <Code>{line}</Code>
-              <Muted>{SS_COPY.caps[i]}</Muted>
-            </Container>
-          ))}
-        </Container>
-        <Lead align="center">{SS_COPY.stillThen}</Lead>
-        <div class={c.closing}>
-          <H2 weight="thin" align="center" line="none">
-            {SS_COPY.closingA}{" "}
-            <span data-ink>
-              <Typography as="span" weight="black" line="none" color="primary-foreground">
-                {SS_COPY.closingB}
+  <section class={c.still} aria-label={SS_COPY.stillLabel}>
+    <Container size="5xl" gap="12">
+      <Container as="section" columns={{ base: 1, md: 5 }} gap="6">
+        {SS_COPY.still.map(([verb, line], i) => (
+          <Container gap="2">
+            <H3 weight="black" color="warning">
+              {verb}{" "}
+              <Typography as="span" weight="thin" color="warning">
+                it.
               </Typography>
-            </span>
-          </H2>
-        </div>
+            </H3>
+            <Code>{line}</Code>
+            <Muted>{SS_COPY.caps[i]}</Muted>
+          </Container>
+        ))}
       </Container>
-    </section>
-  ))
-}
+      <Lead align="center">{SS_COPY.stillThen}</Lead>
+      <div class={c.closing}>
+        <H2 weight="thin" align="center" line="none">
+          {SS_COPY.closingA}{" "}
+          <span data-ink>
+            <Typography as="span" weight="black" line="none" color="primary-foreground">
+              {SS_COPY.closingB}
+            </Typography>
+          </span>
+        </H2>
+      </div>
+    </Container>
+  </section>
 
 <script>
   import { bindSyncStage } from "./sync-stage.behavior";
@@ -276,21 +273,7 @@ const files = ["laptop/shop.db", "server/shop.db"];
     .ss-live {
       display: none;
     }
-    .ss-still:not(.dark) {
-      display: block;
-    }
-    :root[data-theme="dark"] .ss-still:not(.dark) {
-      display: none;
-    }
-    :root[data-theme="dark"] .ss-still.dark {
-      display: block;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) and (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .ss-still:not(.dark) {
-      display: none;
-    }
-    :root:not([data-theme="light"]) .ss-still.dark {
+    .ss-still {
       display: block;
     }
   }

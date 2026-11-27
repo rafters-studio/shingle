@@ -3,9 +3,8 @@
  * sync-stage.astro, built from rafters tokens.
  */
 export const syncStageClasses = {
-  live: "ss-stage ss-live",
-  still: "ss-stage ss-still",
-  stillDark: "ss-stage ss-still dark",
+  live: "ss-stage ss-live dark",
+  still: "ss-stage ss-still dark",
   verb: "ss-verb",
   closing: "ss-closing",
   field: "ss-field",
