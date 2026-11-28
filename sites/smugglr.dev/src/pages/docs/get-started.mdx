@@ -8,6 +8,8 @@ import ManualSection from "@/src/components/ManualSection.astro";
 import ManualTable from "@/src/components/ManualTable.astro";
 import WrapCode from "@/components/wrap-code.astro";
 import OUT from "@/src/smugglr/manual-output.json";
+// A browser tab's records, captured from a run of examples/hono-tab with a real @smugglr/web tab; never typed.
+import WEB from "@/src/smugglr/web-output.json";
 
 <ManualSection id="install" note="one binary">
 
@@ -127,9 +129,9 @@ A D1 place is `d1://<database-name>`. smugglr reads the account and token from `
 
 <WrapCode>{OUT.d1_missing}</WrapCode>
 
-smugglr keeps no secrets and has no environment of its own. It reads the two variables from the environment it runs in; set them however you keep them:
+smugglr keeps no secrets and has no environment of its own. It reads the two variables from the environment it runs in; set them however you keep secrets, never typed on the command line:
 
-<WrapCode>{"CLOUDFLARE_ACCOUNT_ID=<account-id> CLOUDFLARE_API_TOKEN=<token> smugglr sync ./shop.db d1://shop --dryrun"}</WrapCode>
+<WrapCode>{"smugglr sync ./shop.db d1://shop --dryrun"}</WrapCode>
 
 Tables a sync should not touch in a shared database go in the config’s `ignore` list. smugglr checks that both places have the same shape before it reads a row, and a table the two places hold differently stops the run:
 
@@ -142,6 +144,26 @@ Ignore the table, and the check skips it. D1’s own `_cf_*` tables are ignored 
 <WrapCode>{OUT.ignored}</WrapCode>
 
 --table does not narrow the shape check: every table both places hold is checked, so a mismatch in a table you did not name still stops the run.
+
+</ManualSection>
+
+<ManualSection id="web" note="the tab opens, the first sync runs itself">
+
+A web app keeps its own SQLite database in the browser tab with the `@smugglr/web` package and syncs it with a service the app runs. The package is not on npm yet; it comes from the smugglr repo.
+
+smugglr ships no server. `examples/hono-tab` in the smugglr repo is one service: a Hono Worker over D1 that answers for the signed-in person's rows. The tab points at it with an endpoint and the person's session.
+
+<WrapCode>{"import { open } from '@smugglr/web';\n\nconst tab = await open({\n  endpoint: 'https://app.example/place',\n  headers: { authorization: `Bearer ${session}` },\n  schema: SCHEMA,\n});"}</WrapCode>
+
+`open()` runs the first sync itself, into the empty tab, and keeps its record in `tab.record`. This is that record: `first_sync` is true, and 2 rows came to the tab in each of two tables.
+
+<WrapCode out="web_open">{WEB.web_open}</WrapCode>
+
+Every later sync runs when the app calls `tab.sync()`, which returns the record. Here the tab wrote one note first. One row went to the service, and the other table stayed in step.
+
+<WrapCode out="web_sync">{WEB.web_sync}</WrapCode>
+
+The record is the same record the command line prints, as JSON.
 
 </ManualSection>
 

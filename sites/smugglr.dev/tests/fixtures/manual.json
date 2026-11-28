@@ -11,9 +11,10 @@
         "04 Read the record",
         "05 A row changed in both places",
         "06 A hosted place",
-        "07 A large first sync",
-        "08 A mesh of nodes",
-        "09 Next"
+        "07 A browser tab and its service",
+        "08 A large first sync",
+        "09 A mesh of nodes",
+        "10 Next"
       ],
       "blocks": [
         "first_dry",

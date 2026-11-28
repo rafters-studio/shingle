@@ -90,7 +90,7 @@ describe("home page, built", () => {
     for (const command of ["smugglr sync ./shop.db /Volumes/office/shop.db", "smugglr sync ./shop.db d1://shop", "await tab.sync()", "smugglr stash", "smugglr retrieve", "smugglr mesh ./node.db --key-file mesh.key"]) {
       expect(ways).toContain(command);
     }
-    for (const href of ["/docs/get-started/#first-sync", "/docs/get-started/#hosted", "/docs/get-started/#large", "/docs/get-started/#mesh"]) {
+    for (const href of ["/docs/get-started/#first-sync", "/docs/get-started/#hosted", "/docs/get-started/#web", "/docs/get-started/#large", "/docs/get-started/#mesh"]) {
       expect(ways).toContain(`href="${href}"`);
     }
   });

@@ -13,9 +13,10 @@ export const manualPages: ManualPage[] = [
       { num: "04", id: "record", title: "Read the record" },
       { num: "05", id: "both", title: "A row changed in both places" },
       { num: "06", id: "hosted", title: "A hosted place" },
-      { num: "07", id: "large", title: "A large first sync" },
-      { num: "08", id: "mesh", title: "A mesh of nodes" },
-      { num: "09", id: "next", title: "Next" },
+      { num: "07", id: "web", title: "A browser tab and its service" },
+      { num: "08", id: "large", title: "A large first sync" },
+      { num: "09", id: "mesh", title: "A mesh of nodes" },
+      { num: "10", id: "next", title: "Next" },
     ],
   },
   {
