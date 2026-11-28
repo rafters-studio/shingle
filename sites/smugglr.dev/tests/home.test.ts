@@ -74,6 +74,27 @@ describe("home page, built", () => {
     expect(text).toContain("It is not on npm yet");
   });
 
+  it("leads with the ways to sync, a card each with its drawing, its command and where it runs (#217)", () => {
+    const at = html.indexOf('aria-label="Ways to sync"');
+    expect(at).toBeGreaterThan(html.indexOf("data-sync-stage"));
+    expect(at).toBeLessThan(html.indexOf('aria-label="Install"'));
+    const ways = html.slice(at, html.indexOf('aria-label="Install"'));
+    expect([...ways.matchAll(/data-way="([^"]+)"/g)].map((m) => m[1])).toEqual([
+      "Network share",
+      "Local to host",
+      "Web to host",
+      "Stash and retrieve",
+      "Mesh",
+    ]);
+    expect(ways.match(/<svg[^>]*role="img"[^>]*aria-label="[^"]+"/g)).toHaveLength(5);
+    for (const command of ["smugglr sync ./shop.db /Volumes/office/shop.db", "smugglr sync ./shop.db d1://shop", "await tab.sync()", "smugglr stash", "smugglr retrieve", "smugglr mesh ./node.db --key-file mesh.key"]) {
+      expect(ways).toContain(command);
+    }
+    for (const href of ["/docs/get-started/#first-sync", "/docs/get-started/#hosted", "/docs/get-started/#large", "/docs/get-started/#mesh"]) {
+      expect(ways).toContain(`href="${href}"`);
+    }
+  });
+
   it("says nothing is not built (#217)", () => {
     expect(text).not.toMatch(/not built/i);
   });

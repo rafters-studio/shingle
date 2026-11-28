@@ -3,6 +3,7 @@ import Base from "@/src/layouts/Base.astro";
 import BandHead from "@/components/band-head.astro";
 import BandSection from "@/components/band-section.astro";
 import InstallSection from "@/components/install-section.astro";
+import WaysSection from "@/components/ways-section.astro";
 import SpacedSection from "@/components/spaced-section.astro";
 import SyncStage from "@/components/sync-stage.astro";
 import WrapCode from "@/components/wrap-code.astro";
@@ -153,6 +154,8 @@ const SECTIONS: Sec[] = [
   <!-- One article around the page: llms-full.txt takes the first article, so the machine-readable summary band reaches it. -->
   <Container as="article" size="full" padding="0">
   <SyncStage />
+
+  <WaysSection />
 
   <InstallSection />
 

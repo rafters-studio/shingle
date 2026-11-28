@@ -1,0 +1,129 @@
+---
+/**
+ * Ways to sync: the spine of the home page. One rafters Card per way in a
+ * Grid, each with its drawing, when you need it, its command, and the docs
+ * that show it run. The words are writer-smugglr's.
+ *
+ * @cognitive-load 4/10 - Five ways, each a drawing, a sentence and a command
+ * @attention-economics The drawing carries the way; the sentence says when; the command says how
+ * @accessibility One H2; each card titled; each drawing has its words; each link named by its text
+ */
+import CardContent from "@/components/ui/card-content.astro";
+import CardHeader from "@/components/ui/card-header.astro";
+import CardTitle from "@/components/ui/card-title.astro";
+import Card from "@/components/ui/card.astro";
+import Container from "@/components/ui/container.astro";
+import Grid from "@/components/ui/grid.astro";
+import { H2 } from "@/components/ui/typography.astro";
+import SpacedSection from "./spaced-section.astro";
+import WayDiagram from "./way-diagram.astro";
+import WrapCode from "./wrap-code.astro";
+
+type Way = {
+  name: string;
+  sentence: string;
+  commands: string[];
+  shape: "pair" | "chain" | "relay" | "mesh";
+  places: string[];
+  between: string;
+  docs: { href: string; text: string };
+};
+
+const LEAD = "Pick the way that matches where your databases live.";
+
+const ways: Way[] = [
+  {
+    name: "Network share",
+    sentence: "Use it when the second copy of your SQLite file sits on a mounted file share.",
+    commands: ["smugglr sync ./shop.db /Volumes/office/shop.db"],
+    shape: "pair",
+    places: ["This machine's file", "File on the share"],
+    between: "Changed rows",
+    docs: { href: "/docs/get-started/#first-sync", text: "Your first sync" },
+  },
+  {
+    name: "Local to host",
+    sentence: "Use it when the other copy lives in Cloudflare D1 or any service that speaks HTTP-SQL.",
+    commands: ["smugglr sync ./shop.db d1://shop"],
+    shape: "pair",
+    places: ["Local file", "Hosted database"],
+    between: "Changed rows",
+    docs: { href: "/docs/get-started/#hosted", text: "A hosted place" },
+  },
+  {
+    name: "Web to host",
+    sentence: "Use it when a browser tab's SQLite syncs with your service, which answers for the signed-in user's rows.",
+    commands: ["await tab.sync()"],
+    shape: "chain",
+    places: ["Browser tab", "The app's service", "Hub database"],
+    between: "Changed rows",
+    docs: {
+      href: "https://github.com/rafters-studio/smugglr/tree/main/examples/hono-tab",
+      text: "The example service",
+    },
+  },
+  {
+    name: "Stash and retrieve",
+    sentence: "Use it when your devices need not be online together, or the first sync is large.",
+    commands: ["smugglr stash", "smugglr retrieve"],
+    shape: "relay",
+    places: ["One device", "Signed file", "Another device"],
+    between: "Stored where the app keeps it",
+    docs: { href: "/docs/get-started/#large", text: "A large first sync" },
+  },
+  {
+    name: "Mesh",
+    sentence: "Use it for machines on one local network, nobody in charge, synced as changes happen.",
+    commands: ["smugglr mesh ./node.db --key-file mesh.key"],
+    shape: "mesh",
+    places: ["Machine", "Machine", "Machine"],
+    between: "Every change",
+    docs: { href: "/docs/get-started/#mesh", text: "A mesh of nodes" },
+  },
+];
+---
+
+<SpacedSection label="Ways to sync" space="16">
+  <Container size="4xl" padding="0" gap="8">
+    <Container as="article" padding="0">
+      <H2>Ways to sync</H2>
+      <p>{LEAD}</p>
+    </Container>
+    <Container gap="6" padding="0">
+      {
+        ways.map((way, i) => (
+          <Card data-way={way.name}>
+            <CardHeader>
+              <CardTitle>{way.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Grid id={`way-${i}`} preset="linear" columns={{ base: 1, md: 2 }} gap="8">
+                <Container padding="0">
+                  <WayDiagram
+                    shape={way.shape}
+                    places={way.places}
+                    between={way.between}
+                    label={`${way.name}: ${way.places.join(", ")}; ${way.between.toLowerCase()}.`}
+                  />
+                </Container>
+                <Container gap="4" padding="0">
+                  <Container as="article" padding="0">
+                    <p>{way.sentence}</p>
+                  </Container>
+                  {way.commands.map((command) => (
+                    <WrapCode>{command}</WrapCode>
+                  ))}
+                  <Container as="article" padding="0">
+                    <p>
+                      <a href={way.docs.href}>{way.docs.text}</a>
+                    </p>
+                  </Container>
+                </Container>
+              </Grid>
+            </CardContent>
+          </Card>
+        ))
+      }
+    </Container>
+  </Container>
+</SpacedSection>

@@ -1,0 +1,107 @@
+---
+/**
+ * A way to sync, drawn: the places and what crosses between them. Rafters
+ * ships no diagram, so this is the site's own, in its semantic tokens: the
+ * places on the muted surface with a border, the labels in the foreground,
+ * the crossings in the muted foreground. It follows the theme by itself.
+ *
+ * shape:
+ * - "pair": two places, rows crossing both ways (network share, local to host)
+ * - "chain": three places, each step both ways (web to host)
+ * - "relay": three places, one way through the middle (stash and retrieve)
+ * - "mesh": three peers, each joined to the others (mesh)
+ *
+ * @cognitive-load 2/10 - Two or three boxes and the arrows between them
+ * @accessibility role="img" with an aria-label that says the same in words
+ */
+import { classy } from "@/lib/primitives/classy";
+
+interface Props {
+  shape: "pair" | "chain" | "relay" | "mesh";
+  /** The places, left to right (two for pair, three otherwise). */
+  places: string[];
+  /** What crosses between them. */
+  between: string;
+  /** The drawing in words. */
+  label: string;
+}
+
+const { shape, places, between, label } = Astro.props;
+
+const box = classy("fill-muted stroke-border");
+const text = classy("fill-foreground");
+const line = classy("stroke-muted-foreground");
+const note = classy("fill-muted-foreground");
+
+const three = shape !== "pair";
+const W = three ? 380 : 320;
+const H = shape === "mesh" ? 150 : 110;
+const bw = three ? 108 : 112;
+const xs = three ? [4, (W - bw) / 2, W - bw - 4] : [4, W - bw - 4];
+const by = shape === "mesh" ? 8 : 40;
+const bh = 36;
+---
+
+<svg
+  viewBox={`0 0 ${W} ${H}`}
+  role="img"
+  aria-label={label}
+  width="100%"
+  preserveAspectRatio="xMidYMid meet"
+  data-way-diagram={shape}
+>
+  <defs>
+    <marker id={`arrow-${shape}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class={note}></path>
+    </marker>
+  </defs>
+  {
+    shape === "mesh" ? (
+      <>
+        {[
+          [W / 2 - bw / 2, 8],
+          [4, 104],
+          [W - bw - 4, 104],
+        ].map(([x, y], i) => (
+          <>
+            <rect x={x} y={y} width={bw} height={bh} rx="6" class={box}></rect>
+            <text x={x + bw / 2} y={y + bh / 2 + 4} text-anchor="middle" font-size="11" class={text}>
+              {places[i]}
+            </text>
+          </>
+        ))}
+        <line x1={W / 2 - 20} y1={44} x2={4 + bw / 2 + 10} y2={104} class={line} marker-start={`url(#arrow-${shape})`} marker-end={`url(#arrow-${shape})`}></line>
+        <line x1={W / 2 + 20} y1={44} x2={W - bw / 2 - 14} y2={104} class={line} marker-start={`url(#arrow-${shape})`} marker-end={`url(#arrow-${shape})`}></line>
+        <line x1={4 + bw + 4} y1={122} x2={W - bw - 8} y2={122} class={line} marker-start={`url(#arrow-${shape})`} marker-end={`url(#arrow-${shape})`}></line>
+        <text x={W / 2} y={96} text-anchor="middle" font-size="10" class={note}>
+          {between}
+        </text>
+      </>
+    ) : (
+      <>
+        {places.map((place, i) => (
+          <>
+            <rect x={xs[i]} y={by} width={bw} height={bh} rx="6" class={box}></rect>
+            <text x={(xs[i] ?? 0) + bw / 2} y={by + bh / 2 + 4} text-anchor="middle" font-size="11" class={text}>
+              {place}
+            </text>
+          </>
+        ))}
+        {xs.slice(0, -1).map((x, i) => (
+          <line
+            x1={x + bw + 4}
+            y1={by + bh / 2}
+            x2={(xs[i + 1] ?? 0) - 4}
+            y2={by + bh / 2}
+            class={line}
+            marker-start={shape === "relay" ? undefined : `url(#arrow-${shape})`}
+            marker-end={`url(#arrow-${shape})`}
+          ></line>
+        ))}
+        <text x={W / 2} y={by - 12} text-anchor="middle" font-size="10" class={note}>
+          {between}
+        </text>
+      </>
+    )
+  }
+</svg>
