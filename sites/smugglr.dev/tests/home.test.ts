@@ -71,6 +71,7 @@ describe("home page, built", () => {
     expect([...ways].sort((a, b) => a - b)).toEqual(ways);
     expect(text).not.toMatch(/## \d+ MESH/);
     expect(text).toContain("A browser tab");
+    expect(text).toContain("It is not on npm yet");
   });
 
   it("says nothing is not built (#217)", () => {
