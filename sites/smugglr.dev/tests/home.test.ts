@@ -66,7 +66,9 @@ describe("home page, built", () => {
     const at = sections.map((section) => text.indexOf(`## ${section}`));
     expect(at.every((i) => i >= 0)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
-    for (const way of ["Local to host", "Web to host", "Stash and retrieve", "Mesh"]) expect(text).toContain(way);
+    const ways = ["File to file", "Local to host", "Web to host", "Stash and retrieve", "Mesh"].map((way) => text.indexOf(way));
+    expect(ways.every((i) => i >= 0)).toBe(true);
+    expect([...ways].sort((a, b) => a - b)).toEqual(ways);
     expect(text).not.toMatch(/## \d+ MESH/);
     expect(text).toContain("A browser tab");
   });
